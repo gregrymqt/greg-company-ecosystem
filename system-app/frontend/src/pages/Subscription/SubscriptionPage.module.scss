@@ -9,10 +9,10 @@
 
 // Título principal
 .headerTitle {
-  color: v.$text-dark;
+  color: $text-dark;
   margin-bottom: 2rem;
   font-size: 1.8rem;
-  border-bottom: 1px solid v.$border-color;
+  border-bottom: 1px solid $border-color;
   padding-bottom: 1rem; // [cite: 9]
 }
 
@@ -25,7 +25,7 @@
   position: relative;
 
   // Configuração Desktop: Sidebar Fixa (280px) | Conteúdo Flexível
-  @include v.desktop {
+  @include desktop {
     grid-template-columns: 280px 1fr; // 
   }
 }
@@ -99,7 +99,7 @@
   border-right-color: transparent;
   border-radius: 50%;
   animation: spinner-border 0.75s linear infinite;
-  color: v.$primary-color;
+  color: $primary-color;
 }
 
 @keyframes spinner-border {

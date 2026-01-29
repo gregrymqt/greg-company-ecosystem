@@ -5,7 +5,7 @@
   margin-top: 0.5rem;
 
   // Desktop
-  @include v.desktop {
+  @include desktop {
     grid-template-columns: repeat(2, 1fr); // 2 Colunas
   }
 }
@@ -16,14 +16,14 @@
 
   label {
     font-size: 0.85rem;
-    color: v.$secondary-color; // [cite: 15]
+    color: $secondary-color; // [cite: 15]
     margin-bottom: 0.2rem;
     font-weight: 600;
   }
 
   span {
     font-size: 1rem;
-    color: v.$text-dark;
+    color: $text-dark;
     font-weight: 500;
   }
 }
