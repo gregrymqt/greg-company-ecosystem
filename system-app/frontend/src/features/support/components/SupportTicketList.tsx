@@ -3,7 +3,7 @@ import { useSupport } from '@/features/support/hooks/useSupport';
 import  { ActionMenu } from '@/components/ActionMenu/ActionMenu';
 import { type TableColumn, Table } from '@/components/Table/Table';
 import type { SupportTicketStatus, SupportTicket } from '@/features/support/types/support.types';
-import styles from '@/styles/SupportTicketList.module.scss';
+import styles from '../styles/SupportTicketList.module.scss';
 
 export const SupportTicketList: React.FC = () => {
   const { tickets, loading, fetchTicketsPaginated, updateStatus } = useSupport();

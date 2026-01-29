@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 
-import styles from '@/styles/AddCardForm.module.scss';
+import styles from '../styles/AddCardForm.module.scss';
 
 import { MercadoPagoBrick } from '@/features/Payment/components/Credit-Card/components/MercadoPagoBrick';
 import type { BrickPaymentData } from '@/features/Payment/components/Credit-Card/types/credit-card.types';

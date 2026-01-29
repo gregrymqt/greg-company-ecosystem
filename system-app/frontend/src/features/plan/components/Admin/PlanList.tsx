@@ -4,7 +4,7 @@ import { ActionMenu } from "@/components/ActionMenu/ActionMenu";
 import { type TableColumn, Table } from "@/components/Table/Table";
 import { useAdminPlans } from "@/features/Plan/hooks/useAdminPlans";
 import type { PlanAdminSummary, PlanAdminDetail } from "@/features/Plan/types/plans.type";
-import styles from "@/features/Plan/styles/PlanList.module.scss";
+import styles from "../../styles/PlanList.module.scss";
 
 interface PlanListProps {
   onEditRequest: (id: string) => void; // Callback para o pai abrir o Form

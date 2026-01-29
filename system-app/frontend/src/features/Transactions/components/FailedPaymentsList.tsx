@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { usePaymentHistory } from '@/features/Transactions/hooks/usePaymentHistory';
 import type { PaymentItems } from '@/features/Transactions/types/transactions.type';
-import styles from '@/styles/FailedPaymentsList.module.scss';
+import styles from '../styles/FailedPaymentsList.module.scss';
 import { type TableColumn, Table } from '@/components/Table/Table';
 
 export const FailedPaymentsList: React.FC = () => {

@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import styles from '@/pages/styles/CourseFeed.module.scss';
+import styles from './styles/CourseFeed.module.scss';
 import { CourseRow } from '@/features/course/Allow/components/CourseRow';
 import { CourseSkeleton } from '@/features/course/Allow/components/CourseSkeleton';
 import { useCourses } from '@/features/course/Allow/hooks/useCourses';

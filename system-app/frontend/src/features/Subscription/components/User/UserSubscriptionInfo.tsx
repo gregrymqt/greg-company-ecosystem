@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from '@/styles/UserSubscriptionInfo.module.scss';
+import styles from '../../styles/UserSubscriptionInfo.module.scss';
 import { Card } from '@/components/Card/Card';
 import type { SubscriptionDetailsDto } from '@/features/Subscription/types/userSubscription.type';
 

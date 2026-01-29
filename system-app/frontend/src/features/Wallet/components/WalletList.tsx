@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 
-import styles from '@/styles/WalletList.module.scss';
+import styles from '../styles/WalletList.module.scss';
 import { ActionMenu } from '@/components/ActionMenu/ActionMenu';
 import { type TableColumn, Table } from '@/components/Table/Table';
 import { useWallet } from '@/features/Wallet/hooks/useWallet';

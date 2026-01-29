@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from '@/styles/CourseRow.module.scss';
+import styles from '../styles/CourseRow.module.scss';
 import { Carousel } from '@/components/Carousel/Carousel';
 import type { CourseRowUI, VideoCardUI } from '@/features/course/Allow/types/course.type';
 import { VideoCard } from './VideoCard';

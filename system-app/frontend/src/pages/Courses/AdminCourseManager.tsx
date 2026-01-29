@@ -6,7 +6,7 @@ import { type Course } from '@/types/models';
 // Sub-components, Estilos e Types
 import { CourseList } from '@/features/course/Admin/components/CourseList';
 import { CourseForm } from '@/features/course/Admin/components/CourseForm';
-import styles from '@/pages/styles/AdminCourseManager.module.scss';
+import styles from './styles/AdminCourseManager.module.scss';
 import type { CourseFormData, AdminTab } from '@/features/course/Admin/types/course-manager.types';
 
 // [CORREÇÃO] Importando o Hook Real

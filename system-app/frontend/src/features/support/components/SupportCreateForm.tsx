@@ -5,7 +5,7 @@ import type {
   SupportTicketStatus,
 } from "@/features/support/types/support.types";
 
-import styles from '@/features/support/styles/SupportCreateForm.module.scss';
+import styles from '../styles/SupportCreateForm.module.scss';
 import { ActionMenu } from "@/components/ActionMenu/ActionMenu";
 import {
   type FormField,

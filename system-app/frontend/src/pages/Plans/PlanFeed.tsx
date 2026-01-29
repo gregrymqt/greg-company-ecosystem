@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Check, Star } from 'lucide-react';
-import styles from '@/pages/styles/PublicPlansList.module.scss';
+import styles from './styles/PublicPlansList.module.scss';
 import { usePublicPlans } from '@/features/Plan/hooks/usePublicPlans';
 import { Card } from '@/components/Card/Card'; // Ajuste o caminho se necessário
 

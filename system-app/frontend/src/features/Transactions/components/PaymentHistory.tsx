@@ -1,5 +1,5 @@
     import React from 'react';
-    import styles from '@/styles/PaymentHistory.module.scss';
+    import styles from '../styles/PaymentHistory.module.scss';
     import { type TableColumn, Table } from '@/components/Table/Table';
     import { ActionMenu } from '@/components/ActionMenu/ActionMenu';
     import { usePaymentHistory } from '@/features/Transactions/hooks/usePaymentHistory';

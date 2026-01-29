@@ -1,6 +1,6 @@
 import React from 'react';
 import { type Course } from '@/types/models';
-import styles from '@/styles/CourseList.module.scss';
+import styles from '../styles/CourseList.module.scss';
 import { type CourseListProps } from '@/features/course/Admin/types/course-manager.types';
 import { ActionMenu } from '@/components/ActionMenu/ActionMenu';
 import { type TableColumn, Table } from '@/components/Table/Table';

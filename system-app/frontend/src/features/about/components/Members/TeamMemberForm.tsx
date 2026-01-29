@@ -1,9 +1,9 @@
 import React from 'react';
 // CORREÇÃO 1: Importação correta (GenericForm como valor)
 
-import styles from '@/styles/AboutForm.module.scss'; // Mesmo arquivo de estilo
-import { type FormField, GenericForm } from '@/../components/Form/GenericForm';
-import type { TeamMember, TeamMemberFormValues } from '@/types/about.types';
+import styles from '../../styles/AboutForm.module.scss';
+import { type FormField, GenericForm } from '@/components/Form/GenericForm';
+import type { TeamMember, TeamMemberFormValues } from '@/features/about/types/about.types';
 
 interface MemberFormProps {
   initialData?: TeamMember;

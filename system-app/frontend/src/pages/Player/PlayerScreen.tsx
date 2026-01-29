@@ -1,7 +1,7 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 
-import styles from '@/styles/PlayerScreen.module.scss';
+import styles from './PlayerScreen.module.scss';
 import { VideoMetadata } from '@/features/player/components/VideoMetadata';
 import { VideoPlayerFrame } from '@/features/player/components/VideoPlayerFrame';
 import { useVideoPlayer } from '@/features/player/hooks/useVideoPlayer';

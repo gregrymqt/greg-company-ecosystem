@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import styles from '@/features/profile/User/styles/ProfileInfo.module.scss';
+import styles from '../styles/ProfileInfo.module.scss';
 import { AvatarUploadForm } from "./AvatarUploadForm"; 
 import { Card } from "@/components/Card/Card";
 import { useAuth } from "@/features/auth/hooks/useAuth";

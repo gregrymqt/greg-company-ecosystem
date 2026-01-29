@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from '@/styles/ClaimStatusBadge.module.scss';
+import styles from '../styles/ClaimStatusBadge.module.scss';
 import  { ClaimStatus } from '@/types/models';
 
 interface Props {

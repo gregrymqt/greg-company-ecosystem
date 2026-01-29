@@ -10,7 +10,7 @@ import { AdminProfile } from "@/pages/Admin/AdminProfile";
 import { GoogleLoginButton } from "@/features/auth/components/GoogleLoginButton";
 import { CourseFeed } from "@/pages/Courses/CourseFeed";
 import { PlansAdmin } from "@/pages/Plans/PlansAdmin";
-import { PlayerScreen } from "@/features/player/pages/PlayerScreen";
+import { PlayerScreen } from "@/pages/Player/PlayerScreen";
 import { AdminClaimsPage } from "@/pages/Claims/AdminClaimsPage";
 import { UserClaimsPage } from "@/pages/Claims/UserClaimsPage";
 import { ChargebackManager } from "@/pages/ChargeBack/ChargebackManager";

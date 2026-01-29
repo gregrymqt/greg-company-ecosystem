@@ -2,7 +2,7 @@ import React from 'react';
 import type { VideoFormData, VideoFormProps } from '@/features/Videos/types/video-manager.types';
 // Reutiliza estilo do container de form se quiser, ou cria um novo. 
 // Usaremos um module específico aqui para manter o padrão.
-import styles from '@/styles/VideoForm.module.scss'; 
+import styles from '../styles/VideoForm.module.scss'; 
 import { type FormField, GenericForm } from '@/components/Form/GenericForm';
 
 export const VideoForm: React.FC<VideoFormProps> = ({

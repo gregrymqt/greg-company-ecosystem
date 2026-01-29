@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { type TableColumn, Table } from '@/components/Table/Table';
-import { useChargebackDetails } from '@/hooks/useChargebackDetails';
-import { useChargebacks } from '@/hooks/useChargebacks';
-import type { ChargebackSummary } from '@/types/chargeback.type';
+import { useChargebackDetails } from '@/features/Chargeback/hooks/useChargebackDetails';
+import { useChargebacks } from '@/features/Chargeback/hooks/useChargebacks';
+import type { ChargebackSummary } from '@/features/Chargeback/types/chargeback.type';
 import { ChargebackDetailModal } from './ChargebackDetailModal';
 import { type FilterFormData, ChargebackFilter } from './ChargebackFilter';
-import styles from '@/styles/ChargebackList.module.scss';
+import styles from '../styles/ChargebackList.module.scss';
 
 
 export const ChargebackList = () => {

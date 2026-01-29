@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from '@/styles/VideoPlayerFrame.module.scss';
+import styles from '../styles/VideoPlayerFrame.module.scss';
 import type { PlayerUI } from '@/features/player/types/player.type';
 
 interface VideoPlayerFrameProps {

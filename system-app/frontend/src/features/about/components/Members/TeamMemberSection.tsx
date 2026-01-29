@@ -1,7 +1,7 @@
 import React from 'react';
-import styles from '@/styles/TeamMemberSection.module.scss';
-import { Card } from '@/../components/Card/Card';
-import type { AboutTeamData, TeamMember } from '@/types/about.types';
+import styles from '../../styles/TeamMemberSection.module.scss';
+import { Card } from '@/components/Card/Card';
+import type { AboutTeamData, TeamMember } from '@/features/about/types/about.types';
 
 interface AboutTeamSectionProps {
     data: AboutTeamData;

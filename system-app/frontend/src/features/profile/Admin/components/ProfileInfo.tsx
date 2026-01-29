@@ -1,6 +1,6 @@
 import React from 'react';
 import { useAuth } from '@/features/auth/hooks/useAuth';
-import styles from '@/styles/ProfileInfo.module.scss';
+import styles from '../styles/ProfileInfo.module.scss';
 import { Card } from '@/components/Card/Card';
 
 export const ProfileInfo: React.FC = () => {

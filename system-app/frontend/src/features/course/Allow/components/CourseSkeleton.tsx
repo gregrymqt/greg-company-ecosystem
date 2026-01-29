@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from '@/styles/CourseSkeleton.module.scss';
+import styles from '../styles/CourseSkeleton.module.scss';
 
 export const CourseSkeleton: React.FC = () => {
   return (

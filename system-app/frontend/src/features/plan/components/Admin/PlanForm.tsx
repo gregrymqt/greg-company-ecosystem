@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { type SubmitHandler } from 'react-hook-form';
 
-import styles from '@/styles/PlanForm.module.scss';
+import styles from '../../styles/PlanForm.module.scss';
 import { type FormField, GenericForm } from '@/components/Form/GenericForm';
 import { useAdminPlans } from '@/features/Plan/hooks/useAdminPlans';
 import type {  UpdatePlanRequest, CreatePlanRequest, PlanAdminDetail } from '@/features/Plan/types/plans.type';

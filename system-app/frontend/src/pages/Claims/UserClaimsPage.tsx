@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import styles from "@/pages/styles/ClaimsLayout.module.scss";
+import styles from "./styles/ClaimsLayout.module.scss";
 import { ClaimChat } from "@/features/Claim/components/ClaimChat";
 import { ClaimsList } from "@/features/Claim/components/ClaimsList";
 import { ClaimService } from "@/features/Claim/services/claim.service";

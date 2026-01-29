@@ -1,7 +1,7 @@
 import React from "react";
 import { type Video, VideoStatus } from "@/types/models";
 import { type VideoListProps } from "@/features/Videos/types/video-manager.types";
-import styles from '@/features/Videos/styles/VideoList.module.scss';
+import styles from '../features/Videos/styles/VideoList.module.scss';
 import { ActionMenu } from "@/components/ActionMenu/ActionMenu";
 import { type TableColumn, Table } from "@/components/Table/Table";
 import { ProcessingBadge } from "./ProcessingBadge"; //

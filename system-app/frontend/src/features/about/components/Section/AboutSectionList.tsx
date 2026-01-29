@@ -1,6 +1,6 @@
 import React from "react";
 
-import styles from '@/features/about/styles/AboutLists.module.scss';
+import styles from '../../styles/AboutLists.module.scss';
 import { ActionMenu } from '@/components/ActionMenu/ActionMenu';
 import { type TableColumn, Table } from '@/components/Table/Table';
 import type { AboutSectionData } from '@/features/about/types/about.types';

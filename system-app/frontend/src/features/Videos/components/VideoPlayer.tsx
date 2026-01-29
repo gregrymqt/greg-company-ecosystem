@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from '@/styles/VideoPlayer.module.scss';
+import styles from '../styles/VideoPlayer.module.scss';
 import { type VideoPlayerProps } from '@/features/Videos/types/video-manager.types';
 
 export const VideoPlayer: React.FC<VideoPlayerProps> = ({ video, onBack }) => {

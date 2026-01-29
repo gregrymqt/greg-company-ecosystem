@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from '@/styles/UserSubscriptionActions.module.scss';
+import styles from '../../styles/UserSubscriptionActions.module.scss';
 import  { Card } from '@/components/Card/Card';
 
 interface SubscriptionActionsProps {

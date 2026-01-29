@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-import styles from '@/features/Subscription/styles/AdminSubscriptionList.module.scss';
+import styles from '../../styles/AdminSubscriptionList.module.scss';
 import { useAdminSubscription } from "@/features/Subscription/hooks/useAdminSubscription";
 import { type TableColumn, Table } from "@/components/Table/Table";
 import type { AdminSubscriptionDetail } from "@/features/Subscription/types/adminSubscription.type";
