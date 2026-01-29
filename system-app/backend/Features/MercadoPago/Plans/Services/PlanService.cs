@@ -60,9 +60,13 @@ namespace MeuCrudCsharp.Features.MercadoPago.Plans.Services
             // Este método interno continua buscando a entidade do banco
             var plan = await _planRepository.GetByPublicIdAsync(publicId, asNoTracking: true);
 
-            return (plan == null ? null : // Não encontrado
-                // Usa o novo método de mapeamento para retornar o DTO de edição
-                PlanMapper.MapPlanToEditDto(plan)) ?? throw new InvalidOperationException();
+            return (
+                    plan == null
+                        ? null
+                        : // Não encontrado
+                        // Usa o novo método de mapeamento para retornar o DTO de edição
+                        PlanMapper.MapPlanToEditDto(plan)
+                ) ?? throw new InvalidOperationException();
         }
 
         public async Task<PlanDto> CreatePlanAsync(CreatePlanDto createDto)
@@ -121,7 +125,7 @@ namespace MeuCrudCsharp.Features.MercadoPago.Plans.Services
                 // 6. Pós-processamento (cache, log)
                 await _cacheService.RemoveAsync(CacheKeys.ActiveDbPlans);
                 await _cacheService.RemoveAsync(CacheKeys.ActiveApiPlans);
-                
+
                 _logger.LogInformation(
                     "Plano '{PlanName}' criado com sucesso. ID: {PlanId}, ExternalId: {ExternalId}",
                     newPlan.Name,
@@ -142,7 +146,7 @@ namespace MeuCrudCsharp.Features.MercadoPago.Plans.Services
                 // ✅ ROLLBACK AUTOMÁTICO
                 // Como não fizemos commit, o UnitOfWork descarta todas as mudanças automaticamente
                 // Não precisa remover manualmente - o Entity Framework faz isso
-                
+
                 _logger.LogInformation(
                     "Rollback automático concluído. Plano '{PlanName}' NÃO foi persistido.",
                     createDto.Reason
@@ -176,7 +180,7 @@ namespace MeuCrudCsharp.Features.MercadoPago.Plans.Services
                     reason = updateDto.Reason,
                     auto_recurring = updateDto.AutoRecurring,
                 };
-                
+
                 await _mercadoPagoPlanService.UpdatePlanAsync(
                     localPlan.ExternalPlanId,
                     payloadForMercadoPago
@@ -189,7 +193,7 @@ namespace MeuCrudCsharp.Features.MercadoPago.Plans.Services
                 // 6. Pós-processamento
                 await _cacheService.RemoveAsync(CacheKeys.ActiveDbPlans);
                 await _cacheService.RemoveAsync(CacheKeys.ActiveApiPlans);
-                
+
                 _logger.LogInformation(
                     "Plano {PlanId} atualizado com sucesso no DB e na API externa.",
                     localPlan.ExternalPlanId
@@ -252,7 +256,7 @@ namespace MeuCrudCsharp.Features.MercadoPago.Plans.Services
                 // 4. Pós-processamento
                 await _cacheService.RemoveAsync(CacheKeys.ActiveDbPlans);
                 await _cacheService.RemoveAsync(CacheKeys.ActiveApiPlans);
-                
+
                 _logger.LogInformation(
                     "Plano {PlanId} desativado com sucesso no DB e na API externa.",
                     localPlan.ExternalPlanId
@@ -270,7 +274,7 @@ namespace MeuCrudCsharp.Features.MercadoPago.Plans.Services
                 // Como não fizemos commit, o EF vai descartar as mudanças automaticamente
                 // Mas como a entidade está sendo rastreada, precisamos reverter manualmente
                 localPlan.IsActive = true;
-                
+
                 _logger.LogInformation(
                     "Rollback concluído. Plano '{PlanName}' permanece ativo localmente.",
                     localPlan.Name

@@ -43,7 +43,8 @@ public record PlanDto(
     [Required] [StringLength(100)] string? BillingInfo,
     List<string> Features,
     bool IsRecommended,
-    bool IsActive
+    bool IsActive,
+    int Frequency
 );
 
 /// <summary>

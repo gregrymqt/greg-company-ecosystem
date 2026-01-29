@@ -25,7 +25,8 @@ namespace MeuCrudCsharp.Features.MercadoPago.Plans.Mappers
                 PlanUtils.FormatBillingInfo(dbPlan.TransactionAmount, dbPlan.FrequencyInterval),
                 PlanUtils.GetDefaultFeatures(),
                 isAnnual,
-                dbPlan.IsActive
+                dbPlan.IsActive,
+                dbPlan.FrequencyInterval
             );
         }
 
@@ -66,7 +67,8 @@ namespace MeuCrudCsharp.Features.MercadoPago.Plans.Mappers
                 ),
                 PlanUtils.GetDefaultFeatures(),
                 isRecommended,
-                isActive
+                isActive,
+                apiPlan.AutoRecurring.Frequency
             );
         }
 

@@ -1,12 +1,21 @@
-﻿# 💼 Greg Company - Integrated Business Suite
+﻿# 💼 Greg Company - Plataforma de Cursos Online
 
-Este ecossistema integra uma plataforma de gestão de produtos (Full-stack) com um motor de inteligência de negócios (BI) automatizado. O projeto foi desenvolvido por Lucas Vicente De Souza, estudante de Desenvolvimento de Software Multiplataforma na FATEC.
+Ecossistema completo para gestão de cursos online com sistema integrado de pagamentos, assinaturas e inteligência de negócios. Plataforma Full-stack desenvolvida por Lucas Vicente De Souza, estudante de Desenvolvimento de Software Multiplataforma na FATEC.
+
+**Features Principais:**
+- 🎓 Gestão completa de cursos e vídeos
+- 💳 Sistema de pagamentos com MercadoPago (PIX, Cartão, Assinaturas)
+- 👥 Autenticação e perfis de usuário
+- 📊 Dashboard de BI para métricas de negócio
+- 🔔 Suporte e sistema de reclamações
+- 💰 Gestão de carteira digital e transações
 
 <!-- Sugestão: Adicionar screenshots ou um GIF da aplicação em funcionamento torna o projeto muito mais atrativo. -->
 <!-- 
 ## 📸 Screenshots
 
-*(coloque aqui um screenshot da tela de produtos)*
+*(coloque aqui um screenshot da área de cursos)*
+*(coloque aqui um screenshot do dashboard de assinaturas)*
 *(coloque aqui um screenshot do dashboard de BI)*
 -->
 
@@ -28,37 +37,72 @@ Este ecossistema integra uma plataforma de gestão de produtos (Full-stack) com 
 ### Sistema Principal (C# & React)
 A aplicação principal foca na escalabilidade, manutenibilidade e experiência do usuário:
 
-*   **Backend (C#):** Implementa uma arquitetura limpa (Clean Architecture) com foco em APIs RESTful e princípios SOLID. Lida com regras de negócio complexas, autenticação, e integrações financeiras de forma segura.
-*   **Frontend (React):** Estrutura baseada em componentes modulares e reutilizáveis, com gerenciamento de estado e hooks customizados para interagir com o backend.
-*   **Infraestrutura:** Configuração de ambiente via Docker Compose para orquestração de containers (SQL Server, Redis), garantindo um setup de desenvolvimento rápido e consistente.
+*   **Backend (C#):** Clean Architecture com Vertical Slices - cada feature (Auth, Courses, MercadoPago, Support, Videos) possui sua própria estrutura completa (Controllers, Services, Repositories, ViewModels). Auto-registro de dependências via Scrutor. Implementa princípios SOLID para regras de negócio complexas, autenticação JWT + OAuth, e integrações financeiras seguras.
+
+*   **Frontend (React + TypeScript):** Arquitetura features-based espelhando o backend. Cada feature possui seus próprios componentes, hooks, services, types e styles. Clean Architecture garantindo separação de concerns - lógica de negócio em `features/`, componentes UI puros em `components/`, utilitários compartilhados em `shared/`.
+
+*   **Features Implementadas:**
+    - `auth/` - Autenticação (JWT, Google OAuth)
+    - `course/` - Gestão de cursos (Admin + Allow)
+    - `Videos/` - Player e gerenciamento de vídeos
+    - `Payment/` - Checkout (PIX, Cartão, Preferências)
+    - `Subscription/` - Gestão de assinaturas
+    - `Wallet/` - Carteira digital
+    - `Transactions/` - Histórico de pagamentos
+    - `Chargeback/` - Gestão de estornos
+    - `Claim/` - Sistema de reclamações
+    - `profile/`, `support/`, `home/`, `about/`
+
+*   **Infraestrutura:** Docker Compose orquestrando SQL Server, MongoDB, Redis e aplicação. Hangfire para jobs assíncronos (renovação de assinaturas, webhooks).
 
 ### Módulo de BI (Python)
-O projeto de BI foi construído seguindo rigorosos padrões de Clean Code e Separação de Responsabilidades, garantindo que a lógica de dados seja independente da interface de saída.
----------------------------------------------------------
+Motor de inteligência de negócios para análise de métricas da plataforma de cursos, seguindo padrões rigorosos de Clean Code e Separação de Responsabilidades.
 
-🐍 Arquitetura do BI-Dashboard (Python)
-O projeto de BI foi construído seguindo rigorosos padrões de Clean Code e Separação de Responsabilidades, garantindo que a lógica de dados seja independente da interface de saída.
+---
 
-Estrutura de Pastas e Responsabilidades:
-- controllers/: Gerencia o fluxo de execução, coordenando a captura de dados brutos da API e o acionamento dos serviços.
+### 🐍 Arquitetura do BI-Dashboard (Python)
 
-- services/: Camada onde reside a inteligência de negócio. Realiza o processo de ETL, limpando os dados e calculando métricas como Patrimônio Total e Alertas Críticos de Estoque.
+**Estrutura de Pastas e Responsabilidades:**
 
-- models/: Define as entidades de dados (ex: Product), garantindo tipagem e consistência durante o processamento.
+- **controllers/**: Orquestra o fluxo ETL, coordenando extração de dados da API do sistema transacional e acionamento dos serviços de processamento.
 
-- data/: Centraliza a comunicação com as APIs externas (Exporters), como a implementação do RowsExporter para envio de dados.
+- **services/**: Camada de inteligência de negócio. Processa métricas como:
+  - 💰 Receita total e MRR (Monthly Recurring Revenue)
+  - 📈 Taxa de conversão de assinaturas
+  - ⚠️ Análise de chargebacks e transações falhadas
+  - 👥 Engajamento de alunos por curso
+  - 📊 Status de assinaturas (Ativas, Canceladas, Inadimplentes)
 
-- views/: Responsável pela formatação da saída dos dados, seja para exibição no terminal ou estruturação de tabelas para o Rows e Notion.
-----------------------------------------------------------
+- **models/**: Define entidades de dados (Subscription, Transaction, Course, Chargeback) garantindo tipagem e consistência durante o processamento.
 
-📊 Fluxo de Dados (ETL)
-1. Extração: O script Python consome os dados brutos da plataforma Greg Company.
+- **data/**: Centraliza exporters para APIs externas (RowsExporter, NotionAPI) para envio de dashboards executivos.
 
-2. Transformação: O DataService processa os status (ex: Alertas Críticos) e agrega valores financeiros.
+- **views/**: Formata saída de dados para terminal, Excel e estruturação de tabelas para Rows.com/Notion.
 
-3. Carga: Os dados processados são enviados via API para o Rows e espelhados no Notion para visualização executiva.
-----------------------------------------------------------
-🛠️ Como Executar
+- **interfaces/**: Contratos abstratos (IDataService, IProductExporter) garantindo inversão de dependência.
+
+- **enums/**: Status padronizados (ProductStatus: OK, CRITICO, ESGOTADO, REPOR).
+
+---
+
+### 📊 Fluxo de Dados (ETL)
+
+1. **Extração**: Script Python consome dados do backend (.NET) via API REST - assinaturas, pagamentos, cursos, chargebacks.
+
+2. **Transformação**: `DataService` processa:
+   - Cálculo de MRR e churn rate
+   - Agregação de receitas por plano
+   - Identificação de assinaturas em risco
+   - Análise de padrões de consumo de cursos
+
+3. **Carga**: Dados processados exportados para:
+   - **Rows.com**: Dashboards executivos em tempo real
+   - **Notion**: Documentação de métricas e KPIs
+   - **Terminal/Excel**: Relatórios locais para análise
+
+---
+
+## 🛠️ Como Executar
 
 ### Pré-requisitos
 *   [.NET 8 SDK](https://dotnet.microsoft.com/download)
@@ -98,9 +142,9 @@ A API estará disponível em `https://localhost:7035` (verifique o `launchSettin
 ```bash
 cd system-app/frontend
 npm install
-npm start
+npm run dev  # Vite dev server na porta 5173
 ```
-A aplicação estará rodando em `http://localhost:3000`.
+A aplicação estará rodando em `http://localhost:5173`.
 
 ### 5. Execute o Módulo de BI
 ```bash
@@ -108,3 +152,126 @@ cd ../../bi-dashboard # a partir da pasta frontend
 pip install -r requirements.txt
 python src/main.py
 ```
+
+---
+
+## 📂 Estrutura do Projeto
+
+```
+greg-company-ecosystem/
+├── system-app/
+│   ├── backend/                    # .NET 8 API
+│   │   ├── Features/              # Vertical Slices (Auth, Courses, MercadoPago, etc.)
+│   │   ├── Extensions/            # DI, Auth, Persistence config
+│   │   ├── Data/                  # DbContext, Migrations
+│   │   └── Program.cs             # Entry point
+│   │
+│   └── frontend/                  # React + TypeScript + Vite
+│       └── src/
+│           ├── features/          # Features-based (auth, course, Payment, etc.)
+│           ├── components/        # UI components puros
+│           ├── pages/             # Route-level pages
+│           ├── shared/            # Shared utilities
+│           └── routes/            # Routing config
+│
+├── bi-dashboard/                  # Python BI Engine
+│   └── src/
+│       ├── controllers/           # ETL orchestration
+│       ├── services/              # Business intelligence logic
+│       ├── models/                # Data entities
+│       ├── data/                  # API exporters (Rows, Notion)
+│       ├── views/                 # Output formatters
+│       └── main.py                # CLI menu
+│
+├── mcp-servers/                   # Model Context Protocol servers
+│   ├── greg_context_mcp.py       # Architecture context for AI
+│   └── log_mcp_server.py         # Log analysis for AI
+│
+├── docker-compose.yml             # Infrastructure orchestration
+└── .env                           # Environment variables
+```
+
+---
+
+## 🔑 Variáveis de Ambiente Necessárias
+
+Configure no arquivo `.env`:
+
+```env
+# Database
+ConnectionStrings__DefaultConnection=Server=localhost,1433;Database=GregCompany;...
+
+# MercadoPago
+MERCADOPAGO_ACCESS_TOKEN=your_access_token
+MERCADOPAGO_PUBLIC_KEY=your_public_key
+
+# JWT
+JWT_SECRET=your_secret_key
+JWT_ISSUER=GregCompanyAPI
+JWT_AUDIENCE=GregCompanyClient
+
+# Redis (opcional, use USE_REDIS=false para desabilitar)
+USE_REDIS=true
+REDIS_CONNECTION=localhost:6379
+
+# MongoDB
+MONGODB_CONNECTION=mongodb://localhost:27017
+
+# BI APIs
+ROWS_API_KEY=your_rows_api_key
+NOTION_API_KEY=your_notion_api_key
+```
+
+---
+
+## 🎯 Endpoints Principais da API
+
+- **Auth**: `/api/auth/login`, `/api/auth/register`, `/api/auth/google`
+- **Courses**: `/api/courses`, `/api/courses/{id}/videos`
+- **Plans**: `/api/plans`, `/api/plans/{id}`
+- **Subscriptions**: `/api/subscriptions/my`, `/api/subscriptions/cancel`
+- **Payments**: `/api/payment/preference`, `/api/payment/webhook`
+- **Wallet**: `/api/wallet/cards`, `/api/wallet/add-card`
+- **Transactions**: `/api/transactions/history`
+- **Chargebacks**: `/api/chargebacks`
+- **Claims**: `/api/claims`, `/api/claims/{id}/messages`
+
+Documentação completa disponível em `/swagger` após iniciar o backend.
+
+---
+
+## 🧪 Testes
+
+```bash
+# Backend
+cd system-app/backend
+dotnet test
+
+# Frontend
+cd system-app/frontend
+npm run test
+```
+
+---
+
+## 📝 Licença
+
+Este projeto foi desenvolvido como trabalho acadêmico na FATEC - Faculdade de Tecnologia de São Paulo.
+
+---
+
+## 👨‍💻 Autor
+
+**Lucas Vicente De Souza**  
+Estudante de Desenvolvimento de Software Multiplataforma - FATEC
+
+---
+
+## 🚀 Próximas Features
+
+- [ ] Sistema de avaliações de cursos
+- [ ] Certificados digitais automáticos
+- [ ] Relatórios de progresso do aluno
+- [ ] Integração com outras plataformas de pagamento
+- [ ] App mobile (React Native)
+- [ ] Gamificação (badges, rankings)
