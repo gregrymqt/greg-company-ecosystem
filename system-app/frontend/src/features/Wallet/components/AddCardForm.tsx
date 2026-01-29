@@ -1,11 +1,11 @@
 import React, { useCallback } from 'react';
 
-import styles from '../styles/AddCardForm.module.scss';
+import styles from '@/styles/AddCardForm.module.scss';
 
-import { MercadoPagoBrick } from '../../Payment/components/Credit-Card/components/MercadoPagoBrick';
-import type { BrickPaymentData } from '../../Payment/components/Credit-Card/types/credit-card.types';
-import { usePreference } from '../../Payment/components/Preferences/hooks/usePreference';
-import { useWallet } from '../hooks/useWallet';
+import { MercadoPagoBrick } from '@/features/Payment/components/Credit-Card/components/MercadoPagoBrick';
+import type { BrickPaymentData } from '@/features/Payment/components/Credit-Card/types/credit-card.types';
+import { usePreference } from '@/features/Payment/components/Preferences/hooks/usePreference';
+import { useWallet } from '@/features/Wallet/hooks/useWallet';
 
 interface AddCardFormProps {
   onSuccess?: () => void; // Callback para fechar modal ou feedback extra

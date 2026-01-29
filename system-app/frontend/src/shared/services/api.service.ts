@@ -1,5 +1,5 @@
 import { StorageService, STORAGE_KEYS } from "./storage.service";
-import { SmartUploadHandler } from "./upload.utils"; // <-- Importe o arquivo criado acima
+import { SmartUploadHandler } from "../utils/upload.utils"; // <-- Importe o arquivo criado acima
 
 // --- INTERFACES AUXILIARES ---
 interface ApiErrorResponse {

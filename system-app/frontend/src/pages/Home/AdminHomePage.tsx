@@ -1,19 +1,19 @@
 import React, { useState } from "react";
 import styles from "./styles/AdminHomePage.module.scss"; // Vamos criar/reutilizar este estilo
 
-import { Sidebar } from "../../components/SideBar/components/Sidebar";
-import type { SidebarItem } from "../../components/SideBar/types/sidebar.types";
-import { HeroForm } from "../../features/home/components/Hero/HeroForm";
-import { HeroList } from "../../features/home/components/Hero/HeroList";
-import { ServiceForm } from "../../features/home/components/Service/ServiceForm";
-import { ServiceList } from "../../features/home/components/Service/ServiceList";
-import { useHomeData } from "../../features/home/hooks/useHomeData";
-import { useHomeHero } from "../../features/home/hooks/useHomeHero";
-import { useHomeServices } from "../../features/home/hooks/useHomeServices";
+import { Sidebar } from "@/components/SideBar/components/Sidebar";
+import type { SidebarItem } from "@/components/SideBar/types/sidebar.types";
+import { HeroForm } from "@/features/home/components/Hero/HeroForm";
+import { HeroList } from "@/features/home/components/Hero/HeroList";
+import { ServiceForm } from "@/features/home/components/Service/ServiceForm";
+import { ServiceList } from "@/features/home/components/Service/ServiceList";
+import { useHomeData } from "@/features/home/hooks/useHomeData";
+import { useHomeHero } from "@/features/home/hooks/useHomeHero";
+import { useHomeServices } from "@/features/home/hooks/useHomeServices";
 import type {
   HeroSlideData,
   ServiceData,
-} from "../../features/home/types/home.types";
+} from "@/features/home/types/home.types";
 
 // --- CONFIGURAÇÃO DA SIDEBAR ---
 const sidebarItems: SidebarItem[] = [

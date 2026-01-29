@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { socketService } from 'src/shared/services/socket.service';
-import { AlertService } from 'src/shared/services/alert.service';
-import { AppHubs } from 'src/shared/enums/hub.enums';
-import { VideoStatus } from 'src/types/models';
+import { socketService } from '@/shared/services/socket.service';
+import { AlertService } from '@/shared/services/alert.service';
+import { AppHubs } from '@/shared/enums/hub.enums';
+import { VideoStatus } from '@/types/models';
 
 interface ProgressData {
   message: string;

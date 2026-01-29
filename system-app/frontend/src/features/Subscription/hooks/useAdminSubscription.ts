@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
-import { AdminSubscriptionService } from '../services/AdminSubscriptionService';
-import { ApiError } from '../../../shared/services/api.service';
-import type { AdminSubscriptionDetail } from '../types/adminSubscription.type';
+import { AdminSubscriptionService } from '@/features/Subscription/services/AdminSubscriptionService';
+import { ApiError } from '@/shared/services/api.service';
+import type { AdminSubscriptionDetail } from '@/features/Subscription/types/adminSubscription.type';
 
 export const useAdminSubscription = () => {
   const [subscription, setSubscription] = useState<AdminSubscriptionDetail | null>(null);

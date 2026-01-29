@@ -1,6 +1,6 @@
 // src/pages/Payment/hooks/usePreference.ts
 import { useState, useEffect } from "react";
-import { PreferenceService } from "../services/preference.service";
+import { PreferenceService } from "@/features/Payment/components/Preferences/services/preference.service";
 
 export const usePreference = (amount: number, shouldFetch: boolean = true) => {
   const [preferenceId, setPreferenceId] = useState<string | null>(null);

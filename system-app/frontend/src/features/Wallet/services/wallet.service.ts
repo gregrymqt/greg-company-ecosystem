@@ -1,5 +1,5 @@
-import { ApiService } from "../../../shared/services/api.service";
-import type { WalletCard, AddCardPayload } from "../types/wallet.type";
+import { ApiService } from "@/shared/services/api.service";
+import type { WalletCard, AddCardPayload } from "@/features/Wallet/types/wallet.type";
 
 
 const ENDPOINT = '/v1/wallet';

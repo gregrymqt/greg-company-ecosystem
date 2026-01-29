@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { AppHubs } from '../../../shared/enums/hub.enums';
-import { useSocketListener } from '../../../shared/hooks/useSocket';
-import { AlertService } from '../../../shared/services/alert.service';
-import { socketService } from '../../../shared/services/socket.service';
+import { AppHubs } from '@/shared/enums/hub.enums';
+import { useSocketListener } from '@/shared/hooks/useSocket';
+import { AlertService } from '@/shared/services/alert.service';
+import { socketService } from '@/shared/services/socket.service';
 
 
 interface RefundStatusData {

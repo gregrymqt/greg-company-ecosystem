@@ -1,5 +1,5 @@
 import { Outlet } from 'react-router-dom';
-import styles from '../styles/MainLayout.module.scss'; // Apenas o layout wrapper
+import styles from '@/styles/MainLayout.module.scss'; // Apenas o layout wrapper
 import { Footer } from './Footer';
 import { Navbar } from './Navbar';
 

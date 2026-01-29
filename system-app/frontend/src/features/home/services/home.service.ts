@@ -1,11 +1,11 @@
-import { ApiService } from "../../../shared/services/api.service";
+import { ApiService } from "@/shared/services/api.service";
 import type {
   HomeContent,
   HeroSlideData,
   ServiceData,
   HeroFormValues,
   ServiceFormValues,
-} from "../types/home.types";
+} from "@/features/home/types/home.types";
 
 const ENDPOINT = "/Home";
 

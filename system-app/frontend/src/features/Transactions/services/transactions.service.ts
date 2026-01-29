@@ -1,5 +1,5 @@
-import  { ApiService } from "../../../shared/services/api.service";
-import type { PaymentItems } from "../types/transactions.type";
+import  { ApiService } from "@/shared/services/api.service";
+import type { PaymentItems } from "@/features/Transactions/types/transactions.type";
 
 export const TransactionService = {
   getPaymentHistory: async (): Promise<PaymentItems[]> => {

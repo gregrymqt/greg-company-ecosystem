@@ -1,9 +1,9 @@
 import React from 'react';
 
-import styles from '../../styles/HomeLists.module.scss';
-import { ActionMenu } from '../../../../components/ActionMenu/ActionMenu';
-import { type TableColumn, Table } from '../../../../components/Table/Table';
-import type { ServiceData } from '../../types/home.types';
+import styles from '@/styles/HomeLists.module.scss';
+import { ActionMenu } from '@/components/ActionMenu/ActionMenu';
+import { type TableColumn, Table } from '@/components/Table/Table';
+import type { ServiceData } from '@/features/home/types/home.types';
 
 interface ServiceListProps {
   data: ServiceData[];

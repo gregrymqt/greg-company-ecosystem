@@ -1,11 +1,11 @@
-import { ApiService } from "../../../shared/services/api.service";
+import { ApiService } from '@/shared/services/api.service';
 import type {
   AboutSectionFormValues,
   AboutSectionData,
   TeamMemberFormValues,
   TeamMember,
   AboutPageResponse,
-} from "../types/about.types";
+} from '@/features/about/types/about.types';
 
 const ENDPOINT = "/About";
 

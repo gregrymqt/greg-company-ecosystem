@@ -1,9 +1,9 @@
 import React from "react";
-import { type Video, VideoStatus } from "src/types/models"; 
-import { type VideoListProps } from "../types/video-manager.types";
-import styles from "../styles/VideoList.module.scss";
-import { ActionMenu } from "src/components/ActionMenu/ActionMenu";
-import { type TableColumn, Table } from "src/components/Table/Table";
+import { type Video, VideoStatus } from "@/types/models";
+import { type VideoListProps } from "@/features/Videos/types/video-manager.types";
+import styles from '@/features/Videos/styles/VideoList.module.scss';
+import { ActionMenu } from "@/components/ActionMenu/ActionMenu";
+import { type TableColumn, Table } from "@/components/Table/Table";
 import { ProcessingBadge } from "./ProcessingBadge"; //
 
 export const VideoList: React.FC<VideoListProps> = ({

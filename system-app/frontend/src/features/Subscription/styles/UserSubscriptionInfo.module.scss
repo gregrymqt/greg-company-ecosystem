@@ -1,5 +1,3 @@
-@use '../../../../styles/variables' as v; // Ajuste o caminho
-
 .dataGrid {
   display: grid;
   grid-template-columns: 1fr; // Mobile First: 1 coluna

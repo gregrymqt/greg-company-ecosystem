@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 
 import styles from './AdminProfile.module.scss';
-import { Sidebar } from '../../components/SideBar/components/Sidebar';
-import type { SidebarItem } from '../../components/SideBar/types/sidebar.types';
-import { AdminTerminal } from '../../features/profile/Admin/components/AdminTerminal';
-import { ProfileInfo } from '../../features/profile/User/components/ProfileInfo';
+import { Sidebar } from '@/components/SideBar/components/Sidebar';
+import type { SidebarItem } from '@/components/SideBar/types/sidebar.types';
+import { AdminTerminal } from '@/features/profile/Admin/components/AdminTerminal';
+import { ProfileInfo } from '@/features/profile/User/components/ProfileInfo';
 // 1. IMPORT NOVO: Importamos a lista de tickets
-import { SupportTicketList } from '../../features/support/components/SupportTicketList'; 
+import { SupportTicketList } from '@/features/support/components/SupportTicketList'; 
 
 export const AdminProfile: React.FC = () => {
     const [activeTab, setActiveTab] = useState<string>('profile');

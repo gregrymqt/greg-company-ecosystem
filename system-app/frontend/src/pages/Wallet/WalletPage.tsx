@@ -1,10 +1,10 @@
 import React, { useState, useMemo } from 'react';
 
 import styles from './WalletPage.module.scss';
-import { AddCardForm } from '../../features/Wallet/components/AddCardForm';
-import { WalletList } from '../../features/Wallet/components/WalletList';
-import { Sidebar } from '../../components/SideBar/components/Sidebar';
-import type { SidebarItem } from '../../components/SideBar/types/sidebar.types';
+import { AddCardForm } from '@/features/Wallet/components/AddCardForm';
+import { WalletList } from '@/features/Wallet/components/WalletList';
+import { Sidebar } from '@/components/SideBar/components/Sidebar';
+import type { SidebarItem } from '@/components/SideBar/types/sidebar.types';
 
 // IDs das Views
 type ViewState = 'list' | 'add';

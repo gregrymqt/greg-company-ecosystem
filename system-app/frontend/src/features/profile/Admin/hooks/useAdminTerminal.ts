@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import type { SubmitHandler } from 'react-hook-form';
-import type { TerminalFormData } from '../types/adminProfile.types';
+import type { TerminalFormData } from '@/features/profile/Admin/types/adminProfile.types';
 
 export const useAdminTerminal = () => {
   const navigate = useNavigate();

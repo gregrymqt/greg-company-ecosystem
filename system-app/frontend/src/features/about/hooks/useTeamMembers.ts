@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
-import type { TeamMemberFormValues } from "../types/about.types";
-import { AboutService } from "../services/about.service";
-import { AlertService } from "../../../shared/services/alert.service";
+import type { TeamMemberFormValues } from '@/features/about/types/about.types';
+import { AboutService } from '@/features/about/services/about.service';
+import { AlertService } from '@/shared/services/alert.service';
 
 
 export const useTeamMembers = () => {

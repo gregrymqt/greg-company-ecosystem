@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { courseService } from '../services/courseService';
-import type { CourseRowUI } from '../types/course.type';
-import { ApiError } from '../../../../shared/services/api.service';
+import { courseService } from '@/features/course/Allow/services/courseService';
+import type { CourseRowUI } from '@/features/course/Allow/types/course.type';
+import { ApiError } from '@/shared/services/api.service';
 
 export const useCourses = (pageSize: number = 5) => {
   const [courses, setCourses] = useState<CourseRowUI[]>([]);

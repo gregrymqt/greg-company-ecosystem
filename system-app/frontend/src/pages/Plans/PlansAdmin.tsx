@@ -1,10 +1,10 @@
 import React, { useState, useCallback } from 'react';
 
 import styles from './styles/PlansPage.module.scss';
-import { PlanForm } from '../../features/Plan/components/Admin/PlanForm';
-import { PlanList } from '../../features/Plan/components/Admin/PlanList';
-import { Sidebar } from '../../components/SideBar/components/Sidebar';
-import type { SidebarItem } from '../../components/SideBar/types/sidebar.types';
+import { PlanForm } from '@/features/Plan/components/Admin/PlanForm';
+import { PlanList } from '@/features/Plan/components/Admin/PlanList';
+import { Sidebar } from '@/components/SideBar/components/Sidebar';
+import type { SidebarItem } from '@/components/SideBar/types/sidebar.types';
 import { useAdminPlans } from '@/features/Plan/hooks/useAdminPlans';
 import type { PlanAdminDetail } from '@/features/Plan/types/plans.type';
 

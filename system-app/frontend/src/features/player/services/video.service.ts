@@ -1,5 +1,5 @@
-import { ApiService } from "../../../shared/services/api.service";
-import type { VideoDto } from "../types/player.type";
+import { ApiService } from "@/shared/services/api.service";
+import type { VideoDto } from "@/features/player/types/player.type";
 
 export const videoService = {
   /**

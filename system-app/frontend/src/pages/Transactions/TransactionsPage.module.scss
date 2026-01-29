@@ -1,5 +1,3 @@
-@use '../../styles/variables' as *; // Importando do seu arquivo _variables.scss [cite: 17]
-
 .pageContainer {
   display: flex;
   flex-direction: column; // Mobile: Sidebar (Header) em cima, conteúdo embaixo

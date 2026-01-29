@@ -35,6 +35,7 @@ export interface PlanAdminDetail {
   transactionAmount: number;
   frequency: number;
   frequencyType: string;
+  description: string;
 }
 
 // Baseado no C# PlanResponseDto

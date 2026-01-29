@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import styles from "../styles/ProfileInfo.module.scss";
+import styles from '@/features/profile/User/styles/ProfileInfo.module.scss';
 import { AvatarUploadForm } from "./AvatarUploadForm"; 
-import { Card } from "../../../../components/Card/Card";
-import { useAuth } from "../../../auth/hooks/useAuth";
+import { Card } from "@/components/Card/Card";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 
 // Removemos a prop 'subscription', pois não é mais responsabilidade deste componente
 type TabOption = "details" | "avatar";

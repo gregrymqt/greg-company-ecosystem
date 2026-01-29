@@ -1,7 +1,7 @@
 // components/Header/Navbar.tsx
 import { useState } from 'react';
 import { NavLink, Link } from 'react-router-dom';
-import styles from '../styles/Navbar.module.scss';
+import styles from '@/styles/Navbar.module.scss';
 import { UserArea } from './UserArea';
 
 export const Navbar = () => {

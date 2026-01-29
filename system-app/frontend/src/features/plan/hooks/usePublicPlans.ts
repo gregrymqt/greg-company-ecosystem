@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
-import { PlanService } from '../services/plans.service';
-import type { PlanPublic } from '../types/plans.type';
-import { ApiError } from 'src/shared/services/api.service';
+import { PlanService } from '@/features/Plan/services/plans.service';
+import type { PlanPublic } from '@/features/Plan/types/plans.type';
+import { ApiError } from '@/shared/services/api.service';
 
 export const usePublicPlans = () => {
     const [loading, setLoading] = useState(false);

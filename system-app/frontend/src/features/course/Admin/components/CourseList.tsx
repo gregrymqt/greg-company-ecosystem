@@ -1,9 +1,9 @@
 import React from 'react';
-import { type Course } from 'src/types/models';
-import styles from '../styles/CourseList.module.scss';
-import { type CourseListProps } from '../types/course-manager.types';
-import { ActionMenu } from 'src/components/ActionMenu/ActionMenu';
-import { type TableColumn, Table } from 'src/components/Table/Table';
+import { type Course } from '@/types/models';
+import styles from '@/styles/CourseList.module.scss';
+import { type CourseListProps } from '@/features/course/Admin/types/course-manager.types';
+import { ActionMenu } from '@/components/ActionMenu/ActionMenu';
+import { type TableColumn, Table } from '@/components/Table/Table';
 
 export const CourseList: React.FC<CourseListProps> = ({ 
   courses, 

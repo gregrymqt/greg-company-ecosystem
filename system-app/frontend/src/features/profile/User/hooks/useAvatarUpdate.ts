@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { useAuth } from "../../../auth/hooks/useAuth"; 
-import { ProfileService } from "../services/profile.service";
-import { ApiError } from "../../../../shared/services/api.service";
+import { useAuth } from "@/features/auth/hooks/useAuth";
+import { ProfileService } from "@/features/profile/User/services/profile.service";
+import { ApiError } from "@/shared/services/api.service";
 
 interface AvatarFormData {
   file: FileList; // O React Hook Form retorna FileList

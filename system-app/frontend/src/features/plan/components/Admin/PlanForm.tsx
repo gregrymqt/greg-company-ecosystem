@@ -1,10 +1,10 @@
 import React, { useMemo } from 'react';
 import { type SubmitHandler } from 'react-hook-form';
 
-import styles from '../../styles/PlanForm.module.scss';
-import { type FormField, GenericForm } from '../../../../components/Form/GenericForm';
-import { usePlans } from '../../hooks/usePlans';
-import type { PlanEditDetail, UpdatePlanRequest, CreatePlanRequest } from '../../types/plans.type';
+import styles from '@/styles/PlanForm.module.scss';
+import { type FormField, GenericForm } from '@/components/Form/GenericForm';
+import { useAdminPlans } from '@/features/Plan/hooks/useAdminPlans';
+import type {  UpdatePlanRequest, CreatePlanRequest, PlanAdminDetail } from '@/features/Plan/types/plans.type';
 
 // Interface "Plana" para controlar o formulário visualmente
 interface PlanFormSchema {
@@ -16,13 +16,13 @@ interface PlanFormSchema {
 }
 
 interface PlanFormProps {
-    initialData?: PlanEditDetail | null; // Se vier preenchido, é Edição
+    initialData?: PlanAdminDetail | null; // Se vier preenchido, é Edição
     onSuccess: () => void; // Callback para fechar modal ou atualizar lista
     onCancel?: () => void;
 }
 
 export const PlanForm: React.FC<PlanFormProps> = ({ initialData, onSuccess, onCancel }) => {
-    const { createPlan, updatePlan, loading } = usePlans();
+    const { createPlan, updatePlan, loading } = useAdminPlans();
 
     const isEditing = !!initialData;
 

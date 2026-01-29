@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 // Imports dos seus componentes
-import { SubscriptionActions } from '../../features/Subscription/components/User/UserSubscriptionActions';
-import { SubscriptionInfo } from '../../features/Subscription/components/User/UserSubscriptionInfo';
-import { useSubscription } from '../../features/Subscription/hooks/useUserSubscription'; 
+import { SubscriptionActions } from '@/features/Subscription/components/User/UserSubscriptionActions';
+import { SubscriptionInfo } from '@/features/Subscription/components/User/UserSubscriptionInfo';
+import { useSubscription } from '@/features/Subscription/hooks/useUserSubscription'; 
 // Imports da Sidebar Genérica
 
 // Estilos
 import styles from './SubscriptionPage.module.scss';
-import { Sidebar } from '../../components/SideBar/components/Sidebar';
-import type { SidebarItem } from '../../components/SideBar/types/sidebar.types';
+import { Sidebar } from '@/components/SideBar/components/Sidebar';
+import type { SidebarItem } from '@/components/SideBar/types/sidebar.types';
 
 export const SubscriptionPage: React.FC = () => {
     // 1. Estado para controlar a aba ativa da Sidebar

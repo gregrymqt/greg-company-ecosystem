@@ -1,5 +1,5 @@
-import { ApiService } from '../../../shared/services/api.service';
-import type { UserSessionDto } from '../types/auth.types';
+import { ApiService } from '@/shared/services/api.service';
+import type { UserSessionDto } from '@/types/auth.types';
 
 export const authService = {
   /**

@@ -1,4 +1,4 @@
-import { type Course, type Video } from 'src/types/models'; // Importando do seu source [cite: 1]
+import { type Course, type Video } from '@/types/models';
 
 // Define as abas de navegação da Sidebar interna
 export type AdminTab = 'list' | 'form';

@@ -1,10 +1,10 @@
 // src/components/Payment/MercadoPagoBrick.tsx
-import React from "react"; // [Correção 1]: Removido { useEffect } pois não era usado
+import React from "react";
 import { initMercadoPago, Payment } from "@mercadopago/sdk-react";
 import type {
   CreditCardConfig,
   BrickPaymentData,
-} from "../types/credit-card.types";
+} from "@/features/Payment/components/Credit-Card/types/credit-card.types";
 
 // Inicialize com sua PUBLIC KEY
 initMercadoPago(process.env.REACT_APP_MP_PUBLIC_KEY || "SUA_PUBLIC_KEY_AQUI", {

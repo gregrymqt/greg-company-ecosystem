@@ -1,9 +1,9 @@
 import React from "react";
 
-import styles from "../../styles/HomeLists.module.scss";
-import { ActionMenu } from "../../../../components/ActionMenu/ActionMenu";
-import { type TableColumn, Table } from "../../../../components/Table/Table";
-import type { HeroSlideData } from "../../types/home.types";
+import styles from '@/features/home/styles/HomeLists.module.scss';
+import { ActionMenu } from "@/components/ActionMenu/ActionMenu";
+import { type TableColumn, Table } from "@/components/Table/Table";
+import type { HeroSlideData } from "@/features/home/types/home.types";
 
 interface HeroListProps {
   data: HeroSlideData[];

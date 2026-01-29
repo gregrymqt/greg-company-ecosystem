@@ -1,9 +1,9 @@
-import { ApiService } from "../../../../../shared/services/api.service";
+import { ApiService } from "@/shared/services/api.service";
 import type {
   CreatePixDTO,
   PixResponse,
   IdentificationType,
-} from "../types/pix.types";
+} from "@/features/Payment/components/Pix/types/pix.types";
 
 export const PixService = {
   createPix: async (data: CreatePixDTO): Promise<PixResponse> => {

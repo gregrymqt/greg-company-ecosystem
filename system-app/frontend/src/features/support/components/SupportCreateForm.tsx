@@ -1,17 +1,17 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
-import { useSupport } from "../hooks/useSupport";
+import { useSupport } from "@/features/support/hooks/useSupport";
 import type {
   SupportTicket,
   SupportTicketStatus,
-} from "../types/support.types";
+} from "@/features/support/types/support.types";
 
-import styles from "../styles/SupportTicketList.module.scss"; // Use o mesmo SCSS
-import { ActionMenu } from "../../../components/ActionMenu/ActionMenu";
+import styles from '@/features/support/styles/SupportCreateForm.module.scss';
+import { ActionMenu } from "@/components/ActionMenu/ActionMenu";
 import {
   type FormField,
   GenericForm,
-} from "../../../components/Form/GenericForm";
-import { type TableColumn, Table } from "../../../components/Table/Table";
+} from "@/components/Form/GenericForm";
+import { type TableColumn, Table } from "@/components/Table/Table";
 
 type TabOption = "list" | "search";
 

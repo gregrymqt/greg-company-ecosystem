@@ -2,16 +2,16 @@ import React, { useState, useEffect, useMemo } from "react";
 
 // Styles
 import styles from "./AdminVideoManager.module.scss";
-import { Sidebar } from "../../components/SideBar/components/Sidebar";
-import type { SidebarItem } from "../../components/SideBar/types/sidebar.types";
-import { VideoForm } from "../../features/Videos/components/VideoForm";
-import { VideoList } from "../../features/Videos/components/VideoList";
-import { VideoPlayer } from "../../features/Videos/components/VideoPlayer";
-import { useAdminVideos } from "../../features/Videos/hooks/useAdminVideos";
-import type { VideoTab, VideoFormData } from "../../features/Videos/types/video-manager.types";
-import { useCourses } from "../../features/course/Allow/hooks/useCourses";
-import { AlertService } from "../../shared/services/alert.service";
-import type { Video, Course } from "../../types/models";
+import { Sidebar } from "@/components/SideBar/components/Sidebar";
+import type { SidebarItem } from "@/components/SideBar/types/sidebar.types";
+import { VideoForm } from "@/features/Videos/components/VideoForm";
+import { VideoList } from "@/features/Videos/components/VideoList";
+import { VideoPlayer } from "@/features/Videos/components/VideoPlayer";
+import { useAdminVideos } from "@/features/Videos/hooks/useAdminVideos";
+import type { VideoTab, VideoFormData } from "@/features/Videos/types/video-manager.types";
+import { useCourses } from "@/features/course/Allow/hooks/useCourses";
+import { AlertService } from "@/shared/services/alert.service";
+import type { Video, Course } from "@/types/models";
 
 
 

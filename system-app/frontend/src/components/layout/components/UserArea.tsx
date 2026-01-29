@@ -1,8 +1,8 @@
 // components/Header/UserArea.tsx
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import styles from '../styles/Navbar.module.scss';
-import { useAuth } from '../../../features/auth/hooks/useAuth';
+import styles from '@/styles/Navbar.module.scss';
+import { useAuth } from '@/features/auth/hooks/useAuth';
 
 interface UserAreaProps {
   isMobile?: boolean;

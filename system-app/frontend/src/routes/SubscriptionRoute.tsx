@@ -1,6 +1,6 @@
 import { Navigate, Outlet } from "react-router-dom";
-import { useAuth } from "../features/auth/hooks/useAuth";
-import { AppRoles } from "../types/models";
+import { useAuth } from "@/features/auth/hooks/useAuth";
+import { AppRoles } from "@/types/models";
 
 export const SubscriptionRoute = () => {
   const { user, isAuthenticated } = useAuth();

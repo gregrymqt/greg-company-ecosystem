@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
-import { HomeService } from "../services/home.service";
-import type { HeroSlideData, ServiceData } from "../types/home.types";
-import { ApiError } from "../../../shared/services/api.service";
+import { HomeService } from "@/features/home/services/home.service";
+import type { HeroSlideData, ServiceData } from "@/features/home/types/home.types";
+import { ApiError } from "@/shared/services/api.service";
 
 export const useHomeData = () => {
   const [heroSlides, setHeroSlides] = useState<HeroSlideData[]>([]);

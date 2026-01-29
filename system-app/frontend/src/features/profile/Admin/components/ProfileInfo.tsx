@@ -1,7 +1,7 @@
 import React from 'react';
-import { useAuth } from '../../../auth/hooks/useAuth'; // Ajuste o import conforme sua estrutura
-import styles from '../styles/ProfileInfo.module.scss'; // Estilo local
-import { Card } from '../../../../components/Card/Card';
+import { useAuth } from '@/features/auth/hooks/useAuth';
+import styles from '@/styles/ProfileInfo.module.scss';
+import { Card } from '@/components/Card/Card';
 
 export const ProfileInfo: React.FC = () => {
   const { user } = useAuth(); //  Pega dados do contexto

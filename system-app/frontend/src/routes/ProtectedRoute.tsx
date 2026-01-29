@@ -1,6 +1,6 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
-import { useAuth } from '../features/auth/hooks/useAuth';
-import { AppRoles } from '../types/models'; // Ajuste o caminho se necessário
+import { useAuth } from '@/features/auth/hooks/useAuth';
+import { AppRoles } from '@/types/models'; // Ajuste o caminho se necessário
 
 // --- PROTECTED ROUTE (Baseada em Autenticação e Roles) ---
 interface ProtectedRouteProps {

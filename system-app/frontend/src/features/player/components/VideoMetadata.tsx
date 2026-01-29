@@ -1,8 +1,8 @@
 import React from 'react';
 
-import styles from '../styles/VideoMetadata.module.scss';
-import { Card } from '../../../components/Card/Card';
-import type { PlayerUI } from '../types/player.type';
+import styles from '@/styles/VideoMetadata.module.scss';
+import { Card } from '@/components/Card/Card';
+import type { PlayerUI } from '@/features/player/types/player.type';
 
 interface VideoMetadataProps {
   data: PlayerUI;

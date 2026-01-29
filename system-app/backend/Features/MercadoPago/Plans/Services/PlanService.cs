@@ -168,6 +168,7 @@ namespace MeuCrudCsharp.Features.MercadoPago.Plans.Services
             var originalTransactionAmount = localPlan.TransactionAmount;
             var originalFrequencyInterval = localPlan.FrequencyInterval;
             var originalFrequencyType = localPlan.FrequencyType;
+            var originalDescription = localPlan.Description;
 
             // 3. Aplica as mudanças (apenas em memória)
             PlanUtils.ApplyUpdateDtoToPlan(localPlan, updateDto);
@@ -216,7 +217,7 @@ namespace MeuCrudCsharp.Features.MercadoPago.Plans.Services
                 localPlan.TransactionAmount = originalTransactionAmount;
                 localPlan.FrequencyInterval = originalFrequencyInterval;
                 localPlan.FrequencyType = originalFrequencyType;
-
+                localPlan.Description = originalDescription;
                 _logger.LogInformation(
                     "Rollback concluído. Alterações locais no plano '{PlanName}' foram desfeitas.",
                     localPlan.Name

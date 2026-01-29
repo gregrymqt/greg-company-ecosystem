@@ -1,6 +1,6 @@
 import React from 'react';
-import styles from '../styles/VideoCard.module.scss';
-import type { VideoCardUI } from '../types/course.type';
+import styles from '@/styles/VideoCard.module.scss';
+import type { VideoCardUI } from '@/features/course/Allow/types/course.type';
 
 interface VideoCardProps {
   data: VideoCardUI;

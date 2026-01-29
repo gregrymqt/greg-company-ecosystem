@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
-import { ApiError } from "../../../shared/services/api.service";
-import { ChargebackService } from "../services/chargeBack.service";
-import type { ChargebackDetail } from "../types/chargeback.type";
+import { ApiError } from "@/shared/services/api.service";
+import { ChargebackService } from '@/features/Chargeback/services/chargeBack.service';
+import type { ChargebackDetail } from '@/features/Chargeback/types/chargeback.type';
 
 export const useChargebackDetails = (chargebackId: string | null) => {
   const [details, setDetails] = useState<ChargebackDetail | null>(null);

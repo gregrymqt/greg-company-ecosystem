@@ -1,5 +1,5 @@
-import type { SidebarItem } from "../../../../components/SideBar/types/sidebar.types";
-import type { UserSession } from "../../../auth/types/auth.types";
+import type { SidebarItem } from "@/components/SideBar/types/sidebar.types";
+import type { UserSession } from "@/features/auth/types/auth.types";
 
 
 export const getProfileSidebarItems = (user: UserSession | null): SidebarItem[] => {

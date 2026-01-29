@@ -1,13 +1,13 @@
 import { useState, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { SupportService } from "../services/support.service";
-import { AlertService } from "../../../shared/services/alert.service";
-import { ApiError } from "../../../shared/services/api.service";
+import { SupportService } from "@/features/support/services/support.service";
+import { AlertService } from "@/shared/services/alert.service";
+import { ApiError } from "@/shared/services/api.service";
 import type {
   SupportTicket,
   CreateSupportTicketPayload,
   SupportTicketStatus,
-} from "../types/support.types";
+} from "@/features/support/types/support.types";
 
 export const useSupport = () => {
   const [tickets, setTickets] = useState<SupportTicket[]>([]); // Lista geral

@@ -1,5 +1,4 @@
-import { ApiService } from "../../../shared/services/api.service"; 
-// ^ Ajuste o import conforme sua estrutura real de utils/api
+import { ApiService } from "@/shared/services/api.service";
 
 import type { 
   PagedResult, 
@@ -8,7 +7,7 @@ import type {
   PlanAdminSummary,
   CreatePlanRequest, 
   UpdatePlanRequest 
-} from "../types/plans.type";
+} from "@/features/Plan/types/plans.type";
 
 const ADMIN_ENDPOINT = '/admin/plans';
 const PUBLIC_ENDPOINT = '/public/plans';

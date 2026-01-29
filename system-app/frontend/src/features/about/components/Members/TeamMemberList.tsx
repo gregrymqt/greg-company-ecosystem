@@ -1,9 +1,9 @@
 import React from 'react';
 
-import styles from '../../styles/AboutLists.module.scss';
-import { ActionMenu } from '../../../../components/ActionMenu/ActionMenu';
-import { type TableColumn, Table } from '../../../../components/Table/Table';
-import type { TeamMember } from '../../types/about.types';
+import styles from '@/styles/AboutLists.module.scss';
+import { ActionMenu } from '@/../components/ActionMenu/ActionMenu';
+import { type TableColumn, Table } from '@/../components/Table/Table';
+import type { TeamMember } from '@/types/about.types';
 
 interface TeamListProps {
   data: TeamMember[];

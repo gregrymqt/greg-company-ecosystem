@@ -2,11 +2,11 @@ import React, { useMemo } from "react";
 import { useNavigate } from "react-router-dom"; // Importante para navegação
 
 import styles from "./ProfileDashboard.module.scss";
-import { Sidebar } from "../../components/SideBar/components/Sidebar";
-import type { SidebarItem } from "../../components/SideBar/types/sidebar.types";
-import { useAuth } from "../../features/auth/hooks/useAuth";
-import { ProfileInfo } from "../../features/profile/User/components/ProfileInfo";
-import { getProfileSidebarItems } from "../../features/profile/User/config/sidebarConfig";
+import { Sidebar } from "@/components/SideBar/components/Sidebar";
+import type { SidebarItem } from "@/components/SideBar/types/sidebar.types";
+import { useAuth } from "@/features/auth/hooks/useAuth";
+import { ProfileInfo } from "@/features/profile/User/components/ProfileInfo";
+import { getProfileSidebarItems } from "@/features/profile/User/config/sidebarConfig";
 
 export const ProfileDashboard: React.FC = () => {
   const { user } = useAuth();

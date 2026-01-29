@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Hls from 'hls.js';
-import  { videoService } from '../services/video.service';
-import type { PlayerUI, VideoDto } from '../types/player.type';
+import  { videoService } from '@/features/player/services/video.service';
+import type { PlayerUI, VideoDto } from '@/features/player/types/player.type';
 
 
 export const useVideoPlayer = (publicId: string | undefined) => {

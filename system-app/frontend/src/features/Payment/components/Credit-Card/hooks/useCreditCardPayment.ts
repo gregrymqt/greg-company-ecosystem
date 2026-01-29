@@ -1,18 +1,18 @@
 // src/pages/Payment/hooks/useCreditCardPayment.ts
 import { useState, useEffect } from "react";
-import { CreditCardService } from "../services/credit-card.service";
-import { AlertService } from "../../../../../shared/services/alert.service"; 
-import { socketService } from "../../../../../shared/services/socket.service";
+import { CreditCardService } from "@/features/Payment/components/Credit-Card/services/credit-card.service";
+import { AlertService } from "@/shared/services/alert.service";
+import { socketService } from "@/shared/services/socket.service";
 
 import type { 
   BrickPaymentData, 
   CreditCardPaymentRequestDto, 
   CreditCardMode 
-} from "../types/credit-card.types";
-import  { AppHubs } from "../../../../../shared/enums/hub.enums";
-import { useSocketListener } from "../../../../../shared/hooks/useSocket";
-import type { PaymentSocketMessage } from "../../../types/payment.types";
-import { ApiError } from "../../../../../shared/services/api.service";
+} from "@/features/Payment/components/Credit-Card/types/credit-card.types";
+import  { AppHubs } from "@/shared/enums/hub.enums";
+import { useSocketListener } from "@/shared/hooks/useSocket";
+import type { PaymentSocketMessage } from "@/features/Payment/types/payment.types";
+import { ApiError } from "@/shared/services/api.service";
 
 interface UseCreditCardProps {
   planId: string;   // Guid do plano

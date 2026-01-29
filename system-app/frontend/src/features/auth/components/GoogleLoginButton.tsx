@@ -1,5 +1,5 @@
-import { useAuth } from '../hooks/useAuth';
-import styles from '../styles/GoogleLoginButton.module.scss';
+import { useAuth } from '@/hooks/useAuth';
+import styles from '@/styles/GoogleLoginButton.module.scss';
 
 export const GoogleLoginButton = () => {
   const { loginGoogle } = useAuth();

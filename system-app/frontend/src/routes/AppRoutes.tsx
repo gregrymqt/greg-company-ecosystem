@@ -1,30 +1,30 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import { ProtectedRoute } from "./ProtectedRoute";
-import { SubscriptionRoute } from "./SubscriptionRoute"; // Importe o novo componente
-import { AppRoles } from "../types/models";
-import { AccessDenied } from "../pages/AccessDenied/AccessDenied";
-import { GoogleCallbackPage } from "../features/auth/components/GoogleCallbackPage";
-import { Home } from "../pages/Home/Home";
-import { AdminCourseManager } from "../pages/Courses/AdminCourseManager";
-import { AdminProfile } from "../pages/Admin/AdminProfile";
-import { GoogleLoginButton } from "../features/auth/components/GoogleLoginButton";
-import { CourseFeed } from "../pages/Courses/CourseFeed";
-import { PlansAdmin } from "../pages/Plans/PlansAdmin";
-import { PlayerScreen } from "../features/player/pages/PlayerScreen";
-import { AdminClaimsPage } from "../pages/Claims/AdminClaimsPage";
-import { UserClaimsPage } from "../pages/Claims/UserClaimsPage";
-import { ChargebackManager } from "../pages/ChargeBack/ChargebackManager";
-import { WalletPage } from "../pages/Wallet/WalletPage";
-import { TransactionsPage } from "../pages/Transactions/TransactionsPage";
-import { SubscriptionPage } from "../pages/Subscription/SubscriptionPage";
-import { ProfileDashboard } from "../pages/Profile/ProfileDashboard";
-import { CreateSupportPage } from "../pages/Support/CreateSupportPage";
-import { SupportAdminPage } from "../pages/Support/SupportAdminPage";
-import { AboutPage } from "../pages/About/AboutPage";
-import { AdminAboutPage } from "../pages/About/AdminAboutPage";
-import { AdminHomePage } from "../pages/Home/AdminHomePage";
-import { MainLayout } from "src/components/layout/components/MainLayout";
-import { PlanFeed } from "src/pages/Plans/PlanFeed";
+import { ProtectedRoute } from "@/routes/ProtectedRoute";
+import { SubscriptionRoute } from "@/routes/SubscriptionRoute";
+import { AppRoles } from "@/types/models";
+import { AccessDenied } from "@/pages/AccessDenied/AccessDenied";
+import { GoogleCallbackPage } from "@/features/auth/components/GoogleCallbackPage";
+import { Home } from "@/pages/Home/Home";
+import { AdminCourseManager } from "@/pages/Courses/AdminCourseManager";
+import { AdminProfile } from "@/pages/Admin/AdminProfile";
+import { GoogleLoginButton } from "@/features/auth/components/GoogleLoginButton";
+import { CourseFeed } from "@/pages/Courses/CourseFeed";
+import { PlansAdmin } from "@/pages/Plans/PlansAdmin";
+import { PlayerScreen } from "@/features/player/pages/PlayerScreen";
+import { AdminClaimsPage } from "@/pages/Claims/AdminClaimsPage";
+import { UserClaimsPage } from "@/pages/Claims/UserClaimsPage";
+import { ChargebackManager } from "@/pages/ChargeBack/ChargebackManager";
+import { WalletPage } from "@/pages/Wallet/WalletPage";
+import { TransactionsPage } from "@/pages/Transactions/TransactionsPage";
+import { SubscriptionPage } from "@/pages/Subscription/SubscriptionPage";
+import { ProfileDashboard } from "@/pages/Profile/ProfileDashboard";
+import { CreateSupportPage } from "@/pages/Support/CreateSupportPage";
+import { SupportAdminPage } from "@/pages/Support/SupportAdminPage";
+import { AboutPage } from "@/pages/About/AboutPage";
+import { AdminAboutPage } from "@/pages/About/AdminAboutPage";
+import { AdminHomePage } from "@/pages/Home/AdminHomePage";
+import { MainLayout } from "@/components/layout/components/MainLayout";
+import { PlanFeed } from "@/pages/Plans/PlanFeed";
 
 export const AppRoutes = () => {
   return (

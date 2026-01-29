@@ -1,8 +1,8 @@
 import React from 'react';
-import styles from '../../styles/Home.module.scss';
-import { Carousel } from '../../../../components/Carousel/Carousel';
-import { useScrollOpacity } from '../../hooks/useScrollOpacity';
-import type { HeroSlideData } from '../../types/home.types';
+import styles from '@/styles/Home.module.scss';
+import { Carousel } from '@/components/Carousel/Carousel';
+import { useScrollOpacity } from '@/features/home/hooks/useScrollOpacity';
+import type { HeroSlideData } from '@/features/home/types/home.types';
 
 
 interface HeroProps {

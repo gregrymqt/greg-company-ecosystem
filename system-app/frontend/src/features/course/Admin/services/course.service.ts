@@ -1,8 +1,8 @@
 // src/features/admin/courses/services/course.service.ts
 
-import { ApiService } from 'src/shared/services/api.service'; // 
-import type { Course } from 'src/types/models';
-import type { CourseFilters, PaginatedResponse, CreateCourseData, UpdateCourseData } from '../types/course-manager.types';
+import { ApiService } from '@/shared/services/api.service';
+import type { Course } from '@/types/models';
+import type { CourseFilters, PaginatedResponse, CreateCourseData, UpdateCourseData } from '@/features/course/Admin/types/course-manager.types';
 
 
 const BASE_ENDPOINT = '/admin/courses'; // 

@@ -97,6 +97,8 @@ namespace MeuCrudCsharp.Features.MercadoPago.Plans.Utils
 
                 localPlan.FrequencyType = frequencyTypeEnum;
             }
+            if (updateDto.Description != null)
+                localPlan.Description = updateDto.Description;
         }
     }
 }

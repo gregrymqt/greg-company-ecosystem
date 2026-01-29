@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
-import { socketService } from '../services/socket.service';
-import { AppHubs } from '../enums/hub.enums';
+import { socketService } from '@/shared/services/socket.service';
+import { AppHubs } from '@/shared/enums/hub.enums';
 
 export const useSocketListener = <T>(
   hub: AppHubs,       // <--- NOVO PARAMETRO: Qual Hub?

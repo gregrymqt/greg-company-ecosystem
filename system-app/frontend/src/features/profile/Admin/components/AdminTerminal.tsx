@@ -1,10 +1,10 @@
 import React from 'react';
 
-import  { Card } from '../../../../components/Card/Card';
-import { type FormField, GenericForm } from '../../../../components/Form/GenericForm';
-import { useAdminTerminal } from '../hooks/useAdminTerminal';
-import type { TerminalFormData } from '../types/adminProfile.types';
-import styles from '../styles/AdminTerminal.module.scss';
+import  { Card } from '@/components/Card/Card';
+import { type FormField, GenericForm } from '@/components/Form/GenericForm';
+import { useAdminTerminal } from '@/features/profile/Admin/hooks/useAdminTerminal';
+import type { TerminalFormData } from '@/features/profile/Admin/types/adminProfile.types';
+import styles from '@/styles/AdminTerminal.module.scss';
 
 export const AdminTerminal: React.FC = () => {
   const { handleTerminalCommand } = useAdminTerminal();

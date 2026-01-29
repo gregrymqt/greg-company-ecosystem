@@ -5,7 +5,7 @@ import {
   HubConnectionState,
 } from "@microsoft/signalr";
 import { StorageService, STORAGE_KEYS } from "./storage.service";
-import { AppHubs } from "../enums/hub.enums"; // Importe o Enum
+import { AppHubs } from "@/shared/enums/hub.enums"; // Importe o Enum
 
 class WebSocketService {
   // Agora armazenamos várias conexões: "Payment" -> ConnectionObj, "Video" -> ConnectionObj

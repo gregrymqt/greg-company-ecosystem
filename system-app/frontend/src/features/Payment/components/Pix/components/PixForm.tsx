@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
-import { type FormField, GenericForm } from '../../../../../components/Form/GenericForm';
-import type { PixPayer, IdentificationType } from '../types/pix.types';
+import { type FormField, GenericForm } from '@/components/Form/GenericForm';
+import type { PixPayer, IdentificationType } from '@/features/Payment/components/Pix/types/pix.types';
 
 
 interface PixFormProps {

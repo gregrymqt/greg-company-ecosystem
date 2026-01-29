@@ -1,12 +1,12 @@
-import { ApiService } from "src/shared/services/api.service";
-import type { Video } from "src/types/models";
+import { ApiService } from "@/shared/services/api.service";
+import type { Video } from "@/types/models";
 import type {
   VideoFilters,
   PaginatedResponse,
   CreateVideoParams,
   UpdateVideoParams,
   CreateVideoPayload,
-} from "../types/video-manager.types";
+} from "@/features/Videos/types/video-manager.types";
 
 const BASE_ENDPOINT = "/admin/videos";
 

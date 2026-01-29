@@ -1,8 +1,8 @@
 import React from 'react';
 
-import styles from '../styles/AvatarUploadForm.module.scss';
-import { type FormField, GenericForm } from '../../../../components/Form/GenericForm';
-import { useAvatarUpdate } from '../hooks/useAvatarUpdate';
+import styles from '@/styles/AvatarUploadForm.module.scss';
+import { type FormField, GenericForm } from '@/components/Form/GenericForm';
+import { useAvatarUpdate } from '@/features/profile/User/hooks/useAvatarUpdate';
 
 interface AvatarFormSchema {
   file: FileList;

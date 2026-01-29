@@ -1,6 +1,6 @@
 import React from 'react';
-import { useVideoProcessing } from '../hooks/useVideoProcessing';
-import styles from '../styles/ProcessingBadge.module.scss';
+import { useVideoProcessing } from '@/features/Videos/hooks/useVideoProcessing';
+import styles from '@/styles/ProcessingBadge.module.scss';
 
 interface Props {
   storageIdentifier: string;

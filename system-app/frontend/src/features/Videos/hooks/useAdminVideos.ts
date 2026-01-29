@@ -1,11 +1,11 @@
 // src/features/admin/videos/hooks/useAdminVideos.ts
 
 import { useState, useCallback } from 'react';
-import { VideoService } from '../services/video.service';
-import { AlertService } from 'src/shared/services/alert.service'; // 
-import { ApiError } from 'src/shared/services/api.service'; //
-import type { Video } from 'src/types/models';
-import type { PaginatedResponse, CreateVideoParams, UpdateVideoParams } from '../types/video-manager.types';
+import { VideoService } from '@/features/Videos/services/video.service';
+import { AlertService } from '@/shared/services/alert.service';
+import { ApiError } from '@/shared/services/api.service';
+import type { Video } from '@/types/models';
+import type { PaginatedResponse, CreateVideoParams, UpdateVideoParams } from '@/features/Videos/types/video-manager.types';
 
 export const useAdminVideos = () => {
   const [loading, setLoading] = useState(false);

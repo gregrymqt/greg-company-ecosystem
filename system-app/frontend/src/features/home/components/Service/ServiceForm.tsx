@@ -1,7 +1,7 @@
 import React from 'react';
-import styles from '../../styles/HomeForms.module.scss';
-import { type FormField, GenericForm } from '../../../../components/Form/GenericForm';
-import type { ServiceData, ServiceFormValues } from '../../types/home.types'; //
+import styles from '@/styles/HomeForms.module.scss';
+import { type FormField, GenericForm } from '@/components/Form/GenericForm';
+import type { ServiceData, ServiceFormValues } from '@/features/home/types/home.types';
 
 interface ServiceFormProps {
   initialData?: ServiceData;

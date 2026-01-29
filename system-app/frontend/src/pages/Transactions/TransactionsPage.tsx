@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import styles from './TransactionsPage.module.scss'; // CSS Modules
-import { FailedPaymentsList } from '../../features/Transactions/components/FailedPaymentsList';
-import { Sidebar } from '../../components/SideBar/components/Sidebar';
-import type { SidebarItem } from '../../components/SideBar/types/sidebar.types';
-import {PaymentHistory} from "src/features/Transactions/components/PaymentHistory.tsx";
+import { FailedPaymentsList } from '@/features/Transactions/components/FailedPaymentsList';
+import { Sidebar } from '@/components/SideBar/components/Sidebar';
+import type { SidebarItem } from '@/components/SideBar/types/sidebar.types';
+import {PaymentHistory} from "@/features/Transactions/components/PaymentHistory.tsx";
 
 // Definição dos itens do menu lateral
 const MENU_ITEMS: SidebarItem[] = [

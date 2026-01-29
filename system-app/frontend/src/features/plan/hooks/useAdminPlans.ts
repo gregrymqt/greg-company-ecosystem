@@ -1,14 +1,14 @@
 import { useState, useCallback } from 'react';
-import { PlanService } from '../services/plans.service';
-import { AlertService } from '../../../shared/services/alert.service'; // Ajuste o import do seu Alert
+import { PlanService } from '@/features/Plan/services/plans.service';
+import { AlertService } from '@/shared/services/alert.service';
 import type { 
   PlanAdminSummary, 
   PlanAdminDetail, 
   PagedResult, 
   CreatePlanRequest, 
   UpdatePlanRequest 
-} from '../types/plans.type';
-import { ApiError } from 'src/shared/services/api.service';
+} from '@/features/Plan/types/plans.type';
+import { ApiError } from '@/shared/services/api.service';
 
 export const useAdminPlans = () => {
     // Estados

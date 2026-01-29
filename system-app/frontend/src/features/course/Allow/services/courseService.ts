@@ -1,5 +1,5 @@
-import { ApiService } from '../../../../shared/services/api.service'; // [cite: 1]
-import type { PaginatedResponse, CourseDto, CourseRowUI, VideoCardUI } from '../types/course.type';
+import { ApiService } from '@/shared/services/api.service';
+import type { PaginatedResponse, CourseDto, CourseRowUI, VideoCardUI } from '@/features/course/Allow/types/course.type';
 
 
 // Helper simples para formatar duração (pode mover para utils)

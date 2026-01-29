@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
-import { HomeService } from "../services/home.service";
-import type { HeroFormValues } from "../types/home.types";
-import { AlertService } from "../../../shared/services/alert.service";
+import { HomeService } from "@/features/home/services/home.service";
+import type { HeroFormValues } from "@/features/home/types/home.types";
+import { AlertService } from "@/shared/services/alert.service";
 
 export const useHomeHero = () => {
   const [isLoading, setIsLoading] = useState(false);

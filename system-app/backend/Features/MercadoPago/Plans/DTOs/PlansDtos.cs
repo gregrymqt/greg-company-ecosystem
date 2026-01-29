@@ -55,7 +55,8 @@ public record PlanEditDto(
     string Name,
     decimal TransactionAmount,
     int Frequency,
-    string FrequencyType
+    string FrequencyType,
+    string Description
 );
 
 /// <summary>
@@ -82,6 +83,7 @@ public record PlanSearchResponseDto(
 /// </summary>
 public record UpdatePlanDto(
     [property: JsonPropertyName("reason")] string? Reason,
+    [property: JsonPropertyName("description")] string? Description,
     [property: JsonPropertyName("auto_recurring")] AutoRecurringDto? AutoRecurring
 );
 

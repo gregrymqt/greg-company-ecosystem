@@ -1,9 +1,9 @@
-import { ApiService } from "../../../shared/services/api.service";
+import { ApiService } from "@/shared/services/api.service";
 import type {
   AdminSubscriptionDetail,
   UpdateSubscriptionValuePayload,
   UpdateSubscriptionStatusPayload,
-} from "../types/adminSubscription.type";
+} from "@/features/Subscription/types/adminSubscription.type";
 
 export const AdminSubscriptionService = {
   /**

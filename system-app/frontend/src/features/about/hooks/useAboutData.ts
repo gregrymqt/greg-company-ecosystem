@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
-import { AboutService } from "../services/about.service"; // Ajuste o caminho se necessário
-import type { AboutSectionData, TeamMember } from "../types/about.types";
+import { AboutService } from '@/features/about/services/about.service';
+import type { AboutSectionData, TeamMember } from '@/features/about/types/about.types';
 
 export const useAboutData = () => {
   const [sections, setSections] = useState<AboutSectionData[]>([]);

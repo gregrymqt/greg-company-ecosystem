@@ -1,16 +1,16 @@
 import React from "react";
 // CORREÇÃO 1: Removido 'type' da importação do GenericForm (ele é um componente/valor)
 
-import styles from "../../styles/AboutForm.module.scss";
+import styles from '@/features/about/styles/AboutForm.module.scss';
 
 import {
   type FormField,
   GenericForm,
-} from "../../../../components/Form/GenericForm";
+} from '@/components/Form/GenericForm';
 import type {
   AboutSectionData,
   AboutSectionFormValues,
-} from "../../types/about.types";
+} from '@/features/about/types/about.types';
 
 interface SectionFormProps {
   initialData?: AboutSectionData;

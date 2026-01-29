@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
-import { ClaimService } from "../services/claim.service";
-import type { ChatMessage, ReplyFormData } from "../types/claims.type";
-import { AlertService } from "src/shared/services/alert.service";
-import { ApiError } from "src/shared/services/api.service";
+import { ClaimService } from '@/features/Claim/services/claim.service';
+import type { ChatMessage, ReplyFormData } from '@/features/Claim/types/claims.type';
+import { AlertService } from "@/shared/services/alert.service";
+import { ApiError } from "@/shared/services/api.service";
 
 // Props para saber quem está usando o hook
 interface UseClaimChatProps {

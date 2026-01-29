@@ -1,6 +1,6 @@
 // src/features/support/services/support.service.ts
 
-import { ApiService } from '../../../shared/services/api.service'; // Ajuste o caminho se necessário
+import { ApiService } from '@/shared/services/api.service';
 import type { 
   SupportTicket, 
   CreateSupportTicketPayload, 
@@ -8,7 +8,7 @@ import type {
   UpdateSupportTicketPayload,
   SupportApiResponse,
   PaginatedResult // Importe o novo type
-} from '../types/support.types';
+} from '@/features/support/types/support.types';
 
 export const SupportService = {
   createTicket: async (payload: CreateSupportTicketPayload): Promise<SupportApiResponse<void>> => {

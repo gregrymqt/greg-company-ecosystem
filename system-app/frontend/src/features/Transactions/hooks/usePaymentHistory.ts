@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
-import { ApiError } from "../../../shared/services/api.service";
-import { TransactionService } from "../services/transactions.service";
-import type { PaymentItems } from "../types/transactions.type";
+import { ApiError } from "@/shared/services/api.service";
+import { TransactionService } from "@/features/Transactions/services/transactions.service";
+import type { PaymentItems } from "@/features/Transactions/types/transactions.type";
 
 export const usePaymentHistory = () => {
   const [payments, setPayments] = useState<PaymentItems[]>([]);

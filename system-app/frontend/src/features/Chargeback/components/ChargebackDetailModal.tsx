@@ -1,6 +1,6 @@
-import { Modal } from '../../../components/Modal/Modal';
-import type { ChargebackDetail } from '../types/chargeback.type';
-import styles from '../styles/ChargebackDetailModal.module.scss';
+import { Modal } from '@/components/Modal/Modal';
+import type { ChargebackDetail } from '@/types/chargeback.type';
+import styles from '@/styles/ChargebackDetailModal.module.scss';
 
 interface Props {
   isOpen: boolean;

@@ -1,9 +1,9 @@
-import { ApiService } from "../../../shared/services/api.service";
+import { ApiService } from "@/shared/services/api.service";
 import type {
   ClaimSummary,
   ClaimDetail,
   ReplyClaimPayload,
-} from "../types/claims.type";
+} from '@/features/Claim/types/claims.type';
 
 export const ClaimService = {
   // ============================================================

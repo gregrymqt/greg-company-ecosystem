@@ -1,24 +1,24 @@
 import React, { useState } from "react";
 import styles from "./styles/AdminAboutPage.module.scss";
 
-import { Sidebar } from "../../components/SideBar/components/Sidebar";
-import type { SidebarItem } from "../../components/SideBar/types/sidebar.types";
-import { TeamMemberForm } from "../../features/about/components/Members/TeamMemberForm";
-import { TeamMemberList } from "../../features/about/components/Members/TeamMemberList";
-import { AboutSectionForm } from "../../features/about/components/Section/AboutSectionForm";
-import { AboutSectionList } from "../../features/about/components/Section/AboutSectionList";
+import { Sidebar } from "@/components/SideBar/components/Sidebar";
+import type { SidebarItem } from "@/components/SideBar/types/sidebar.types";
+import { TeamMemberForm } from "@/features/about/components/Members/TeamMemberForm";
+import { TeamMemberList } from "@/features/about/components/Members/TeamMemberList";
+import { AboutSectionForm } from "@/features/about/components/Section/AboutSectionForm";
+import { AboutSectionList } from "@/features/about/components/Section/AboutSectionList";
 
 // Importamos o NOVO hook de leitura
-import { useAboutData } from "../../features/about/hooks/useAboutData";
+import { useAboutData } from "@/features/about/hooks/useAboutData";
 
 // Hooks de escrita (CRUD) continuam os mesmos
-import { useAboutSection } from "../../features/about/hooks/useAboutSection";
-import { useTeamMembers } from "../../features/about/hooks/useTeamMembers";
+import { useAboutSection } from "@/features/about/hooks/useAboutSection";
+import { useTeamMembers } from "@/features/about/hooks/useTeamMembers";
 
 import type {
   AboutSectionData,
   TeamMember,
-} from "../../features/about/types/about.types";
+} from "@/features/about/types/about.types";
 
 // --- CONFIGURAÇÃO DA SIDEBAR ---
 const sidebarItems: SidebarItem[] = [

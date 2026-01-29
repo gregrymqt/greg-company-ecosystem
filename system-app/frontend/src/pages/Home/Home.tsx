@@ -2,11 +2,11 @@ import React from 'react';
 import styles from './styles/Home.module.scss'; // Ajuste o caminho conforme sua estrutura
 
 // Componentes
-import { Services } from '../../features/home/components/Service/Services';
-import { Hero } from '../../features/home/components/Hero/Hero';
+import { Services } from '@/features/home/components/Service/Services';
+import { Hero } from '@/features/home/components/Hero/Hero';
 
 // Hook
-import { useHomeData } from '../../features/home/hooks/useHomeData';
+import { useHomeData } from '@/features/home/hooks/useHomeData';
 
 export const Home: React.FC = () => {
   // CORREÇÃO: O hook retorna heroSlides, services e isLoading (não 'data' e 'loading')

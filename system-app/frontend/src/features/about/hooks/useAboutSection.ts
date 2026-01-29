@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
-import { AlertService } from "../../../shared/services/alert.service";
-import { AboutService } from "../services/about.service";
-import type { AboutSectionFormValues } from "../types/about.types";
+import { AlertService } from '@/shared/services/alert.service';
+import { AboutService } from '@/features/about/services/about.service';
+import type { AboutSectionFormValues } from '@/features/about/types/about.types';
 
 export const useAboutSection = () => {
   const [isLoading, setIsLoading] = useState(false);

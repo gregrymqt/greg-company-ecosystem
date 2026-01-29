@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Sidebar } from 'src/components/SideBar/components/Sidebar';
-import type { SidebarItem } from 'src/components/SideBar/types/sidebar.types';
-import { type Course } from 'src/types/models';
+import { Sidebar } from '@/components/SideBar/components/Sidebar';
+import type { SidebarItem } from '@/components/SideBar/types/sidebar.types';
+import { type Course } from '@/types/models';
 
 // Sub-components, Estilos e Types
-import { CourseList } from '../../features/course/Admin/components/CourseList';
-import { CourseForm } from '../../features/course/Admin/components/CourseForm';
-import styles from '../styles/AdminCourseManager.module.scss';
-import type { CourseFormData, AdminTab } from '../../features/course/Admin/types/course-manager.types';
+import { CourseList } from '@/features/course/Admin/components/CourseList';
+import { CourseForm } from '@/features/course/Admin/components/CourseForm';
+import styles from '@/pages/styles/AdminCourseManager.module.scss';
+import type { CourseFormData, AdminTab } from '@/features/course/Admin/types/course-manager.types';
 
 // [CORREÇÃO] Importando o Hook Real
-import { useCourses } from '../../features/course/Admin/hooks/useCourses';
+import { useCourses } from '@/features/course/Admin/hooks/useCourses';
 
 export const AdminCourseManager: React.FC = () => {
   // [CORREÇÃO] O hook gerencia o estado dos cursos e loading agora
