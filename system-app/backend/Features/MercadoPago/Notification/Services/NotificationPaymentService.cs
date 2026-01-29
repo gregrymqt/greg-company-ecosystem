@@ -9,6 +9,7 @@ using MeuCrudCsharp.Features.MercadoPago.Refunds.Interfaces;
 using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Interfaces;
 using MeuCrudCsharp.Features.Shared.Work;
 using MeuCrudCsharp.Models;
+using Microsoft.Extensions.Options;
 
 namespace MeuCrudCsharp.Features.MercadoPago.Notification.Services;
 
@@ -26,7 +27,8 @@ public class NotificationPaymentService(
     ILogger<NotificationPaymentService> logger,
     IMercadoPagoPaymentService mercadoPagoService,
     IRefundNotification refundNotification,
-    ISubscriptionService subscriptionService)
+    ISubscriptionService subscriptionService,
+    IOptions<GeneralSettings> generalSettings)
     : INotificationPayment
 {
 
@@ -346,6 +348,8 @@ public class NotificationPaymentService(
         {
             UserName = user.Name ?? "Cliente",
             PaymentId = paymentId,
+            PaymentPageUrl = $"{generalSettings.Value.FrontendUrl}/payments/{paymentId}",
+            SiteUrl = generalSettings.Value.FrontendUrl!
         };
         await SendPaymentEmailNotificationAsync(
             user,

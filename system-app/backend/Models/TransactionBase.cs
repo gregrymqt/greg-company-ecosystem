@@ -1,4 +1,4 @@
-﻿using System;
+﻿﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -17,7 +17,7 @@ namespace MeuCrudCsharp.Models
 
         // A FK para o usuário já é uma string (padrão do Identity), então está correto.
         [Required]
-        public string UserId { get; set; }
+        public required string UserId { get; set; }
 
         [ForeignKey("UserId")]
         public virtual Users? User { get; set; }

@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+﻿﻿using System.Globalization;
 using System.Text.RegularExpressions;
 using MeuCrudCsharp.Features.Exceptions;
 using MeuCrudCsharp.Features.Files.Interfaces;
@@ -54,7 +54,7 @@ public class VideoProcessingService : IVideoProcessingService
     // Assinatura ajustada para receber IDs (usada pelo AdminVideoService)
     public async Task ProcessVideoToHlsAsync(int videoId, int fileId)
     {
-        Video video = null;
+        Video? video = null;
         var groupName = "";
 
         try

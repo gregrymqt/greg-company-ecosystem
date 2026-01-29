@@ -258,7 +258,7 @@ public class AboutService : IAboutService
         {
             var tempPath = await _fileService.ProcessChunkAsync(
                 dto.File,
-                dto.FileName,
+                dto.FileName!,
                 dto.ChunkIndex,
                 dto.TotalChunks
             );

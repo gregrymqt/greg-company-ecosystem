@@ -1,9 +1,8 @@
-﻿using MeuCrudCsharp.Data;
+﻿﻿using MeuCrudCsharp.Data;
 using MeuCrudCsharp.Features.Base;
 using MeuCrudCsharp.Features.Exceptions;
 using MeuCrudCsharp.Features.MercadoPago.Base;
 using MeuCrudCsharp.Features.MercadoPago.Payments.Interfaces; // Ajuste conforme seu namespace
-using MeuCrudCsharp.Features.MercadoPago.Refunds.Interfaces;
 using MeuCrudCsharp.Features.MercadoPago.Refunds.Interfaces;
 using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Interfaces; // Ajuste conforme seu namespace
 using MeuCrudCsharp.Features.Shared.Work; // Ajuste conforme seu namespace

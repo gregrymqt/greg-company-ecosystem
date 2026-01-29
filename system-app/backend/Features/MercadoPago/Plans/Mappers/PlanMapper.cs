@@ -79,7 +79,8 @@ namespace MeuCrudCsharp.Features.MercadoPago.Plans.Mappers
                 dbPlan.Name,
                 dbPlan.TransactionAmount,
                 dbPlan.FrequencyInterval,
-                dbPlan.FrequencyType.ToString().ToLower()
+                dbPlan.FrequencyType.ToString().ToLower(),
+                dbPlan.Description
             );
         }
     }

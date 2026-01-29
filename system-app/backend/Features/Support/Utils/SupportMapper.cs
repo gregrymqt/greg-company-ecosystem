@@ -5,7 +5,7 @@ namespace MeuCrudCsharp.Features.Support.Utils
 {
     public static class SupportMapper
     {
-        public static SupportTicketResponseDto ToDto(SupportTicketDocument document)
+        public static SupportTicketResponseDto? ToDto(SupportTicketDocument? document)
         {
             if (document == null)
                 return null;

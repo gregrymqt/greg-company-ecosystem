@@ -33,10 +33,10 @@ public class MercadoPagoClaimsViewModels
         public string CustomerName { get; set; } = string.Empty;
         public string CustomerEmail { get; set; } = string.Empty;
 
-        public string ResourceId { get; set; } // ID do Pagamento/Curso vinculado
+        public string? ResourceId { get; set; } // ID do Pagamento/Curso vinculado
 
-        public string Type { get; set; } // ex: "Produto com defeito", "Não reconhece compra"
-        public string Status { get; set; } // "Aberto", "Em Mediação"
+        public string? Type { get; set; } // ex: "Produto com defeito", "Não reconhece compra"
+        public string? Status { get; set; } // "Aberto", "Em Mediação"
 
         public DateTime DateCreated { get; set; }
 
@@ -54,9 +54,9 @@ public class MercadoPagoClaimsViewModels
         public long MpClaimId { get; set; }
 
         // Informações de Cabeçalho
-        public string Status { get; set; }
-        public string Stage { get; set; } // Em que pé está a briga
-        public string PlayerRole { get; set; } // "respondent" (nós)
+        public string? Status { get; set; }
+        public string? Stage { get; set; } // Em que pé está a briga
+        public string? PlayerRole { get; set; } // "respondent" (nós)
 
         // O Chat Completo
         public List<ClaimMessageViewModel> Messages { get; set; } = new();
@@ -67,13 +67,13 @@ public class MercadoPagoClaimsViewModels
 
     public class ClaimMessageViewModel
     {
-        public string MessageId { get; set; }
+        public string? MessageId { get; set; }
 
         // Quem mandou?
-        public string SenderRole { get; set; } // "complainant" (aluno), "respondent" (você), "mediator" (MP)
+        public string? SenderRole { get; set; } // "complainant" (aluno), "respondent" (você), "mediator" (MP)
 
         // Texto
-        public string Content { get; set; }
+        public string? Content { get; set; }
 
         public DateTime DateCreated { get; set; }
 
@@ -95,7 +95,7 @@ public class MercadoPagoClaimsViewModels
 
         [Required(ErrorMessage = "A mensagem não pode ser vazia.")]
         [MinLength(5, ErrorMessage = "Escreva uma resposta mais detalhada.")]
-        public string Message { get; set; }
+        public string? Message { get; set; }
 
         // Opcional: Lista de nomes de arquivos se fizer upload
         public List<string>? Attachments { get; set; }

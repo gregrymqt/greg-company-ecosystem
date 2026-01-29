@@ -1,4 +1,4 @@
-﻿using System.Security.Claims;
+﻿﻿using System.Security.Claims;
 using MeuCrudCsharp.Features.Auth.Dtos;
 using MeuCrudCsharp.Features.Auth.Interfaces;
 using MeuCrudCsharp.Features.Exceptions;
@@ -149,7 +149,7 @@ namespace MeuCrudCsharp.Features.Auth.Services
         private async Task addRolesToUser(Users user)
         {
             if (
-                user.Email.Equals(
+                user.Email != null && user.Email.Equals(
                     "emailGenéricoAdmin@gmail.com",
                     StringComparison.OrdinalIgnoreCase
                 )

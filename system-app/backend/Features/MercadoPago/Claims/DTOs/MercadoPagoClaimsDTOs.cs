@@ -10,10 +10,10 @@ namespace MeuCrudCsharp.Features.MercadoPago.Claims.DTOs
         public class MpClaimSearchResponse
         {
             [JsonPropertyName("paging")]
-            public MpPaging Paging { get; set; }
+            public MpPaging? Paging { get; set; }
 
             [JsonPropertyName("results")]
-            public List<MpClaimItem> Results { get; set; }
+            public List<MpClaimItem>? Results { get; set; }
         }
 
         public class MpPaging
@@ -34,7 +34,7 @@ namespace MeuCrudCsharp.Features.MercadoPago.Claims.DTOs
             public long Id { get; set; }
 
             [JsonPropertyName("resource_id")]
-            public string ResourceId { get; set; } // ID do Pagamento (ex: "123456")
+            public string? ResourceId { get; set; } // ID do Pagamento (ex: "123456")
 
             // --- ALTERAÇÃO: Adicionado o campo Resource que faltava ---
             [JsonPropertyName("resource")]
@@ -57,7 +57,7 @@ namespace MeuCrudCsharp.Features.MercadoPago.Claims.DTOs
             public ClaimStage Stage { get; set; } // Dispute, Claim, etc.
 
             [JsonPropertyName("players")]
-            public List<MpPlayer> Players { get; set; }
+            public List<MpPlayer>? Players { get; set; }
 
             [JsonPropertyName("date_created")]
             public DateTime DateCreated { get; set; }
@@ -69,13 +69,13 @@ namespace MeuCrudCsharp.Features.MercadoPago.Claims.DTOs
         public class MpPlayer
         {
             [JsonPropertyName("role")]
-            public string Role { get; set; } // "complainant" ou "respondent" (Poderíamos criar um Enum para isso também se quiser)
+            public string? Role { get; set; } // "complainant" ou "respondent" (Poderíamos criar um Enum para isso também se quiser)
 
             [JsonPropertyName("id")]
             public long UserId { get; set; }
 
             [JsonPropertyName("type")]
-            public string Type { get; set; } // "user"
+            public string? Type { get; set; } // "user"
         }
 
         // ==========================================
@@ -84,16 +84,16 @@ namespace MeuCrudCsharp.Features.MercadoPago.Claims.DTOs
         public class MpMessageResponse
         {
             [JsonPropertyName("id")]
-            public string Id { get; set; }
+            public string? Id { get; set; }
 
             [JsonPropertyName("sender_role")]
-            public string SenderRole { get; set; } // "complainant", "respondent", "mediator"
+            public string? SenderRole { get; set; } // "complainant", "respondent", "mediator"
 
             [JsonPropertyName("receiver_role")]
-            public string ReceiverRole { get; set; }
+            public string? ReceiverRole { get; set; }
 
             [JsonPropertyName("message")]
-            public string Message { get; set; }
+            public string? Message { get; set; }
 
             [JsonPropertyName("date_created")]
             public DateTime DateCreated { get; set; }
@@ -105,10 +105,10 @@ namespace MeuCrudCsharp.Features.MercadoPago.Claims.DTOs
         public class MpAttachment
         {
             [JsonPropertyName("filename")]
-            public string Filename { get; set; }
+            public string? Filename { get; set; }
 
             [JsonPropertyName("original_filename")]
-            public string OriginalFilename { get; set; }
+            public string? OriginalFilename { get; set; }
         }
 
         // ==========================================
@@ -117,10 +117,10 @@ namespace MeuCrudCsharp.Features.MercadoPago.Claims.DTOs
         public class MpPostMessageRequest
         {
             [JsonPropertyName("receiver_role")]
-            public string ReceiverRole { get; set; }
+            public string? ReceiverRole { get; set; }
 
             [JsonPropertyName("message")]
-            public string Message { get; set; }
+            public string? Message { get; set; }
 
             [JsonPropertyName("attachments")]
             public List<string>? Attachments { get; set; }
@@ -128,7 +128,7 @@ namespace MeuCrudCsharp.Features.MercadoPago.Claims.DTOs
 
         public class ReplyRequestDto
         {
-            public string Message { get; set; }
+            public string? Message { get; set; }
         }
     }
 }

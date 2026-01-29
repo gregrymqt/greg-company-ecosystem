@@ -34,6 +34,12 @@ public class RateLimitAttribute : ActionFilterAttribute
 
         // 2. Resolve o CacheService manualmente (atributos não têm injeção de construtor direta fácil)
         var cacheService = context.HttpContext.RequestServices.GetService<ICacheService>();
+        
+        if (cacheService == null)
+        {
+            // Se não tiver cache configurado, permite a requisição
+            return;
+        }
 
         // 3. Chave única: rate_limit:USER_ID:ENDPOINT_NAME
         var key = $"rate_limit:{userId}:{context.ActionDescriptor.DisplayName}";

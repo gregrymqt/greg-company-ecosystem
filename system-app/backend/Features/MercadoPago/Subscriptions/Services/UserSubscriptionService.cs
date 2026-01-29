@@ -50,7 +50,7 @@ public class UserSubscriptionService : IUserSubscriptionService
 
                 // 2. Busca dados externos para ter o status real e data de cobrança
                 var mpSubscription = await _mpSubscriptionService.GetSubscriptionByIdAsync(
-                    subscription.ExternalId
+                    subscription.ExternalId ?? string.Empty
                 );
 
                 if (mpSubscription == null)
@@ -100,7 +100,7 @@ public class UserSubscriptionService : IUserSubscriptionService
             // 4. Chama o MercadoPago primeiro
             var dto = new UpdateSubscriptionStatusDto(statusEnum.ToMpString());
             var result = await _mpSubscriptionService.UpdateSubscriptionStatusAsync(
-                subscription.ExternalId,
+                subscription.ExternalId ?? string.Empty,
                 dto
             );
 

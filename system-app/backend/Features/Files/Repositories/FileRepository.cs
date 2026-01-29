@@ -6,7 +6,7 @@ namespace MeuCrudCsharp.Features.Files.Repositories;
 
 public class FileRepository(ApiDbContext context) : IFileRepository
 {
-    public async Task<EntityFile> GetByIdAsync(int id)
+    public async Task<EntityFile?> GetByIdAsync(int id)
         => await context.Files.FindAsync(id);
 
     public async Task AddAsync(EntityFile arquivo)

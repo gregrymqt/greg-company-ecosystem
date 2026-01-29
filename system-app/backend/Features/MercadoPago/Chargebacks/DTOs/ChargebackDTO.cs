@@ -5,13 +5,13 @@ namespace MeuCrudCsharp.Features.MercadoPago.Chargebacks.DTOs;
 public class MercadoPagoChargebackResponse
 {
     [JsonPropertyName("id")]
-    public string Id { get; set; }
+    public string? Id { get; set; }
 
     [JsonPropertyName("amount")]
     public decimal Amount { get; set; }
 
     [JsonPropertyName("currency")]
-    public string Currency { get; set; }
+    public string? Currency { get; set; }
 
     [JsonPropertyName("coverage_applied")]
     public bool CoverageApplied { get; set; }
@@ -23,7 +23,7 @@ public class MercadoPagoChargebackResponse
     public bool DocumentationRequired { get; set; }
 
     [JsonPropertyName("documentation_status")]
-    public string DocumentationStatus { get; set; }
+    public string? DocumentationStatus { get; set; }
 
     [JsonPropertyName("documentation")]
     public List<MercadoPagoDocumentation>? Documentation { get; set; }
@@ -44,20 +44,20 @@ public class MercadoPagoChargebackResponse
 public class MercadoPagoChargebackPayment
 {
     [JsonPropertyName("id")]
-    public string Id { get; set; } // ID do pagamento no MP
+    public string? Id { get; set; } // ID do pagamento no MP
 
     [JsonPropertyName("status")]
-    public string Status { get; set; }
+    public string? Status { get; set; }
 }
 
 public class MercadoPagoDocumentation
 {
     [JsonPropertyName("type")]
-    public string Type { get; set; }
+    public string? Type { get; set; }
 
     [JsonPropertyName("url")]
-    public string Url { get; set; }
+    public string? Url { get; set; }
 
     [JsonPropertyName("description")]
-    public string Description { get; set; }
+    public string? Description { get; set; }
 }

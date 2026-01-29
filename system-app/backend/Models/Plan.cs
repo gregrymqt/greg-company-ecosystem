@@ -1,4 +1,4 @@
-﻿// Models/Plan.cs
+﻿﻿// Models/Plan.cs
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
@@ -34,7 +34,7 @@ namespace MeuCrudCsharp.Models
 
         [Required]
         [MaxLength(100)]
-        public string Name { get; set; }
+        public required string Name { get; set; }
 
         [MaxLength(255)]
         public string? Description { get; set; }

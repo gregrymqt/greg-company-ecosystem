@@ -56,7 +56,7 @@ public record PlanEditDto(
     decimal TransactionAmount,
     int Frequency,
     string FrequencyType,
-    string Description
+    string? Description
 );
 
 /// <summary>

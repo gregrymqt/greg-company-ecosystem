@@ -31,7 +31,7 @@ public class MercadoPagoSubscriptionService
             );
     }
 
-    public async Task<SubscriptionResponseDto> GetSubscriptionByIdAsync(string subscriptionId)
+    public async Task<SubscriptionResponseDto?> GetSubscriptionByIdAsync(string subscriptionId)
     {
         // Leitura: GET /preapproval/{id}
         var endpoint = $"/preapproval/{subscriptionId}";

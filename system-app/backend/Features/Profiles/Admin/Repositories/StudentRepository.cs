@@ -33,7 +33,7 @@ namespace MeuCrudCsharp.Features.Profiles.Admin.Repositories
             // 3. Busca paginada com relacionamentos
             var items = await query
                 .Include(u => u.Subscription)
-                .ThenInclude(s => s.Plan)
+                .ThenInclude(s => s!.Plan)
                 .OrderBy(u => u.Name ?? string.Empty) // Trata null como string vazia para ordenação
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
@@ -47,7 +47,7 @@ namespace MeuCrudCsharp.Features.Profiles.Admin.Repositories
             return await _context
                 .Users.AsNoTracking()
                 .Include(u => u.Subscription)
-                .ThenInclude(s => s.Plan)
+                .ThenInclude(s => s!.Plan)
                 .SingleOrDefaultAsync(u => u.PublicId == publicId);
         }
     }

@@ -6,10 +6,10 @@ public class ChargeBackViewModels
 {
     public class ChargebackDetailViewModel
     {
-        public string ChargebackId { get; set; }
+        public required string ChargebackId { get; set; }
         public decimal Valor { get; set; }
-        public string Moeda { get; set; }
-        public string StatusDocumentacao { get; set; }
+        public required string Moeda { get; set; }
+        public required string StatusDocumentacao { get; set; }
         public bool CoberturaAplicada { get; set; }
         public bool PrecisaDocumentacao { get; set; }
         public DateTime? DataLimiteDisputa { get; set; }
@@ -21,9 +21,9 @@ public class ChargeBackViewModels
 
     public class ChargebackFileViewModel
     {
-        public string Tipo { get; set; }
-        public string Url { get; set; }
-        public string NomeArquivo { get; set; }
+        public required string Tipo { get; set; }
+        public required string Url { get; set; }
+        public required string NomeArquivo { get; set; }
     }
 
     public class ChargebacksIndexViewModel
@@ -43,13 +43,13 @@ public class ChargeBackViewModels
 
     public class ChargebackSummaryViewModel
     {
-        public string Id { get; set; }
+        public required string Id { get; set; }
         public string? Customer { get; set; }
         public decimal Amount { get; set; }
         public DateTime Date { get; set; }
 
         // ChargebackSummaryViewModel
         public int Status { get; set; } // Retorna 0, 1, 2...
-        public string MercadoPagoUrl { get; set; }
+        public required string MercadoPagoUrl { get; set; }
     }
 }

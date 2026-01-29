@@ -1,4 +1,4 @@
-﻿using MeuCrudCsharp.Features.Videos.DTOs;
+﻿﻿using MeuCrudCsharp.Features.Videos.DTOs;
 using MeuCrudCsharp.Models;
 
 namespace MeuCrudCsharp.Features.Videos.Utils
@@ -17,8 +17,8 @@ namespace MeuCrudCsharp.Features.Videos.Utils
                 UploadDate = video.UploadDate,
                 Duration = video.Duration,
                 Status = video.Status.ToString(),
-                CourseName = video.Course?.Name, // O '?' protege contra Course nulo
-                ThumbnailUrl = video.ThumbnailUrl,
+                CourseName = video.Course?.Name ?? string.Empty, // O '?' protege contra Course nulo
+                ThumbnailUrl = video.ThumbnailUrl ?? string.Empty,
             };
         }
     }

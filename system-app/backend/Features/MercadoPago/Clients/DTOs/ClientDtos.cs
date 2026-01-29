@@ -27,16 +27,16 @@ public record CardRequestDto([property: JsonPropertyName("id")] string? Token);
 
 public class WalletCardDto
 {
-    public string Id { get; set; }
-    public string LastFourDigits { get; set; }
+    public string? Id { get; set; }
+    public string? LastFourDigits { get; set; }
     public int ExpirationMonth { get; set; }
     public int ExpirationYear { get; set; }
-    public string PaymentMethodId { get; set; } // O Front recebe "visa", "master"
+    public string? PaymentMethodId { get; set; } // O Front recebe "visa", "master"
     public bool IsSubscriptionActiveCard { get; set; }
 }
 
 public class AddCardRequestDto
 {
     [Required(ErrorMessage = "O token do cartão é obrigatório.")]
-    public string CardToken { get; set; }
+    public string? CardToken { get; set; }
 }

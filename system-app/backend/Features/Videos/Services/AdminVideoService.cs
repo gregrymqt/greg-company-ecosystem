@@ -1,4 +1,4 @@
-﻿using Hangfire;
+﻿﻿using Hangfire;
 using MeuCrudCsharp.Features.Caching.Interfaces;
 using MeuCrudCsharp.Features.Exceptions;
 using MeuCrudCsharp.Features.Files.Interfaces;
@@ -142,7 +142,7 @@ public class AdminVideoService : IAdminVideoService
 
         var cacheKey = $"AdminVideos_v{cacheVersion}_Page{page}_Size{pageSize}";
 
-        return await _cacheService.GetOrCreateAsync(
+        return (await _cacheService.GetOrCreateAsync(
             cacheKey,
             async () =>
             {
@@ -159,7 +159,7 @@ public class AdminVideoService : IAdminVideoService
                         Title = v.Title,
                         Description = v.Description,
                         StorageIdentifier = v.StorageIdentifier,
-                        ThumbnailUrl = v.ThumbnailUrl,
+                        ThumbnailUrl = v.ThumbnailUrl ?? string.Empty,
                         Status = v.Status.ToString(),
                         UploadDate = v.UploadDate,
                     })
@@ -168,7 +168,7 @@ public class AdminVideoService : IAdminVideoService
                 return new PaginatedResultDto<VideoDto>(dtos, result.TotalCount, page, pageSize);
             },
             TimeSpan.FromMinutes(10)
-        );
+        ))!;
     }
 
     public async Task<Video> UpdateVideoAsync(Guid id, UpdateVideoDto dto)

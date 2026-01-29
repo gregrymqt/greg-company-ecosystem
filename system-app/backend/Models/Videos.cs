@@ -24,13 +24,12 @@ namespace MeuCrudCsharp.Models
 
         public Guid PublicId { get; set; } = Guid.NewGuid();
 
-        [Required] // É bom marcar como obrigatório
-        public string Title { get; set; }
+        [Required]
+        public required string Title { get; set; }
 
-        public string Description { get; set; }
+        public required string Description { get; set; }
 
-        // Identificador usado para a pasta de streaming (HLS)
-        public string StorageIdentifier { get; set; }
+        public required string StorageIdentifier { get; set; }
 
         public DateTime UploadDate { get; set; }
 
@@ -40,17 +39,20 @@ namespace MeuCrudCsharp.Models
 
         // --- RELACIONAMENTOS ---
 
-        // 1. Relacionamento com Curso (Existente)
+        // 1. Relacionamento com Curso
         public int CourseId { get; set; }
 
         [ForeignKey("CourseId")]
-        public virtual Course Course { get; set; }
+        // MUDANÇA AQUI: Remova 'required' e adicione '?'
+        // O EF Core vai usar o CourseId para fazer o vínculo na hora de salvar.
+        public virtual Course? Course { get; set; } 
 
-        // Isso vincula o vídeo ao arquivo salvo em "uploads/Videos/..."
+        // 2. Relacionamento com Arquivo
         public int FileId { get; set; }
 
         [ForeignKey("FileId")]
-        public virtual EntityFile File { get; set; } // Propriedade de navegação
+        // MUDANÇA AQUI: Remova 'required' e adicione '?'
+        public virtual EntityFile? File { get; set; } 
 
         // -----------------------
 

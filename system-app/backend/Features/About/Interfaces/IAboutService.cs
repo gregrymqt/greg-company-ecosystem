@@ -14,7 +14,7 @@ public interface IAboutService
     Task DeleteSectionAsync(int id);
 
     // Membros (Usa DTO de escrita)
-    Task<TeamMemberDto> CreateTeamMemberAsync(CreateUpdateTeamMemberDto dto);
+    Task<TeamMemberDto?> CreateTeamMemberAsync(CreateUpdateTeamMemberDto dto);
     Task<bool> UpdateTeamMemberAsync(int id, CreateUpdateTeamMemberDto dto);
     Task DeleteTeamMemberAsync(int id);
 }
