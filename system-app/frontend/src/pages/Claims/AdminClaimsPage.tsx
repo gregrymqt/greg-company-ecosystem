@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useCallback } from "react";
 import styles from "../styles/ClaimsLayout.module.scss"; // Verifique se o nome do arquivo CSS está correto
-import { ClaimChat } from "./ClaimChat";
-import { ClaimsList } from "./ClaimsList";
-import { ClaimService } from "../services/claim.service";
-import type { ClaimSummary } from "../types/claims.type";
-import { Modal } from "../../../components/Modal/Modal";
-import { Sidebar } from "../../../components/SideBar/components/Sidebar";
-import type { SidebarItem } from "../../../components/SideBar/types/sidebar.types";
+import { ClaimChat } from "../../features/Claim/components/ClaimChat";
+import { ClaimsList } from "../../features/Claim/components/ClaimsList";
+import { ClaimService } from "../../features/Claim/services/claim.service";
+import type { ClaimSummary } from "../../features/Claim/types/claims.type";
+import { Modal } from "../../components/Modal/Modal";
+import { Sidebar } from "../../components/SideBar/components/Sidebar";
+import type { SidebarItem } from "../../components/SideBar/types/sidebar.types";
 
 // Menu da Sidebar do Admin
 const MENU_ITEMS: SidebarItem[] = [

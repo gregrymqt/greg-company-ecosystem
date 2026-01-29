@@ -5,8 +5,8 @@ import { ClaimStatusBadge } from './ClaimStatusBadge';
 // MUDANÇA: Importamos ClaimSummary ao invés de Claim
 import { type ClaimSummary } from '../types/claims.type'; 
 import styles from '../styles/ClaimsList.module.scss';
-import type { ClaimStatus } from '../../../../types/models';
-import { type TableColumn, Table } from '../../../Table/Table';
+import type { ClaimStatus } from '../../../types/models';
+import { type TableColumn, Table } from '../../../components/Table/Table';
 
 interface ClaimsListProps {
   data: ClaimSummary[]; // MUDANÇA: Agora aceita o Summary

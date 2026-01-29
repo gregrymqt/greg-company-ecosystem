@@ -1,40 +1,58 @@
-import { ApiService } from "../../../../shared/services/api.service";
-import type { PagedResult, PlanSummary, PlanEditDetail, CreatePlanRequest, UpdatePlanRequest } from "../types/plans.type";
+import { ApiService } from "../../../shared/services/api.service"; 
+// ^ Ajuste o import conforme sua estrutura real de utils/api
 
+import type { 
+  PagedResult, 
+  PlanPublic, 
+  PlanAdminDetail, 
+  PlanAdminSummary,
+  CreatePlanRequest, 
+  UpdatePlanRequest 
+} from "../types/plans.type";
 
-const ENDPOINT = '/admin/plans';
+const ADMIN_ENDPOINT = '/admin/plans';
+const PUBLIC_ENDPOINT = '/public/plans';
 
 export const PlanService = {
+  // ============================================================
+  // ÁREA PÚBLICA (ALLOW)
+  // ============================================================
 
-    // GET: Listar planos com paginação
-    // C# Controller: GetPlans([FromQuery] int page = 1, [FromQuery] int pageSize = 10) [cite: 22]
-    getAll: async (page: number = 1, pageSize: number = 10): Promise<PagedResult<PlanSummary>> => {
-        // Monta a query string
-        const query = `?page=${page}&pageSize=${pageSize}`;
-        return await ApiService.get<PagedResult<PlanSummary>>(`${ENDPOINT}${query}`);
-    },
+  // C# Controller: PublicPlansController.GetPlans
+  getPublicPlans: async (page = 1, pageSize = 10): Promise<PagedResult<PlanPublic>> => {
+    const query = `?page=${page}&pageSize=${pageSize}`;
+    return await ApiService.get<PagedResult<PlanPublic>>(`${PUBLIC_ENDPOINT}${query}`);
+  },
 
-    // GET: Obter plano específico para edição
-    // C# Controller: GetPlanById(Guid id) -> retorna PlanEditDto [cite: 24]
-    getById: async (id: string): Promise<PlanEditDetail> => {
-        return await ApiService.get<PlanEditDetail>(`${ENDPOINT}/${id}`);
-    },
+  // ============================================================
+  // ÁREA ADMINISTRATIVA (ADMIN)
+  // ============================================================
 
-    // POST: Criar novo plano
-    // C# Controller: CreatePlan([FromBody] CreatePlanDto createDto) [cite: 19]
-    create: async (data: CreatePlanRequest): Promise<unknown> => {
-        return await ApiService.post(`${ENDPOINT}`, data);
-    },
+  // C# Controller: AdminPlansController.GetPlans
+  // Retorna a lista crua/administrativa dos planos
+  getAdminPlans: async (page = 1, pageSize = 10): Promise<PagedResult<PlanAdminSummary>> => {
+    const query = `?page=${page}&pageSize=${pageSize}`;
+    return await ApiService.get<PagedResult<PlanAdminSummary>>(`${ADMIN_ENDPOINT}${query}`);
+  },
 
-    // PUT: Atualizar plano existente
-    // C# Controller: UpdatePlan(Guid id, [FromBody] UpdatePlanDto updateDto) [cite: 27]
-    update: async (id: string, data: UpdatePlanRequest): Promise<unknown> => {
-        return await ApiService.put(`${ENDPOINT}/${id}`, data);
-    },
+  // C# Controller: AdminPlansController.GetPlanById
+  // Retorna o DTO específico para preencher o formulário de edição
+  getById: async (id: string): Promise<PlanAdminDetail> => {
+    return await ApiService.get<PlanAdminDetail>(`${ADMIN_ENDPOINT}/${id}`);
+  },
 
-    // DELETE: Remover plano
-    // C# Controller: DeletePlan(Guid id) [cite: 30]
-    delete: async (id: string): Promise<void> => {
-        return await ApiService.delete(`${ENDPOINT}/${id}`);
-    }
+  // C# Controller: AdminPlansController.CreatePlan
+  create: async (data: CreatePlanRequest): Promise<PlanAdminSummary> => {
+    return await ApiService.post<PlanAdminSummary>(`${ADMIN_ENDPOINT}`, data);
+  },
+
+  // C# Controller: AdminPlansController.UpdatePlan
+  update: async (id: string, data: UpdatePlanRequest): Promise<unknown> => {
+    return await ApiService.put(`${ADMIN_ENDPOINT}/${id}`, data);
+  },
+
+  // C# Controller: AdminPlansController.DeletePlan
+  delete: async (id: string): Promise<void> => {
+    return await ApiService.delete(`${ADMIN_ENDPOINT}/${id}`);
+  }
 };

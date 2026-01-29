@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useCallback } from "react";
 import styles from "../styles/ClaimsLayout.module.scss";
-import { ClaimChat } from "./ClaimChat";
-import { ClaimsList } from "./ClaimsList";
-import { ClaimService } from "../services/claim.service";
-import type { ClaimSummary } from "../types/claims.type";
-import { Modal } from "../../../components/Modal/Modal";
-import { Sidebar } from "../../../components/SideBar/components/Sidebar";
-import type { SidebarItem } from "../../../components/SideBar/types/sidebar.types";
+import { ClaimChat } from "../../features/Claim/components/ClaimChat";
+import { ClaimsList } from "../../features/Claim/components/ClaimsList";
+import { ClaimService } from "../../features/Claim/services/claim.service";
+import type { ClaimSummary } from "../../features/Claim/types/claims.type";
+import { Modal } from "../../components/Modal/Modal";
+import { Sidebar } from "../../components/SideBar/components/Sidebar";
+import type { SidebarItem } from "../../components/SideBar/types/sidebar.types";
 
 const USER_MENU: SidebarItem[] = [
   { id: "my-claims", label: "Minhas Reclamações", icon: "fas fa-list-alt" },

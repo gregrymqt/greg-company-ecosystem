@@ -1,4 +1,4 @@
-import { Modal } from '../../../Modal/Modal';
+import { Modal } from '../../../components/Modal/Modal';
 import type { ChargebackDetail } from '../types/chargeback.type';
 import styles from '../styles/ChargebackDetailModal.module.scss';
 

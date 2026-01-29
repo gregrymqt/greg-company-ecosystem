@@ -1,10 +1,10 @@
 import React, { useEffect, useState, useMemo } from 'react';
 
-import { ActionMenu } from '../../../ActionMenu/ActionMenu';
-import { type TableColumn, Table } from '../../../Table/Table';
-import { usePlans } from '../hooks/usePlans';
-import type { PlanSummary, PlanEditDetail } from '../types/plans.type';
-import styles from '../styles/PlanList.module.scss';
+import { ActionMenu } from '../../../../components/ActionMenu/ActionMenu';
+import { type TableColumn, Table } from '../../../../components/Table/Table';
+import { usePlans } from '../../hooks/usePlans';
+import type { PlanSummary, PlanEditDetail } from '../../types/plans.type';
+import styles from '../../styles/PlanList.module.scss';
 
 interface PlanListProps {
     onEditRequest: (id: string) => void; // Callback para o pai abrir o Form

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 
 import styles from "../../styles/AdminSubscriptionList.module.scss";
 import { useAdminSubscription } from "../../hooks/useAdminSubscription";
-import { type TableColumn, Table } from "../../../../Table/Table";
+import { type TableColumn, Table } from "../../../../components/Table/Table";
 import type { AdminSubscriptionDetail } from "../../types/adminSubscription.type";
 
 export const AdminSubscriptionList: React.FC = () => {

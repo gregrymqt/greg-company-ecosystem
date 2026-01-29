@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { WalletService } from "../services/wallet.service";
 import type { WalletCard } from "../types/wallet.type";
-import { AlertService } from "../../../../shared/services/alert.service";
-import { ApiError } from "../../../../shared/services/api.service";
+import { AlertService } from "../../../shared/services/alert.service";
+import { ApiError } from "../../../shared/services/api.service";
 
 export const useWallet = () => {
   const [cards, setCards] = useState<WalletCard[]>([]);

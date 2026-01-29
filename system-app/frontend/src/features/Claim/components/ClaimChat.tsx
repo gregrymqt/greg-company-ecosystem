@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from "react";
 import styles from "../styles/ClaimChat.module.scss";
 import type { FieldValues } from "react-hook-form";
-import { type FormField, GenericForm } from "../../../Form/GenericForm";
+import { type FormField, GenericForm } from "../../../components/Form/GenericForm";
 import { useClaimChatLogic } from "../hooks/useClaimChatLogic";
 
 interface Props {

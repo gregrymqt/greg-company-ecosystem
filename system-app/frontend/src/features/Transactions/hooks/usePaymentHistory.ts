@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { ApiError } from "../../../../shared/services/api.service";
+import { ApiError } from "../../../shared/services/api.service";
 import { TransactionService } from "../services/transactions.service";
 import type { PaymentItems } from "../types/transactions.type";
 

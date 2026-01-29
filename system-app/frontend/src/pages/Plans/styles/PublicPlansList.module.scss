@@ -1,0 +1,179 @@
+
+.container {
+  width: 100%;
+  max-width: $container-max-width;
+  margin: 0 auto;
+  padding: $spacing-xl $spacing-md;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: $spacing-xxl;
+
+  h1 {
+    font-size: $font-size-xxl;
+    color: $text-dark;
+    font-weight: 700;
+    margin-bottom: $spacing-sm;
+  }
+
+  p {
+    color: $text-muted;
+    font-size: $font-size-lg;
+  }
+}
+
+.loadingState {
+  text-align: center;
+  padding: $spacing-xxl;
+  color: $secondary-color;
+  font-size: $font-size-lg;
+}
+
+// Grid System
+.grid {
+  display: grid;
+  grid-template-columns: 1fr; // Mobile: 1 coluna (pilha vertical)
+  gap: $spacing-lg;
+  align-items: center; // Para alinhar verticalmente se as alturas variarem
+
+  // Desktop: 4 colunas (1, 3, 6, 12 meses lado a lado)
+  @include desktop {
+    grid-template-columns: repeat(4, 1fr);
+    gap: $spacing-md;
+  }
+}
+
+// O Card Individual (Estendendo seu Generic Card)
+.planCard {
+  position: relative;
+  background-color: $bg-light;
+  border: 1px solid $border-color;
+  border-radius: 12px;
+  padding: $spacing-lg;
+  transition: transform $transition-speed ease, box-shadow $transition-speed ease;
+  height: 100%; // Alturas iguais
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: $shadow-lg;
+    border-color: rgba($primary-color, 0.3);
+  }
+
+  // Estilo específico para o card Recomendado
+  &.recommended {
+    border: 2px solid $primary-color;
+    transform: scale(1.02); // Levemente maior no Desktop
+    box-shadow: 0 8px 24px rgba($primary-color, 0.15);
+    z-index: 1; // Fica acima dos outros
+
+    @include desktop {
+      transform: scale(1.05);
+    }
+
+    .selectBtn {
+      background-color: $primary-color;
+      color: $text-light;
+      
+      &:hover {
+        background-color: $primary-hover;
+      }
+    }
+  }
+}
+
+// Badge "Recomendado"
+.badge {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: $warning-color; // Amarelo/Laranja chama atenção
+  color: #fff; // Texto escuro para contraste no amarelo
+  font-size: $font-size-sm;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: $shadow;
+}
+
+// Tipografia do Preço
+.priceWrapper {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  color: $text-dark;
+  margin: $spacing-md 0 0 0;
+}
+
+.currency {
+  font-size: $font-size-md;
+  margin-top: 6px;
+  font-weight: 500;
+}
+
+.value {
+  font-size: 3rem; // Preço bem grande
+  font-weight: 800;
+  line-height: 1;
+  color: $text-color;
+}
+
+.billingInfo {
+  text-align: center;
+  color: $text-muted;
+  font-size: $font-size-sm;
+  margin-bottom: $spacing-lg;
+}
+
+.divider {
+  height: 1px;
+  background-color: $bg-grey;
+  margin: $spacing-md 0;
+}
+
+// Lista de Features
+.featuresList {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 $spacing-xl 0;
+  text-align: left;
+
+  li {
+    display: flex;
+    align-items: center; // Alinha ícone com texto
+    gap: $spacing-sm;
+    margin-bottom: $spacing-sm;
+    color: $text-secondary;
+    font-size: $font-size-sm;
+
+    .checkIcon {
+      color: $success-color;
+      flex-shrink: 0; // Ícone não esmaga
+    }
+  }
+}
+
+// Botão de Ação
+.selectBtn {
+  width: 100%;
+  padding: $spacing-md;
+  border-radius: 8px;
+  border: 1px solid $primary-color;
+  background-color: transparent;
+  color: $primary-color;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all $transition-speed;
+
+  &:hover {
+    background-color: rgba($primary-color, 0.1);
+  }
+}

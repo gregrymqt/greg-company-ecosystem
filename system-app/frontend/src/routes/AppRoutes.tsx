@@ -5,14 +5,14 @@ import { AppRoles } from "../types/models";
 import { AccessDenied } from "../pages/AccessDenied/AccessDenied";
 import { GoogleCallbackPage } from "../features/auth/components/GoogleCallbackPage";
 import { Home } from "../pages/Home/Home";
-import { AdminCourseManager } from "../features/course/Admin/components/AdminCourseManager";
+import { AdminCourseManager } from "../pages/Courses/AdminCourseManager";
 import { AdminProfile } from "../pages/Admin/AdminProfile";
 import { GoogleLoginButton } from "../features/auth/components/GoogleLoginButton";
-import { CourseFeed } from "../features/course/Allow/pages/CourseFeed";
-import { PlansFeed } from "../features/plan/pages/PlansFeed";
+import { CourseFeed } from "../pages/Courses/CourseFeed";
+import { PlansAdmin } from "../pages/Plans/PlansAdmin";
 import { PlayerScreen } from "../features/player/pages/PlayerScreen";
-import { AdminClaimsPage } from "../features/Claim/components/AdminClaimsPage";
-import { UserClaimsPage } from "../features/Claim/components/UserClaimsPage";
+import { AdminClaimsPage } from "../pages/Claims/AdminClaimsPage";
+import { UserClaimsPage } from "../pages/Claims/UserClaimsPage";
 import { ChargebackManager } from "../pages/ChargeBack/ChargebackManager";
 import { WalletPage } from "../pages/Wallet/WalletPage";
 import { TransactionsPage } from "../pages/Transactions/TransactionsPage";
@@ -24,6 +24,7 @@ import { AboutPage } from "../pages/About/AboutPage";
 import { AdminAboutPage } from "../pages/About/AdminAboutPage";
 import { AdminHomePage } from "../pages/Home/AdminHomePage";
 import { MainLayout } from "src/components/layout/components/MainLayout";
+import { PlanFeed } from "src/pages/Plans/PlanFeed";
 
 export const AppRoutes = () => {
   return (
@@ -41,7 +42,7 @@ export const AppRoutes = () => {
         <Route element={<ProtectedRoute />}>
           {/* Rotas que todo logado pode ver (Perfil, Callback, Comprar Planos) */}
           <Route path="/perfil" element={<ProfileDashboard />} />
-          <Route path="/plans" element={<PlansFeed />} />
+          <Route path="/plans" element={<PlanFeed />} />
           <Route path="/login/callback" element={<GoogleCallbackPage />} />
           <Route path="reclamacoes" element={<UserClaimsPage />} />
 
@@ -65,6 +66,7 @@ export const AppRoutes = () => {
           <Route path="/admin/suporte" element={<SupportAdminPage />} />
           <Route path="/admin/About" element={<AdminAboutPage />} />
           <Route path="/admin/Home" element={<AdminHomePage />} />
+          <Route path="/admin/planos" element={<PlansAdmin />} />
         </Route>
 
         {/* Nível 3: Manager OU Admin */}

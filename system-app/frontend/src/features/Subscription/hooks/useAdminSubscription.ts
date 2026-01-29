@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { AdminSubscriptionService } from '../services/AdminSubscriptionService';
-import { ApiError } from '../../../../shared/services/api.service';
+import { ApiError } from '../../../shared/services/api.service';
 import type { AdminSubscriptionDetail } from '../types/adminSubscription.type';
 
 export const useAdminSubscription = () => {

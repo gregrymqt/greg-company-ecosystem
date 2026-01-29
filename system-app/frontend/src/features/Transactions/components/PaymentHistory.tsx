@@ -1,7 +1,7 @@
     import React from 'react';
     import styles from '../styles/PaymentHistory.module.scss';
-    import { type TableColumn, Table } from '../../../../components/Table/Table';
-    import { ActionMenu } from '../../../ActionMenu/ActionMenu';
+    import { type TableColumn, Table } from '../../../components/Table/Table';
+    import { ActionMenu } from '../../../components/ActionMenu/ActionMenu';
     import { usePaymentHistory } from '../hooks/usePaymentHistory';
     import { useRefund } from '../hooks/useRefund';
     import { useRefundNotification } from '../hooks/useRefundNotification';

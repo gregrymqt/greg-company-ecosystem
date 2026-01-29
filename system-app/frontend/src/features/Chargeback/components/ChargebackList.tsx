@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { type TableColumn, Table } from '../../../Table/Table';
+import { type TableColumn, Table } from '../../../components/Table/Table';
 import { useChargebackDetails } from '../hooks/useChargebackDetails';
 import { useChargebacks } from '../hooks/useChargebacks';
 import type { ChargebackSummary } from '../types/chargeback.type';

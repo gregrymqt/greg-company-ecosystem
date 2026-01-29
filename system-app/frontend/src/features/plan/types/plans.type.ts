@@ -1,60 +1,73 @@
-// types/plans.ts
+// --- GENERIC SHARED ---
 
-// Interface genérica para paginação (Match com PagedResultDto do C#)
 export interface PagedResult<T> {
-  items: T[];          // 
-  currentPage: number; // [cite: 42]
-  pageSize: number;    // [cite: 43]
-  totalCount: number;  // [cite: 44]
+  items: T[];
+  currentPage: number;
+  pageSize: number;
+  totalCount: number;
   totalPages: number;
-  hasPreviousPage: boolean; // [cite: 45]
-  hasNextPage: boolean;     // [cite: 46]
+  hasPreviousPage: boolean;
+  hasNextPage: boolean;
 }
 
-// --- DTOs de LEITURA (O que vem do backend para exibir) ---
-
-// Usado na listagem principal (Grid)
-export interface PlanSummary {
+// --- PUBLIC (ALLOW) TYPES ---
+// Baseado no C# PlanDto
+// Usado na tela de preços/assinatura pública
+export interface PlanPublic {
   publicId: string;
   name: string;
   slug: string;
   priceDisplay: string;
   billingInfo: string;
-  features: string[];
+  features: string[]; // Lista de benefícios
   isRecommended: boolean;
   isActive: boolean;
-  // Baseado no PlanDto do C# [cite: 36]
+  frequency: number; // 1 = mensal, 12 = anual, etc.
 }
 
-// Usado para preencher o formulário de Edição
-export interface PlanEditDetail {
+// --- ADMIN TYPES ---
+
+// Baseado no C# PlanEditDto
+// Usado no formulário de edição (GET by ID)
+export interface PlanAdminDetail {
   publicId: string;
   name: string;
   transactionAmount: number;
   frequency: number;
   frequencyType: string;
-  description?: string; 
 }
 
-// --- DTOs de ESCRITA (O que enviamos para o backend) ---
+// Baseado no C# PlanResponseDto
+// Usado na listagem administrativa (Grid do Admin)
+export interface PlanAdminSummary {
+  id: string;      // MP ID
+  reason: string;  // Nome do plano no MP
+  status: string;  // active, etc.
+  date_created: string;
+  external_reference?: string;
+  auto_recurring?: AutoRecurringRequest;
+}
 
-// Sub-objeto para recorrência (usado no Create/Update)
+// --- PAYLOADS (REQUESTS) ---
+// Atenção: Propriedades em snake_case para bater com o [JsonPropertyName] do C#
+
+// Baseado no C# AutoRecurringDto
 export interface AutoRecurringRequest {
-  frequency: number;            // [cite: 34]
-  frequency_type: string;       // Nota: snake_case pois o DTO C# usa JsonPropertyName [cite: 34]
-  transaction_amount: number;   // [cite: 34]
-  currency_id: string;          // [cite: 34]
+  frequency: number;
+  frequency_type: string;
+  transaction_amount: number;
+  currency_id: string;
 }
 
-// Payload para CRIAR um plano
+// Baseado no C# CreatePlanDto
 export interface CreatePlanRequest {
-  reason: string;               // [cite: 35]
-  auto_recurring: AutoRecurringRequest; // [cite: 35]
-  description: string;          // [cite: 35]
+  reason: string;               // Nome do plano
+  description: string;          // Descrição interna
+  auto_recurring: AutoRecurringRequest;
 }
 
-// Payload para ATUALIZAR um plano
+// Baseado no C# UpdatePlanDto
 export interface UpdatePlanRequest {
-  reason?: string;              // [cite: 40]
-  auto_recurring?: AutoRecurringRequest; // [cite: 40]
+  reason?: string;
+  auto_recurring?: AutoRecurringRequest;
 }

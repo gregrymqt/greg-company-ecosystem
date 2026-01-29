@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { usePaymentHistory } from '../hooks/usePaymentHistory'; // [cite: 2]
 import type { PaymentItems } from '../types/transactions.type'; // [cite: 2]
 import styles from '../styles/FailedPaymentsList.module.scss'; // [cite: 2]
-import { type TableColumn, Table } from '../../../Table/Table'; // [cite: 3]
+import { type TableColumn, Table } from '../../../components/Table/Table'; // [cite: 3]
 
 export const FailedPaymentsList: React.FC = () => {
     // 1. Consumimos o hook existente para buscar todos os pagamentos

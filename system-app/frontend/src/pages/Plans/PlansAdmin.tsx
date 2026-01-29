@@ -1,12 +1,12 @@
 import React, { useState, useCallback } from 'react';
 
-import styles from './PlansPage.module.scss';
+import styles from './styles/PlansPage.module.scss';
 import { PlanForm } from '../../features/Plan/components/Admin/PlanForm';
 import { PlanList } from '../../features/Plan/components/Admin/PlanList';
-import type { PlanEditDetail } from '../../features/Plan/types/plans.type';
 import { Sidebar } from '../../components/SideBar/components/Sidebar';
 import type { SidebarItem } from '../../components/SideBar/types/sidebar.types';
-import { usePlans } from '../../features/Plan/hooks/usePlans';
+import { useAdminPlans } from '@/features/Plan/hooks/useAdminPlans';
+import type { PlanAdminDetail } from '@/features/Plan/types/plans.type';
 
 
 // Menu da Sidebar
@@ -15,15 +15,15 @@ const MENU_ITEMS: SidebarItem[] = [
     { id: 'create', label: 'Novo Plano', icon: 'fas fa-plus-circle' }
 ];
 
-export const PlansPage: React.FC = () => {
+export const PlansAdmin: React.FC = () => {
     // Estado da View Atual
     const [activeView, setActiveView] = useState<string>('list');
 
     // Estado para Edição (Dados do plano selecionado)
-    const [editingPlan, setEditingPlan] = useState<PlanEditDetail | null>(null);
+    const [editingPlan, setEditingPlan] = useState<PlanAdminDetail | null>(null);
 
     // Hook de lógica (precisamos do getPlanById aqui para preparar a edição)
-    const { getPlanById } = usePlans();
+    const { getPlanById } = useAdminPlans();
 
     // --- Handlers de Navegação ---
 

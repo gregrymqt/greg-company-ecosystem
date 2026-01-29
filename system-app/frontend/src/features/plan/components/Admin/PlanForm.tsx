@@ -1,10 +1,10 @@
 import React, { useMemo } from 'react';
 import { type SubmitHandler } from 'react-hook-form';
 
-import styles from '../styles/PlanForm.module.scss';
-import { type FormField, GenericForm } from '../../../Form/GenericForm';
-import { usePlans } from '../hooks/usePlans';
-import type { PlanEditDetail, UpdatePlanRequest, CreatePlanRequest } from '../types/plans.type';
+import styles from '../../styles/PlanForm.module.scss';
+import { type FormField, GenericForm } from '../../../../components/Form/GenericForm';
+import { usePlans } from '../../hooks/usePlans';
+import type { PlanEditDetail, UpdatePlanRequest, CreatePlanRequest } from '../../types/plans.type';
 
 // Interface "Plana" para controlar o formulário visualmente
 interface PlanFormSchema {

@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { AlertService } from '../../../../shared/services/alert.service';
-import { ApiError } from '../../../../shared/services/api.service';
+import { AlertService } from '../../../shared/services/alert.service';
+import { ApiError } from '../../../shared/services/api.service';
 import { TransactionService } from '../services/transactions.service';
 
 

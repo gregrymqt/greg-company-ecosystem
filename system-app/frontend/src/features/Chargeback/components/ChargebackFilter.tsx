@@ -1,4 +1,4 @@
-import { type FormField, GenericForm } from '../../../Form/GenericForm';
+import { type FormField, GenericForm } from '../../../components/Form/GenericForm';
 import styles from '../styles/ChargebackFilter.module.scss';
 
 export interface FilterFormData {

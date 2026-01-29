@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { SubscriptionService } from '../services/UserSubscriptionService'; // Ajuste o caminho
-import { AlertService } from '../../../../shared/services/alert.service';
-import { ApiError } from '../../../../shared/services/api.service';
+import { AlertService } from '../../../shared/services/alert.service';
+import { ApiError } from '../../../shared/services/api.service';
 import type { SubscriptionDetailsDto } from '../types/userSubscription.type';
 
 

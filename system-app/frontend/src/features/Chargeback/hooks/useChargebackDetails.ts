@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { ApiError } from "../../../../shared/services/api.service";
+import { ApiError } from "../../../shared/services/api.service";
 import { ChargebackService } from "../services/chargeBack.service";
 import type { ChargebackDetail } from "../types/chargeback.type";
 
