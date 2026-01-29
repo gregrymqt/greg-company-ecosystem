@@ -5,6 +5,7 @@ import type {
   PaginatedResponse,
   CreateVideoParams,
   UpdateVideoParams,
+  CreateVideoPayload,
 } from "../types/video-manager.types";
 
 const BASE_ENDPOINT = "/admin/videos";
@@ -26,34 +27,14 @@ export const VideoService = {
   // VideoService.ts
 
   create: async (data: CreateVideoParams): Promise<Video> => {
-    // Separa os arquivos do DTO de texto
     const { videoFile, thumbnailFile, ...textDto } = data;
 
-    const formData = new FormData();
-    // Campos de Texto
-    formData.append("Title", textDto.title);
-    formData.append("Description", textDto.description);
-    formData.append("CourseId", textDto.courseId); // Backend precisa disso!
-
-    // Arquivos
-    if (videoFile) {
-      // Chave 'File' para casar com BaseUploadDto no C#
-      formData.append("File", videoFile);
-    }
-
-    if (thumbnailFile) {
-      // Chave 'ThumbnailFile' para casar com CreateVideoDto no C#
-      formData.append("ThumbnailFile", thumbnailFile);
-    }
-
-    // Como o chunking é complexo, recomendo usar a sua ApiService
-    // mas passando o nome da chave do arquivo principal como 'File'
-
-    return await ApiService.postWithFile<Video, any>(
+    // Aqui substituímos o <Video, any> pelo novo tipo CreateVideoPayload
+    return await ApiService.postWithFile<Video, CreateVideoPayload>(
       BASE_ENDPOINT,
-      { ...textDto, ThumbnailFile: thumbnailFile }, // Passa a Thumb como "dado" se o handler suportar File em objeto
-      videoFile, // O arquivo principal (Vídeo) que será fatiado
-      "File" // Nome da chave no Backend (BaseUploadDto.File)
+      { ...textDto, ThumbnailFile: thumbnailFile }, 
+      videoFile, 
+      "File" // Chave esperada pelo BaseUploadDto no C#
     );
   },
 

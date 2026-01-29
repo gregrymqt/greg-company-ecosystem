@@ -63,13 +63,13 @@ export const PixForm: React.FC<PixFormProps> = ({
   ], [docTypes]);
 
   // Separa o nome completo se vier nos defaults
-  const defaultValues = useMemo(() => {
+  const defaultValues = useMemo<Partial<PixPayer>>(() => {
     return {
       email: defaultEmail || '',
       firstName: defaultName?.split(' ')[0] || '',
       // Tenta pegar o resto do nome, ou deixa vazio
       lastName: defaultName?.split(' ').slice(1).join(' ') || ''
-    } as any;
+    } ;
   }, [defaultEmail, defaultName]);
 
   return (

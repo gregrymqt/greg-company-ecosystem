@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 // Imports dos seus componentes
-import { SubscriptionActions } from '../../components/MercadoPago/Subscription/components/User/UserSubscriptionActions'; // [cite: 1]
-import { SubscriptionInfo } from '../../components/MercadoPago/Subscription/components/User/UserSubscriptionInfo'; // [cite: 1]
-import { useSubscription } from '../../components/MercadoPago/Subscription/hooks/useUserSubscription'; // 
+import { SubscriptionActions } from '../../features/Subscription/components/User/UserSubscriptionActions';
+import { SubscriptionInfo } from '../../features/Subscription/components/User/UserSubscriptionInfo';
+import { useSubscription } from '../../features/Subscription/hooks/useUserSubscription'; 
 // Imports da Sidebar Genérica
 
 // Estilos

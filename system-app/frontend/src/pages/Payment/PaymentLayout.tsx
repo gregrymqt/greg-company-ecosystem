@@ -9,13 +9,13 @@ import { Sidebar } from "../../components/SideBar/components/Sidebar";
 // Hooks & Types
 
 import type { SidebarItem } from "../../components/SideBar/types/sidebar.types";
-import { CreditCardPayment } from "../../components/MercadoPago/Payment/components/Credit-Card/CreditCardPayment";
-import { PixPayment } from "../../components/MercadoPago/Payment/components/Pix/PixPayment";
-import { usePreference } from "../../components/MercadoPago/Payment/components/Preferences/hooks/usePreference";
+import { CreditCardPayment } from "../../features/Payment/components/Credit-Card/CreditCardPayment";
+import { PixPayment } from "../../features/Payment/components/Pix/PixPayment";
+import { usePreference } from "../../features/Payment/components/Preferences/hooks/usePreference";
 import type {
   PaymentLayoutProps,
   PaymentMethodId,
-} from "../../components/MercadoPago/Payment/types/payment.types";
+} from "../../features/Payment/types/payment.types";
 
 export const PaymentLayout: React.FC<PaymentLayoutProps> = ({
   plan,

@@ -1,12 +1,12 @@
 import React, { useState, useCallback } from 'react';
 
 import styles from './PlansPage.module.scss';
-import { PlanForm } from '../../components/MercadoPago/Plans/components/PlanForm';
-import { PlanList } from '../../components/MercadoPago/Plans/components/PlanList';
-import type { PlanEditDetail } from '../../components/MercadoPago/Plans/types/plans.type';
+import { PlanForm } from '../../features/Plan/components/Admin/PlanForm';
+import { PlanList } from '../../features/Plan/components/Admin/PlanList';
+import type { PlanEditDetail } from '../../features/Plan/types/plans.type';
 import { Sidebar } from '../../components/SideBar/components/Sidebar';
 import type { SidebarItem } from '../../components/SideBar/types/sidebar.types';
-import { usePlans } from '../../components/MercadoPago/Plans/hooks/usePlans';
+import { usePlans } from '../../features/Plan/hooks/usePlans';
 
 
 // Menu da Sidebar

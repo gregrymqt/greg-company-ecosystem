@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback } from "react";
 import styles from "../styles/ClaimsLayout.module.scss"; // Verifique se o nome do arquivo CSS está correto
-import { ClaimChat } from "../../../components/MercadoPago/Claim/components/ClaimChat";
-import { ClaimsList } from "../../../components/MercadoPago/Claim/components/ClaimsList";
-import { ClaimService } from "../../../components/MercadoPago/Claim/services/claim.service";
-import type { ClaimSummary } from "../../../components/MercadoPago/Claim/types/claims.type";
+import { ClaimChat } from "./ClaimChat";
+import { ClaimsList } from "./ClaimsList";
+import { ClaimService } from "../services/claim.service";
+import type { ClaimSummary } from "../types/claims.type";
 import { Modal } from "../../../components/Modal/Modal";
 import { Sidebar } from "../../../components/SideBar/components/Sidebar";
 import type { SidebarItem } from "../../../components/SideBar/types/sidebar.types";

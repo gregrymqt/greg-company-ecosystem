@@ -85,3 +85,7 @@ export interface VideoFilters {
   page: number;
   pageSize: number;
 }
+
+export type CreateVideoPayload = Omit<CreateVideoParams, 'videoFile' | 'thumbnailFile'> & { 
+  ThumbnailFile?: File 
+};
