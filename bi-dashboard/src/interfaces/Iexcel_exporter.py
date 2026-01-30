@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import List
-from models.cleaned_product_dto import CleanedProductDTO
+from ..models.cleaned_product_dto import CleanedProductDTO
 
 class IExcelExporter(ABC):
     @abstractmethod

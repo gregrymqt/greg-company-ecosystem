@@ -99,8 +99,8 @@ services:
 
   bi-engine:
     build:
-      context: .
-      dockerfile: ./bi-dashboard/Dockerfile
+      context: ./bi-dashboard
+      dockerfile: Dockerfile
     container_name: greg_company_bi
     env_file: .env
     environment:

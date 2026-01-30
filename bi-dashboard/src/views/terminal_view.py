@@ -1,7 +1,7 @@
-from models.cleaned_product_dto import CleanedProductDTO
+from ..models.cleaned_product_dto import CleanedProductDTO
 
-from interfaces.Iproduct_source import IProductSource
-from interfaces.Idata_service import IDataService
+from ..interfaces.Iproduct_source import IProductSource
+from ..interfaces.Idata_service import IDataService
 
 
 class TerminalView:

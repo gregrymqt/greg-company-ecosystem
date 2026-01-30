@@ -1,8 +1,8 @@
 from datetime import datetime as dt
 import time
-from interfaces.Iproduct_source import IProductSource
-from interfaces.Idata_service import IDataService
-from interfaces.Iproduct_exporter import IProductExporter
+from ..interfaces.Iproduct_source import IProductSource
+from ..interfaces.Idata_service import IDataService
+from ..interfaces.Iproduct_exporter import IProductExporter
 
 class RowsView:
     def __init__(self, source: IProductSource, service: IDataService, exporter: IProductExporter):

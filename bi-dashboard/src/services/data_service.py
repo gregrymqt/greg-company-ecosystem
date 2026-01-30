@@ -1,9 +1,9 @@
 from typing import List, Tuple
 import numpy as np
-from models.product_dto import ProductDTO
-from models.cleaned_product_dto import CleanedProductDTO
-from interfaces.Idata_service import IDataService
-from enums.product_status import ProductStatus
+from ..models.product_dto import ProductDTO
+from ..models.cleaned_product_dto import CleanedProductDTO
+from ..interfaces.Idata_service import IDataService
+from ..enums.product_status import ProductStatus
 
 class DataService(IDataService):
     def prepare_products(self, raw_products: List[ProductDTO]) -> Tuple[List[CleanedProductDTO], dict]:

@@ -1,6 +1,6 @@
-from interfaces.Iproduct_source import IProductSource
-from interfaces.Idata_service import IDataService
-from interfaces.Iexcel_exporter import IExcelExporter
+from ..interfaces.Iproduct_source import IProductSource
+from ..interfaces.Idata_service import IDataService
+from ..interfaces.Iexcel_exporter import IExcelExporter
 
 class ExcelView:
     def __init__(self, source: IProductSource, service: IDataService, exporter: IExcelExporter):

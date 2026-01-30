@@ -1,7 +1,7 @@
 from typing import List
 import requests
-from models.product_dto import ProductDTO
-from interfaces.Iproduct_source import IProductSource
+from ..models.product_dto import ProductDTO
+from ..interfaces.Iproduct_source import IProductSource
 
 class DummyJsonController(IProductSource):
     BASE_URL = "https://dummyjson.com/products"

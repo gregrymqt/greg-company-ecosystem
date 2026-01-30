@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import List
-from models.product_dto import ProductDTO
+from ..models.product_dto import ProductDTO
 
 
 class IProductSource(ABC):

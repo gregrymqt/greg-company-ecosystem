@@ -16,5 +16,8 @@ COPY . .
 # Variável de ambiente para garantir que os logs apareçam em tempo real
 ENV PYTHONUNBUFFERED=1
 
+# Ativa o modo automático para execução não-interativa
+ENV BI_AUTO_MODE=true
+
 # Comando para rodar o motor de BI
-CMD ["py", "src.main.py"]
+CMD ["python", "-m", "src.main"]

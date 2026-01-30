@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from enums.product_status import ProductStatus
+from ..enums.product_status import ProductStatus
 
 @dataclass(frozen=True)
 class CleanedProductDTO:

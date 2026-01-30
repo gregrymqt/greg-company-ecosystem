@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import List, Tuple, Dict
-from models.product_dto import ProductDTO
-from models.cleaned_product_dto import CleanedProductDTO
+from ..models.product_dto import ProductDTO
+from ..models.cleaned_product_dto import CleanedProductDTO
 
 class IDataService(ABC):
     @abstractmethod

@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import List, Dict
-from models.cleaned_product_dto import CleanedProductDTO
+from ..models.cleaned_product_dto import CleanedProductDTO
 
 class IProductExporter(ABC):
     @abstractmethod

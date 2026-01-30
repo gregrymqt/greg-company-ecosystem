@@ -3,8 +3,8 @@ import os
 from dataclasses import asdict
 from typing import List
 from dotenv import load_dotenv
-from interfaces.Iexcel_exporter import IExcelExporter
-from models.cleaned_product_dto import CleanedProductDTO
+from ..interfaces.Iexcel_exporter import IExcelExporter
+from ..models.cleaned_product_dto import CleanedProductDTO
 
 load_dotenv()
 
