@@ -102,36 +102,31 @@ public static class PipelineExtensions
         using var scope = app.ApplicationServices.CreateScope();
         var database = scope.ServiceProvider.GetService<IMongoDatabase>();
 
-        // Se o Mongo não estiver configurado, ignora
         if (database == null)
             return;
 
-        // 1. Pega todas as classes que implementam IMongoDocument
-        var documentTypes = AppDomain
-            .CurrentDomain.GetAssemblies()
-            .SelectMany(s => s.GetTypes())
+        // --- CORREÇÃO: Escaneie apenas o Assembly que contém seus documentos ---
+        // Substitua 'IMongoDocument' por uma classe que esteja no mesmo projeto dos seus modelos
+        var documentTypes = typeof(IMongoDocument)
+            .Assembly.GetTypes()
             .Where(p =>
-                typeof(IMongoDocument).IsAssignableFrom(p) && p is { IsInterface: false, IsAbstract: false }
+                typeof(IMongoDocument).IsAssignableFrom(p)
+                && p is { IsInterface: false, IsAbstract: false }
             );
 
         foreach (var docType in documentTypes)
         {
-            // 2. Tenta pegar o nome da coleção via propriedade estática "CollectionName"
             var collectionNameProperty = docType.GetProperty(
                 "CollectionName",
                 BindingFlags.Public | BindingFlags.Static
             );
             var collectionName = collectionNameProperty?.GetValue(null) as string;
 
-            // Se a classe não definiu um nome, pulamos (ou usamos uma lógica padrão se preferir)
             if (string.IsNullOrEmpty(collectionName))
                 continue;
 
-            // --- CORREÇÃO DO ERRO CS0103 ---
-            // A variável 'collection' precisa ser criada aqui para ser usada dentro do próximo loop
             var collection = database.GetCollection<BsonDocument>(collectionName);
 
-            // 3. Pega todas as propriedades marcadas com [MongoIndex]
             var propertiesToIndex = docType
                 .GetProperties()
                 .Where(prop => Attribute.IsDefined(prop, typeof(MongoIndexAttribute)));
@@ -139,8 +134,6 @@ public static class PipelineExtensions
             foreach (var prop in propertiesToIndex)
             {
                 var attribute = prop.GetCustomAttribute<MongoIndexAttribute>();
-
-                // Pega o nome do campo no Bson (se existir), senão usa o nome da propriedade
                 var bsonElement =
                     prop.GetCustomAttribute<MongoDB.Bson.Serialization.Attributes.BsonElementAttribute>();
                 var fieldName = bsonElement?.ElementName ?? prop.Name;
@@ -154,16 +147,15 @@ public static class PipelineExtensions
                     var indexOptions = new CreateIndexOptions { Unique = attribute?.Unique };
                     var indexModel = new CreateIndexModel<BsonDocument>(indexKeys, indexOptions);
 
-                    // Agora a variável 'collection' existe e pode ser usada
                     await collection.Indexes.CreateOneAsync(indexModel);
                     Console.WriteLine(
-                        $"--> [Mongo] Index criado em '{collectionName}': {fieldName}"
+                        $"--> [Mongo] Index garantido em '{collectionName}': {fieldName}"
                     );
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine(
-                        $"--> [Mongo] Erro ao criar index em '{collectionName}': {ex.Message}"
+                        $"--> [Mongo] Erro no index '{collectionName}': {ex.Message}"
                     );
                 }
             }

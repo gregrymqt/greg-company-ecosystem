@@ -1,4 +1,0 @@
---- Busca de tipos 'any' filtrada: qui, 29 de jan de 2026 11:59:15 ---
-Pendente: /c/Users/digob/Desktop/greg-company-ecosystem/system-app/frontend/src/features/Claim/components/AdminClaimsPage.tsx:          data={claims} // CORREÇÃO: Passa direto, sem 'as any'
-Pendente: /c/Users/digob/Desktop/greg-company-ecosystem/system-app/frontend/src/features/Claim/components/UserClaimsPage.tsx:            data={claims} // CORREÇÃO: Passa direto, sem 'as any'
-Pendente: /c/Users/digob/Desktop/greg-company-ecosystem/system-app/frontend/src/features/Plan/components/Admin/PlanForm.tsx:            // Agora o TS reconhece .description, removendo o erro da linha 89 "(initialData as any)" [cite: 3]

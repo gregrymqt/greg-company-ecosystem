@@ -1,5 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
-
   <PropertyGroup>
     <!-- Alterado de net9.0 para net8.0 -->
     <TargetFramework>net8.0</TargetFramework>
@@ -7,7 +6,6 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>44cf1388-7117-4d5a-ac6d-b60ad7b73c25</UserSecretsId>
   </PropertyGroup>
-
   <ItemGroup>
     <!-- Pacotes de terceiros (Hangfire, DotNetEnv, etc.) geralmente não precisam de alteração -->
     <PackageReference Include="DotNetEnv" Version="3.1.1" />
@@ -16,7 +14,6 @@
     <PackageReference Include="Hangfire.Redis.StackExchange" Version="1.12.0" />
     <PackageReference Include="Hangfire.SqlServer" Version="1.8.20" />
     <PackageReference Include="mercadopago-sdk" Version="2.8.0" />
-
     <!-- Pacotes da Microsoft (ASP.NET, EFCore) alterados de 9.0.x para 8.0.7 (ou a última estável do .NET 8) -->
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="8.0.7" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.7" />
@@ -28,6 +25,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.2" />
     <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="8.0.7" />
     <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="8.0.7" />
     <PackageReference Include="Microsoft.TypeScript.MSBuild" Version="5.8.3">
@@ -36,18 +34,15 @@
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.4" />
     <PackageReference Include="MongoDB.Driver" Version="3.5.2" />
-    
     <!-- Pacotes de terceiros (Scrutor, SendGrid, etc.) que são compatíveis -->
     <PackageReference Include="Scrutor" Version="6.1.0" />
     <PackageReference Include="SendGrid" Version="9.29.3" />
-
     <!-- Serilog e Swashbuckle alterados para as versões compatíveis com .NET 8 -->
     <PackageReference Include="Serilog.AspNetCore" Version="8.0.1" />
     <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
     <PackageReference Include="StackExchange.Redis" Version="2.8.58" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
   </ItemGroup>
-
   <ItemGroup>
     <!-- Suas pastas permanecem iguais -->
     <Folder Include="Documents\Attributes\" />
@@ -62,7 +57,7 @@
     <Folder Include="Features/Auth/Dtos/" />
     <Folder Include="Features/Auth/Middlewares/" />
     <Folder Include="Features/Home/Controllers/" />
-    <Folder Include="Features/Home/Repostories/" />
+    <Folder Include="Features/Home/Repositories/" />
     <Folder Include="Features/Home/Services/" />
     <Folder Include="Features/MercadoPago/Payments/Repositories/" />
     <Folder Include="Features/Security/" />
@@ -85,11 +80,9 @@
     <Folder Include="Migrations\" />
     <Folder Include="wwwroot\videos\" />
   </ItemGroup>
-
   <ItemGroup>
     <!-- Itens removidos permanecem iguais -->
     <_ContentIncludedByDefault Remove="wwwroot\js\token\getTokens.js" />
     <_ContentIncludedByDefault Remove="Pages\Payment\Method\SelectPaymentMethod.cshtml" />
   </ItemGroup>
-
 </Project>

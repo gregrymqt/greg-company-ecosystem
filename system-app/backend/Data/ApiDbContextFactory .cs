@@ -1,7 +1,7 @@
+using System.IO;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
-using System.IO;
 
 namespace MeuCrudCsharp.Data
 {
@@ -32,7 +32,9 @@ namespace MeuCrudCsharp.Data
 
             if (string.IsNullOrEmpty(connectionString))
             {
-                throw new InvalidOperationException("A ConnectionString 'DefaultConnection' não foi encontrada. Verifique seus arquivos appsettings.json e User Secrets.");
+                throw new InvalidOperationException(
+                    "A ConnectionString 'DefaultConnection' não foi encontrada. Verifique seus arquivos appsettings.json e User Secrets."
+                );
             }
 
             optionsBuilder.UseSqlServer(connectionString);
