@@ -3,9 +3,9 @@ import type {
   AdminSubscriptionDetail,
   UpdateSubscriptionValuePayload,
   UpdateSubscriptionStatusPayload,
-} from "@/features/Subscription/types/adminSubscription.type";
+} from "../../shared/types/subscriptions.types";
 
-export const AdminSubscriptionService = {
+export const adminSubscriptionService = {
   /**
    * Busca uma assinatura pelo ID (ou query string conforme seu controller).
    * Rota: GET /api/admin/subscriptions/search?query=...

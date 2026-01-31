@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
-import { AdminSubscriptionService } from '@/features/Subscription/services/AdminSubscriptionService';
+import { adminSubscriptionService } from '../services/adminSubscription.service';
 import { ApiError } from '@/shared/services/api.service';
-import type { AdminSubscriptionDetail } from '@/features/Subscription/types/adminSubscription.type';
+import type { AdminSubscriptionDetail } from '../../shared/types/subscriptions.types';
 
 export const useAdminSubscription = () => {
   const [subscription, setSubscription] = useState<AdminSubscriptionDetail | null>(null);
@@ -17,7 +17,7 @@ export const useAdminSubscription = () => {
     setSubscription(null); // Limpa o estado anterior enquanto busca
 
     try {
-      const data = await AdminSubscriptionService.searchSubscription(query);
+      const data = await adminSubscriptionService.searchSubscription(query);
       setSubscription(data);
     } catch (err) {
       // Tenta pegar a mensagem do backend ou usa uma genérica
@@ -39,7 +39,7 @@ export const useAdminSubscription = () => {
     setError(null);
 
     try {
-      const updatedData = await AdminSubscriptionService.updateValue(subscription.id, amount);
+      const updatedData = await adminSubscriptionService.updateValue(subscription.id, amount);
       // Atualiza o estado local com os dados novos retornados pela API
       setSubscription(updatedData);
     } catch (err) {
@@ -61,7 +61,7 @@ export const useAdminSubscription = () => {
     setError(null);
 
     try {
-      const updatedData = await AdminSubscriptionService.updateStatus(subscription.id, status);
+      const updatedData = await adminSubscriptionService.updateStatus(subscription.id, status);
       // Atualiza o estado local com os dados novos retornados pela API
       setSubscription(updatedData);
     } catch (err) {

@@ -1,13 +1,13 @@
 import React from 'react';
-import styles from '../../styles/UserSubscriptionInfo.module.scss';
+import styles from '../styles/UserSubscriptionInfo.module.scss';
 import { Card } from '@/components/Card/Card';
-import type { SubscriptionDetailsDto } from '@/features/Subscription/types/userSubscription.type';
+import type { SubscriptionDetailsDto } from '../../shared/types/subscriptions.types';
 
-interface SubscriptionInfoProps {
+interface UserSubscriptionInfoProps {
     data: SubscriptionDetailsDto;
 }
 
-export const SubscriptionInfo: React.FC<SubscriptionInfoProps> = ({ data }) => {
+export const UserSubscriptionInfo: React.FC<UserSubscriptionInfoProps> = ({ data }) => {
     // Helpers
     const formatCurrency = (val: number) =>
         new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
@@ -27,7 +27,7 @@ export const SubscriptionInfo: React.FC<SubscriptionInfoProps> = ({ data }) => {
     return (
         // Reutilizando seu Card Genérico
         <Card className="mb-4">
-            <Card.Body title="Detalhes do Plano"> {/* [cite: 27] */}
+            <Card.Body title="Detalhes do Plano">
 
                 <div className={styles.dataGrid}>
                     <div className={styles.dataItem}>

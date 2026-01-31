@@ -1,5 +1,6 @@
+// UserSubscriptionActions.module.scss
 .actionText {
-  color: $secondary-color;
+  color: #6c757d;
   margin-bottom: 1rem;
 }
 
@@ -9,13 +10,13 @@
   gap: 1rem;
   width: 100%;
 
-  @include desktop {
+  @media (min-width: 768px) {
     flex-direction: row; // Desktop lado a lado
     align-items: center;
   }
 }
 
-// Botões Específicos (estilização extra sobre seus botões padrão se necessário)
+// Botões Específicos
 .btnAction {
   padding: 0.75rem 1.5rem;
   border-radius: 4px;
@@ -36,16 +37,24 @@
   &.pause {
     background-color: #ffc107;
     color: #212529;
+
+    &:hover:not(:disabled) {
+      background-color: #e0a800;
+    }
   }
 
   &.reactivate {
-    background-color: $primary-color; // [cite: 42]
+    background-color: #007bff;
     color: white;
+
+    &:hover:not(:disabled) {
+      background-color: #0056b3;
+    }
   }
 
   &.cancel {
     background-color: transparent;
-    border: 1px solid #dc3545; // [cite: 44]
+    border: 1px solid #dc3545;
     color: #dc3545;
     
     &:hover:not(:disabled) {

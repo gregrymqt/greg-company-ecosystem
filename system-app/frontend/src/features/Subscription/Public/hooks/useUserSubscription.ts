@@ -1,11 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
-import { SubscriptionService } from '@/features/Subscription/services/UserSubscriptionService';
+import { userSubscriptionService } from '../services/userSubscription.service';
 import { AlertService } from '@/shared/services/alert.service';
 import { ApiError } from '@/shared/services/api.service';
-import type { SubscriptionDetailsDto } from '@/features/Subscription/types/userSubscription.type';
+import type { SubscriptionDetailsDto } from '../../shared/types/subscriptions.types';
 
-
-export const useSubscription = () => {
+export const useUserSubscription = () => {
     const [subscription, setSubscription] = useState<SubscriptionDetailsDto | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [isProcessing, setIsProcessing] = useState<boolean>(false);
@@ -14,7 +13,7 @@ export const useSubscription = () => {
     const fetchSubscription = useCallback(async () => {
         try {
             setIsLoading(true);
-            const data = await SubscriptionService.getDetails();
+            const data = await userSubscriptionService.getDetails();
             setSubscription(data);
         } catch (error) {
             const msg = error instanceof ApiError ? error.message : 'Não foi possível carregar sua assinatura.';
@@ -51,7 +50,7 @@ export const useSubscription = () => {
         // 2. Execução da mudança
         try {
             setIsProcessing(true);
-            await SubscriptionService.updateStatus(newStatus);
+            await userSubscriptionService.updateStatus(newStatus);
 
             // 3. Feedback de Sucesso 
             await AlertService.success(
@@ -98,11 +97,11 @@ export const useSubscription = () => {
         subscription,
         isLoading,
         isProcessing,
-        refresh: fetchSubscription, // Caso queira um botão de "Recarregar" manual
         actions: {
             pause: pauseSubscription,
             reactivate: reactivateSubscription,
-            cancel: cancelSubscription
+            cancel: cancelSubscription,
+            refresh: fetchSubscription
         }
     };
 };

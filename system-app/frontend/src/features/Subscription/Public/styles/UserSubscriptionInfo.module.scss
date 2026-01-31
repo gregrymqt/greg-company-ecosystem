@@ -1,3 +1,4 @@
+// UserSubscriptionInfo.module.scss
 .dataGrid {
   display: grid;
   grid-template-columns: 1fr; // Mobile First: 1 coluna
@@ -5,7 +6,7 @@
   margin-top: 0.5rem;
 
   // Desktop
-  @include desktop {
+  @media (min-width: 768px) {
     grid-template-columns: repeat(2, 1fr); // 2 Colunas
   }
 }
@@ -16,14 +17,14 @@
 
   label {
     font-size: 0.85rem;
-    color: $secondary-color; // [cite: 15]
+    color: #6c757d;
     margin-bottom: 0.2rem;
     font-weight: 600;
   }
 
   span {
     font-size: 1rem;
-    color: $text-dark;
+    color: #212529;
     font-weight: 500;
   }
 }
@@ -39,11 +40,11 @@
 
   &.active, &.authorized {
     background-color: #d4edda;
-    color: #155724; // [cite: 17]
+    color: #155724;
   }
   &.paused {
     background-color: #fff3cd;
-    color: #856404; // [cite: 18]
+    color: #856404;
   }
   &.cancelled {
     background-color: #f8d7da;

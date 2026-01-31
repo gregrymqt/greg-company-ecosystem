@@ -1,14 +1,11 @@
 import React, { useState } from 'react';
-// Imports dos seus componentes
-import { SubscriptionActions } from '@/features/Subscription/components/User/UserSubscriptionActions';
-import { SubscriptionInfo } from '@/features/Subscription/components/User/UserSubscriptionInfo';
-import { useSubscription } from '@/features/Subscription/hooks/useUserSubscription'; 
+// Imports dos componentes de Subscription (Public)
+import { UserSubscriptionActions, UserSubscriptionInfo, useUserSubscription } from '@/features/Subscription/Public';
 // Imports da Sidebar Genérica
-
+import type { SidebarItem } from '@/components/SideBar/types/sidebar.types';
 // Estilos
 import styles from './SubscriptionPage.module.scss';
-import { Sidebar } from '@/components/SideBar/components/Sidebar';
-import type { SidebarItem } from '@/components/SideBar/types/sidebar.types';
+import { Sidebar } from '@/components/SideBar';
 
 export const SubscriptionPage: React.FC = () => {
     // 1. Estado para controlar a aba ativa da Sidebar
@@ -77,7 +74,7 @@ const SubscriptionContent: React.FC = () => {
         isLoading,
         isProcessing,
         actions
-    } = useSubscription(); // 
+    } = useUserSubscription(); 
 
     // Loading
     if (isLoading) {
@@ -103,12 +100,12 @@ const SubscriptionContent: React.FC = () => {
     // Renderização Info + Ações
     return (
         <section className={styles.fadeIn}>
-            {/* Visualização [cite: 6] */}
-            <SubscriptionInfo data={subscription} />
+            {/* Visualização */}
+            <UserSubscriptionInfo data={subscription} />
 
-            {/* Ações (Separadas no card abaixo pelo próprio componente interno) [cite: 7] */}
+            {/* Ações (Separadas no card abaixo pelo próprio componente interno) */}
             <div className={styles.actionsContainer}>
-                <SubscriptionActions
+                <UserSubscriptionActions
                     status={subscription.status}
                     onPause={actions.pause}
                     onReactivate={actions.reactivate}
@@ -117,5 +114,5 @@ const SubscriptionContent: React.FC = () => {
                 />
             </div>
         </section>
-    ); // [cite: 5]
+    );
 };

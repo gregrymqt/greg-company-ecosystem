@@ -1,8 +1,7 @@
 import  { ApiService } from "@/shared/services/api.service";
-import type { SubscriptionDetailsDto, SubscriptionResponseDto } from "@/features/Subscription/types/userSubscription.type";
+import type { SubscriptionDetailsDto, SubscriptionResponseDto } from "../../shared/types/subscriptions.types";
 
-
-export const SubscriptionService = {
+export const userSubscriptionService = {
 
   getDetails: async (): Promise<SubscriptionDetailsDto> => {
     // Controller: [Route("api/subscriptions")] + [HttpGet("details")]

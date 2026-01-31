@@ -12,8 +12,8 @@ namespace MeuCrudCsharp.Features.MercadoPago.Jobs.Job;
 [AutomaticRetry(Attempts = 3, DelaysInSeconds = [60])]
 public class ProcessRenewalSubscriptionJob(
     ILogger<ProcessRenewalSubscriptionJob> logger,
-    ISubscriptionNotificationService subscriptionNotificationService)
-    : IJob<PaymentNotificationData>
+    ISubscriptionNotificationService subscriptionNotificationService
+) : IJob<PaymentNotificationData>
 {
     /// <summary>
     /// Executa o processamento da renovação de assinatura.

@@ -1,8 +1,8 @@
 import React from 'react';
-import styles from '../../styles/UserSubscriptionActions.module.scss';
+import styles from '../styles/UserSubscriptionActions.module.scss';
 import  { Card } from '@/components/Card/Card';
 
-interface SubscriptionActionsProps {
+interface UserSubscriptionActionsProps {
   status: string | null;
   onPause: () => void;
   onReactivate: () => void;
@@ -10,7 +10,7 @@ interface SubscriptionActionsProps {
   isProcessing: boolean;
 }
 
-export const SubscriptionActions: React.FC<SubscriptionActionsProps> = ({
+export const UserSubscriptionActions: React.FC<UserSubscriptionActionsProps> = ({
   status,
   onPause,
   onReactivate,
@@ -33,13 +33,13 @@ export const SubscriptionActions: React.FC<SubscriptionActionsProps> = ({
 
   return (
     <Card>
-      <Card.Body title="Gerenciar Assinatura"> {/* [cite: 27] */}
+      <Card.Body title="Gerenciar Assinatura">
         <p className={styles.actionText}>
           Você pode alterar o status da sua assinatura a qualquer momento.
         </p>
       </Card.Body>
 
-      <Card.Actions> {/*  - Usando a área dedicada a botões do Card */}
+      <Card.Actions>
         <div className={styles.actionsWrapper}>
           
           {/* Toggle Pause/Reactivate */}
