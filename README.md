@@ -39,7 +39,12 @@ A aplicação principal foca na escalabilidade, manutenibilidade e experiência 
 
 *   **Backend (C#):** Clean Architecture com Vertical Slices - cada feature (Auth, Courses, MercadoPago, Support, Videos) possui sua própria estrutura completa (Controllers, Services, Repositories, ViewModels). Auto-registro de dependências via Scrutor. Implementa princípios SOLID para regras de negócio complexas, autenticação JWT + OAuth, e integrações financeiras seguras.
 
-*   **Frontend (React + TypeScript):** Arquitetura features-based espelhando o backend. Cada feature possui seus próprios componentes, hooks, services, types e styles. Clean Architecture garantindo separação de concerns - lógica de negócio em `features/`, componentes UI puros em `components/`, utilitários compartilhados em `shared/`.
+*   **Frontend (React + TypeScript):** Arquitetura features-based espelhando estritamente os Controllers do Backend.
+    *   **Padrão Vertical Slice:** Cada feature em `src/features/` é subdividida internamente em contextos:
+        *   `Admin/`: Área de gestão e backoffice.
+        *   `Public/`: Área do usuário final/vitrine.
+        *   `shared/`: DTOs e utilitários agnósticos.
+    *   **Clean Architecture:** Garante separação de concerns, onde componentes puramente visuais ficam em `components/` e regras de negócio isoladas em `hooks/` e `services/` dentro de cada contexto.
 
 *   **Features Implementadas:**
     - `auth/` - Autenticação (JWT, Google OAuth)

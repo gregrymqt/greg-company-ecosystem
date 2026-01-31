@@ -198,9 +198,13 @@ These enable AI tools to understand project conventions and debug issues via log
 
 ### Frontend Feature
 1. Create folder under `src/features/{featurename}/`
-2. Add components, hooks, types locally to feature
+2. **MANDATORY STRUCTURE**:
+   - `shared/`: Types (DTOs), constants, and context-agnostic utils.
+   - `Admin/`: Components, hooks, services for Backoffice/Management (mirrors `Admin{Feature}Controller`).
+   - `Public/` (or `Account`): Components, hooks, services for End-Users (mirrors `Public{Feature}Controller`).
 3. Wire up routes in `src/routes/`
 4. Use shared API client utilities from `src/utils/`
+
 
 ### Python BI Feature (Vertical Slice)
 1. Create folder under `src/features/{feature_name}/`

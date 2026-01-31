@@ -255,9 +255,11 @@ export const ApiService = {
 
     if (!bypassSmartLogic && isComplexUpload) {
       console.log("Detectado upload complexo. Usando SmartHandler...");
-      // Chama o gerenciador e retorna o resultado (pode precisar adaptar o retorno dependendo do que sua tela espera)
-      // Aqui retornamos o array de resultados, ou o primeiro sucesso se for unitário.
+      
+      // ✅ SOLUÇÃO DA DEPENDÊNCIA CIRCULAR:
+      // Passamos ApiService.postWithFile como função injetada (Dependency Injection)
       const results = await SmartUploadHandler(
+        ApiService.postWithFile.bind(ApiService), // Injeta a própria função com contexto preservado
         endpoint,
         data,
         fileArray,
@@ -309,7 +311,18 @@ export const ApiService = {
       (fileArray.length === 1 && fileArray[0].size > 50 * 1024 * 1024);
 
     if (!bypassSmartLogic && isComplexUpload) {
+      // ✅ Injeta ApiService.putWithFile no SmartHandler (mesmo padrão do POST)
       const results = await SmartUploadHandler(
+        // Adaptador: SmartHandler espera postWithFile, mas aqui usamos PUT
+        // Criamos uma arrow function que chama putWithFile recursivamente
+        <TResponse>(
+          endpoint: string,
+          data: Record<string, unknown>,
+          file: File,
+          fileKey: string,
+          options?: RequestInit,
+          bypass?: boolean
+        ) => ApiService.putWithFile<TResponse, typeof data>(endpoint, data, file, fileKey, options, bypass),
         endpoint,
         data,
         fileArray,

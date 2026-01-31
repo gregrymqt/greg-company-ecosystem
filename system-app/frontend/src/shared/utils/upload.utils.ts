@@ -1,4 +1,16 @@
-import { ApiService } from "@/shared/services/api.service";
+// --- TIPO PARA INJEÇÃO DE DEPENDÊNCIA ---
+/**
+ * Função uploader genérica que será injetada pelo ApiService.
+ * Evita dependência circular entre upload.utils.ts e api.service.ts
+ */
+export type UploaderFn = <TResponse>(
+  endpoint: string,
+  data: Record<string, unknown>,
+  file: File,
+  fileKey: string,
+  options?: RequestInit,
+  bypassSmartLogic?: boolean
+) => Promise<TResponse>;
 
 // --- CONFIGURAÇÕES ---
 const CONFIG = {
@@ -13,7 +25,7 @@ const CONFIG = {
 /**
  * Interface para retorno padronizado
  */
-interface UploadResult {
+export interface UploadResult {
   fileName: string;
   status: "success" | "error";
   data?: unknown;
@@ -23,8 +35,10 @@ interface UploadResult {
 /**
  * Helper interno para enviar um arquivo fatiado (Chunking)
  * ATENÇÃO: Seu backend precisa saber montar os pedaços.
+ * @param uploaderFn - Função injetada para realizar o upload (evita dependência circular)
  */
 const uploadInChunks = async (
+  uploaderFn: UploaderFn,
   file: File,
   endpoint: string,
   extraData: Record<string, unknown>,
@@ -54,17 +68,14 @@ const uploadInChunks = async (
       fileName: file.name,
     };
 
-    // Envia o pedaço (usa o método base do ApiService para evitar loop infinito)
-    // Nota: Aqui chamamos uma versão 'raw' se existir, ou o postWithFile assumindo que ele não vai chamar o smartUpload de volta recursivamente.
-    // Para segurança, vamos assumir que o ApiService.postWithFileBase (método simples) será usado aqui.
-    // Como não temos acesso ao método privado, usamos o postWithFile passando uma flag para ignorar a lógica smart.
-    lastResponse = await ApiService.postWithFile(
+    // ✅ Usa a função injetada (não conhece ApiService diretamente)
+    lastResponse = await uploaderFn(
       endpoint,
       chunkDto,
       chunkFile,
       fileKey,
       undefined,
-      true
+      true // bypassSmartLogic = true para evitar recursão infinita
     );
   }
 
@@ -73,8 +84,18 @@ const uploadInChunks = async (
 
 /**
  * Gerenciador principal de Upload
+ * com Injeção de Dependência
+ * @param uploaderFn - Função injetada para realizar uploads (ApiService.postWithFile)
+ * @param endpoint - Rota da API
+ * @param data - DTO com dados adicionais
+ * @param files - Array de arquivos a enviar
+ * @param fileKey - Nome do campo no FormData (default: "files")
  */
+ 
+
+ 
 export const SmartUploadHandler = async (
+  uploaderFn: UploaderFn,
   endpoint: string,
   data: Record<string, unknown>,
   files: File[],
@@ -93,7 +114,7 @@ export const SmartUploadHandler = async (
       const batch = queue.splice(0, CONFIG.BATCH_SIZE);
 
       const promises = batch.map((file) =>
-        ApiService.postWithFile(endpoint, data, file, fileKey, undefined, true) // flag 'ignoreSmart'
+        uploaderFn(endpoint, data, file, fileKey, undefined, true) // bypassSmartLogic = true
           .then((res) => ({
             fileName: file.name,
             status: "success" as const,
@@ -118,16 +139,16 @@ export const SmartUploadHandler = async (
 
       // Verifica se é GIGANTE para usar Chunking
       if (file.size > CONFIG.HUGE_FILE_CHUNK_THRESHOLD) {
-        response = await uploadInChunks(file, endpoint, data, fileKey);
+        response = await uploadInChunks(uploaderFn, file, endpoint, data, fileKey);
       } else {
         // Se for apenas Grande (ex: 60MB), envia inteiro mas sozinho na fila
-        response = await ApiService.postWithFile(
+        response = await uploaderFn(
           endpoint,
           data,
           file,
           fileKey,
           undefined,
-          true
+          true // bypassSmartLogic = true
         );
       }
 
