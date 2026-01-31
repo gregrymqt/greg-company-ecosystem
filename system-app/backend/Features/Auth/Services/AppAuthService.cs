@@ -149,7 +149,8 @@ namespace MeuCrudCsharp.Features.Auth.Services
         private async Task addRolesToUser(Users user)
         {
             if (
-                user.Email != null && user.Email.Equals(
+                user.Email != null
+                && user.Email.Equals(
                     "emailGenéricoAdmin@gmail.com",
                     StringComparison.OrdinalIgnoreCase
                 )
@@ -161,6 +162,116 @@ namespace MeuCrudCsharp.Features.Auth.Services
             {
                 await _userManager.AddToRoleAsync(user, "User");
             }
+        }
+
+        /// <summary>
+        /// Login com email e senha
+        /// </summary>
+        public async Task<LoginResponseDto> LoginAsync(LoginRequestDto request)
+        {
+            // 1. Validar email
+            var user = await _userManager.FindByEmailAsync(request.Email);
+            if (user == null)
+            {
+                _logger.LogWarning(
+                    "Tentativa de login com email não encontrado: {Email}",
+                    request.Email
+                );
+                throw new UnauthorizedAccessException("Email ou senha inválidos.");
+            }
+
+            // 2. Validar senha
+            var isPasswordValid = await _userManager.CheckPasswordAsync(user, request.Password);
+            if (!isPasswordValid)
+            {
+                _logger.LogWarning(
+                    "Tentativa de login com senha incorreta para o usuário: {UserId}",
+                    user.Id
+                );
+                throw new UnauthorizedAccessException("Email ou senha inválidos.");
+            }
+
+            // 3. Gerar token JWT com expiração
+            var (token, expiration) = await _jwtService.GenerateJwtTokenWithExpirationAsync(user);
+
+            // 4. Gerar refresh token (por enquanto, um GUID simples)
+            // TODO: Implementar refresh token persistente no banco de dados
+            var refreshToken = Guid.NewGuid().ToString();
+
+            // 5. Buscar dados completos do usuário
+            var userSession = await GetAuthenticatedUserDataAsync(user.Id);
+
+            _logger.LogInformation("Login bem-sucedido para o usuário: {UserId}", user.Id);
+
+            // 6. Retornar resposta completa
+            return new LoginResponseDto
+            {
+                User = userSession,
+                Token = token,
+                RefreshToken = refreshToken,
+                Expiration = expiration,
+            };
+        }
+
+        /// <summary>
+        /// Registro de novo usuário
+        /// </summary>
+        public async Task<LoginResponseDto> RegisterAsync(RegisterRequestDto request)
+        {
+            // 1. Validar se senhas coincidem
+            if (request.Password != request.ConfirmPassword)
+            {
+                throw new InvalidOperationException("As senhas não coincidem.");
+            }
+
+            // 2. Verificar se email já existe
+            var existingUser = await _userManager.FindByEmailAsync(request.Email);
+            if (existingUser != null)
+            {
+                throw new InvalidOperationException("Email já cadastrado.");
+            }
+
+            // 3. Criar novo usuário
+            var user = new Users
+            {
+                UserName = request.Email,
+                Email = request.Email,
+                Name = request.Name,
+                EmailConfirmed = false,
+                AvatarUrl = string.Empty,
+                PublicId = Guid.NewGuid(),
+            };
+
+            var result = await _userManager.CreateAsync(user, request.Password);
+            if (!result.Succeeded)
+            {
+                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                _logger.LogError("Erro ao criar usuário: {Errors}", errors);
+                throw new InvalidOperationException($"Não foi possível criar o usuário: {errors}");
+            }
+
+            // 4. Adicionar role padrão
+            await addRolesToUser(user);
+
+            // 5. Gerar token JWT com expiração
+            var (token, expiration) = await _jwtService.GenerateJwtTokenWithExpirationAsync(user);
+
+            // 6. Gerar refresh token
+            var refreshToken = Guid.NewGuid().ToString();
+
+            // 7. Buscar dados completos do usuário
+            var userSession = await GetAuthenticatedUserDataAsync(user.Id);
+
+            _logger.LogInformation("Novo usuário registrado com sucesso: {UserId}", user.Id);
+
+            // 8. Retornar resposta completa
+            return new LoginResponseDto
+            {
+                User = userSession,
+                Token = token,
+                RefreshToken = refreshToken,
+                Expiration = expiration,
+            };
         }
     }
 }

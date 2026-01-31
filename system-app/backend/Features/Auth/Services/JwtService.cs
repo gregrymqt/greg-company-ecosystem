@@ -64,4 +64,50 @@ public class JwtService : IJwtService
         _logger.LogInformation("Token JWT gerado para o usuário {UserId}", user.Id);
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
+
+    /// <summary>
+    /// Gera um JWT Token e retorna junto com a data de expiração
+    /// </summary>
+    public async Task<(string Token, DateTime Expiration)> GenerateJwtTokenWithExpirationAsync(
+        Users user
+    )
+    {
+        if (user == null)
+            throw new ArgumentNullException(nameof(user), "Usuário não pode ser nulo.");
+
+        var userRoles = await _userManager.GetRolesAsync(user);
+        var claims = new List<Claim>
+        {
+            new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+            new Claim(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            new Claim(ClaimTypes.Name, user.Name ?? string.Empty),
+            new Claim("AvatarUrl", user.AvatarUrl ?? string.Empty),
+        };
+
+        foreach (var role in userRoles)
+        {
+            claims.Add(new Claim(ClaimTypes.Role, role));
+        }
+
+        if (string.IsNullOrEmpty(_jwtSettings.Key))
+            throw new InvalidOperationException(
+                "A chave JWT (JwtSettings.Key) não foi configurada."
+            );
+
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Key));
+        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+        var expires = DateTime.UtcNow.AddHours(8);
+
+        var token = new JwtSecurityToken(null, null, claims, null, expires, creds);
+        var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
+
+        _logger.LogInformation(
+            "Token JWT gerado para o usuário {UserId} com expiração {Expiration}",
+            user.Id,
+            expires
+        );
+
+        return (tokenString, expires);
+    }
 }

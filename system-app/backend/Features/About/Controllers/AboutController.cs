@@ -153,7 +153,7 @@ public class AboutController : ApiControllerBase
         try
         {
             bool finished = await _service.UpdateTeamMemberAsync(id, dto);
-            if (finished)
+            if (!finished)
             {
                 return Ok(new { message = $"Chunk {dto.ChunkIndex} atualizado." });
             }

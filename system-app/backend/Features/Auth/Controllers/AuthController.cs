@@ -1,5 +1,6 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Policy;
+using MeuCrudCsharp.Features.Auth.Dtos;
 using MeuCrudCsharp.Features.Auth.Interfaces;
 using MeuCrudCsharp.Features.Base;
 using MeuCrudCsharp.Features.Caching.Interfaces;
@@ -21,8 +22,8 @@ namespace MeuCrudCsharp.Features.Auth.Controllers
         IJwtService jwtService,
         ILogger<AuthController> logger,
         IConfiguration configuration,
-        ICacheService cacheService)
-        : ApiControllerBase
+        ICacheService cacheService
+    ) : ApiControllerBase
     {
         /// <summary>
         /// 1. O React redireciona o usuário para cá para iniciar o login
@@ -122,6 +123,54 @@ namespace MeuCrudCsharp.Features.Auth.Controllers
         }
 
         /// <summary>
+        /// Login com email e senha
+        /// POST: api/auth/login
+        /// </summary>
+        [HttpPost("login")]
+        [AllowAnonymous]
+        public async Task<IActionResult> Login([FromBody] LoginRequestDto request)
+        {
+            try
+            {
+                var response = await authService.LoginAsync(request);
+                return Ok(response);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Erro ao processar login.");
+                return StatusCode(500, new { message = "Erro interno ao processar login." });
+            }
+        }
+
+        /// <summary>
+        /// Registro de novo usuário
+        /// POST: api/auth/register
+        /// </summary>
+        [HttpPost("register")]
+        [AllowAnonymous]
+        public async Task<IActionResult> Register([FromBody] RegisterRequestDto request)
+        {
+            try
+            {
+                var response = await authService.RegisterAsync(request);
+                return Ok(response);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Erro ao processar registro.");
+                return StatusCode(500, new { message = "Erro interno ao processar registro." });
+            }
+        }
+
+        /// <summary>
         /// Realiza o Logout e invalida o token JWT atual adicionando-o à Blacklist do Redis.
         /// </summary>
         [HttpPost("logout")]
@@ -158,7 +207,8 @@ namespace MeuCrudCsharp.Features.Auth.Controllers
                     );
 
                     logger.LogInformation(
-                        "Token invalidado e adicionado à blacklist por {TtlTotalMinutes} minutos.", ttl.TotalMinutes
+                        "Token invalidado e adicionado à blacklist por {TtlTotalMinutes} minutos.",
+                        ttl.TotalMinutes
                     );
                 }
 

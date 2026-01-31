@@ -70,6 +70,20 @@ export const useAuth = () => {
     [navigate],
   );
 
+  const setSession = useCallback((session: UserSession) => {
+    // 1. Salva tokens e dados
+    if (session.token) {
+      StorageService.setItem(STORAGE_KEYS.TOKEN, session.token);
+    }
+    StorageService.setItem(STORAGE_KEYS.USER_SESSION, session);
+
+    // 2. Atualiza estado reativo localmente
+    setUser(session);
+
+    // 3. Notifica o restante da aplicação (sync entre abas)
+    window.dispatchEvent(new Event(AUTH_EVENT_NAME));
+  }, []);
+
   /**
    * LOGOUT
    */
@@ -117,6 +131,7 @@ export const useAuth = () => {
     isAuthenticated,
     logout,
     refreshSession,
+    setSession,
     loginGoogle: authService.loginGoogle,
     handleGoogleCallback,
   };

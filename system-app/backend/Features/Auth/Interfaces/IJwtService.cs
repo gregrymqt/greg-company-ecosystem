@@ -11,4 +11,11 @@ public interface IJwtService
     /// <param name="user">A entidade do usuário para o qual o token será gerado.</param>
     /// <returns>A string do token JWT assinado.</returns>
     Task<string> GenerateJwtTokenAsync(Users user);
+
+    /// <summary>
+    /// Gera um token JWT e retorna junto com a data de expiração.
+    /// </summary>
+    /// <param name="user">A entidade do usuário para o qual o token será gerado.</param>
+    /// <returns>Tupla contendo o token JWT e a data de expiração (UTC).</returns>
+    Task<(string Token, DateTime Expiration)> GenerateJwtTokenWithExpirationAsync(Users user);
 }

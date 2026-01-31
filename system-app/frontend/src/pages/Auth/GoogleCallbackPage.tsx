@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useAuth } from '@/features/auth/hooks/useAuth';
-import styles from '../styles/GoogleCallbackPage.module.scss';
+import styles from './GoogleCallbackPage.module.scss';
 
 export const GoogleCallbackPage = () => {
   const [searchParams] = useSearchParams();

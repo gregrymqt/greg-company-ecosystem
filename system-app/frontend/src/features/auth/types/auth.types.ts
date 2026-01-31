@@ -13,4 +13,6 @@ export interface UserSessionDto {
 // Interface usada no Front (pode incluir token se você mesclar no login)
 export interface UserSession extends UserSessionDto {
   token?: string; // Mantemos opcional pois o token pode estar apenas no Storage separado
+  refreshToken?: string; // Token para renovação de sessão
+  expiration?: string; // Data de expiração do token
 }

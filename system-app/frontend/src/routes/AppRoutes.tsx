@@ -3,11 +3,10 @@ import { ProtectedRoute } from "@/routes/ProtectedRoute";
 import { SubscriptionRoute } from "@/routes/SubscriptionRoute";
 import { AppRoles } from "@/types/models";
 import { AccessDenied } from "@/pages/AccessDenied/AccessDenied";
-import { GoogleCallbackPage } from "@/features/auth/components/GoogleCallbackPage";
+import { GoogleCallbackPage, LoginPage } from "@/pages/Auth";
 import { Home } from "@/pages/Home/Home";
 import { AdminCourseManager } from "@/pages/Courses/AdminCourseManager";
 import { AdminProfile } from "@/pages/Admin/AdminProfile";
-import { GoogleLoginButton } from "@/features/auth/components/GoogleLoginButton";
 import { CourseFeed } from "@/pages/Courses/CourseFeed";
 import { PlansAdmin } from "@/pages/Plans/PlansAdmin";
 import { PlayerScreen } from "@/pages/Player/PlayerScreen";
@@ -31,7 +30,7 @@ export const AppRoutes = () => {
   return (
     <Routes>
       {/* === ROTAS PÚBLICAS === */}
-      <Route path="/login" element={<GoogleLoginButton />} />
+      <Route path="/login" element={<LoginPage />} />
       <Route path="/acesso-negado" element={<AccessDenied />} />
       <Route path="/suporte/novo" element={<CreateSupportPage />} />
       <Route path="/sobre" element={<AboutPage />} />

@@ -25,7 +25,8 @@ import  {
   type Path, 
   type RegisterOptions, 
   type DefaultValues, 
-  type FieldError 
+  type FieldError,
+  type UseFormReturn 
 } from 'react-hook-form';
 import styles from './GenericForm.module.scss';
 
@@ -36,15 +37,18 @@ interface FormProps<T extends FieldValues> {
   onSubmit: SubmitHandler<T>;
   defaultValues?: DefaultValues<T>;
   className?: string;
+  formMethods?: UseFormReturn<T>; // Aceita formMethods externo (opcional)
 }
 
 export function Form<T extends FieldValues>({ 
   children, 
   onSubmit, 
   defaultValues,
-  className = ''
+  className = '',
+  formMethods
 }: FormProps<T>) {
-  const methods = useForm<T>({ defaultValues });
+  // Usa formMethods externo se fornecido, senão cria um interno
+  const methods = formMethods || useForm<T>({ defaultValues });
 
   return (
     <FormProvider {...methods}>
@@ -68,6 +72,7 @@ interface FormInputProps<T extends FieldValues> {
   type?: 'text' | 'email' | 'password' | 'number' | 'date' | 'file';
   placeholder?: string;
   validation?: RegisterOptions<T, Path<T>>;
+  rules?: RegisterOptions<T, Path<T>>; // Alias para validation (compatibilidade)
   colSpan?: 3 | 4 | 6 | 12;
   disabled?: boolean;
   accept?: string; // Para file input
@@ -80,6 +85,7 @@ export function FormInput<T extends FieldValues>({
   type = 'text',
   placeholder,
   validation,
+  rules,
   colSpan = 12,
   disabled,
   accept,
@@ -88,12 +94,15 @@ export function FormInput<T extends FieldValues>({
   const { register, formState: { errors } } = useFormContext<T>();
   const fieldError = errors[name] as FieldError | undefined;
   const errorMessage = fieldError?.message;
+  
+  // Usa 'rules' se fornecido, senão usa 'validation' (retrocompatibilidade)
+  const registerOptions = rules || validation;
 
   return (
     <div className={`${styles.field} ${styles[`colSpan${colSpan}`]}`}>
       <label htmlFor={String(name)}>
         {label}
-        {validation?.required && <span className={styles.required}>*</span>}
+        {registerOptions?.required && <span className={styles.required}>*</span>}
       </label>
       <input
         id={String(name)}
@@ -103,7 +112,7 @@ export function FormInput<T extends FieldValues>({
         accept={accept}
         multiple={multiple}
         className={errorMessage ? styles.error : ''}
-        {...register(name, validation)}
+        {...register(name, registerOptions)}
       />
       {errorMessage && (
         <span className={styles.errorMsg}>
