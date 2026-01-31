@@ -75,33 +75,59 @@ src/
 
 ## BI Dashboard (Python)
 
-### Clean Architecture Pattern
-Strict separation of concerns with dependency injection:
+### Architecture Pattern: Vertical Slice Architecture (alinhada com backend C#)
+FastAPI + WebSocket para analytics em tempo real
 
+**Estrutura:**
 ```
-controllers/  - Orchestrate data flow (DummyJsonController, NotionController)
-services/     - Business logic & ETL (DataService - status calc, metrics)
-models/       - Data entities (ProductDTO, CleanedProductDTO)
-data/         - External integrations (ExcelExporter, RowsExporter)
-views/        - Output formatting (TerminalView, ExcelView, RowsView)
-interfaces/   - Abstract contracts (IDataService, IProductExporter)
-enums/        - Status enums (ProductStatus: OK, CRITICO, ESGOTADO)
+src/
+├── core/                          # Shared infrastructure
+│   ├── infrastructure/
+│   │   ├── database.py           # SQL Server (SQLAlchemy)
+│   │   ├── mongo_client.py       # MongoDB connection
+│   │   └── websocket.py          # WebSocket Manager (Hub pattern)
+│   ├── enums/
+│   │   └── hub_enums.py          # AppHubs enum
+│   └── websocket_server.py       # WebSocket routes setup
+│
+├── features/                      # Vertical Slices (domain-based)
+│   ├── claims/                   # Claims analytics
+│   │   ├── repository.py         # Data access
+│   │   ├── service.py            # Business logic + factory
+│   │   ├── schemas.py            # DTOs (Pydantic)
+│   │   ├── enums.py              # Domain enums
+│   │   └── websocket_handlers.py # WebSocket event handlers
+│   ├── financial/                # Financial analytics
+│   ├── subscriptions/            # MRR, churn rate
+│   ├── support/                  # Support tickets (MongoDB)
+│   ├── content/                  # Course metrics
+│   └── users/                    # User analytics
+│
+└── api/                          # FastAPI application
+    ├── main.py                   # App + CORS + background tasks
+    └── routes/                   # REST endpoints
+        ├── claims_routes.py
+        └── financial_routes.py
 ```
 
-### Key Workflow
-1. Controllers fetch raw data from APIs
-2. `DataService.prepare_products()` transforms raw → cleaned DTOs with status logic:
-   - `stock == 0` → ESGOTADO
-   - `stock < 10` → CRITICO
-   - `stock < 20` → REPOR
-3. Views format and export to Excel, terminal, or Rows.com API
-4. Entry point: `main.py` with interactive CLI menu
+### Key Features
+- **REST API**: On-demand queries for analytics data
+- **WebSocket Hubs**: Real-time push notifications (SignalR-like pattern)
+- **Background Tasks**: Periodic KPI broadcasting every 30s
+- **Factory Pattern**: `create_*_service()` functions for dependency injection
+- **Clean Separation**: Repository → Service → API layers
 
 ### Running BI Dashboard
 ```bash
 cd bi-dashboard
-python src/main.py  # Interactive menu for reports/exports
+pip install -r requirements.txt
+python run_api.py  # Starts FastAPI + WebSocket server on port 8000
 ```
+
+Access:
+- REST API: `http://localhost:8000`
+- WebSocket: `ws://localhost:8000/hubs/[hub-name]`
+- Swagger docs: `http://localhost:8000/docs`
 
 ## Docker Orchestration
 
@@ -176,19 +202,26 @@ These enable AI tools to understand project conventions and debug issues via log
 3. Wire up routes in `src/routes/`
 4. Use shared API client utilities from `src/utils/`
 
-### Python BI Module
-1. Define DTO in `models/`
-2. Create interface in `interfaces/`
-3. Implement logic in `services/`
-4. Create exporter in `data/`
-5. Build view in `views/`
-6. Wire to `main.py` menu
+### Python BI Feature (Vertical Slice)
+1. Create folder under `src/features/{feature_name}/`
+2. Add files:
+   - `repository.py` - Data access layer (SQL/MongoDB queries)
+   - `service.py` - Business logic + `create_{feature}_service()` factory
+   - `schemas.py` - Pydantic models (DTOs)
+   - `websocket_handlers.py` - WebSocket event handlers (optional)
+   - `enums.py` - Domain-specific enums (if needed)
+3. Create REST routes in `src/api/routes/{feature}_routes.py`
+4. Register routes in `src/api/main.py`: `app.include_router({feature}_routes.router)`
+5. Setup WebSocket handlers in `startup_event()` if real-time needed
+6. Feature is now fully isolated and self-contained!
 
 ## Key Files Reference
 - Backend entry: [system-app/backend/Program.cs](system-app/backend/Program.cs)
 - DI config: [system-app/backend/Extensions/DependencyInjectionExtensions.cs](system-app/backend/Extensions/DependencyInjectionExtensions.cs)
 - DB context: [system-app/backend/Data/ApiDbContext.cs](system-app/backend/Data/ApiDbContext.cs)
 - Frontend entry: [system-app/frontend/src/main.tsx](system-app/frontend/src/main.tsx)
-- BI entry: [bi-dashboard/src/main.py](bi-dashboard/src/main.py)
-- BI ETL logic: [bi-dashboard/src/services/data_service.py](bi-dashboard/src/services/data_service.py)
+- BI entry: [bi-dashboard/run_api.py](bi-dashboard/run_api.py)
+- BI FastAPI app: [bi-dashboard/src/api/main.py](bi-dashboard/src/api/main.py)
+- BI WebSocket Manager: [bi-dashboard/src/core/infrastructure/websocket.py](bi-dashboard/src/core/infrastructure/websocket.py)
+- BI Claims feature: [bi-dashboard/src/features/claims/](bi-dashboard/src/features/claims/)
 - Docker config: [docker-compose.yml](docker-compose.yml)

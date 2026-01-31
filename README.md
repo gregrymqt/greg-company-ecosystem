@@ -56,49 +56,65 @@ A aplicação principal foca na escalabilidade, manutenibilidade e experiência 
 *   **Infraestrutura:** Docker Compose orquestrando SQL Server, MongoDB, Redis e aplicação. Hangfire para jobs assíncronos (renovação de assinaturas, webhooks).
 
 ### Módulo de BI (Python)
-Motor de inteligência de negócios para análise de métricas da plataforma de cursos, seguindo padrões rigorosos de Clean Code e Separação de Responsabilidades.
+Plataforma de inteligência de negócios com **FastAPI + WebSocket** para análise de métricas em tempo real da plataforma de cursos, seguindo **Vertical Slice Architecture** alinhada com o backend C#.
 
 ---
 
 ### 🐍 Arquitetura do BI-Dashboard (Python)
 
-**Estrutura de Pastas e Responsabilidades:**
+**Vertical Slice Architecture** - Organização por domínio (features):
 
-- **controllers/**: Orquestra o fluxo ETL, coordenando extração de dados da API do sistema transacional e acionamento dos serviços de processamento.
+**Core Infrastructure** (`src/core/`):
+- **infrastructure/**: Componentes compartilhados
+  - `database.py` - SQL Server connection (SQLAlchemy)
+  - `mongo_client.py` - MongoDB connection
+  - `websocket.py` - WebSocket Manager (Hub pattern similar ao SignalR)
+- **enums/**: `hub_enums.py` - AppHubs enum (Claims, Financial, Subscriptions, Support)
+- **websocket_server.py**: Configuração de rotas WebSocket
 
-- **services/**: Camada de inteligência de negócio. Processa métricas como:
-  - 💰 Receita total e MRR (Monthly Recurring Revenue)
-  - 📈 Taxa de conversão de assinaturas
-  - ⚠️ Análise de chargebacks e transações falhadas
-  - 👥 Engajamento de alunos por curso
-  - 📊 Status de assinaturas (Ativas, Canceladas, Inadimplentes)
+**Feature Slices** (`src/features/`) - Cada feature auto-contida:
+- **claims/**: Analytics de disputas (repository, service, schemas, websocket_handlers)
+- **financial/**: Métricas financeiras e receitas (repository, service, schemas, websocket_handlers)
+- **subscriptions/**: Análise de MRR, churn rate, renovações
+- **support/**: Tickets de suporte (MongoDB)
+- **content/**: Métricas de cursos e vídeos
+- **users/**: Análise de usuários
 
-- **models/**: Define entidades de dados (Subscription, Transaction, Course, Chargeback) garantindo tipagem e consistência durante o processamento.
+**API Layer** (`src/api/`):
+- **main.py**: FastAPI application com REST + WebSocket
+- **routes/**: REST endpoints por feature (claims_routes, financial_routes)
 
-- **data/**: Centraliza exporters para APIs externas (RowsExporter, NotionAPI) para envio de dashboards executivos.
-
-- **views/**: Formata saída de dados para terminal, Excel e estruturação de tabelas para Rows.com/Notion.
-
-- **interfaces/**: Contratos abstratos (IDataService, IProductExporter) garantindo inversão de dependência.
-
-- **enums/**: Status padronizados (ProductStatus: OK, CRITICO, ESGOTADO, REPOR).
+**Métricas Processadas:**
+- 💰 Receita total e MRR (Monthly Recurring Revenue)
+- 📈 Taxa de conversão e churn rate
+- ⚠️ Claims ativas e faturamento em risco
+- 💳 Análise de chargebacks e fraudes
+- 👥 Engajamento de alunos por curso
+- 📊 Status de assinaturas (Ativas, Canceladas, Inadimplentes)
 
 ---
 
-### 📊 Fluxo de Dados (ETL)
+### 📊 Fluxo de Dados (API + WebSocket Real-time)
 
-1. **Extração**: Script Python consome dados do backend (.NET) via API REST - assinaturas, pagamentos, cursos, chargebacks.
-
-2. **Transformação**: `DataService` processa:
+**REST API** (Consulta sob demanda):
+1. **Extração**: Features consomem dados do SQL Server/MongoDB via repositories
+2. **Transformação**: Services processam:
    - Cálculo de MRR e churn rate
    - Agregação de receitas por plano
-   - Identificação de assinaturas em risco
+   - Identificação de claims críticas (>30 dias)
    - Análise de padrões de consumo de cursos
+3. **Resposta**: Endpoints REST retornam JSON para clientes
 
-3. **Carga**: Dados processados exportados para:
-   - **Rows.com**: Dashboards executivos em tempo real
-   - **Notion**: Documentação de métricas e KPIs
-   - **Terminal/Excel**: Relatórios locais para análise
+**WebSocket Hubs** (Push em tempo real):
+- **Claims Hub** (`/hubs/claims`): KPIs de disputas, alertas de claims críticas
+- **Financial Hub** (`/hubs/financial`): Updates de receita, novos pagamentos
+- **Subscriptions Hub**: Renovações, cancelamentos em tempo real
+- **Support Hub**: Status de tickets de suporte
+
+**Background Tasks**:
+- Broadcast automático de KPIs a cada 30 segundos
+- Notificações push de eventos críticos
+- Sincronização periódica com Rows.com/Notion
 
 ---
 
@@ -146,12 +162,18 @@ npm run dev  # Vite dev server na porta 5173
 ```
 A aplicação estará rodando em `http://localhost:5173`.
 
-### 5. Execute o Módulo de BI
+### 5. Execute o Módulo de BI (FastAPI Server)
 ```bash
 cd ../../bi-dashboard # a partir da pasta frontend
 pip install -r requirements.txt
-python src/main.py
+python run_api.py  # FastAPI server com WebSocket
 ```
+
+A API de BI estará disponível em:
+- **REST API**: `http://localhost:8000`
+- **WebSocket**: `ws://localhost:8000/hubs/[hub-name]`
+- **Documentação**: `http://localhost:8000/docs`
+- **Status Hubs**: `http://localhost:8000/ws/status`
 
 ---
 
@@ -174,14 +196,23 @@ greg-company-ecosystem/
 │           ├── shared/            # Shared utilities
 │           └── routes/            # Routing config
 │
-├── bi-dashboard/                  # Python BI Engine
+├── bi-dashboard/                  # Python BI Engine (FastAPI + WebSocket)
 │   └── src/
-│       ├── controllers/           # ETL orchestration
-│       ├── services/              # Business intelligence logic
-│       ├── models/                # Data entities
-│       ├── data/                  # API exporters (Rows, Notion)
-│       ├── views/                 # Output formatters
-│       └── main.py                # CLI menu
+│       ├── core/                  # Shared infrastructure
+│       │   ├── infrastructure/    # Database, MongoDB, WebSocket Manager
+│       │   ├── enums/             # AppHubs enum
+│       │   └── websocket_server.py # WebSocket routes setup
+│       ├── features/              # Vertical Slices (domain-based)
+│       │   ├── claims/           # repository, service, schemas, websocket_handlers
+│       │   ├── financial/        # repository, service, schemas, websocket_handlers
+│       │   ├── subscriptions/    # repository, service, schemas
+│       │   ├── support/          # repository, service, schemas
+│       │   ├── content/          # repository, schemas
+│       │   └── users/            # repository, schemas
+│       └── api/                   # FastAPI application
+│           ├── main.py            # App + background tasks
+│           └── routes/            # REST endpoints
+│   └── run_api.py                 # Script to run FastAPI server
 │
 ├── mcp-servers/                   # Model Context Protocol servers
 │   ├── greg_context_mcp.py       # Architecture context for AI
@@ -226,6 +257,7 @@ NOTION_API_KEY=your_notion_api_key
 
 ## 🎯 Endpoints Principais da API
 
+### Sistema Transacional (.NET - Porta 7035)
 - **Auth**: `/api/auth/login`, `/api/auth/register`, `/api/auth/google`
 - **Courses**: `/api/courses`, `/api/courses/{id}/videos`
 - **Plans**: `/api/plans`, `/api/plans/{id}`
@@ -236,7 +268,21 @@ NOTION_API_KEY=your_notion_api_key
 - **Chargebacks**: `/api/chargebacks`
 - **Claims**: `/api/claims`, `/api/claims/{id}/messages`
 
-Documentação completa disponível em `/swagger` após iniciar o backend.
+### BI Dashboard API (Python - Porta 8000)
+**REST Endpoints:**
+- **Claims**: `GET /api/claims/kpis`, `GET /api/claims/active`, `GET /api/claims/critical`
+- **Financial**: `GET /api/financial/summary`, `GET /api/financial/revenue`
+- **Status**: `GET /ws/status` - Status dos WebSocket hubs
+
+**WebSocket Hubs:**
+- **Claims**: `ws://localhost:8000/hubs/claims`
+- **Financial**: `ws://localhost:8000/hubs/financial`
+- **Subscriptions**: `ws://localhost:8000/hubs/subscriptions`
+- **Support**: `ws://localhost:8000/hubs/support`
+
+Documentação completa disponível em:
+- Backend .NET: `/swagger` 
+- BI Dashboard: `http://localhost:8000/docs`
 
 ---
 
