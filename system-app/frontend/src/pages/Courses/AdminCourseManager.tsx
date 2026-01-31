@@ -1,19 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { Sidebar } from '@/components/SideBar/components/Sidebar';
 import type { SidebarItem } from '@/components/SideBar/types/sidebar.types';
-import { type Course } from '@/types/models';
+import type { CourseDto } from '@/features/course/shared/types/course.types';
 
 // Sub-components, Estilos e Types
 import { CourseList } from '@/features/course/Admin/components/CourseList';
 import { CourseForm } from '@/features/course/Admin/components/CourseForm';
 import styles from './styles/AdminCourseManager.module.scss';
-import type { CourseFormData, AdminTab } from '@/features/course/Admin/types/course-manager.types';
+import type { CourseFormData, AdminTab } from '@/features/course/Admin/types/admin-course.types';
 
-// [CORREÇÃO] Importando o Hook Real
-import { useCourses } from '@/features/course/Admin/hooks/useCourses';
+// Hook refatorado
+import { useAdminCourses } from '@/features/course/Admin/hooks/useAdminCourses';
 
 export const AdminCourseManager: React.FC = () => {
-  // [CORREÇÃO] O hook gerencia o estado dos cursos e loading agora
+  // Hook gerencia o estado dos cursos e loading
   const { 
     courses, 
     loading, 
@@ -21,10 +21,10 @@ export const AdminCourseManager: React.FC = () => {
     createCourse, 
     updateCourse, 
     deleteCourse 
-  } = useCourses();
+  } = useAdminCourses();
 
   const [activeTab, setActiveTab] = useState<AdminTab>('list');
-  const [editingCourse, setEditingCourse] = useState<Course | null>(null);
+  const [editingCourse, setEditingCourse] = useState<CourseDto | null>(null);
 
   // [NOVO] Carrega os cursos ao montar o componente
   useEffect(() => {

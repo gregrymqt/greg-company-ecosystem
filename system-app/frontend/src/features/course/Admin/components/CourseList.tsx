@@ -1,7 +1,7 @@
 import React from 'react';
-import { type Course } from '@/types/models';
+import type { CourseDto } from '@/features/course/shared/types/course.types';
 import styles from '../styles/CourseList.module.scss';
-import { type CourseListProps } from '@/features/course/Admin/types/course-manager.types';
+import type { CourseListProps } from '@/features/course/Admin/types/admin-course.types';
 import { ActionMenu } from '@/components/ActionMenu/ActionMenu';
 import { type TableColumn, Table } from '@/components/Table/Table';
 
@@ -13,7 +13,7 @@ export const CourseList: React.FC<CourseListProps> = ({
   onNewClick 
 }) => {
 
-  const columns: TableColumn<Course>[] = [
+  const columns: TableColumn<CourseDto>[] = [
     { 
       header: 'Nome do Curso', 
       accessor: 'name',

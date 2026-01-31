@@ -1,26 +1,24 @@
 import React, { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './styles/CourseFeed.module.scss';
-import { CourseRow } from '@/features/course/Allow/components/CourseRow';
-import { CourseSkeleton } from '@/features/course/Allow/components/CourseSkeleton';
-import { useCourses } from '@/features/course/Allow/hooks/useCourses';
-import type { VideoCardUI } from '@/features/course/Allow/types/course.type';
+import { CourseRow } from '@/features/course/Public/components/CourseRow';
+import { CourseSkeleton } from '@/features/course/Public/components/CourseSkeleton';
+import { usePublicCourses } from '@/features/course/Public/hooks/usePublicCourses';
+import type { VideoCardUI } from '@/features/course/shared/types/course.types';
 
 
 
 export const CourseFeed: React.FC = () => {
   const navigate = useNavigate();
 
-  // 1. Consumindo o Hook:
-  // O componente não sabe o que é paginação ou observer, 
-  // ele só recebe os dados prontos e a referência 'sentinelRef' para o scroll.
+  // Consumindo o Hook refatorado
   const { 
     courses, 
     isLoading, 
     error, 
     refresh,
     sentinelRef 
-  } = useCourses(); 
+  } = usePublicCourses(); 
 
   // 2. A única responsabilidade sobre o vídeo aqui é o redirecionamento
   const handleVideoClick = useCallback((video: VideoCardUI) => {
