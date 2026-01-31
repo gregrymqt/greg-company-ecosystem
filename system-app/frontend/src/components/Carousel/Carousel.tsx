@@ -7,7 +7,7 @@ import type { SwiperOptions } from 'swiper/types';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
-import './Carousel.scss';
+import styles from './Carousel.module.scss';
 
 // Interface Genérica
 interface CarouselProps<T> {
@@ -67,8 +67,8 @@ export const Carousel = <T,>({
   if (!items || items.length === 0) return null;
 
   return (
-    <div className={`generic-carousel-wrapper ${className}`}>
-      <Swiper {...defaultOptions} className="custom-swiper">
+    <div className={`${styles.carouselWrapper} ${className}`}>
+      <Swiper {...defaultOptions} className={styles.swiper}>
         {items.map((item) => (
           <SwiperSlide key={keyExtractor(item)}>
             {/* Renderiza o conteúdo customizado aqui */}

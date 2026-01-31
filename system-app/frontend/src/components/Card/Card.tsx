@@ -1,5 +1,5 @@
 import { type ReactNode } from 'react';
-import './Card.scss';
+import styles from './Card.module.scss';
 
 // --- Interfaces dos Sub-componentes ---
 
@@ -43,7 +43,7 @@ export const Card = <T,>({
 
   return (
     <article 
-      className={`generic-card ${className}`} 
+      className={`${styles.card} ${className}`} 
       onClick={handleClick}
       // Se tiver onClick, adiciona cursor pointer
       style={onClick ? { cursor: 'pointer' } : undefined}
@@ -56,21 +56,21 @@ export const Card = <T,>({
 // --- Sub-componentes (Attached Properties) ---
 
 const Image = ({ src, alt, badge }: CardImageProps) => (
-  <div className="generic-card__image-wrapper">
+  <div className={styles.imageWrapper}>
     <img src={src} alt={alt} loading="lazy" />
-    {badge && <span className="card-badge">{badge}</span>}
+    {badge && <span className={styles.badge}>{badge}</span>}
   </div>
 );
 
 const Body = ({ title, children }: CardBodyProps) => (
-  <div className="generic-card__body">
+  <div className={styles.body}>
     <h3>{title}</h3>
-    <div className="card-content">{children}</div>
+    <div className={styles.content}>{children}</div>
   </div>
 );
 
 const Actions = ({ children }: CardActionsProps) => (
-  <div className="generic-card__actions">
+  <div className={styles.actions}>
     {children}
   </div>
 );

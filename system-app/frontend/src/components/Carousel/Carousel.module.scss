@@ -1,0 +1,46 @@
+.carouselWrapper {
+  width: 100%;
+  padding: 1rem 0 3rem;
+  position: relative;
+}
+
+.swiper {
+  padding-bottom: 2rem;
+
+  :global(.swiper-button-next),
+  :global(.swiper-button-prev) {
+    color: $primary-color;
+    background-color: rgba($bg-light, 0.8);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    box-shadow: 0 2px 5px $shadow;
+    
+    &::after {
+      font-size: 1.2rem;
+      font-weight: bold;
+    }
+
+    &:hover {
+      color: $primary-hover;
+      background-color: $bg-light;
+    }
+
+    @media (max-width: 768px) {
+      display: none;
+    }
+  }
+
+  :global(.swiper-pagination-bullet) {
+    background-color: $secondary-color;
+    opacity: 0.5;
+    transition: all $transition-speed;
+  }
+
+  :global(.swiper-pagination-bullet-active) {
+    background-color: $primary-color;
+    opacity: 1;
+    width: 20px;
+    border-radius: 4px;
+  }
+}

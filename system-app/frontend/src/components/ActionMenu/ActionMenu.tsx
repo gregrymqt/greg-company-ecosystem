@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import './ActionMenu.scss';
+import styles from './ActionMenu.module.scss';
 
 interface ActionMenuProps {
   onEdit?: () => void;      // Agora é opcional (?)
@@ -34,10 +34,10 @@ export const ActionMenu: React.FC<ActionMenuProps> = ({
   }, [isOpen]);
 
   return (
-    <div className="action-menu" ref={menuRef}>
+    <div className={styles.actionMenu} ref={menuRef}>
       {/* Gatilho */}
       <button 
-        className={`action-menu__trigger ${isOpen ? 'active' : ''}`} 
+        className={`${styles.trigger} ${isOpen ? styles.active : ''}`} 
         onClick={() => setIsOpen(!isOpen)}
         disabled={disabled}
         type="button"
@@ -52,13 +52,13 @@ export const ActionMenu: React.FC<ActionMenuProps> = ({
       {/* Dropdown Genérico */}
       {isOpen && (
         <div 
-            className="action-menu__dropdown"
+            className={styles.dropdown}
             // Garante que qualquer clique dentro do menu (edit, delete ou custom) feche o menu
             onClick={() => setIsOpen(false)} 
         >
           {/* 1. Renderiza botão de Editar se a prop existir */}
           {onEdit && (
-            <button className="action-menu__item" onClick={onEdit}>
+            <button className={styles.item} onClick={onEdit}>
               <span className="icon edit-icon">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
@@ -71,7 +71,7 @@ export const ActionMenu: React.FC<ActionMenuProps> = ({
 
           {/* 2. Renderiza botão de Deletar se a prop existir */}
           {onDelete && (
-            <button className="action-menu__item delete" onClick={onDelete}>
+            <button className={`${styles.item} ${styles.delete}`} onClick={onDelete}>
               <span className="icon delete-icon">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <polyline points="3 6 5 6 21 6"></polyline>
@@ -83,7 +83,7 @@ export const ActionMenu: React.FC<ActionMenuProps> = ({
           )}
 
           {/* Divisor se houver botões padrões E customizados */}
-          {(onEdit || onDelete) && children && <div className="action-menu__divider"></div>}
+          {(onEdit || onDelete) && children && <div className={styles.divider}></div>}
 
           {/* 3. Renderiza conteúdo customizado (seus botões de Estornar/Detalhes) */}
           {children}

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import styles from './Sidebar.module.scss';
-import type { SidebarProps } from '@/components/SideBar/types/sidebar.types';
+import type { SidebarProps } from './types/sidebar.types';
 
 export const Sidebar: React.FC<SidebarProps> = ({ 
   items, 

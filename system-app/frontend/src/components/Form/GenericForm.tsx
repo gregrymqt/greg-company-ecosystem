@@ -8,7 +8,7 @@ import  {
   type DefaultValues, 
   type FieldError 
 } from 'react-hook-form';
-import './GenericForm.scss';
+import styles from './GenericForm.module.scss';
 
 // 1. ADICIONADO 'file' NOS TIPOS ACEITOS
 export type InputType = 
@@ -57,8 +57,8 @@ export const GenericForm = <T extends FieldValues>({
   } = useForm<T>({ defaultValues });
 
   return (
-    <form className="generic-form" onSubmit={handleSubmit(onSubmit)}>
-      <div className="generic-form__grid">
+    <form className={styles.form} onSubmit={handleSubmit(onSubmit)}>
+      <div className={styles.grid}>
         
         {fields.map((field) => {
           // CORREÇÃO: Type Casting seguro para FieldError em vez de 'any'
@@ -66,12 +66,12 @@ export const GenericForm = <T extends FieldValues>({
           const errorMessage = fieldError?.message;
           
           const isCheckbox = field.type === 'checkbox';
-          const colClass = field.colSpan ? `col-span-${field.colSpan}` : 'col-span-12';
+          const colClass = field.colSpan ? `colSpan${field.colSpan}` : 'colSpan12';
 
           return (
             <div 
               key={String(field.name)} 
-              className={`form-field ${colClass} ${isCheckbox ? 'checkbox-field' : ''}`}
+              className={`${styles.field} ${styles[colClass]} ${isCheckbox ? styles.checkboxField : ''}`}
             >
               {/* Rótulo (Label) */}
               {!isCheckbox && (
@@ -151,7 +151,7 @@ export const GenericForm = <T extends FieldValues>({
 
       </div>
 
-      <button type="submit" className="submit-btn" disabled={isLoading}>
+      <button type="submit" className={styles.submitBtn} disabled={isLoading}>
         {isLoading ? (
           <span><i className="fas fa-spinner fa-spin"></i> Processando...</span>
         ) : (
