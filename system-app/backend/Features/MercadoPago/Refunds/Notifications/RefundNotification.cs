@@ -7,8 +7,8 @@ namespace MeuCrudCsharp.Features.MercadoPago.Refunds.Notifications
 {
     public class RefundNotification(
         IHubContext<RefundProcessingHub> hubContext,
-        ConnectionMapping<string> mapping)
-        : IRefundNotification
+        ConnectionMapping<string> mapping
+    ) : IRefundNotification
     {
         // 1. Injetar o ConnectionMapping
 

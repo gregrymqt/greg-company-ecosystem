@@ -16,8 +16,8 @@ namespace MeuCrudCsharp.Features.MercadoPago.Refunds.Services
         ISubscriptionRepository subscriptionRepository,
         IUnitOfWork unitOfWork,
         IHttpClientFactory httpClient,
-        ILogger<RefundService> logger)
-        : MercadoPagoServiceBase(httpClient, logger), IRefundService
+        ILogger<RefundService> logger
+    ) : MercadoPagoServiceBase(httpClient, logger), IRefundService
     {
         public async Task RequestRefundAsync(long paymentId)
         {

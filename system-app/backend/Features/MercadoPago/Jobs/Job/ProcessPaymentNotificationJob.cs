@@ -14,8 +14,8 @@ namespace MeuCrudCsharp.Features.MercadoPago.Jobs.Job;
 public class ProcessPaymentNotificationJob(
     ILogger<ProcessPaymentNotificationJob> logger,
     INotificationPayment notificationPayment,
-    ICacheService cacheService)
-    : IJob<PaymentNotificationData>
+    ICacheService cacheService
+) : IJob<PaymentNotificationData>
 {
     /// <summary>
     /// Executa o processamento da notificação de pagamento.
@@ -26,11 +26,15 @@ public class ProcessPaymentNotificationJob(
         if (resource == null || string.IsNullOrEmpty(resource.Id))
         {
             logger.LogError(
-                "Job de notificação de pagamento recebido com um PaymentId nulo ou vazio. O job será descartado.");
+                "Job de notificação de pagamento recebido com um PaymentId nulo ou vazio. O job será descartado."
+            );
             return; // Não relança para evitar retentativas desnecessárias
         }
 
-        logger.LogInformation("Iniciando processamento do job para o Payment ID: {PaymentId}", resource.Id);
+        logger.LogInformation(
+            "Iniciando processamento do job para o Payment ID: {PaymentId}",
+            resource.Id
+        );
 
         try
         {
@@ -45,7 +49,10 @@ public class ProcessPaymentNotificationJob(
             // 7. Enviar email
             await notificationPayment.VerifyAndProcessNotificationAsync(resource.Id);
 
-            logger.LogInformation("Processamento do Payment ID: {PaymentId} concluído com sucesso.", resource.Id);
+            logger.LogInformation(
+                "Processamento do Payment ID: {PaymentId} concluído com sucesso.",
+                resource.Id
+            );
 
             // Invalida cache após processamento bem-sucedido
             var cacheKey = $"payment:db:{resource.Id}";
@@ -54,7 +61,11 @@ public class ProcessPaymentNotificationJob(
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Erro ao processar notificação para o Payment ID: {PaymentId}.", resource.Id);
+            logger.LogError(
+                ex,
+                "Erro ao processar notificação para o Payment ID: {PaymentId}.",
+                resource.Id
+            );
             throw; // Relança para que o Hangfire aplique a política de retentativas
         }
     }
