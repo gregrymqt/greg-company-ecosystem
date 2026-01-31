@@ -1,0 +1,243 @@
+/**
+ * Analytics Feature - AnalyticsPage Styles
+ * Estilização mobile-first para a página de analytics
+ */
+
+
+.analyticsPage {
+  min-height: 100vh;
+  padding: $spacing-lg;
+  background-color: $bg-grey;
+  
+  @include desktop {
+    padding: $spacing-xl;
+  }
+}
+
+.pageHeader {
+  margin-bottom: $spacing-xl;
+}
+
+.pageTitle {
+  font-size: $font-size-xxl;
+  color: $text-dark;
+  font-weight: 700;
+  margin: 0 0 $spacing-sm 0;
+  
+  @include desktop {
+    font-size: calc($font-size-xxl * 1.5);
+  }
+}
+
+.pageSubtitle {
+  font-size: $font-size-base;
+  color: $text-muted;
+  margin: 0;
+  
+  @include desktop {
+    font-size: $font-size-lg;
+  }
+}
+
+.dashboardGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: $spacing-lg;
+  margin-bottom: $spacing-xl;
+  
+  @include desktop {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.dashboardCard {
+  background-color: $bg-light;
+  padding: $spacing-lg;
+  border-radius: 8px;
+  box-shadow: $shadow;
+  transition: transform $transition-speed ease, box-shadow $transition-speed ease;
+  
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: $shadow-lg;
+  }
+}
+
+.cardTitle {
+  font-size: $font-size-sm;
+  color: $text-muted;
+  text-transform: uppercase;
+  font-weight: 600;
+  margin: 0 0 $spacing-sm 0;
+  letter-spacing: 0.5px;
+}
+
+.cardValue {
+  font-size: $font-size-xxl;
+  color: $text-dark;
+  font-weight: 700;
+  margin: 0;
+  
+  &.success {
+    color: $success-color;
+  }
+  
+  &.danger {
+    color: $danger-color;
+  }
+  
+  &.warning {
+    color: $warning-color;
+  }
+  
+  @include desktop {
+    font-size: calc($font-size-xxl * 1.5);
+  }
+}
+
+.cardSubtext {
+  font-size: $font-size-sm;
+  color: $text-muted;
+  margin: $spacing-sm 0 0 0;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+  margin-bottom: $spacing-xl;
+  
+  @include desktop {
+    flex-direction: row;
+    justify-content: flex-end;
+  }
+}
+
+.btn {
+  padding: $spacing-md $spacing-lg;
+  border: none;
+  border-radius: 4px;
+  font-size: $font-size-base;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all $transition-speed ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-sm;
+  
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  
+  &.primary {
+    background-color: $primary-color;
+    color: $text-light;
+    
+    &:hover:not(:disabled) {
+      background-color: $primary-hover;
+    }
+  }
+  
+  &.secondary {
+    background-color: $secondary-color;
+    color: $text-light;
+    
+    &:hover:not(:disabled) {
+      background-color: darken($secondary-color, 10%);
+    }
+  }
+  
+  &.success {
+    background-color: $success-color;
+    color: $text-light;
+    
+    &:hover:not(:disabled) {
+      background-color: darken($success-color, 10%);
+    }
+  }
+}
+
+.filterSection {
+  background-color: $bg-light;
+  padding: $spacing-lg;
+  border-radius: 8px;
+  box-shadow: $shadow;
+  margin-bottom: $spacing-xl;
+}
+
+.filterTitle {
+  font-size: $font-size-lg;
+  color: $text-dark;
+  font-weight: 600;
+  margin: 0 0 $spacing-md 0;
+}
+
+.filterGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: $spacing-md;
+  
+  @include desktop {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.filterInput {
+  padding: $spacing-md;
+  border: 1px solid $border-color;
+  border-radius: 4px;
+  font-size: $font-size-base;
+  transition: border-color $transition-speed ease;
+  
+  &:focus {
+    outline: none;
+    border-color: $primary-color;
+  }
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+  font-size: $font-size-lg;
+  color: $text-muted;
+}
+
+.error {
+  background-color: rgba($danger-color, 0.1);
+  color: $danger-color;
+  padding: $spacing-lg;
+  border-radius: 4px;
+  margin-bottom: $spacing-xl;
+  text-align: center;
+}
+
+// Mobile-First: Ajustes para telas pequenas
+@media (max-width: $breakpoint-md) {
+  .analyticsPage {
+    padding: $spacing-md;
+  }
+  
+  .pageTitle {
+    font-size: $font-size-lg;
+  }
+  
+  .pageSubtitle {
+    font-size: $font-size-sm;
+  }
+  
+  .dashboardCard {
+    padding: $spacing-md;
+  }
+  
+  .cardValue {
+    font-size: $font-size-lg;
+  }
+  
+  .filterSection {
+    padding: $spacing-md;
+  }
+}

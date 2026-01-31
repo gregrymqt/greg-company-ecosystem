@@ -25,6 +25,7 @@ import { AdminAboutPage } from "@/pages/About/AdminAboutPage";
 import { AdminHomePage } from "@/pages/Home/AdminHomePage";
 import { MainLayout } from "@/components/layout/components/MainLayout";
 import { PlanFeed } from "@/pages/Plans/PlanFeed";
+import { AnalyticsPage } from "@/pages/Analytics/AnalyticsPage";
 
 export const AppRoutes = () => {
   return (
@@ -67,6 +68,7 @@ export const AppRoutes = () => {
           <Route path="/admin/About" element={<AdminAboutPage />} />
           <Route path="/admin/Home" element={<AdminHomePage />} />
           <Route path="/admin/planos" element={<PlansAdmin />} />
+          <Route path="/admin/analytics" element={<AnalyticsPage />} />
         </Route>
 
         {/* Nível 3: Manager OU Admin */}

@@ -1,0 +1,55 @@
+# ============================================================
+# GREG COMPANY ECOSYSTEM - DOCKER BUILD EXCLUSIONS
+# ============================================================
+
+# Python virtual environments
+.venv
+venv
+env
+ENV
+
+# Python cache
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Logs
+logs/
+*.log
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Outputs temporários
+bi-dashboard/output/
+uploads/
+
+# Node modules (frontend já tem seu próprio .dockerignore)
+node_modules/
+
+# .NET build artifacts
+**/bin/
+**/obj/
+
+# Documentation
+README.md
+*.md
+docs/
+
+# Development scripts
+shell/

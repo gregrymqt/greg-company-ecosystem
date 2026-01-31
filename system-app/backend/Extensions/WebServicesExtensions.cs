@@ -1,5 +1,6 @@
 using MercadoPago.Config;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Polly;
 
 namespace MeuCrudCsharp.Extensions;
@@ -20,7 +21,7 @@ public static class WebServicesExtensions
         var mercadoPagoSettings = builder
             .Configuration.GetSection("MercadoPago")
             .Get<MercadoPagoSettings>();
-            
+
         if (mercadoPagoSettings is null || string.IsNullOrEmpty(mercadoPagoSettings.AccessToken))
         {
             throw new InvalidOperationException(
@@ -28,8 +29,8 @@ public static class WebServicesExtensions
             );
         }
 
-        builder.Services
-            .AddHttpClient(
+        builder
+            .Services.AddHttpClient(
                 "MercadoPagoClient",
                 client =>
                 {
@@ -94,7 +95,7 @@ public static class WebServicesExtensions
             if (generalSettings is null || string.IsNullOrEmpty(generalSettings.BaseUrl))
             {
                 throw new InvalidOperationException(
-                    "Configurações do Mercado Pago não encontradas ou o AccessToken está vazio."
+                    "Configurações do General não encontradas ou o BaseUrl está vazio."
                 );
             }
             options.AddPolicy(
@@ -125,6 +126,41 @@ public static class WebServicesExtensions
         builder.ConfigureCookiePolicies();
 
         return builder;
+    }
+
+    /// <summary>
+    /// Middleware customizado para a Greg Company:
+    /// Envia logs de rede em tempo real para o servidor MCP na porta 8888.
+    /// </summary>
+    public static IApplicationBuilder UseGregNetworkMonitoring(this IApplicationBuilder app)
+    {
+        return app.Use(
+            async (context, next) =>
+            {
+                // Deixa a requisição seguir o fluxo normal
+                await next();
+
+                // Após a resposta, capturamos os dados para o monitor
+                var logData = new
+                {
+                    source = "Back", // Identifica que o log veio do C# no porto 5045
+                    method = context.Request.Method,
+                    url = context.Request.Path.Value,
+                    status = context.Response.StatusCode,
+                };
+
+                try
+                {
+                    using var client = new HttpClient();
+                    // Envia para o coletor que criamos anteriormente
+                    await client.PostAsJsonAsync("http://localhost:8888/log", logData);
+                }
+                catch
+                {
+                    // Falha silenciosa: não interrompe o app se o monitor MCP estiver fechado
+                }
+            }
+        );
     }
 
     /// <summary>

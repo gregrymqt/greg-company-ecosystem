@@ -1,0 +1,129 @@
+/**
+ * Analytics Feature - AnalyticsCarousel Styles
+ * Estilização mobile-first para o carrossel de analytics
+ */
+
+
+.analyticsCarousel {
+  padding: $spacing-lg;
+  background-color: $bg-light;
+  border-radius: 8px;
+  box-shadow: $shadow;
+  margin: $spacing-lg 0;
+}
+
+.header {
+  margin-bottom: $spacing-lg;
+  
+  @include desktop {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
+.title {
+  font-size: $font-size-lg;
+  color: $text-dark;
+  font-weight: 700;
+  margin: 0 0 $spacing-md 0;
+  
+  @include desktop {
+    font-size: $font-size-xxl;
+    margin: 0;
+  }
+}
+
+.stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-md;
+  
+  @include desktop {
+    gap: $spacing-lg;
+  }
+}
+
+.stat {
+  font-size: $font-size-sm;
+  color: $text-muted;
+  
+  strong {
+    font-size: $font-size-base;
+    color: $text-dark;
+    margin-left: 0.25rem;
+  }
+  
+  &.critical strong {
+    color: $danger-color;
+  }
+  
+  &.healthy strong {
+    color: $success-color;
+  }
+  
+  @include desktop {
+    font-size: $font-size-base;
+    
+    strong {
+      font-size: $font-size-lg;
+    }
+  }
+}
+
+.carousel {
+  // Customizações específicas do Swiper se necessário
+  :global {
+    .swiper-button-next,
+    .swiper-button-prev {
+      color: $primary-color;
+      
+      &:hover {
+        color: $primary-hover;
+      }
+    }
+    
+    .swiper-pagination-bullet-active {
+      background-color: $primary-color;
+    }
+  }
+}
+
+.emptyState {
+  text-align: center;
+  padding: $spacing-xxl;
+  color: $text-muted;
+  
+  p {
+    font-size: $font-size-lg;
+    margin: 0;
+  }
+  
+  @include desktop {
+    padding: $spacing-xxl * 2;
+  }
+}
+
+// Mobile-First: Ajustes para telas pequenas
+@media (max-width: $breakpoint-md) {
+  .analyticsCarousel {
+    padding: $spacing-md;
+    margin: $spacing-md 0;
+  }
+  
+  .title {
+    font-size: $font-size-md;
+  }
+  
+  .stats {
+    gap: $spacing-sm;
+  }
+  
+  .stat {
+    font-size: 0.75rem;
+    
+    strong {
+      font-size: $font-size-sm;
+    }
+  }
+}

@@ -45,6 +45,9 @@ public static class PipelineExtensions
         app.UseRouting();
         app.UseCors(WebServicesExtensions.CorsPolicyName);
 
+        // --- 3.5. Monitoramento de Rede (MCP) ---
+        app.UseGregNetworkMonitoring();
+
         // --- 4. Autenticação e Autorização ---
         app.UseAuthFeatures();
 

@@ -11,7 +11,7 @@ This is a **multi-service business suite** with three core components:
 ## Backend (C# / .NET 8)
 
 ### Architecture Pattern: Clean Architecture with Vertical Slice
-- **Features-first organization**: All features live under `Features/` directory (Auth, Courses, MercadoPago, Support, Videos, etc.)
+- **Features-first organization**: All features live under `Features/` directory (Auth, Authorization, Courses, MercadoPago, Support, Videos, etc.)
 - Each feature contains its own: Controllers, Services, Repositories, ViewModels, DTOs
 - **Extension-based startup**: `Program.cs` uses extension methods from `Extensions/` for clean dependency registration
   - `AddApplicationServices()` - Registers services/repos using Scrutor scanning
@@ -43,7 +43,7 @@ When adding new features: create `Services/` and `Repositories/` folders followi
 ### Logging
 - **Serilog** configured in `Program.cs` with dual output:
   - Console
-  - File (`log/log-{date}.txt`) with shared file access for MCP server reads
+  - File (`log/log-.txt` with daily rolling interval) with shared file access for MCP server reads
 
 ## Frontend (React + TypeScript + Vite)
 
@@ -54,6 +54,8 @@ When adding new features: create `Services/` and `Repositories/` folders followi
 - **Real-time**: SignalR for live notifications/updates
 - **Payments**: MercadoPago SDK React (`@mercadopago/sdk-react`)
 - **Styling**: Sass modules
+- **UI Components**: Lucide React (icons), SweetAlert2 (modals/alerts), Swiper (carousels)
+- **Video Streaming**: HLS.js for adaptive video playback
 
 ### Project Structure
 ```
@@ -145,7 +147,7 @@ These enable AI tools to understand project conventions and debug issues via log
 
 ### Error Handling
 - Validation errors return structured responses
-- Serilog captures exceptions to both console and file logs (check `logs/` directory)
+- Serilog captures exceptions to both console and file logs (check `log/` directory)
 
 ### Testing & Debugging
 - Backend: Run `dotnet run` from `system-app/backend/`

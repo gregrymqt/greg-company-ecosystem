@@ -2,9 +2,9 @@ import requests
 import os
 from typing import List, Dict
 from dotenv import load_dotenv
-from ..interfaces.Iproduct_exporter import IProductExporter
-from ..models.cleaned_product_dto import CleanedProductDTO
-from ..controllers.notion_controller import NotionController
+from ...interfaces.Iproduct_exporter import IProductExporter
+from ...models.cleaned_product_dto import CleanedProductDTO
+from ...controllers.notion_controller import NotionController
 
 load_dotenv()
 

@@ -1,10 +1,16 @@
+import sys
 from mcp.server.fastmcp import FastMCP
 import docker # Biblioteca para conversar com o Docker Desktop
 import os
 
 mcp = FastMCP("GregCompany-Logs")
-client = docker.from_env() # Conecta no seu Docker Desktop automaticamente
-
+try:
+    client = docker.from_env()
+except Exception:
+    client = None
+    print("AVISO: Docker Desktop não detectado. As ferramentas de log estarão indisponíveis.", file=sys.stderr)
+    
+    
 @mcp.tool()
 def ler_logs_servico(nome_servico: str, linhas: int = 20):
     """
@@ -23,7 +29,7 @@ def ler_logs_servico(nome_servico: str, linhas: int = 20):
 @mcp.tool()
 def analisar_saude_infra():
     """Verifica se todos os bancos e o cache estão rodando."""
-    servicos = ['mssql-db', 'mongodb-store', 'redis-cache']
+    servicos = ['mssql-db', 'mongodb-store', 'redis-cache', 'backend-api']
     status_geral = ""
     for s in servicos:
         try:

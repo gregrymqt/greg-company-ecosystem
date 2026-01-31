@@ -21,6 +21,7 @@ export class ApiError extends Error {
   }
 }
 
+// --- 2. FUNÇÃO AUXILIAR PARA CONVERTER OBJETO EM FORM-DATA ---
 const toFormData = <T extends Record<string, unknown>>(
   data: T,
   files?: File | File[] | FileList | null, // Aceita 1 ou vários
@@ -86,8 +87,19 @@ const getHeaders = (isFormData = false): HeadersInit => {
   return headers;
 };
 
-// --- 4. TRATAMENTO DE RESPOSTA E ERROS ---
-const handleResponse = async <T>(response: Response): Promise<T> => {
+// --- 4. REPORTA ERROS PARA O MCP ---
+const reportToMcp = (url: string, method: string, status: number) => {
+  fetch("http://localhost:8888/log", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ source: "Front", url, method, status }),
+  }).catch(() => {}); // Ignora se o MCP estiver desligado
+};
+
+
+// --- 5. FUNÇÃO AUXILIAR PARA TRATAR RESPOSTAS ---
+const handleResponse = async <T>(response: Response, method: string): Promise<T> => {
+  reportToMcp(response.url, method, response.status);
   let data: unknown = null;
   const contentType = response.headers.get("content-type");
 
@@ -147,7 +159,7 @@ const handleResponse = async <T>(response: Response): Promise<T> => {
   throw new ApiError(response.status, errorMessage, data);
 };
 
-// --- 5. O WRAPPER API (MÉTODOS) ---
+// --- 6. O WRAPPER API (MÉTODOS) ---
 export const ApiService = {
   // --- MÉTODOS JSON PADRÃO ---
 
@@ -161,7 +173,7 @@ export const ApiService = {
       method: "GET",
       headers: headers as HeadersInit,
     });
-    return await handleResponse<T>(response);
+    return await handleResponse<T>(response, "GET");
   },
 
   post: async <TResponse, TBody = unknown>(
@@ -179,7 +191,7 @@ export const ApiService = {
       headers: headers as HeadersInit,
       body: JSON.stringify(body),
     });
-    return await handleResponse<TResponse>(response);
+    return await handleResponse<TResponse>(response, "POST");
   },
 
   put: async <TResponse, TBody = unknown>(
@@ -197,7 +209,7 @@ export const ApiService = {
       headers: headers as HeadersInit,
       body: JSON.stringify(body),
     });
-    return await handleResponse<TResponse>(response);
+    return await handleResponse<TResponse>(response, "PUT");
   },
 
   delete: async <T>(endpoint: string, options?: RequestInit): Promise<T> => {
@@ -210,7 +222,7 @@ export const ApiService = {
       method: "DELETE",
       headers: headers as HeadersInit,
     });
-    return await handleResponse<T>(response);
+    return await handleResponse<T>(response, "DELETE");
   },
 
   /**
@@ -271,7 +283,7 @@ export const ApiService = {
       headers: headers as HeadersInit,
       body: formData,
     });
-    return await handleResponse<TResponse>(response);
+    return await handleResponse<TResponse>(response, "POST");
   },
 
   // Faça o mesmo para o putWithFile se desejar
@@ -316,6 +328,6 @@ export const ApiService = {
       headers: headers as HeadersInit,
       body: formData,
     });
-    return await handleResponse<TResponse>(response);
+    return await handleResponse<TResponse>(response, "PUT");
   },
 };

@@ -1,0 +1,876 @@
+===============================================================================
+           TODAS AS MODELS DO BACKEND - GREG COMPANY ECOSYSTEM
+===============================================================================
+
+Data de Geração: 31/01/2026
+Localização: system-app/backend/Models/
+
+===============================================================================
+                              MODELS/ABOUT.CS
+===============================================================================
+
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace MeuCrudCsharp.Models
+{
+    // Tabela para Seções de Texto Genéricas
+    [Table("AboutSections")]
+    public class AboutSection
+    {
+        [Key]
+        public int Id { get; set; }
+
+        // Pode ser útil para ordenar as seções na tela
+        public int OrderIndex { get; set; }
+
+        [Required]
+        [MaxLength(200)]
+        public string Title { get; set; } = string.Empty;
+
+        public string Description { get; set; } = string.Empty; // Pode ser HTML ou Texto longo
+
+        public string ImageUrl { get; set; } = string.Empty; // URL vinda do upload
+
+        public int? FileId { get; set; } // FK opcional para rastrear o arquivo
+
+        public string ImageAlt { get; set; } = string.Empty;
+    }
+
+    // Tabela para Membros da Equipe
+    [Table("AboutTeamMembers")]
+    public class TeamMember
+    {
+        [Key]
+        public int Id { get; set; }
+
+        [Required]
+        [MaxLength(100)]
+        public string Name { get; set; } = string.Empty;
+
+        [MaxLength(100)]
+        public string Role { get; set; } = string.Empty;
+
+        public string PhotoUrl { get; set; } = string.Empty; // URL vinda do upload
+
+        public int? FileId { get; set; } // FK opcional para rastrear o arquivo
+
+        [MaxLength(200)]
+        public string? LinkedinUrl { get; set; } // Nullable
+
+        [MaxLength(200)]
+        public string? GithubUrl { get; set; } // Nullable
+    }
+}
+
+
+===============================================================================
+                            MODELS/APPROLES.CS
+===============================================================================
+
+namespace MeuCrudCsharp.Models;
+
+public static class AppRoles
+{
+    public const string Admin = "Admin";
+    public const string User = "User";
+    public const string Manager = "Manager";
+}
+
+
+===============================================================================
+                           MODELS/CHARGEBACK.CS
+===============================================================================
+
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
+
+namespace MeuCrudCsharp.Models;
+
+/// <summary>
+/// Define o status interno de um chargeback para acompanhamento.
+/// </summary>
+public enum ChargebackStatus
+{
+    [Display(Name = "Novo")]
+    Novo, // O chargeback acabou de ser registrado e aguarda análise inicial.
+
+    [Display(Name = "Aguardando Evidências")]
+    AguardandoEvidencias, // A equipe precisa coletar e enviar as evidências para a disputa.
+
+    [Display(Name = "Evidências Enviadas")]
+    EvidenciasEnviadas, // As evidências foram enviadas e aguardamos a resolução.
+
+    [Display(Name = "Ganhamos")]
+    Ganhamos, // A disputa foi resolvida a nosso favor.
+
+    [Display(Name = "Perdemos")]
+    Perdemos, // A disputa foi resolvida a favor do cliente.
+}
+
+/// <summary>
+/// Representa uma notificação de chargeback recebida do Mercado Pago.
+/// </summary>
+[Index(nameof(ChargebackId), IsUnique = true)]
+[Index(nameof(PaymentId))]
+[Index(nameof(UserId))]
+public class Chargeback
+{
+    [Key]
+    public int Id { get; set; }
+
+    /// <summary>
+    /// ID do chargeback no Mercado Pago (vem de `data.id`).
+    /// </summary>
+    [Required]
+    public long ChargebackId { get; set; }
+
+    /// <summary>
+    /// ID do pagamento associado ao chargeback (vem de `data.payment_id`).
+    /// </summary>
+    [Required]
+    public long PaymentId { get; set; }
+
+    /// <summary>
+    /// FK para o usuário que realizou o pagamento original.
+    /// </summary>
+    public string? UserId { get; set; }
+
+    [ForeignKey("UserId")]
+    public virtual Users? User { get; set; }
+
+    /// <summary>
+    /// Status interno para acompanhamento da equipe.
+    /// </summary>
+    [Required]
+    public ChargebackStatus Status { get; set; } = ChargebackStatus.Novo;
+
+    /// <summary>
+    /// Valor do chargeback. Este campo precisará ser preenchido consultando a API do MP.
+    /// </summary>
+    [Column(TypeName = "decimal(10, 2)")]
+    public decimal Amount { get; set; }
+
+    /// <summary>
+    /// Data em que o registro foi criado no banco de dados.
+    /// </summary>
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    /// <summary>
+    /// Campo de texto para notas internas da equipe sobre o chargeback.
+    /// </summary>
+    public string? InternalNotes { get; set; }
+}
+
+
+===============================================================================
+                             MODELS/CLAIMS.CS
+===============================================================================
+
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using MeuCrudCsharp.Models.Enums;
+
+namespace MeuCrudCsharp.Models
+{
+    // Seu status interno
+    public enum InternalClaimStatus
+    {
+        [Display(Name = "Novo")]
+        Novo,
+
+        [Display(Name = "Em Análise")]
+        EmAnalise,
+
+        [Display(Name = "Respondido pelo Vendedor")]
+        RespondidoPeloVendedor,
+
+        [Display(Name = "Resolvido - Ganhamos")]
+        ResolvidoGanhamos,
+
+        [Display(Name = "Resolvido - Perdemos")]
+        ResolvidoPerdemos
+    }
+
+    public class Claims
+    {
+        [Key]
+        public int Id { get; set; } // ID Interno do Banco
+
+        // Este é o ID real que o MP usa (ex: 5012391221)
+        [Required]
+        public long MpClaimId { get; set; }
+
+        // ID do pagamento vinculado (Resource ID)
+        public string? ResourceId { get; set; }
+
+        // Agora usando o Enum forte em vez de string
+        [Required]
+        [Column(TypeName = "nvarchar(50)")] // Salva como string no banco para legibilidade
+        public ClaimType Type { get; set; } // "mediations", "cancel_purchase" etc
+
+        // Agora usando o Enum forte em vez de string
+        [Column(TypeName = "nvarchar(50)")]
+        public ClaimResource? ResourceType { get; set; } // "payment", "subscription" etc
+
+        // Novo campo sugerido para guardar o status original do MP (opened/closed) separadamente do seu status interno
+        [Column(TypeName = "nvarchar(20)")]
+        public ClaimStage? CurrentStage { get; set; } // claim, dispute, etc
+
+        public DateTime DataCreated { get; set; } = DateTime.UtcNow;
+
+        // Seu status interno de controle
+        public InternalClaimStatus Status { get; set; } = InternalClaimStatus.Novo; 
+
+        public string? MercadoPagoPanelUrl =>
+            $"https://www.mercadopago.com.br/developers/panel/notifications/claims/{MpClaimId}"; 
+
+        [ForeignKey("user_id")]
+        public string? UserId { get; set; }
+    
+        public virtual Users? User { get; set; }
+    }
+}
+
+
+===============================================================================
+                             MODELS/COURSE.CS
+===============================================================================
+
+using System.ComponentModel.DataAnnotations;
+using Microsoft.EntityFrameworkCore;
+
+namespace MeuCrudCsharp.Models
+{
+    [Index(nameof(Name), IsUnique = true)]
+    public class Course
+    {
+        [Key]
+        public int Id { get; set; }
+
+        public Guid PublicId { get; set; } = Guid.NewGuid();
+
+        [Required]
+        [MaxLength(200)]
+        public string Name { get; set; } = string.Empty;
+
+        [Required]
+        [MaxLength(200)]
+        public string Description { get; set; } = string.Empty;
+
+        // Propriedade de navegação para a lista de vídeos que pertencem a este curso
+        public virtual ICollection<Video> Videos { get; set; } = new List<Video>();
+    }
+}
+
+
+===============================================================================
+                          MODELS/ENTITYFILE.CS
+===============================================================================
+
+using System;
+
+namespace MeuCrudCsharp.Models;
+
+public class EntityFile
+{
+    public int Id { get; set; }
+    public required string NomeArquivo { get; set; } // Ex: "guid_relatorio.pdf"
+    public required string CaminhoRelativo { get; set; } // Ex: "uploads/Financeiro/guid_relatorio.pdf"
+    public required string ContentType { get; set; } // Ex: "application/pdf", "image/png"
+    public required string FeatureCategoria { get; set; } // Ex: "Financeiro", "Perfil", "VideosAula"
+    public long TamanhoBytes { get; set; } // Útil para validações
+}
+
+
+===============================================================================
+                              MODELS/HOME.CS
+===============================================================================
+
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace MeuCrudCsharp.Models
+{
+    // Tabela para o Carrossel
+    [Table("HomeHeroes")]
+    public class HomeHero
+    {
+        [Key]
+        public int Id { get; set; }
+
+        [Required]
+        [MaxLength(200)]
+        public string Title { get; set; } = string.Empty;
+
+        [MaxLength(200)]
+        public string Subtitle { get; set; } = string.Empty;
+
+        // Aqui você guarda o caminho final, ex: "/uploads/home/banner1.jpg"
+        public string ImageUrl { get; set; } = string.Empty;
+
+        public int? FileId { get; set; } // FK opcional para rastrear o arquivo
+
+        [MaxLength(50)]
+        public string ActionText { get; set; } = string.Empty; // Texto do botão
+
+        [MaxLength(500)]
+        public string ActionUrl { get; set; } = string.Empty; // Link do botão
+    }
+
+    // Tabela para os Serviços
+    [Table("HomeServices")]
+    public class HomeService
+    {
+        [Key]
+        public int Id { get; set; }
+
+        [Required]
+        [MaxLength(50)]
+        public string IconClass { get; set; } = string.Empty;
+
+        [Required]
+        [MaxLength(100)]
+        public string Title { get; set; } = string.Empty;
+
+        [MaxLength(500)]
+        public string Description { get; set; } = string.Empty;
+
+        // Se precisar de botão nos serviços também:
+        public string ActionText { get; set; } = string.Empty;
+        public string ActionUrl { get; set; } = string.Empty;
+    }
+}
+
+
+===============================================================================
+                            MODELS/PAYMENTS.CS
+===============================================================================
+
+using System;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
+
+namespace MeuCrudCsharp.Models
+{
+    [Index(nameof(UserId))]
+    [Index(nameof(SubscriptionId))]
+    [Index(nameof(ExternalId), IsUnique = true)]
+    [Index(nameof(Status))]
+    [Index(nameof(PayerEmail))]
+    public class Payments : TransactionBase
+    {
+        [Required]
+        [MaxLength(20)]
+        public string? Method { get; set; }
+
+        [Required]
+        public int Installments { get; set; }
+
+        public DateTime? DateApproved { get; set; }
+
+        [Required]
+        public string? LastFourDigits { get; set; }
+
+        [Required]
+        [MaxLength(15)]
+        public string? CustomerCpf { get; set; }
+
+        [Required]
+        [Column(TypeName = "decimal(10, 2)")]
+        public decimal Amount { get; set; }
+
+        [Required]
+        public string Description { get; set; } = null!;
+
+        [Required]
+        public string SubscriptionId { get; set; } = null!;
+
+        [ForeignKey("SubscriptionId")]
+        public virtual Subscription? Subscription { get; set; }
+    }
+}
+
+
+===============================================================================
+                              MODELS/PLAN.CS
+===============================================================================
+
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
+
+public enum PlanFrequencyType
+{
+    Days, // Corresponde a "days" na API
+    Months, // Corresponde a "months" na API
+}
+
+namespace MeuCrudCsharp.Models
+{
+    [Index(nameof(PublicId), IsUnique = true)]
+    [Index(nameof(IsActive))]
+    public class Plan
+    {
+        [Key]
+        public int Id { get; set; }
+
+        [Required]
+        public Guid PublicId { get; set; } = Guid.NewGuid();
+
+        /// <summary>
+        /// ID do plano correspondente no Mercado Pago.
+        /// Essencial para criar assinaturas vinculadas a ele.
+        /// </summary>
+        [Required]
+        [MaxLength(255)]
+        public string ExternalPlanId { get; set; } = string.Empty;
+
+        [Required]
+        [MaxLength(100)]
+        public required string Name { get; set; }
+
+        [MaxLength(255)]
+        public string? Description { get; set; }
+
+        /// <summary>
+        /// Valor da transação/cobrança. Mapeia para "transaction_amount" na API.
+        /// </summary>
+        [Required]
+        [Column(TypeName = "decimal(10, 2)")]
+        public decimal TransactionAmount { get; set; }
+
+        /// <summary>
+        /// Moeda da transação. Mapeia para "currency_id" na API.
+        /// </summary>
+        [Required]
+        [MaxLength(10)]
+        public string CurrencyId { get; set; } = "BRL";
+
+        /// <summary>
+        /// O intervalo da recorrência. Ex: 1, 3, 6.
+        /// Mapeia para o campo "frequency" na API do Mercado Pago.
+        /// </summary>
+        [Required]
+        public int FrequencyInterval { get; set; }
+
+        /// <summary>
+        /// A unidade de tempo da recorrência (Dias ou Meses).
+        /// Mapeia para o campo "frequency_type" na API do Mercado Pago.
+        /// </summary>
+        [Required]
+        public PlanFrequencyType FrequencyType { get; set; }
+
+        [Required]
+        public bool IsActive { get; set; } = false;
+    }
+}
+
+
+===============================================================================
+                             MODELS/ROLES.CS
+===============================================================================
+
+using Microsoft.AspNetCore.Identity;
+
+namespace MeuCrudCsharp.Models
+{
+    // Criando a Model Roles herdando de IdentityRole para integração nativa
+    public class Roles : IdentityRole
+    {
+        // Você pode adicionar propriedades extras aqui se precisar, 
+        // ex: Description, CreatedAt, etc.
+        public Roles() : base() { }
+        public Roles(string roleName) : base(roleName) { }
+    }
+}
+
+
+===============================================================================
+                          MODELS/SUBSCRIPTION.CS
+===============================================================================
+
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
+
+namespace MeuCrudCsharp.Models
+{
+    [Index(nameof(UserId))]
+    [Index(nameof(PlanId))]
+    [Index(nameof(ExternalId), IsUnique = true)]
+    [Index(nameof(Status))]
+    [Index(nameof(PayerEmail))]
+    [Index(nameof(CurrentPeriodEndDate))]
+    public class Subscription : TransactionBase
+    {
+        // --- RELACIONAMENTO COM PLAN ---
+        [Required]
+        public int PlanId { get; set; }
+
+        [ForeignKey("PlanId")]
+        public virtual Plan? Plan { get; set; }
+
+        [NotMapped]
+        public Guid PlanPublicId { get; set; }
+
+        [Required]
+        public string? LastFourCardDigits { get; set; }
+
+        [Required]
+        public string? PayerMpId { get; set; }
+
+        [Required]
+        public int CurrentAmount { get; set; }
+
+        [Required]
+        public DateTime CurrentPeriodStartDate { get; set; }
+
+        [Required]
+        public DateTime CurrentPeriodEndDate { get; set; }
+
+        [Required]
+        public string? PaymentMethodId { get; set; }
+
+        public string? CardTokenId { get; set; }
+    }
+}
+
+
+===============================================================================
+                        MODELS/TRANSACTIONBASE.CS
+===============================================================================
+
+using System;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace MeuCrudCsharp.Models
+{
+    public abstract class TransactionBase
+    {
+        // A chave primária já é um Guid em formato de string, o que é seguro para expor.
+        // Neste caso, ele serve tanto como PK quanto como identificador público.
+        [Key]
+        public string Id { get; set; }
+
+        // ID externo (do Mercado Pago, por exemplo)
+        [Required]
+        public string? ExternalId { get; set; }
+
+        // A FK para o usuário já é uma string (padrão do Identity), então está correto.
+        [Required]
+        public required string UserId { get; set; }
+
+        [ForeignKey("UserId")]
+        public virtual Users? User { get; set; }
+
+        [Required]
+        [MaxLength(20)]
+        public string? Status { get; set; }
+
+        [Required]
+        [MaxLength(255)]
+        public string? PayerEmail { get; set; }
+
+        [Required]
+        public DateTime CreatedAt { get; set; }
+
+        public DateTime? UpdatedAt { get; set; }
+
+        public string? PaymentId { get; set; }
+
+        protected TransactionBase()
+        {
+            Id = Guid.NewGuid().ToString();
+            CreatedAt = DateTime.UtcNow;
+        }
+    }
+}
+
+
+===============================================================================
+                             MODELS/USERS.CS
+===============================================================================
+
+using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+
+namespace MeuCrudCsharp.Models
+{
+    [Index(nameof(GoogleId), IsUnique = true, Name = "IX_Users_GoogleId")]
+    public class Users : IdentityUser
+    {
+        public Guid PublicId { get; set; } = Guid.NewGuid();
+        public string? Name { get; set; }
+
+        // --- IMAGENS ---
+        public int? AvatarFileId { get; set; }
+        public string? AvatarUrl { get; set; }
+
+        // --- Autenticação Externa ---
+        public string? GoogleId { get; set; }
+        public string? CustomerId { get; set; }
+
+        // --- Relacionamentos ---
+        public virtual Subscription? Subscription { get; set; }
+        public virtual ICollection<Payments> Payments { get; set; } = new List<Payments>();
+    }
+}
+
+
+===============================================================================
+                             MODELS/VIDEOS.CS
+===============================================================================
+
+using System;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
+
+namespace MeuCrudCsharp.Models
+{
+    public enum VideoStatus
+    {
+        Processing, // 0
+        Available, // 1
+        Error, // 2
+    }
+
+    [Index(nameof(CourseId))]
+    [Index(nameof(PublicId), IsUnique = true)]
+    public class Video
+    {
+        [Key]
+        public int Id { get; set; }
+
+        public Guid PublicId { get; set; } = Guid.NewGuid();
+
+        [Required]
+        public required string Title { get; set; }
+
+        public required string Description { get; set; }
+
+        public required string StorageIdentifier { get; set; }
+
+        public DateTime UploadDate { get; set; }
+
+        public TimeSpan Duration { get; set; }
+
+        public VideoStatus Status { get; set; }
+
+        // --- RELACIONAMENTOS ---
+
+        // 1. Relacionamento com Curso
+        public int CourseId { get; set; }
+
+        [ForeignKey("CourseId")]
+        public virtual Course? Course { get; set; } 
+
+        // 2. Relacionamento com Arquivo
+        public int FileId { get; set; }
+
+        [ForeignKey("FileId")]
+        public virtual EntityFile? File { get; set; } 
+
+        [MaxLength(2048)]
+        public string? ThumbnailUrl { get; set; }
+
+        public Video()
+        {
+            UploadDate = DateTime.UtcNow;
+            Status = VideoStatus.Processing;
+        }
+    }
+}
+
+
+===============================================================================
+                      MODELS/ENUMS/CLAIMSENUMS.CS
+===============================================================================
+
+using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
+
+namespace MeuCrudCsharp.Models.Enums
+{
+    public enum ClaimResource
+    {
+        [Display(Name = "Pagamento")]
+        Payment,    // "payment"
+        
+        [Display(Name = "Pedido")]
+        Order,      // "order"
+        
+        [Display(Name = "Envio")]
+        Shipment,   // "shipment"
+        
+        [Display(Name = "Compra")]
+        Purchase    // "purchase"
+    }
+
+    public enum ClaimStage
+    {
+        [Display(Name = "Reclamação")]
+        Claim,      // "claim" - Fase inicial
+        
+        [Display(Name = "Disputa")]
+        Dispute,    // "dispute" - Em desacordo
+        
+        [Display(Name = "Recontato")]
+        Recontact,  // "recontact" - Após encerramento
+        
+        [Display(Name = "Nenhuma")]
+        None        // "none"
+    }
+
+    public enum ClaimType
+    {
+        [Display(Name = "Mediação")]
+        Mediations,      // "mediations"
+        
+        [Display(Name = "Cancelamento de Compra")]
+        CancelPurchase,  // "cancel_purchase"
+        
+        [Display(Name = "Devolução")]
+        Return,          // "return"
+        
+        [Display(Name = "Cancelamento de Venda")]
+        CancelSale,      // "cancel_sale"
+        
+        [Display(Name = "Alteração")]
+        Change           // "change"
+    }
+
+    public enum MpClaimStatus
+    {
+        [Display(Name = "Aberto")]
+        Opened, // "opened"
+        
+        [Display(Name = "Fechado")]
+        Closed  // "closed"
+    }
+}
+
+
+===============================================================================
+                   MODELS/ENUMS/SUBSCRIPTIONSTATUS.CS
+===============================================================================
+
+using System;
+
+namespace MeuCrudCsharp.Models.Enums;
+
+public enum SubscriptionStatus
+{
+    Pending,
+    Authorized, // O equivalente a "active" no MP
+    Paused,
+    Cancelled,
+    Unknown,
+}
+
+public static class SubscriptionStatusExtensions
+{
+    public static string ToMpString(this SubscriptionStatus status)
+    {
+        return status switch
+        {
+            SubscriptionStatus.Pending => "pending",
+            SubscriptionStatus.Authorized => "authorized",
+            SubscriptionStatus.Paused => "paused",
+            SubscriptionStatus.Cancelled => "cancelled",
+            _ => "unknown",
+        };
+    }
+
+    public static SubscriptionStatus FromMpString(string status)
+    {
+        return status.ToLower() switch
+        {
+            "pending" => SubscriptionStatus.Pending,
+            "authorized" => SubscriptionStatus.Authorized,
+            "paused" => SubscriptionStatus.Paused,
+            "cancelled" => SubscriptionStatus.Cancelled,
+            _ => SubscriptionStatus.Unknown,
+        };
+    }
+}
+
+
+===============================================================================
+              DOCUMENTS/MODELS/SUPPORTTICKETDOCUMENT.CS (MONGODB)
+===============================================================================
+
+using MeuCrudCsharp.Documents.Interfaces;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
+
+namespace MeuCrudCsharp.Documents.Models
+{
+    public class SupportTicketDocument : IMongoDocument
+    {
+        public static string CollectionName => "support_tickets";
+
+        // O Id do Mongo é gerado automaticamente
+        [BsonId]
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string Id { get; set; }
+
+        // Referência ao ID do usuário no seu SQL (Identity)
+        [BsonElement("userId")]
+        public required string UserId { get; set; }
+
+        // O "Assunto" ou Categoria (ex: Financeiro, Bug, Dúvida)
+        [BsonElement("context")]
+        public required string Context { get; set; }
+
+        // A mensagem detalhada do usuário
+        [BsonElement("explanation")]
+        public required string Explanation { get; set; }
+
+        // Campos de controle
+        [BsonElement("status")]
+        public string Status { get; set; } = "Open"; // Open, InProgress, Closed
+
+        [BsonElement("createdAt")]
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    }
+}
+
+
+===============================================================================
+                              RESUMO ESTATÍSTICO
+===============================================================================
+
+Total de Arquivos de Models: 17
+
+MODELS SQL SERVER (Entity Framework):
+- About.cs (2 classes: AboutSection, TeamMember)
+- AppRoles.cs (1 classe estática)
+- Chargeback.cs (1 enum + 1 classe)
+- Claims.cs (1 enum + 1 classe)
+- Course.cs (1 classe)
+- EntityFile.cs (1 classe)
+- Home.cs (2 classes: HomeHero, HomeService)
+- Payments.cs (1 classe)
+- Plan.cs (1 enum + 1 classe)
+- Roles.cs (1 classe)
+- Subscription.cs (1 classe)
+- TransactionBase.cs (1 classe abstrata)
+- Users.cs (1 classe)
+- Videos.cs (1 enum + 1 classe)
+
+ENUMS:
+- ClaimsEnums.cs (4 enums)
+- SubscriptionStatus.cs (1 enum + 1 classe de extensões)
+
+MODELS MONGODB:
+- SupportTicketDocument.cs (1 classe)
+
+===============================================================================
+                              FIM DO ARQUIVO
+===============================================================================

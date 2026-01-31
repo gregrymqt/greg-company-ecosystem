@@ -1,0 +1,110 @@
+/**
+ * Analytics Feature - ProductCard Styles
+ * Estilização mobile-first para cards de produtos
+ */
+
+
+.productCard {
+  height: 100%;
+  transition: transform $transition-speed ease, box-shadow $transition-speed ease;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: $shadow-lg;
+  }
+}
+
+.productInfo {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+  margin-top: $spacing-sm;
+}
+
+.infoRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-sm 0;
+  border-bottom: 1px solid $border-color;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.label {
+  font-size: $font-size-sm;
+  color: $text-muted;
+  font-weight: 500;
+}
+
+.value {
+  font-size: $font-size-base;
+  color: $text-dark;
+  font-weight: 600;
+  
+  &.critical {
+    color: $warning-color;
+  }
+  
+  &.outOfStock {
+    color: $danger-color;
+  }
+  
+  &.refill {
+    color: $warning-color;
+  }
+  
+  &.ok {
+    color: $success-color;
+  }
+}
+
+.badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  font-size: $font-size-sm;
+  font-weight: 700;
+  text-transform: uppercase;
+  
+  &.critical {
+    background-color: rgba($warning-color, 0.1);
+    color: $warning-color;
+  }
+  
+  &.outOfStock {
+    background-color: rgba($danger-color, 0.1);
+    color: $danger-color;
+  }
+  
+  &.refill {
+    background-color: rgba($warning-color, 0.15);
+    color: darken($warning-color, 10%);
+  }
+  
+  &.ok {
+    background-color: rgba($success-color, 0.1);
+    color: $success-color;
+  }
+}
+
+.lastUpdate {
+  font-size: $font-size-sm;
+  color: $text-muted;
+  font-style: italic;
+  display: block;
+  text-align: right;
+  margin-top: $spacing-sm;
+}
+
+// Responsividade
+@include desktop {
+  .productInfo {
+    gap: $spacing-md;
+  }
+  
+  .infoRow {
+    padding: $spacing-md 0;
+  }
+}
