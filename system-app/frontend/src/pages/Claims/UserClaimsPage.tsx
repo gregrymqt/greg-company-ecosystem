@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useCallback } from "react";
 import styles from "./styles/ClaimsLayout.module.scss";
-import { ClaimChat } from "@/features/Claim/components/ClaimChat";
-import { ClaimsList } from "@/features/Claim/components/ClaimsList";
-import { ClaimService } from "@/features/Claim/services/claim.service";
-import type { ClaimSummary } from "@/features/Claim/types/claims.type";
+import { ClaimChat, ClaimsList } from "@/features/Claim/Public";
+import { UserClaimService } from "@/features/Claim/Public/services/userClaim.service";
+import type { ClaimSummary } from "@/features/Claim/shared";
 import { Modal } from "@/components/Modal/Modal";
-import { Sidebar } from "@/components/SideBar/components/Sidebar";
 import type { SidebarItem } from "@/components/SideBar/types/sidebar.types";
+import { Sidebar } from "@/components/SideBar";
 
 const USER_MENU: SidebarItem[] = [
   { id: "my-claims", label: "Minhas Reclamações", icon: "fas fa-list-alt" },
@@ -22,7 +21,7 @@ export const UserClaimsPage: React.FC = () => {
   const loadMyClaims = useCallback(async () => {
     setIsLoading(true);
     try {
-      const data = await ClaimService.user.getMyClaims();
+      const data = await UserClaimService.getMyClaims();
       setClaims(data);
     } catch (error) {
       console.error(error);

@@ -1,0 +1,108 @@
+// Importação moderna do módulo de variáveis conforme solicitado
+// Ajuste o caminho relativo conforme a necessidade da sua pasta
+
+.container {
+  display: flex;
+  flex-direction: column;
+  background-color: $bg-light;
+  border-radius: 8px;
+  box-shadow: $shadow;
+  border: 1px solid $border-color;
+  
+  // Mobile First: Padding menor para aproveitar tela
+  padding: $spacing-md;
+  margin-bottom: $spacing-lg;
+
+  // Ajuste para Desktop
+  @include desktop {
+    padding: $spacing-lg;
+  }
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-md;
+  padding-bottom: $spacing-sm;
+  border-bottom: 1px solid $border-color;
+
+  h2 {
+    font-size: $font-size-lg;
+    color: $text-dark;
+    font-weight: 600;
+    margin: 0;
+  }
+}
+
+// Wrapper da tabela essencial para UX Mobile
+// Permite que a tabela tenha scroll horizontal sem quebrar o layout da página
+.tableWrapper {
+  width: 100%;
+  overflow-x: auto; 
+  -webkit-overflow-scrolling: touch; // Scroll suave no iOS
+  
+  // Espaçamento interno para evitar corte de sombras ou borders
+  padding-bottom: $spacing-sm; 
+}
+
+// Estilo para o ID do MercadoPago (Visual de código)
+.monoFont {
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: $font-size-sm;
+  color: $text-muted;
+  background-color: $bg-grey;
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid rgba($border-color, 0.5);
+  white-space: nowrap; // Evita quebra de linha no ID
+}
+
+// Estilo para a coluna "Tipo" (Pill / Tag)
+.typeTag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  
+  // Estilo padrão (pode ser customizado dinamicamente, mas aqui é o default)
+  background-color: rgba($secondary-color, 0.1);
+  color: $secondary-color;
+  border: 1px solid rgba($secondary-color, 0.2);
+}
+
+// Botão de Ação "Ver Detalhes"
+.actionBtn {
+  background-color: transparent;
+  border: 1px solid $primary-color;
+  color: $primary-color;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: $font-size-sm;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all $transition-speed ease-in-out;
+
+  // Efeitos de Hover para UX
+  &:hover {
+    background-color: $primary-color;
+    color: $text-light;
+    box-shadow: 0 2px 4px rgba($primary-color, 0.2);
+  }
+
+  // Feedback visual de clique
+  &:active {
+    transform: scale(0.96);
+  }
+
+  &:focus {
+    outline: 2px solid rgba($primary-color, 0.5);
+    outline-offset: 2px;
+  }
+}

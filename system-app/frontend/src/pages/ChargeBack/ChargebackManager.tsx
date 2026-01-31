@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import styles from "./ChargebackManager.module.scss";
-import { ChargebackList } from "@/features/Chargeback/components/ChargebackList";
+import { ChargebackList } from "@/features/Chargeback/Admin";
 import { Sidebar } from "@/components/SideBar/components/Sidebar";
 import type { SidebarItem } from "@/components/SideBar/types/sidebar.types";
 

@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useCallback } from "react";
 import styles from "./styles/ClaimsLayout.module.scss";
-import { ClaimChat } from "@/features/Claim/components/ClaimChat";
-import { ClaimsList } from "@/features/Claim/components/ClaimsList";
-import { ClaimService } from "@/features/Claim/services/claim.service";
-import type { ClaimSummary } from "@/features/Claim/types/claims.type";
+import { ClaimChat, ClaimsList } from "@/features/Claim/Public";
+import { AdminClaimService } from "@/features/Claim/Admin";
+import type { ClaimSummary } from "@/features/Claim/shared";
 import { Modal } from "@/components/Modal/Modal";
-import { Sidebar } from "@/components/SideBar/components/Sidebar";
 import type { SidebarItem } from "@/components/SideBar/types/sidebar.types";
+import { Sidebar } from "@/components/SideBar";
 
 // Menu da Sidebar do Admin
 const MENU_ITEMS: SidebarItem[] = [
@@ -34,7 +33,7 @@ export const AdminClaimsPage: React.FC = () => {
           ? "mediation"
           : "opened";
 
-      const response = await ClaimService.admin.getAll(1, "", statusFilter);
+      const response = await AdminClaimService.getAll(1, "", statusFilter);
       setClaims(response.claims);
     } catch (error) {
       console.error(error);
