@@ -9,13 +9,11 @@ import { Sidebar } from "@/components/SideBar/components/Sidebar";
 // Hooks & Types
 
 import type { SidebarItem } from "@/components/SideBar/types/sidebar.types";
-import { CreditCardPayment } from "@/features/Payment/components/Credit-Card/CreditCardPayment";
-import { PixPayment } from "@/features/Payment/components/Pix/PixPayment";
-import { usePreference } from "@/features/Payment/components/Preferences/hooks/usePreference";
+import { CreditCardPayment, PixPayment, usePreference } from "@/features/Payment/Public";
 import type {
   PaymentLayoutProps,
   PaymentMethodId,
-} from "@/features/Payment/types/payment.types";
+} from "@/features/Payment/shared";
 
 export const PaymentLayout: React.FC<PaymentLayoutProps> = ({
   plan,
@@ -76,6 +74,7 @@ export const PaymentLayout: React.FC<PaymentLayoutProps> = ({
         return (
           <PixPayment
             amount={plan.amount}
+            planId={plan.id}
             planName={plan.name}
             userParams={userParams}
             onPaymentSuccess={handleSuccess}
