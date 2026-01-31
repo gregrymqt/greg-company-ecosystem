@@ -2,9 +2,7 @@ import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 
 import styles from './PlayerScreen.module.scss';
-import { VideoMetadata } from '@/features/player/components/VideoMetadata';
-import { VideoPlayerFrame } from '@/features/player/components/VideoPlayerFrame';
-import { useVideoPlayer } from '@/features/player/hooks/useVideoPlayer';
+import { VideoMetadata, VideoPlayerFrame, useVideoPlayer } from '@/features/video/Public';
 
 export const PlayerScreen: React.FC = () => {
   // 1. Pega o ID da rota (ex: /watch/guid-do-video)

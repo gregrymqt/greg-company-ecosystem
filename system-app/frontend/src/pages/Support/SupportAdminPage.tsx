@@ -1,6 +1,6 @@
 import React from 'react';
 import styles from './styles/SupportAdminPage.module.scss';
-import { SupportTicketList } from '@/features/support/components/SupportTicketList';
+import { SupportTicketList } from '@/features/support/Admin';
 
 export const SupportAdminPage: React.FC = () => {
   return (
