@@ -9,7 +9,8 @@ import type {
   UseAnalyticsState,
   AnalyticsDashboard,
   ProductMetric,
-  AnalyticsFilters 
+  AnalyticsFilters,
+  StorageStats
 } from '@/features/analytics/types/analytics.types';
 import { AlertService } from '@/shared/services/alert.service';
 
@@ -21,6 +22,8 @@ export const useAnalytics = () => {
     error: null,
     filters: {},
   });
+
+  const [storageStats, setStorageStats] = useState<StorageStats | null>(null);
 
   /**
    * Carrega dados do dashboard
@@ -128,11 +131,28 @@ export const useAnalytics = () => {
   }, [loadProducts]);
 
   /**
+   * Carrega dados de armazenamento do BI Dashboard Python
+   */
+  const loadStorageStats = useCallback(async () => {
+    try {
+      const stats = await AnalyticsService.getStorageOverview();
+      setStorageStats(stats);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Erro ao carregar dados de armazenamento';
+      console.error(errorMessage);
+      // Não exibe alerta para não poluir a UX, apenas loga
+    }
+  }, []);
+storageStats, // Novo: dados de armazenamento
+    loadDashboard,
+    loadProducts,
+    loadStorageStats, // Novo: recarregar storage manualmente se necessário
    * Carrega dados iniciais
    */
   useEffect(() => {
     loadDashboard();
-  }, [loadDashboard]);
+    loadStorageStats(); // Carrega também os dados de storage
+  }, [loadDashboard, loadStorageStats]);
 
   return {
     dashboard: state.dashboard,

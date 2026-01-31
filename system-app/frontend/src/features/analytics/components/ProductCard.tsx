@@ -6,6 +6,7 @@
 
 import { Card } from '@/components/Card/Card';
 import type { ProductMetric } from '@/features/analytics/types/analytics.types';
+import { PRODUCT_STATUS } from '@/features/analytics/types/analytics.types';
 import styles from '@/features/analytics/styles/ProductCard.module.scss';
 
 interface ProductCardProps {
@@ -18,11 +19,11 @@ export const ProductCard = ({ product, onClick }: ProductCardProps) => {
   // Define a classe CSS baseada no status
   const getStatusClass = (status: string) => {
     switch (status) {
-      case 'CRITICO':
+      case PRODUCT_STATUS.CRITICO:
         return styles.critical;
-      case 'ESGOTADO':
+      case PRODUCT_STATUS.ESGOTADO:
         return styles.outOfStock;
-      case 'REPOR':
+      case PRODUCT_STATUS.REPOR:
         return styles.refill;
       default:
         return styles.ok;

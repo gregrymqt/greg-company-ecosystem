@@ -11,7 +11,8 @@ import asyncio
 from ..core.websocket_server import setup_websocket_routes
 from ..features.claims import websocket_handlers as claims_ws
 from ..features.financial import websocket_handlers as financial_ws
-from .routes import claims_routes, financial_routes
+from .routes import claims_routes, financial_routes, storage_routes
+from ..core.infrastructure.redis_client import get_redis_client, close_redis_connection
 
 # Logging
 logging.basicConfig(
@@ -30,13 +31,15 @@ app = FastAPI(
 )
 
 
-# CORS
+# CORS - Permite acesso do Frontend React (porta 5173)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:3000",
         "http://localhost:5173",
-        "http://localhost:5045",
+        "http://127.0.0.1:5173",  # Frontend React (desenvolvimento)
+        "http://localhost:5045",   # Backend C# (caso o frontend passe por proxy)
+        "http://127.0.0.1:5045",
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -51,6 +54,7 @@ setup_websocket_routes(app)
 # Include REST routes
 app.include_router(claims_routes.router, prefix="/api/claims", tags=["Claims"])
 app.include_router(financial_routes.router, prefix="/api/financial", tags=["Financial"])
+app.include_router(storage_routes.router, prefix="/api/storage", tags=["Storage"])
 
 
 # Startup event
@@ -58,6 +62,13 @@ app.include_router(financial_routes.router, prefix="/api/financial", tags=["Fina
 async def startup_event():
     """Inicialização do app"""
     logger.info("🚀 Iniciando BI Dashboard API...")
+    
+    # Inicializa conexão com Redis (para Token Blocklist)
+    try:
+        get_redis_client()
+        logger.info("✅ Redis conectado (Token Blocklist ativo)")
+    except Exception as e:
+        logger.warning(f"⚠️  Redis não conectado: {str(e)} - Blocklist desabilitada")
     
     # Setup WebSocket handlers
     await claims_ws.setup_claims_hub_handlers()
@@ -73,6 +84,9 @@ async def startup_event():
 async def shutdown_event():
     """Shutdown do app"""
     logger.info("🛑 Encerrando BI Dashboard API...")
+    
+    # Fecha conexão com Redis
+    close_redis_connection()
 
 
 # Background tasks

@@ -1,15 +1,18 @@
 /**
  * Analytics Feature - Service Layer
- * Comunicação com FastAPI na porta 8888
+ * Comunicação com FastAPI na porta 8888 (legacy) e porta 8000 (BI Dashboard Python)
  * Herda funcionalidades do ApiService base
  */
 
-import { ApiService } from "@/shared/services/api.service";
+import { ApiService, BiApiService } from "@/shared/services/api.service";
 import type { 
   AnalyticsApiResponse, 
   AnalyticsDashboard, 
   ProductMetric,
-  AnalyticsFilters 
+  AnalyticsFilters,
+  StorageStats,
+  StorageGrowthTrend,
+  FileDetail
 } from "@/features/analytics/types/analytics.types";
 
 // Base URL do FastAPI (diferente do backend principal)
@@ -159,5 +162,50 @@ export const AnalyticsService = {
     }).catch(() => {});
 
     return await response.blob();
+  },
+
+  // ==================== STORAGE ANALYTICS (BI DASHBOARD PYTHON - PORTA 8000) ====================
+
+  /**
+   * Busca visão geral de armazenamento com breakdown por categoria
+   * @returns StorageStats com estatísticas totais e breakdown
+   */
+  getStorageOverview: async (): Promise<StorageStats> => {
+    return await BiApiService.get<StorageStats>('/api/storage/overview');
+  },
+
+  /**
+   * Busca os maiores arquivos do sistema
+   * @param limit Quantidade de arquivos a retornar (padrão: 10, máx: 100)
+   * @returns Lista de arquivos ordenada por tamanho
+   */
+  getLargestFiles: async (limit: number = 10): Promise<{ TotalResults: number; Files: FileDetail[] }> => {
+    return await BiApiService.get<{ TotalResults: number; Files: FileDetail[] }>(
+      `/api/storage/largest-files?limit=${limit}`
+    );
+  },
+
+  /**
+   * Busca arquivos de uma categoria específica
+   * @param categoria Nome da categoria (ex: 'Videos', 'Imagens')
+   * @param limit Quantidade de arquivos (padrão: 50, máx: 500)
+   * @returns Lista de arquivos filtrada por categoria
+   */
+  getFilesByCategory: async (
+    categoria: string, 
+    limit: number = 50
+  ): Promise<{ Category: string; TotalResults: number; Files: FileDetail[] }> => {
+    return await BiApiService.get<{ Category: string; TotalResults: number; Files: FileDetail[] }>(
+      `/api/storage/by-category/${encodeURIComponent(categoria)}?limit=${limit}`
+    );
+  },
+
+  /**
+   * Busca tendência de crescimento de armazenamento
+   * @param days Quantidade de dias para análise (padrão: 30, máx: 365)
+   * @returns Dados de crescimento diário + resumo
+   */
+  getStorageGrowthTrend: async (days: number = 30): Promise<StorageGrowthTrend> => {
+    return await BiApiService.get<StorageGrowthTrend>(`/api/storage/growth-trend?days=${days}`);
   },
 };

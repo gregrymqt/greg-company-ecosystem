@@ -7,7 +7,8 @@
 import { useState } from 'react';
 import { AnalyticsCarousel } from '@/features/analytics/components/AnalyticsCarousel';
 import { useAnalytics } from '@/features/analytics/hooks/useAnalytics';
-import type { AnalyticsFilters } from '@/features/analytics/types/analytics.types';
+import type { AnalyticsFilters, ProductStatus } from '@/features/analytics/types/analytics.types';
+import { PRODUCT_STATUS } from '@/features/analytics/types/analytics.types';
 import styles from './AnalyticsPage.module.scss';
 import { RefreshCw, Download, Filter } from 'lucide-react';
 
@@ -56,7 +57,7 @@ export const AnalyticsPage = () => {
       <header className={styles.pageHeader}>
         <h1 className={styles.pageTitle}>Analytics Dashboard</h1>
         <p className={styles.pageSubtitle}>
-          Monitore métricas de produtos e estoque em tempo real
+          Monitore métricas de cursos, assinaturas e engajamento em tempo real
         </p>
       </header>
 
@@ -71,25 +72,25 @@ export const AnalyticsPage = () => {
       {dashboard && (
         <div className={styles.dashboardGrid}>
           <div className={styles.dashboardCard}>
-            <h3 className={styles.cardTitle}>Total de Produtos</h3>
+            <h3 className={styles.cardTitle}>Total de Cursos</h3>
             <p className={styles.cardValue}>{dashboard.totalProducts}</p>
-            <p className={styles.cardSubtext}>Produtos cadastrados</p>
+            <p className={styles.cardSubtext}>Cursos disponíveis</p>
           </div>
 
           <div className={styles.dashboardCard}>
-            <h3 className={styles.cardTitle}>Produtos Críticos</h3>
+            <h3 className={styles.cardTitle}>Assinaturas a Expirar</h3>
             <p className={`${styles.cardValue} ${styles.danger}`}>
               {dashboard.criticalProducts}
             </p>
-            <p className={styles.cardSubtext}>Estoque baixo ou esgotado</p>
+            <p className={styles.cardSubtext}>Próximas 7 dias</p>
           </div>
 
           <div className={styles.dashboardCard}>
-            <h3 className={styles.cardTitle}>Estoque Médio</h3>
+            <h3 className={styles.cardTitle}>Alunos Ativos</h3>
             <p className={`${styles.cardValue} ${styles.success}`}>
               {dashboard.averageStock.toFixed(0)}
             </p>
-            <p className={styles.cardSubtext}>Unidades por produto</p>
+            <p className={styles.cardSubtext}>Usuários com acesso</p>
           </div>
 
           <div className={styles.dashboardCard}>
@@ -101,15 +102,15 @@ export const AnalyticsPage = () => {
                 minimumFractionDigits: 0,
               }).format(dashboard.totalRevenue)}
             </p>
-            <p className={styles.cardSubtext}>Valor total em estoque</p>
+            <p className={styles.cardSubtext}>MRR (Receita Mensal Recorrente)</p>
           </div>
 
           <div className={styles.dashboardCard}>
-            <h3 className={styles.cardTitle}>Produtos Esgotados</h3>
+            <h3 className={styles.cardTitle}>Taxa de Cancelamento</h3>
             <p className={`${styles.cardValue} ${styles.warning}`}>
-              {dashboard.outOfStockProducts}
+              {dashboard.outOfStockProducts}%
             </p>
-            <p className={styles.cardSubtext}>Necessitam reposição urgente</p>
+            <p className={styles.cardSubtext}>Churn rate do mês</p>
           </div>
 
           <div className={styles.dashboardCard}>
@@ -162,14 +163,14 @@ export const AnalyticsPage = () => {
               value={localFilters.status || ''}
               onChange={(e) => setLocalFilters({
                 ...localFilters,
-                status: e.target.value as any || undefined,
+                status: e.target.value as ProductStatus || undefined,
               })}
             >
               <option value="">Todos os Status</option>
-              <option value="OK">OK</option>
-              <option value="CRITICO">Crítico</option>
-              <option value="ESGOTADO">Esgotado</option>
-              <option value="REPOR">Repor</option>
+              <option value={PRODUCT_STATUS.OK}>Ativo</option>
+              <option value={PRODUCT_STATUS.CRITICO}>A Expirar</option>
+              <option value={PRODUCT_STATUS.ESGOTADO}>Cancelado</option>
+              <option value={PRODUCT_STATUS.REPOR}>Pausado</option>
             </select>
 
             <input
@@ -186,7 +187,7 @@ export const AnalyticsPage = () => {
             <input
               type="number"
               className={styles.filterInput}
-              placeholder="Estoque Mínimo"
+              placeholder="Alunos Mínimo"
               value={localFilters.minStock || ''}
               onChange={(e) => setLocalFilters({
                 ...localFilters,
@@ -197,7 +198,7 @@ export const AnalyticsPage = () => {
             <input
               type="number"
               className={styles.filterInput}
-              placeholder="Estoque Máximo"
+              placeholder="Alunos Máximo"
               value={localFilters.maxStock || ''}
               onChange={(e) => setLocalFilters({
                 ...localFilters,
@@ -227,11 +228,11 @@ export const AnalyticsPage = () => {
       {/* Carousel */}
       <AnalyticsCarousel 
         products={products}
-        title="Produtos em Destaque"
+        title="Cursos em Destaque"
         maxItems={12}
         autoplay={true}
         onProductClick={(product) => {
-          console.log('Produto clicado:', product);
+          console.log('Curso clicado:', product);
           // Pode abrir um modal com detalhes, navegar para outra página, etc.
         }}
       />

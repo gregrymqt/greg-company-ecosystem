@@ -5,6 +5,7 @@
 
 import { useMemo } from 'react';
 import type { ProductMetric } from '@/features/analytics/types/analytics.types';
+import { PRODUCT_STATUS } from '@/features/analytics/types/analytics.types';
 
 interface UseAnalyticsCarouselProps {
   products: ProductMetric[];
@@ -24,21 +25,21 @@ export const useAnalyticsCarousel = ({ products, maxItems = 10 }: UseAnalyticsCa
    * Produtos críticos (estoque baixo ou esgotado)
    */
   const criticalProducts = useMemo(() => {
-    return products.filter(p => p.status === 'CRITICO' || p.status === 'ESGOTADO');
+    return products.filter(p => p.status === PRODUCT_STATUS.CRITICO || p.status === PRODUCT_STATUS.ESGOTADO);
   }, [products]);
 
   /**
    * Produtos OK
    */
   const healthyProducts = useMemo(() => {
-    return products.filter(p => p.status === 'OK');
+    return products.filter(p => p.status === PRODUCT_STATUS.OK);
   }, [products]);
 
   /**
    * Produtos que precisam reposição
    */
   const refilProducts = useMemo(() => {
-    return products.filter(p => p.status === 'REPOR');
+    return products.filter(p => p.status === PRODUCT_STATUS.REPOR);
   }, [products]);
 
   /**
@@ -47,8 +48,8 @@ export const useAnalyticsCarousel = ({ products, maxItems = 10 }: UseAnalyticsCa
   const productsByStatus = useMemo(() => {
     return {
       OK: healthyProducts,
-      CRITICO: criticalProducts.filter(p => p.status === 'CRITICO'),
-      ESGOTADO: criticalProducts.filter(p => p.status === 'ESGOTADO'),
+      CRITICO: criticalProducts.filter(p => p.status === PRODUCT_STATUS.CRITICO),
+      ESGOTADO: criticalProducts.filter(p => p.status === PRODUCT_STATUS.ESGOTADO),
       REPOR: refilProducts,
     };
   }, [healthyProducts, criticalProducts, refilProducts]);
