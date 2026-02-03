@@ -1,24 +1,16 @@
-"""
-Content Feature - Schemas
-DTOs para análise de conteúdo (cursos e vídeos)
-"""
+from pydantic import BaseModel
+from typing import Optional
 
-from dataclasses import dataclass
-
-
-@dataclass
-class CourseDTO:
-    """DTO para Course"""
+class CourseDTO(BaseModel):
+    """DTO para Course (baseado no logError.md)"""
     Id: str
     Name: str
     IsActive: bool
     TotalVideos: int
 
-
-@dataclass
-class VideoDTO:
-    """DTO para Video"""
-    Id: int
-    Title: str
-    CourseId: str
-    IsActive: bool
+class ContentSummaryDTO(BaseModel):
+    """KPIs calculados de conteúdo"""
+    TotalCourses: int
+    ActiveCourses: int
+    TotalVideosLib: int # Soma de todos os vídeos
+    AvgVideosPerCourse: float

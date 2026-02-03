@@ -1,37 +1,25 @@
 """
-MongoDB Infrastructure Module
-Configuração de conexão MongoDB
+MongoDB Infrastructure Module (ASYNC)
+Usando Motor (Motor Asyncio)
 """
 
 import os
 from typing import Optional
-from pymongo import MongoClient
-from pymongo.database import Database
+from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
 from dotenv import load_dotenv
+import asyncio
 
 load_dotenv()
 
-
 class MongoDBConfig:
-    """Configuração centralizada do MongoDB"""
-    
     def __init__(self):
-        self.connection_string = os.getenv(
-            "MONGO_CONNECTION_STRING", 
-            "mongodb://localhost:27017/"
-        )
+        self.connection_string = os.getenv("MONGO_CONNECTION_STRING", "mongodb://localhost:27017/")
         self.database_name = os.getenv("MONGO_DATABASE", "GregCompanyMongo")
 
-
 class MongoDBConnection:
-    """
-    Gerenciador de conexão com MongoDB
-    Implementa Singleton pattern
-    """
-    
     _instance: Optional['MongoDBConnection'] = None
-    _client: Optional[MongoClient] = None
-    _database: Optional[Database] = None
+    _client: Optional[AsyncIOMotorClient] = None
+    _database: Optional[AsyncIOMotorDatabase] = None
     
     def __new__(cls):
         if cls._instance is None:
@@ -43,50 +31,34 @@ class MongoDBConnection:
             self._initialize_client()
     
     def _initialize_client(self):
-        """Cria e configura o client MongoDB"""
         config = MongoDBConfig()
-        
-        self._client = MongoClient(config.connection_string)
+        # Motor Client é nativamente async, mas a inicialização é síncrona (lazy)
+        self._client = AsyncIOMotorClient(config.connection_string)
         self._database = self._client[config.database_name]
-        
-        print(f"✅ MongoDB Client inicializado: {config.database_name}")
+        print(f"✅ Motor (Mongo Async) inicializado: {config.database_name}")
     
     @property
-    def database(self) -> Database:
-        """Retorna a database MongoDB"""
+    def database(self) -> AsyncIOMotorDatabase:
         if self._database is None:
             self._initialize_client()
         return self._database
     
-    def test_connection(self) -> bool:
-        """Testa a conexão com o MongoDB"""
+    async def test_connection(self) -> bool:
         try:
-            self._client.admin.command('ping')
-            print("✅ Conexão com MongoDB OK!")
+            # 'ping' precisa de await no motor
+            await self._client.admin.command('ping')
+            print("✅ Conexão Async com MongoDB OK!")
             return True
         except Exception as e:
             print(f"❌ Erro ao conectar no MongoDB: {e}")
             return False
-    
+            
     def close(self):
-        """Fecha a conexão com MongoDB"""
-        if self._client is not None:
+        if self._client:
             self._client.close()
             print("🔒 Conexão MongoDB fechada")
 
-
-# Singleton instance global
 mongo_connection = MongoDBConnection()
 
-
-def get_mongo_db() -> Database:
-    """
-    Helper function para obter database do MongoDB
-    """
+def get_mongo_db() -> AsyncIOMotorDatabase:
     return mongo_connection.database
-
-
-if __name__ == "__main__":
-    # Teste de conexão
-    print("🔧 Testando conexão com MongoDB...")
-    mongo_connection.test_connection()

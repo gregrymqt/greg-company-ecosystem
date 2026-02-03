@@ -1,39 +1,34 @@
-"""
-Support Repository
-MongoDB repository for support tickets
-"""
-
-from typing import List, Dict, Optional, Any
-from datetime import datetime, timedelta
-from pymongo.collection import Collection
-from ...core.infrastructure import get_mongo_db
-
+from typing import List, Dict, Any, Optional
+from ...core.infrastructure.database_mongo import get_mongo_db # Seu novo helper do motor
 
 class SupportRepository:
-    """Repository para tickets de suporte (MongoDB)"""
+    """
+    Repository Assíncrono para Tickets (MongoDB/Motor)
+    """
     
     COLLECTION_NAME = "support_tickets"
     
     def __init__(self):
-        db = get_mongo_db()
-        self.collection: Collection = db[self.COLLECTION_NAME]
+        # Em Motor, pegamos o DB, mas as operações são awaitables
+        self.db = get_mongo_db()
+        self.collection = self.db[self.COLLECTION_NAME]
     
-    def get_all_tickets(self, limit: Optional[int] = None) -> List[Dict[str, Any]]:
-        """Busca todos os tickets"""
+    async def get_all_tickets(self, limit: int = 50) -> List[Dict[str, Any]]:
+        """Busca tickets ordenados por data (Non-blocking)"""
+        # Motor: .find() não aceita await, mas o cursor resultante sim (para converter em lista)
         cursor = self.collection.find().sort("CreatedAt", -1)
         
-        if limit:
-            cursor = cursor.limit(limit)
+        # O Motor exige um 'length' no to_list. Se quiser todos, use um número alto ou None (cuidado com memória)
+        tickets = await cursor.to_list(length=limit)
         
-        tickets = []
-        for ticket in cursor:
-            ticket['_id'] = str(ticket['_id'])
-            tickets.append(ticket)
+        # Conversão de ObjectId para string
+        for t in tickets:
+            t['_id'] = str(t['_id'])
         
         return tickets
     
-    def get_tickets_summary(self) -> Dict[str, Any]:
-        """Resumo de tickets por status"""
+    async def get_tickets_summary(self) -> Dict[str, Any]:
+        """Agregação de status via Pipeline do Mongo"""
         pipeline = [
             {
                 "$group": {
@@ -52,7 +47,9 @@ class SupportRepository:
             }
         ]
         
-        result = list(self.collection.aggregate(pipeline))
+        # Aggregate no Motor também devolve um cursor
+        cursor = self.collection.aggregate(pipeline)
+        result = await cursor.to_list(length=1)
         
         if result:
             summary = result[0]

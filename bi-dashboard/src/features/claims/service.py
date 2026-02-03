@@ -1,43 +1,25 @@
-"""
-Claims Service
-Service layer para inteligência de Claims
-Lógica de negócio para análise de risco e disputas
-"""
-
-from typing import List, Dict, Optional, Any
+import asyncio
+from typing import List, Dict, Any
 from decimal import Decimal
 from datetime import datetime
-from .repository import ClaimsRepository
-from .schemas import ClaimAnalyticsDTO
-from .enums import InternalClaimStatus
 
+# Infra Nova
+from ...core.infrastructure.rows_client import rows_client
+from ...features.rows.service import rows_service
+from ...core.infrastructure.redis_client import get_or_create_async # <--- O SEU REDIS
+
+from .schemas import ClaimAnalyticsDTO, ClaimSummaryDTO
+from .repository import ClaimsRepository
 
 class ClaimsService:
-    """
-    Service para operações de análise de Claims
-    Implementa lógica de negócio e cálculos de métricas
-    """
-    
     def __init__(self, claims_repository: ClaimsRepository):
-        """
-        Inicializa o service com injeção de dependência
-        
-        Args:
-            claims_repository: Repositório de Claims injetado
-        """
         self.claims_repo = claims_repository
     
-    # ==================== ANALYTICS ====================
+    # ==================== ANALYTICS (Agora com Async) ====================
     
-    def get_active_claims_analytics(self) -> List[ClaimAnalyticsDTO]:
-        """
-        Retorna claims ativas em formato de analytics
-        Converte dados do repository para DTOs
-        
-        Returns:
-            Lista de ClaimAnalyticsDTO processados
-        """
-        raw_claims = self.claims_repo.get_active_claims()
+    async def get_active_claims_analytics(self) -> List[ClaimAnalyticsDTO]:
+        # Agora damos await no repo
+        raw_claims = await self.claims_repo.get_active_claims()
         
         analytics_list = []
         for claim in raw_claims:
@@ -56,162 +38,113 @@ class ClaimsService:
                 payment_status=claim.get('PaymentStatus'),
                 date_created=claim.get('DataCreated')
             )
+            analytics_dto.is_critical = (analytics_dto.days_open or 0) > 30 
             analytics_list.append(analytics_dto)
         
         return analytics_list
     
-    def calculate_revenue_at_risk(self) -> Decimal:
-        """
-        Calcula o "Faturamento em Risco"
-        Soma de todos os pagamentos com claims abertas (não resolvidas)
-        
-        Returns:
-            Valor total em risco (Decimal)
-        """
-        active_claims = self.claims_repo.get_active_claims()
-        
-        total_at_risk = Decimal('0.00')
-        for claim in active_claims:
-            amount = claim.get('AmountAtRisk')
-            if amount is not None:
-                total_at_risk += Decimal(amount)
-        
-        return total_at_risk
+    # ==================== KPIS COM REDIS CACHE ====================
     
-    def get_claims_summary_by_status(self) -> Dict[str, Any]:
+    async def get_claims_kpis(self, use_cache: bool = True) -> Dict[str, Any]:
         """
-        Retorna resumo de volumetria de claims por status
-        
-        Returns:
-            Dicionário com contagens por status e métricas agregadas
+        Retorna KPIs. Usa Redis Cache se use_cache=True.
         """
-        status_counts = self.claims_repo.get_claims_by_status()
+        cache_key = "claims:kpis:dashboard"
         
+        # Esta é a função factory que o Redis vai chamar se der Cache Miss
+        async def _calculate_kpis_from_db():
+            # Busca dados em paralelo (Scatter-Gather Pattern)
+            active_claims_task = self.get_active_claims_analytics()
+            status_counts_task = self.claims_repo.get_claims_by_status_counts()
+            
+            active_claims, status_raw = await asyncio.gather(active_claims_task, status_counts_task)
+            
+            # Processamento em Memória (Rápido)
+            summary = self._process_status_summary(status_raw)
+            critical_count = sum(1 for c in active_claims if c.is_critical)
+            revenue_risk = sum(c.amount_at_risk for c in active_claims)
+            
+            # Retorno puro (Dicionário)
+            return {
+                'active_claims_count': len(active_claims),
+                'revenue_at_risk': float(revenue_risk),
+                'avg_days_open': summary['avg_days_open'],
+                'critical_claims_count': critical_count,
+                'win_rate_percentage': summary['win_rate'],
+                'total_resolved': summary['total_resolved'],
+                'won_count': summary['won'],
+                'lost_count': summary['lost'],
+                'by_status': summary['by_status_dict']
+            }
+
+        if use_cache:
+            # A mágica acontece aqui:
+            return await get_or_create_async(cache_key, _calculate_kpis_from_db, ttl_seconds=60)
+        else:
+            return await _calculate_kpis_from_db()
+
+    # Helper interno para processar dados (não precisa ser async, é CPU puro)
+    def _process_status_summary(self, status_counts: List[Dict]) -> Dict:
         summary = {
-            'total_claims': 0,
-            'total_at_risk': Decimal('0.00'),
-            'by_status': {},
-            'avg_days_open': 0.0
+            'by_status_dict': {}, 
+            'avg_days_open': 0.0,
+            'won': 0, 
+            'lost': 0
         }
-        
         total_days = 0.0
         total_count = 0
         
-        for status_data in status_counts:
-            status = status_data['InternalStatus']
-            count = status_data['Count']
-            amount = Decimal(status_data.get('TotalAmountAtRisk', 0) or 0)
-            avg_days = status_data.get('AvgDaysOpen', 0) or 0
+        for row in status_counts:
+            status = row['InternalStatus']
+            count = row['Count']
+            avg = row['AvgDaysOpen'] or 0
             
-            summary['by_status'][status] = {
+            summary['by_status_dict'][status] = {
                 'count': count,
-                'total_amount': float(amount),
-                'avg_days_open': float(avg_days)
+                'total_amount': float(row['TotalAmountAtRisk'] or 0),
+                'avg_days_open': float(avg)
             }
             
-            summary['total_claims'] += count
-            summary['total_at_risk'] += amount
-            total_days += avg_days * count
+            total_days += avg * count
             total_count += count
-        
+            
+            if status == 'ResolvidoGanhamos': summary['won'] = count
+            if status == 'ResolvidoPerdemos': summary['lost'] = count
+
         if total_count > 0:
             summary['avg_days_open'] = total_days / total_count
-        
-        summary['total_at_risk'] = float(summary['total_at_risk'])
+            
+        summary['total_resolved'] = summary['won'] + summary['lost']
+        summary['win_rate'] = (summary['won'] / summary['total_resolved'] * 100) if summary['total_resolved'] > 0 else 0
         
         return summary
-    
-    def get_critical_claims(self) -> List[ClaimAnalyticsDTO]:
-        """
-        Retorna claims críticas (> 30 dias abertas)
-        
-        Returns:
-            Lista de ClaimAnalyticsDTO críticas ordenadas por dias abertos
-        """
-        all_claims = self.get_active_claims_analytics()
-        critical_claims = [claim for claim in all_claims if claim.is_critical]
-        
-        # Ordenar por dias abertos (decrescente)
-        critical_claims.sort(key=lambda x: x.days_open, reverse=True)
-        
-        return critical_claims
-    
-    def get_claims_by_type(self) -> Dict[str, int]:
-        """
-        Agrupa claims por tipo (ClaimType)
-        
-        Returns:
-            Dicionário com contagem por tipo de claim
-        """
-        active_claims = self.claims_repo.get_active_claims()
-        
-        type_counts = {}
-        for claim in active_claims:
-            claim_type = claim['Type']
-            type_counts[claim_type] = type_counts.get(claim_type, 0) + 1
-        
-        return type_counts
-    
-    def generate_panel_url(self, mp_claim_id: int) -> str:
-        """
-        Gera URL dinâmica do painel do MercadoPago para uma claim
-        
-        Args:
-            mp_claim_id: ID da claim no MercadoPago
-            
-        Returns:
-            URL completa do painel
-        """
-        return f"https://www.mercadopago.com.br/developers/panel/notifications/claims/{mp_claim_id}"
-    
-    # ==================== KPIs ====================
-    
-    def get_claims_kpis(self) -> Dict[str, Any]:
-        """
-        Retorna KPIs consolidados de Claims para dashboards
-        
-        Returns:
-            Dicionário com principais indicadores:
-            - Total de claims ativas
-            - Faturamento em risco
-            - Média de dias em aberto
-            - Claims críticas (> 30 dias)
-            - Taxa de resolução favorável
-        """
-        active_claims = self.get_active_claims_analytics()
-        summary = self.get_claims_summary_by_status()
-        
-        # Contar claims críticas
-        critical_count = sum(1 for claim in active_claims if claim.is_critical)
-        
-        # Calcular taxa de resolução favorável (ganhamos vs perdemos)
-        status_data = summary['by_status']
-        won = status_data.get('ResolvidoGanhamos', {}).get('count', 0)
-        lost = status_data.get('ResolvidoPerdemos', {}).get('count', 0)
-        total_resolved = won + lost
-        win_rate = (won / total_resolved * 100) if total_resolved > 0 else 0
-        
-        return {
-            'active_claims_count': len(active_claims),
-            'revenue_at_risk': float(self.calculate_revenue_at_risk()),
-            'avg_days_open': summary['avg_days_open'],
-            'critical_claims_count': critical_count,
-            'win_rate_percentage': round(win_rate, 2),
-            'total_resolved': total_resolved,
-            'won_count': won,
-            'lost_count': lost,
-            'by_status': summary['by_status']
-        }
 
+    # ==================== ROWS SYNC (Mantido Async) ====================
+    
+    async def sync_claims_to_rows(self):
+        # Busca dados frescos (force cache bypass ou reuse se preferir)
+        # Aqui vamos forçar bypass para garantir que o Rows receba o mais recente
+        active_claims_list = await self.get_active_claims_analytics()
+        kpis_dict = await self.get_claims_kpis(use_cache=False) 
+        
+        summary_dto = ClaimSummaryDTO(
+            TotalClaims=kpis_dict.get('active_claims_count', 0),
+            TotalAmountAtRisk=Decimal(kpis_dict.get('revenue_at_risk', 0)),
+            WinRate=Decimal(kpis_dict.get('win_rate_percentage', 0)),
+            DisputeRate=Decimal(0),
+            AverageResolutionDays=int(kpis_dict.get('avg_days_open', 0)),
+            OpenedClaims=kpis_dict.get('active_claims_count', 0),
+        )
 
-# ==================== FACTORY ====================
+        payload_kpis = rows_service.build_claims_kpis(summary_dto)
+        payload_list = rows_service.build_critical_claims_list(active_claims_list)
+
+        await asyncio.gather(
+            rows_client.send_data("Dashboard!A1", payload_kpis),
+            rows_client.send_data("Claims_Data!A1", payload_list)
+        )
+        
+        return {"status": "success"}
 
 def create_claims_service() -> ClaimsService:
-    """
-    Factory method para criar instância do ClaimsService com dependências
-    
-    Returns:
-        ClaimsService configurado
-    """
-    claims_repository = ClaimsRepository()
-    return ClaimsService(claims_repository)
+    return ClaimsService(ClaimsRepository())

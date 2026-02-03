@@ -1,37 +1,121 @@
-"""
-FastAPI Application - BI Dashboard
-API REST + WebSocket Hubs
-"""
-
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
 import logging
 import asyncio
+from contextlib import asynccontextmanager
+from fastapi import FastAPI, Depends
+from fastapi.middleware.cors import CORSMiddleware
 
-from ..core.websocket_server import setup_websocket_routes
-from ..features.claims import websocket_handlers as claims_ws
-from ..features.financial import websocket_handlers as financial_ws
-from .routes import claims_routes, financial_routes, storage_routes
-from ..core.infrastructure.redis_client import get_redis_client, close_redis_connection
+# Infraestrutura Core
+from src.core.infrastructure.redis_client import get_redis_client, close_redis_connection
+from src.core.infrastructure.database import db_connection
+from src.core.infrastructure.mongo_client import mongo_connection
+from src.core.infrastructure.rows_client import rows_client
+from src.core.infrastructure.websocket import ws_manager
+from src.core.security import get_current_user
+from src.core.enums.hub_enums import AppHubs
+from src.core.websocket_router import setup_websocket_routes
+
+# Importação dos Handlers (Ajuste os nomes dos arquivos se necessário)
+# Estou assumindo que seus arquivos chamam 'handlers.py' ou 'websocket_handlers.py'
+from src.features.claims import handlers as claims_ws
+from src.features.financial import handlers as financial_ws
+from src.features.support import handlers as support_ws
+from src.features.subscriptions import handlers as subscriptions_ws
+from src.features.users import handlers as users_ws
+from src.features.content import handlers as content_ws
+from src.features.storage import handlers as storage_ws
+
+# Importação das Rotas REST
+from src.features.claims import routes as claims_routes
+from src.features.financial import routes as financial_routes
+from src.features.support import routes as support_routes
+from src.features.subscriptions import routes as subscriptions_routes
+from src.features.users import routes as users_routes
+from src.features.content import routes as content_routes
+from src.features.storage import routes as storage_routes
 
 # Logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
-
 logger = logging.getLogger(__name__)
 
+# ==============================================================================
+# 1. LIFESPAN (REGISTRO DOS HUBS)
+# ==============================================================================
 
-# FastAPI App
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    logger.info("🚀 Iniciando Greg Company BI API (2.0)...")
+    
+    # A. Teste de Conexões de Infra
+    try:
+        await get_redis_client()
+        await db_connection.test_connection() # Teste SQL
+        await mongo_connection.test_connection() # Teste MongoDB
+        logger.info("✅ Infraestrutura (Redis/SQL/MongoDB) conectada.")
+    except Exception as e:
+        logger.critical(f"⚠️ Falha na Infraestrutura: {str(e)}")
+    
+    # B. Registro dos WebSocket Hubs (O Pulo do Gato)
+    # Aqui conectamos a lógica de cada Feature ao Gerente de Sockets
+    try:
+        # 1. Claims
+        claims_handler = await claims_ws.setup_claims_handlers()
+        ws_manager.create_hub(AppHubs.CLAIMS.value).register_handler(claims_handler.handle_client_invoke)
+
+        # 2. Financial
+        fin_handler = await financial_ws.setup_financial_handlers()
+        ws_manager.create_hub(AppHubs.FINANCIAL.value).register_handler(fin_handler.handle_client_invoke)
+
+        # 3. Support
+        support_handler = await support_ws.setup_support_handlers()
+        ws_manager.create_hub(AppHubs.SUPPORT.value).register_handler(support_handler.handle_client_invoke)
+
+        # 4. Subscriptions
+        sub_handler = await subscriptions_ws.setup_subscriptions_handlers()
+        ws_manager.create_hub(AppHubs.SUBSCRIPTIONS.value).register_handler(sub_handler.handle_client_invoke)
+
+        # 5. Users
+        users_handler = await users_ws.setup_users_handlers()
+        ws_manager.create_hub(AppHubs.USERS.value).register_handler(users_handler.handle_client_invoke)
+
+        # 6. Content
+        content_handler = await content_ws.setup_content_handlers()
+        ws_manager.create_hub(AppHubs.CONTENT.value).register_handler(content_handler.handle_client_invoke)
+
+        # 7. Storage
+        storage_handler = await storage_ws.setup_storage_handlers()
+        ws_manager.create_hub(AppHubs.STORAGE.value).register_handler(storage_handler.handle_client_invoke)
+        
+        logger.info("✅ Todos os 7 WebSocket Hubs foram registrados com sucesso.")
+        
+    except Exception as e:
+        logger.error(f"❌ Erro fatal ao registrar Hubs: {e}")
+    
+    # C. Inicia Tarefas em Background (Broadcast Automático)
+    broadcast_task = asyncio.create_task(broadcast_kpis_periodically())
+    
+    yield
+    
+    # --- SHUTDOWN ---
+    logger.info("🛑 Encerrando serviços...")
+    broadcast_task.cancel() # Para o loop infinito
+    await rows_client.close()
+    await db_connection.close()
+    await close_redis_connection()
+    await mongo_connection.close()
+
+# ==============================================================================
+# 2. APP SETUP
+# ==============================================================================
+
 app = FastAPI(
-    title="BI Dashboard API",
-    description="API de Analytics com WebSocket Real-time",
-    version="1.0.0"
+    title="Greg Company BI API",
+    version="2.0.0",
+    lifespan=lifespan
 )
 
-
-# CORS - Permite acesso do Frontend React (porta 5173)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -46,108 +130,63 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
-# Setup WebSocket
+# Registra rota /ws
 setup_websocket_routes(app)
 
+# ==============================================================================
+# 3. ROTAS REST (Com Auth)
+# ==============================================================================
 
-# Include REST routes
-app.include_router(claims_routes.router, prefix="/api/claims", tags=["Claims"])
-app.include_router(financial_routes.router, prefix="/api/financial", tags=["Financial"])
-app.include_router(storage_routes.router, prefix="/api/storage", tags=["Storage"])
+api_prefix = "/api"
 
+app.include_router(claims_routes.router, prefix=f"{api_prefix}/claims", tags=["Claims"], dependencies=[Depends(get_current_user)])
+app.include_router(financial_routes.router, prefix=f"{api_prefix}/financial", tags=["Financial"], dependencies=[Depends(get_current_user)])
+app.include_router(storage_routes.router, prefix=f"{api_prefix}/storage", tags=["Storage"], dependencies=[Depends(get_current_user)])
+app.include_router(support_routes.router, prefix=f"{api_prefix}/support", tags=["Support"], dependencies=[Depends(get_current_user)])
+app.include_router(subscriptions_routes.router, prefix=f"{api_prefix}/subscriptions", tags=["Subscriptions"], dependencies=[Depends(get_current_user)])
+app.include_router(users_routes.router, prefix=f"{api_prefix}/users", tags=["Users"], dependencies=[Depends(get_current_user)])
+app.include_router(content_routes.router, prefix=f"{api_prefix}/content", tags=["Content"], dependencies=[Depends(get_current_user)])
 
-# Startup event
-@app.on_event("startup")
-async def startup_event():
-    """Inicialização do app"""
-    logger.info("🚀 Iniciando BI Dashboard API...")
-    
-    # Inicializa conexão com Redis (para Token Blocklist)
-    try:
-        get_redis_client()
-        logger.info("✅ Redis conectado (Token Blocklist ativo)")
-    except Exception as e:
-        logger.warning(f"⚠️  Redis não conectado: {str(e)} - Blocklist desabilitada")
-    
-    # Setup WebSocket handlers
-    await claims_ws.setup_claims_hub_handlers()
-    await financial_ws.setup_financial_hub_handlers()
-    
-    # Inicia background tasks
-    asyncio.create_task(broadcast_kpis_periodically())
-    
-    logger.info("✅ BI Dashboard API iniciado!")
+# ==============================================================================
+# 4. BACKGROUND TASKS
+# ==============================================================================
 
-
-@app.on_event("shutdown")
-async def shutdown_event():
-    """Shutdown do app"""
-    logger.info("🛑 Encerrando BI Dashboard API...")
-    
-    # Fecha conexão com Redis
-    close_redis_connection()
-
-
-# Background tasks
 async def broadcast_kpis_periodically():
-    """
-    Task em background para enviar KPIs periodicamente
-    Similar ao padrão de updates automáticos do sistema principal
-    """
-    from ..core.infrastructure.websocket import ws_manager
-    from ..features.claims import create_claims_service
-    
-    await asyncio.sleep(5)  # Aguarda inicialização
+    """Loop infinito que envia atualizações automáticas para os dashboards"""
+    logger.info("⏳ Iniciando Broadcast Loop...")
+    await asyncio.sleep(10) # Aguarda warmup inicial
     
     while True:
         try:
-            # Aguarda 30 segundos
-            await asyncio.sleep(30)
+            tasks = [
+                claims_ws.ClaimsHubHandlers().broadcast_claims_update(type="Auto"),
+                financial_ws.FinancialHubHandlers().broadcast_revenue_update(type="Auto"),
+                content_ws.ContentHubHandlers().broadcast_content_update(type="Auto"),
+                support_ws.SupportHubHandlers().broadcast_support_update(type="Auto"),
+                storage_ws.StorageHubHandlers().broadcast_storage_update(type="Auto"),
+                subscriptions_ws.SubscriptionsHubHandlers().broadcast_subscriptions_update(type="Auto"),
+                users_ws.UsersHubHandlers().broadcast_users_update(type="Auto")
+            ]
             
-            # Verifica se há clientes conectados no hub de claims
-            claims_hub = ws_manager.get_hub("claims")
-            if claims_hub and claims_hub.get_connection_count() > 0:
-                # Busca KPIs atualizados
-                service = create_claims_service()
-                kpis = service.get_claims_kpis()
-                
-                # Broadcast
-                await claims_hub.broadcast_method("KPIUpdate", {
-                    "kpis": kpis,
-                    "autoUpdate": True
-                })
-                
-                logger.info(f"📊 KPIs enviados para {claims_hub.get_connection_count()} clientes")
-                
+            # Executa todos em paralelo sem travar se um falhar
+            await asyncio.gather(*tasks, return_exceptions=True)
+            
         except Exception as e:
-            logger.error(f"Erro no broadcast periódico de KPIs: {e}")
+            logger.error(f"Erro no broadcast periódico: {e}")
+            
+        await asyncio.sleep(60) # Roda a cada 60 segundos
 
-
-# Health check
-@app.get("/")
-async def root():
-    """Health check"""
-    return {
-        "status": "online",
-        "service": "BI Dashboard API",
-        "version": "1.0.0"
-    }
-
+# ==============================================================================
+# 5. HEALTH CHECK
+# ==============================================================================
 
 @app.get("/health")
 async def health():
-    """Health check detalhado"""
-    from ..core.infrastructure.websocket import ws_manager
-    
     return {
-        "status": "healthy",
-        "websocket": {
-            "totalConnections": ws_manager.get_total_connections(),
-            "hubs": ws_manager.get_hubs_status()
-        }
+        "status": "online",
+        "connections": ws_manager.get_total_connections(),
+        "hubs_active": ws_manager.get_hubs_status()
     }
-
 
 if __name__ == "__main__":
     import uvicorn

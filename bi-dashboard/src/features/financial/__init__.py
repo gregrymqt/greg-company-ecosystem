@@ -12,6 +12,7 @@ from .schemas import (
     ChargebackSummaryDTO,
     RevenueMetricsDTO,
 )
+from .websocket_handlers import setup_financial_hub_handlers
 
 __all__ = [
     # Repository
@@ -27,4 +28,7 @@ __all__ = [
     'ChargebackDTO',
     'ChargebackSummaryDTO',
     'RevenueMetricsDTO',
+    
+    # WebSocket Handlers
+    'setup_financial_hub_handlers',
 ]

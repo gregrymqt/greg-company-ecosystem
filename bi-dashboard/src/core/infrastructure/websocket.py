@@ -91,20 +91,38 @@ class WebSocketHub:
             self.disconnect(client_id)
     
     async def broadcast(self, data: dict, exclude_client: Optional[str] = None):
-        """Broadcast para todos os clientes do hub"""
-        disconnected_clients = []
-        
+        """
+        Broadcast otimizado para todos os clientes do hub usando concorrência.
+        """
+        if not self.active_connections:
+            return
+
+        # Criamos uma lista de tarefas de envio para processar em paralelo
+        tasks = []
+        client_ids = []
+
         for client_id, connection in self.active_connections.items():
             if exclude_client and client_id == exclude_client:
                 continue
             
-            try:
-                await connection.send(data)
-            except Exception as e:
-                logger.error(f"Erro ao enviar broadcast para {client_id}: {e}")
+            # Adicionamos a corrotina na lista (sem dar o await ainda)
+            tasks.append(connection.send(data))
+            client_ids.append(client_id)
+        
+        if not tasks:
+            return
+
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+
+        # Analisamos os resultados para desconectar quem falhou
+        disconnected_clients = []
+        for i, result in enumerate(results):
+            if isinstance(result, Exception):
+                client_id = client_ids[i]
+                logger.error(f"Erro no broadcast paralelo para {client_id}: {result}")
                 disconnected_clients.append(client_id)
         
-        # Remove conexões mortas
+        # Limpeza de conexões mortas
         for client_id in disconnected_clients:
             self.disconnect(client_id)
     

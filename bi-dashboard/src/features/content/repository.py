@@ -1,19 +1,18 @@
-"""
-Content Repository
-Queries para cursos e vídeos
-"""
-
 from typing import List, Dict, Any
 from sqlalchemy import text
-from ...core.infrastructure import get_db_session
-
+from ...core.infrastructure.database import get_db_session # O helper async que criamos
 
 class ContentRepository:
-    """Repository para conteúdo"""
+    """
+    Repository Assíncrono para Conteúdo
+    Stack: SQLAlchemy Async + aioodbc
+    """
     
-    def get_all_courses(self, limit: int = 100) -> List[Dict[str, Any]]:
-        """Busca cursos"""
-        query = f"""
+    async def get_all_courses(self, limit: int = 100) -> List[Dict[str, Any]]:
+        """
+        Busca cursos e contagem de vídeos de forma não bloqueante.
+        """
+        query = text(f"""
         SELECT 
             c.Id,
             c.Name,
@@ -23,9 +22,11 @@ class ContentRepository:
         LEFT JOIN Videos v ON c.Id = v.CourseId
         GROUP BY c.Id, c.Name, c.IsActive
         ORDER BY c.Name
-        OFFSET 0 ROWS FETCH NEXT {limit} ROWS ONLY
-        """
+        OFFSET 0 ROWS FETCH NEXT :limit ROWS ONLY
+        """)
         
-        with get_db_session() as session:
-            result = session.execute(text(query))
+        # Async Context Manager
+        async with get_db_session() as session:
+            # O banco processa, o Python fica livre
+            result = await session.execute(query, {"limit": limit})
             return [dict(row._mapping) for row in result]

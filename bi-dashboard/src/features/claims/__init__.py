@@ -19,6 +19,7 @@ from .enums import (
     ClaimResource,
     MpClaimStatus,
 )
+from .websocket_handlers import setup_claims_hub_handlers
 
 __all__ = [
     # Repository
@@ -41,4 +42,7 @@ __all__ = [
     'ClaimStage',
     'ClaimResource',
     'MpClaimStatus',
+    
+    # WebSocket Handlers
+    'setup_claims_hub_handlers',
 ]

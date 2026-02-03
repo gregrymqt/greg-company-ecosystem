@@ -1,30 +1,30 @@
-import {
-  HubConnection,
-  HubConnectionBuilder,
-  LogLevel,
-  HubConnectionState,
-} from "@microsoft/signalr";
+import { HubConnection, HubConnectionBuilder, LogLevel, HubConnectionState } from "@microsoft/signalr";
 import { StorageService, STORAGE_KEYS } from "./storage.service";
-import { AppHubs } from "@/shared/enums/hub.enums"; // Importe o Enum
+import { AppHubsBIFastAPI, type AnyAppHub } from "@/shared/enums/hub.enums";
 
 class WebSocketService {
-  // Agora armazenamos várias conexões: "Payment" -> ConnectionObj, "Video" -> ConnectionObj
-  private connections: Map<AppHubs, HubConnection> = new Map();
+  // Agora o mapa aceita qualquer um dos dois tipos de Hub
+  private connections: Map<string, HubConnection> = new Map();
 
   /**
-   * Inicializa e Conecta a um Hub específico
+   * Identifica qual a Base URL correta para o Hub solicitado
    */
-  public async connect(hubPath: AppHubs): Promise<void> {
-    // Se já existe e está conectado, ignora
-    if (
-      this.connections.has(hubPath) &&
-      this.connections.get(hubPath)?.state === HubConnectionState.Connected
-    ) {
+  private getBaseUrlForHub(hubPath: string): string {
+    // Verifica se o hubPath pertence aos valores do enum de BI (Python)
+    const isPythonHub = Object.values(AppHubsBIFastAPI as Record<string, string>).includes(hubPath);
+    
+    if (isPythonHub) {
+      return import.meta.env.VITE_BI_API_URL || "http://localhost:8000"; // Porta do seu FastAPI
+    }
+    return import.meta.env.VITE_GENERAL__BASEURL || "https://localhost:5045"; // Porta do seu C#
+  }
+
+  public async connect(hubPath: AnyAppHub): Promise<void> {
+    if (this.connections.has(hubPath) && this.connections.get(hubPath)?.state === HubConnectionState.Connected) {
       return;
     }
 
-    const baseUrl =
-      import.meta.env.VITE_GENERAL__BASEURL || "https://localhost:5045";
+    const baseUrl = this.getBaseUrlForHub(hubPath);
     const fullUrl = `${baseUrl}${hubPath}`;
 
     const connection = new HubConnectionBuilder()
@@ -34,83 +34,55 @@ class WebSocketService {
           return Promise.resolve(token || "");
         },
         skipNegotiation: true,
-        transport: 1,
+        transport: 1, // WebSockets apenas
       })
       .withAutomaticReconnect()
       .configureLogging(LogLevel.Warning)
       .build();
 
-    // Salva no mapa
     this.connections.set(hubPath, connection);
 
     try {
       await connection.start();
-      console.log(`✅ Socket Conectado: ${hubPath}`);
+      console.log(`✅ [${baseUrl}] Socket Conectado: ${hubPath}`);
     } catch (err) {
       console.error(`❌ Erro ao conectar em ${hubPath}:`, err);
     }
   }
 
-  /**
-   * Desconecta de um Hub específico (ou de todos se não passar nada)
-   */
-  public disconnect(hubPath?: AppHubs): void {
+  public on<T>(hubPath: AnyAppHub, methodName: string, callback: (data: T) => void): void {
+    const connection = this.connections.get(hubPath);
+    if (!connection) {
+      console.warn(`Tentou ouvir evento em ${hubPath} mas não há conexão ativa.`);
+      return;
+    }
+    connection.off(methodName);
+    connection.on(methodName, callback);
+  }
+
+  public off(hubPath: AnyAppHub, methodName: string): void {
+    this.connections.get(hubPath)?.off(methodName);
+  }
+
+  public async invoke<T>(hubPath: AnyAppHub, methodName: string, ...args: T[]): Promise<void> {
+    const connection = this.connections.get(hubPath);
+    if (!connection || connection.state !== HubConnectionState.Connected) {
+      await this.connect(hubPath);
+    }
+    try {
+      await this.connections.get(hubPath)?.invoke(methodName, ...args);
+    } catch (err) {
+      console.error(`❌ Erro ao invocar ${methodName}:`, err);
+    }
+  }
+
+  public disconnect(hubPath?: AnyAppHub): void {
     if (hubPath) {
       this.connections.get(hubPath)?.stop();
       this.connections.delete(hubPath);
     } else {
       this.connections.forEach((conn) => conn.stop());
       this.connections.clear();
-    }
-  }
-
-  /**
-   * OUVIR (Subscribe) - Agora pede qual Hub você quer ouvir
-   */
-  public on<T>(
-    hubPath: AppHubs,
-    methodName: string,
-    callback: (data: T) => void
-  ): void {
-    const connection = this.connections.get(hubPath);
-    if (!connection) {
-      console.warn(
-        `Tentou ouvir evento em ${hubPath} mas não há conexão ativa.`
-      );
-      return;
-    }
-
-    connection.off(methodName); // Evita duplicidade
-    connection.on(methodName, callback);
-  }
-
-  public off(hubPath: AppHubs, methodName: string): void {
-    this.connections.get(hubPath)?.off(methodName);
-  }
-
-  /**
-   * ENVIAR COMANDO (Invoke)
-   * Necessário para chamar o método 'SubscribeToJobProgress' do Backend
-   */
-  public async invoke<T>(
-    hubPath: AppHubs,
-    methodName: string,
-    ...args: T[]
-  ): Promise<void> {
-    const connection = this.connections.get(hubPath);
-
-    if (!connection || connection.state !== HubConnectionState.Connected) {
-      console.warn(
-        `Tentou invocar ${methodName} em ${hubPath}, mas não está conectado. Tentando conectar...`
-      );
-      await this.connect(hubPath);
-    }
-
-    try {
-      // Re-obtemos a conexão após tentativa de reconexão
-      await this.connections.get(hubPath)?.invoke(methodName, ...args);
-    } catch (err) {
-      console.error(`❌ Erro ao invocar ${methodName}:`, err);
     }
   }
 }

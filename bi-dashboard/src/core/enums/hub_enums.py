@@ -18,6 +18,9 @@ class AppHubs(str, Enum):
     FINANCIAL = "/hubs/financial"
     SUBSCRIPTIONS = "/hubs/subscriptions"
     SUPPORT = "/hubs/support"
+    CONTENT = "/hubs/content"
+    USERS = "/hubs/users"
+    STORAGE = "/hubs/storage"
     
     # General Hub
     NOTIFICATIONS = "/hubs/notifications"

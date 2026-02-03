@@ -1,127 +1,108 @@
-"""
-Storage Service
-Lógica de negócio para análises de armazenamento
-"""
-
+import asyncio
 from typing import List, Optional
 from decimal import Decimal
+
+# Infra Greg Company
+from ...core.infrastructure.rows_client import rows_client
+from ...features.rows.service import rows_service
+from ...core.infrastructure.redis_client import get_or_create_async
+
 from .repository import StorageRepository
 from .schemas import StorageStatsDTO, FileCategoryBreakdownDTO, FileDetailDTO
 
-
 class StorageService:
-    """
-    Service para processamento de dados de armazenamento
-    """
-    
     def __init__(self, repository: StorageRepository):
         self.repository = repository
     
-    def get_storage_overview(self) -> StorageStatsDTO:
+    # ==================== OVERVIEW COM CACHE ====================
+
+    async def get_storage_overview(self, use_cache: bool = True) -> StorageStatsDTO:
         """
-        Retorna visão geral de armazenamento com breakdown por categoria
+        Retorna visão geral. Cache de 5 minutos por padrão.
         """
-        # Busca stats totais
-        total_stats = self.repository.get_total_storage_stats()
-        
-        # Busca breakdown por categoria
-        category_data = self.repository.get_storage_by_category()
-        
-        # Calcula percentual de cada categoria
-        total_bytes = total_stats['TotalBytes']
-        
-        category_breakdown = []
-        for cat in category_data:
-            percentage = (cat['TotalBytes'] / total_bytes * 100) if total_bytes > 0 else 0
+        cache_key = "storage:overview:stats"
+
+        # Função Factory: Roda apenas no Cache MISS
+        async def _calculate_overview():
+            # Executa as duas queries em paralelo (Performance Boost)
+            task_totals = self.repository.get_total_storage_stats()
+            task_categories = self.repository.get_storage_by_category()
             
-            category_breakdown.append(FileCategoryBreakdownDTO(
-                FeatureCategoria=cat['FeatureCategoria'],
-                TotalFiles=cat['TotalFiles'],
-                TotalBytes=cat['TotalBytes'],
-                TotalGB=Decimal(str(cat['TotalGB'])).quantize(Decimal('0.01')),
-                PercentageOfTotal=Decimal(str(percentage)).quantize(Decimal('0.01')),
-                AvgFileSizeMB=Decimal(str(cat['AvgFileSizeMB'])).quantize(Decimal('0.01'))
-            ))
-        
-        # Identifica maior e menor categoria
-        largest_cat = None
-        smallest_cat = None
-        
-        if category_breakdown:
-            largest_cat = max(category_breakdown, key=lambda x: x.TotalBytes).FeatureCategoria
-            smallest_cat = min(category_breakdown, key=lambda x: x.TotalBytes).FeatureCategoria
-        
-        return StorageStatsDTO(
-            TotalFiles=total_stats['TotalFiles'],
-            TotalBytes=total_stats['TotalBytes'],
-            TotalGB=Decimal(str(total_stats['TotalGB'])).quantize(Decimal('0.01')),
-            TotalMB=Decimal(str(total_stats['TotalMB'])).quantize(Decimal('0.01')),
-            CategoryBreakdown=category_breakdown,
-            LargestCategory=largest_cat,
-            SmallestCategory=smallest_cat
+            total_stats, category_data = await asyncio.gather(task_totals, task_categories)
+            
+            # Lógica de Negócio (Conversão para DTO)
+            total_bytes = total_stats['TotalBytes']
+            category_breakdown = []
+            
+            for cat in category_data:
+                p = (cat['TotalBytes'] / total_bytes * 100) if total_bytes > 0 else 0
+                
+                category_breakdown.append(FileCategoryBreakdownDTO(
+                    FeatureCategoria=cat['FeatureCategoria'],
+                    TotalFiles=cat['TotalFiles'],
+                    TotalBytes=cat['TotalBytes'],
+                    TotalGB=Decimal(str(cat['TotalGB'])).quantize(Decimal('0.01')),
+                    PercentageOfTotal=Decimal(str(p)).quantize(Decimal('0.01')),
+                    AvgFileSizeMB=Decimal(str(cat['AvgFileSizeMB'])).quantize(Decimal('0.01'))
+                ))
+            
+            largest_cat = max(category_breakdown, key=lambda x: x.TotalBytes).FeatureCategoria if category_breakdown else None
+            smallest_cat = min(category_breakdown, key=lambda x: x.TotalBytes).FeatureCategoria if category_breakdown else None
+            
+            return StorageStatsDTO(
+                TotalFiles=total_stats['TotalFiles'],
+                TotalBytes=total_stats['TotalBytes'],
+                TotalGB=Decimal(str(total_stats['TotalGB'])).quantize(Decimal('0.01')),
+                TotalMB=Decimal(str(total_stats['TotalMB'])).quantize(Decimal('0.01')),
+                CategoryBreakdown=category_breakdown,
+                LargestCategory=largest_cat,
+                SmallestCategory=smallest_cat
+            )
+
+        if use_cache:
+            return await get_or_create_async(cache_key, _calculate_overview, ttl_seconds=300)
+        return await _calculate_overview()
+
+    # ==================== LISTAGENS (SEM CACHE OU CURTO) ====================
+
+    async def get_largest_files(self, limit: int = 10) -> List[FileDetailDTO]:
+        """Geralmente real-time, mas pode cachear se quiser"""
+        files = await self.repository.get_largest_files(limit)
+        return [self._map_file_to_dto(f) for f in files]
+
+    # Helper privado para mapeamento
+    def _map_file_to_dto(self, file_dict: dict) -> FileDetailDTO:
+        return FileDetailDTO(
+            Id=file_dict['Id'],
+            FileName=file_dict['FileName'],
+            FeatureCategoria=file_dict['FeatureCategoria'],
+            TamanhoBytes=file_dict['TamanhoBytes'],
+            SizeMB=Decimal(str(file_dict['SizeMB'])).quantize(Decimal('0.01')),
+            CriadoEm=file_dict['CriadoEm'],
+            ModificadoEm=file_dict['ModificadoEm']
         )
-    
-    def get_largest_files(self, limit: int = 10) -> List[FileDetailDTO]:
-        """
-        Retorna os maiores arquivos do sistema
-        """
-        files = self.repository.get_largest_files(limit)
-        
-        return [
-            FileDetailDTO(
-                Id=file['Id'],
-                FileName=file['FileName'],
-                FeatureCategoria=file['FeatureCategoria'],
-                TamanhoBytes=file['TamanhoBytes'],
-                SizeMB=Decimal(str(file['SizeMB'])).quantize(Decimal('0.01')),
-                CriadoEm=file['CriadoEm'],
-                ModificadoEm=file['ModificadoEm']
-            )
-            for file in files
-        ]
-    
-    def get_files_by_category(self, categoria: str, limit: Optional[int] = 50) -> List[FileDetailDTO]:
-        """
-        Retorna arquivos de uma categoria específica
-        """
-        files = self.repository.get_files_by_category(categoria, limit)
-        
-        return [
-            FileDetailDTO(
-                Id=file['Id'],
-                FileName=file['FileName'],
-                FeatureCategoria=file['FeatureCategoria'],
-                TamanhoBytes=file['TamanhoBytes'],
-                SizeMB=Decimal(str(file['SizeMB'])).quantize(Decimal('0.01')),
-                CriadoEm=file['CriadoEm'],
-                ModificadoEm=file['ModificadoEm']
-            )
-            for file in files
-        ]
-    
-    def get_storage_growth_trend(self, days: int = 30) -> dict:
-        """
-        Retorna tendência de crescimento de armazenamento
-        """
-        trend_data = self.repository.get_storage_growth_trend(days)
-        
-        total_gb_added = sum(item['GBAdded'] for item in trend_data)
-        total_files_added = sum(item['FilesAdded'] for item in trend_data)
-        
-        return {
-            'TrendData': trend_data,
-            'Summary': {
-                'Days': days,
-                'TotalGBAdded': round(total_gb_added, 2),
-                'TotalFilesAdded': total_files_added,
-                'AvgGBPerDay': round(total_gb_added / days, 2) if days > 0 else 0
-            }
-        }
 
+    # ==================== ROWS SYNC (PARALLEL) ====================
 
-# Factory pattern (seguindo padrão das outras features)
+    async def sync_storage_to_rows(self):
+        # 1. Busca dados (Force update para garantir frescor no relatório)
+        # Executa em paralelo: Overview e LargestFiles
+        task_overview = self.get_storage_overview(use_cache=False)
+        task_files = self.get_largest_files(limit=20)
+        
+        overview_dto, largest_files_dto = await asyncio.gather(task_overview, task_files)
+
+        # 2. Formata Payloads
+        payload_kpis = rows_service.build_storage_kpis(overview_dto)
+        payload_files = rows_service.build_largest_files_list(largest_files_dto)
+
+        # 3. Envia para o Rows
+        await asyncio.gather(
+            rows_client.send_data("Storage_KPIs!A1", payload_kpis),
+            rows_client.send_data("Storage_TopFiles!A1", payload_files)
+        )
+
+        return {"status": "success", "message": "Storage synced."}
+
 def create_storage_service() -> StorageService:
-    """
-    Factory para criar instância do StorageService
-    """
     return StorageService(StorageRepository())

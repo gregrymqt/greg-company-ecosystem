@@ -1,19 +1,18 @@
 """
-Database Infrastructure Module
-Configuração de conexão SQLAlchemy para SQL Server
-Baseado nas entidades do ApiDbContext.cs
+Database Infrastructure Module (ASYNC)
+Configuração de conexão SQLAlchemy Assíncrona para SQL Server
 """
 
 import os
 from typing import Optional
-from sqlalchemy import create_engine, Engine, text
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncEngine, AsyncSession, async_sessionmaker
+from sqlalchemy import text
 from sqlalchemy.pool import QueuePool
 from dotenv import load_dotenv
 import urllib.parse
+import asyncio
 
 load_dotenv()
-
 
 class DatabaseConfig:
     """Configuração centralizada do banco de dados SQL Server"""
@@ -23,36 +22,34 @@ class DatabaseConfig:
         self.database = os.getenv("SQL_DATABASE", "GregCompanyDB")
         self.username = os.getenv("SQL_USERNAME", "sa")
         self.password = os.getenv("SQL_PASSWORD", "")
+        # Nota: O driver ODBC do sistema continua o mesmo, mas o wrapper muda
         self.driver = os.getenv("SQL_DRIVER", "ODBC Driver 17 for SQL Server")
         self.port = os.getenv("SQL_PORT", "1433")
         
     def get_connection_string(self) -> str:
         """
-        Gera a connection string para SQLAlchemy com SQL Server
-        Formato: mssql+pyodbc://user:pass@server:port/database?driver=...
+        Gera a connection string para SQLAlchemy ASYNC (aioodbc)
+        Muda de mssql+pyodbc para mssql+aioodbc
         """
-        # Encode password para URL safety
         encoded_password = urllib.parse.quote_plus(self.password)
         encoded_username = urllib.parse.quote_plus(self.username)
         encoded_driver = urllib.parse.quote_plus(self.driver)
         
         return (
-            f"mssql+pyodbc://{encoded_username}:{encoded_password}"
+            f"mssql+aioodbc://{encoded_username}:{encoded_password}"
             f"@{self.server}:{self.port}/{self.database}"
             f"?driver={encoded_driver}"
             f"&TrustServerCertificate=yes"
         )
 
-
 class DatabaseConnection:
     """
-    Gerenciador de conexão com SQL Server usando SQLAlchemy
-    Implementa Singleton pattern para reutilizar engine
+    Gerenciador de conexão Async com SQL Server
     """
     
     _instance: Optional['DatabaseConnection'] = None
-    _engine: Optional[Engine] = None
-    _session_factory: Optional[sessionmaker] = None
+    _engine: Optional[AsyncEngine] = None
+    _session_factory: Optional[async_sessionmaker] = None
     
     def __new__(cls):
         if cls._instance is None:
@@ -64,87 +61,66 @@ class DatabaseConnection:
             self._initialize_engine()
     
     def _initialize_engine(self):
-        """Cria e configura o engine SQLAlchemy"""
         config = DatabaseConfig()
         connection_string = config.get_connection_string()
         
-        self._engine = create_engine(
+        # Cria engine assíncrono
+        self._engine = create_async_engine(
             connection_string,
             poolclass=QueuePool,
             pool_size=5,
             max_overflow=10,
-            pool_pre_ping=True,  # Verifica conexão antes de usar
-            pool_recycle=3600,   # Recicla conexões a cada hora
-            echo=False,          # Mude para True para debug
+            pool_pre_ping=True,
+            echo=False,
         )
         
-        self._session_factory = sessionmaker(
+        # Cria fábrica de sessões assíncronas
+        self._session_factory = async_sessionmaker(
             bind=self._engine,
+            class_=AsyncSession,
             autocommit=False,
-            autoflush=False
+            autoflush=False,
+            expire_on_commit=False # Importante para async
         )
         
-        print(f"✅ Database Engine inicializado: {config.database}@{config.server}")
+        print(f"✅ Async Database Engine inicializado: {config.database}@{config.server}")
     
     @property
-    def engine(self) -> Engine:
-        """Retorna o engine SQLAlchemy"""
+    def engine(self) -> AsyncEngine:
         if self._engine is None:
             self._initialize_engine()
         return self._engine
     
-    def get_session(self) -> Session:
+    def get_session(self) -> AsyncSession:
         """
-        Cria uma nova sessão SQLAlchemy
-        Use com context manager: with db.get_session() as session:
+        Cria uma nova sessão Async
+        Uso: async with db.get_session() as session:
         """
         if self._session_factory is None:
             self._initialize_engine()
         return self._session_factory()
     
-    def test_connection(self) -> bool:
-        """Testa a conexão com o banco de dados"""
+    async def test_connection(self) -> bool:
+        """Testa conexão de forma assíncrona"""
         try:
-            with self.engine.connect() as conn:
-                result = conn.execute(text("SELECT 1"))
-                result.fetchone()
-                print("✅ Conexão com SQL Server OK!")
+            # Em async, precisamos pegar uma conexão do engine
+            async with self.engine.connect() as conn:
+                result = await conn.execute(text("SELECT 1"))
+                print("✅ Conexão Async com SQL Server OK!")
                 return True
         except Exception as e:
             print(f"❌ Erro ao conectar no SQL Server: {e}")
             return False
-    
-    def close(self):
-        """Fecha todas as conexões do pool"""
-        if self._engine is not None:
-            self._engine.dispose()
-            print("🔒 Pool de conexões fechado")
+            
+    async def close(self):
+        if self._engine:
+            await self._engine.dispose()
+            print("🔒 Engine Async fechado")
 
-
-# Singleton instance global
+# Singleton
 db_connection = DatabaseConnection()
 
-
-def get_db_session() -> Session:
-    """
-    Helper function para obter sessão do banco
-    Uso recomendado:
-    
-    with get_db_session() as session:
-        results = session.execute(text("SELECT * FROM Payments"))
-    """
-    return db_connection.get_session()
-
-
-def get_db_engine() -> Engine:
-    """
-    Helper function para obter engine do banco
-    Útil para pandas.read_sql ou queries diretas
-    """
-    return db_connection.engine
-
-
-if __name__ == "__main__":
-    # Teste de conexão
-    print("🔧 Testando conexão com SQL Server...")
-    db_connection.test_connection()
+# Helper para injeção de dependência no FastAPI
+async def get_db_session() -> AsyncSession:
+    async with db_connection.get_session() as session:
+        yield session

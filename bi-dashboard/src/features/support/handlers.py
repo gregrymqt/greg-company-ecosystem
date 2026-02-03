@@ -1,0 +1,64 @@
+import logging
+from typing import Any
+from ...core.infrastructure.websocket import ws_manager
+from ...core.infrastructure.redis_client import delete_key
+from ...core.enums.hub_enums import AppHubs
+from .service import create_support_service
+
+logger = logging.getLogger(__name__)
+
+class SupportHubHandlers:
+    def __init__(self):
+        self.feature_name = AppHubs.SUPPORT.value
+
+    async def handle_client_invoke(self, client_id: str, method: str, *args: Any):
+        if method == "ForceUpdate":
+            await self.handle_force_update(client_id)
+        elif method == "GetInitialData":
+            await self.handle_initial_data(client_id)
+
+    async def handle_initial_data(self, client_id: str):
+        try:
+            service = create_support_service()
+            summary = await service.get_ticket_summary(use_cache=True)
+            
+            hub = ws_manager.get_hub(self.feature_name)
+            if hub:
+                await hub.send_to_client(client_id, "SupportTicketsUpdate", {
+                    "summary": summary.model_dump(),
+                    "type": "Initial"
+                })
+        except Exception as e:
+            logger.error(f"❌ Erro Support InitialData: {e}")
+
+    async def handle_force_update(self, client_id: str):
+        logger.info(f"🔄 ForceUpdate Support por {client_id}")
+        try:
+            await self.broadcast_support_update(type="Manual")
+            
+            hub = ws_manager.get_hub(self.feature_name)
+            if hub:
+                await hub.send_to_client(client_id, "UpdateProcessed", {"status": "ok"})
+        except Exception as e:
+            logger.error(f"❌ Erro ForceUpdate Support: {e}")
+
+    # --- Método Público para o Loop de Background ---
+
+    async def broadcast_support_update(self, type: str = "Auto"):
+        try:
+            service = create_support_service()
+            
+            await delete_key("support:kpis:summary")
+            summary = await service.get_ticket_summary(use_cache=False)
+            
+            hub = ws_manager.get_hub(self.feature_name)
+            if hub:
+                await hub.broadcast("SupportTicketsUpdate", {
+                    "summary": summary.model_dump(),
+                    "type": type
+                })
+        except Exception as e:
+            logger.error(f"Erro broadcast Support: {e}")
+
+async def setup_support_handlers():
+    return SupportHubHandlers()
