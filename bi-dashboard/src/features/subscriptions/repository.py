@@ -22,7 +22,7 @@ class SubscriptionsRepository:
         
         async with get_db_session() as session:
             result = await session.execute(query)
-            row = result.fetchone()
+            row = await result.fetchone()
             return dict(row._mapping) if row else {}
 
     async def get_recent_subscriptions(self, limit: int = 50) -> List[Dict[str, Any]]:
@@ -39,4 +39,4 @@ class SubscriptionsRepository:
         
         async with get_db_session() as session:
             result = await session.execute(query)
-            return [dict(row._mapping) for row in result]
+            return [dict(row._mapping) for row in await result.fetchall()]

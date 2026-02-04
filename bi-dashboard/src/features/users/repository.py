@@ -26,18 +26,14 @@ class UsersRepository:
             return dict(row._mapping) if row else {}
 
     async def get_latest_users(self, limit: int = 100) -> List[Dict[str, Any]]:
-        """Busca apenas os últimos usuários para listagem"""
-        query = text(f"""
-        SELECT TOP {limit}
-            Id,
-            Name,
-            Email,
-            EmailConfirmed,
-            CreatedAt
+        # Use :limit com parênteses: TOP (:limit)
+        query = text("""
+        SELECT TOP (:limit)
+            Id, Name, Email, EmailConfirmed, CreatedAt
         FROM AspNetUsers
         ORDER BY CreatedAt DESC
         """)
         
         async with get_db_session() as session:
-            result = await session.execute(query)
+            result = await session.execute(query, {"limit": limit})
             return [dict(row._mapping) for row in result]

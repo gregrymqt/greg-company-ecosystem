@@ -62,27 +62,31 @@ class FinancialHubHandlers:
 
     # --- Método Público para o Loop de Background ---
 
-    async def broadcast_revenue_update(self, type: str = "Auto"):
-        """Recalcula e faz broadcast (Sem Client ID)"""
+    async def broadcast_full_financial_update(self, type: str = "Auto"):
+        """Atualiza TUDO: Revenue, Payments e Chargebacks"""
         try:
             service = create_financial_service()
             
-            # Limpa Caches
-            keys = [
-                "financial:summary:payments",
-                "financial:metrics:revenue",
-                "financial:summary:chargeback"
-            ]
-            for key in keys: await delete_key(key)
+            # 1. Limpa Todos os Caches
+            await delete_key("financial:summary:payments")
+            await delete_key("financial:metrics:revenue")
+            await delete_key("financial:summary:chargeback")
 
-            # Recalcula as métricas principais
-            rev_metrics = await service.get_revenue_metrics(use_cache=False)
+            # 2. Recalcula em Paralelo (Scatter)
+            task_rev = service.get_revenue_metrics(use_cache=False)
+            task_pay = service.get_payment_summary(use_cache=False)
+            task_cb = service.get_chargeback_summary(use_cache=False)
             
-            # Broadcast
+            rev, pay, cb = await asyncio.gather(task_rev, task_pay, task_cb)
+            
+            # 3. Broadcast Unificado ou Separado
             hub = ws_manager.get_hub(self.feature_name)
             if hub:
-                await hub.broadcast("RevenueUpdate", {
-                     "revenue": rev_metrics.model_dump(),
+                # Envia tudo num evento "FullUpdate" ou eventos separados
+                await hub.broadcast("FinancialUpdate", {
+                     "revenue": rev.model_dump(),
+                     "paymentSummary": pay.model_dump(),
+                     "chargebacks": cb.model_dump(),
                      "type": type
                 })
         except Exception as e:

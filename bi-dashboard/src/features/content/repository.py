@@ -30,3 +30,21 @@ class ContentRepository:
             # O banco processa, o Python fica livre
             result = await session.execute(query, {"limit": limit})
             return [dict(row._mapping) for row in result]
+        
+
+    async def get_dashboard_metrics(self) -> Dict[str, Any]:
+        """
+        Retorna os KPIs de conteúdo em uma única ida ao banco.
+        Usa Subqueries para eficiência total.
+        """
+        query = text("""
+        SELECT 
+            (SELECT COUNT(*) FROM Courses) AS TotalCourses,
+            (SELECT COUNT(*) FROM Courses WHERE IsActive = 1) AS ActiveCourses,
+            (SELECT COUNT(*) FROM Videos) AS TotalVideosLib
+        """)
+        
+        async with get_db_session() as session:
+            result = await session.execute(query)
+            row = await result.fetchone()
+            return dict(row._mapping) if row else {}    

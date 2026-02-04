@@ -30,20 +30,15 @@ class ContentService:
         ]
 
     async def get_content_kpis(self, use_cache: bool = True) -> ContentSummaryDTO:
-        """
-        Retorna KPIs de Conteúdo.
-        Usa Redis Cache (TTL 5 min) por padrão.
-        """
         cache_key = "content:kpis:summary"
         
-        # Factory: Lógica pesada que roda só se não tiver Cache
         async def _calculate_kpis():
-            # Buscamos uma amostragem maior para estatísticas
-            all_courses = await self.get_courses_list(limit=500)
+            # ✅ BUSCA DIRETA: Nada de loops ou limites artificiais
+            raw = await self.repository.get_dashboard_metrics()
             
-            total_courses = len(all_courses)
-            active_courses = sum(1 for c in all_courses if c.IsActive)
-            total_videos = sum(c.TotalVideos for c in all_courses)
+            total_courses = raw.get('TotalCourses', 0)
+            active_courses = raw.get('ActiveCourses', 0)
+            total_videos = raw.get('TotalVideosLib', 0)
             
             avg_videos = 0.0
             if total_courses > 0:
@@ -53,14 +48,13 @@ class ContentService:
                 TotalCourses=total_courses,
                 ActiveCourses=active_courses,
                 TotalVideosLib=total_videos,
-                AvgVideosPerCourse=avg_videos
+                AvgVideosPerCourse=round(avg_videos, 1) # Arredondamento visual
             )
 
         if use_cache:
-            # Retorna do Redis ou Calcula+Salva
             return await get_or_create_async(cache_key, _calculate_kpis, ttl_seconds=300)
-        else:
-            return await _calculate_kpis()
+        
+        return await _calculate_kpis()
 
     # ==================== SYNC ROWS (PARALELO) ====================
 

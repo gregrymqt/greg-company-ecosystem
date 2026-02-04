@@ -21,12 +21,14 @@ class FinancialService:
         cache_key = "financial:summary:payments"
 
         async def _calculate():
-            raw = await self.repository.get_payments_summary()
+            # Busca APENAS o sumário (1 linha), sem trazer listas pesadas
+            raw = await self.repository.get_payments_summary_optimized()
             
-            # Lógica de negócio
             total = raw.get('TotalPayments', 0)
-            approved = await self.repository.get_payments_by_status('approved')
-            approval_rate = (len(approved) / total * 100) if total > 0 else 0.0
+            # CORREÇÃO CRÍTICA: Usamos o count do SQL, não len() de uma lista
+            count_approved = raw.get('CountApproved', 0) 
+            
+            approval_rate = (count_approved / total * 100) if total > 0 else 0.0
 
             return PaymentSummaryDTO(
                 TotalPayments=total,
@@ -46,43 +48,44 @@ class FinancialService:
         cache_key = "financial:metrics:revenue"
 
         async def _calculate():
-            # Busca TODOS os pagamentos aprovados (pode ser pesado, por isso o cache é vital)
-            approved_payments = await self.repository.get_payments_by_status('approved')
+            # 🚀 SCATTER: Dispara as duas queries ao mesmo tempo
+            task_metrics = self.repository.get_revenue_dashboard_metrics()
+            task_methods = self.repository.get_payment_method_stats()
             
-            if not approved_payments:
-                return RevenueMetricsDTO.empty() # Supondo que você crie um método estático helper
+            # GATHER: Espera ambas terminarem
+            raw_metrics, raw_methods = await asyncio.gather(task_metrics, task_methods)
+            
+            # Processamento Metrics
+            total_rev = Decimal(str(raw_metrics.get('TotalRevenue', 0) or 0))
+            count = raw_metrics.get('TotalTransactions', 0)
 
-            # Processamento em memória (CPU bound, não bloqueia IO)
-            total_rev = sum(Decimal(str(p['Amount'])) for p in approved_payments)
-            count = len(approved_payments)
-            
-            # Filtros de data
-            now = datetime.now()
-            month_ago = now - timedelta(days=30)
-            year_ago = now - timedelta(days=365)
-            
-            monthly_rev = sum(Decimal(str(p['Amount'])) for p in approved_payments if p['CreatedAt'] >= month_ago)
-            yearly_rev = sum(Decimal(str(p['Amount'])) for p in approved_payments if p['CreatedAt'] >= year_ago)
-            
-            # Distribuição
-            methods = {}
-            for p in approved_payments:
-                m = p.get('Method', 'Unknown')
-                methods[m] = methods.get(m, 0) + 1
-            top_method = max(methods, key=methods.get) if methods else 'N/A'
+            # Processamento Methods (Top & Distribution)
+            # Se a lista vier vazia, fallback seguro
+            top_method_name = "N/A"
+            dist_dict = {}
+
+            if raw_methods:
+                # O primeiro da lista é o Top (pois o SQL ordenou DESC)
+                top_method_name = raw_methods[0]['Method']
+                
+                # Monta o dicionário de distribuição para o gráfico
+                for item in raw_methods:
+                    method = item['Method'] or "Unknown"
+                    amount = Decimal(str(item['TotalAmount'] or 0))
+                    dist_dict[method] = amount
 
             return RevenueMetricsDTO(
                 TotalRevenue=total_rev,
-                MonthlyRevenue=monthly_rev,
-                YearlyRevenue=yearly_rev,
+                MonthlyRevenue=Decimal(str(raw_metrics.get('MonthlyRevenue', 0) or 0)),
+                YearlyRevenue=Decimal(str(raw_metrics.get('YearlyRevenue', 0) or 0)),
                 TotalTransactions=count,
                 AverageTransactionValue=(total_rev / count) if count else Decimal(0),
-                TopPaymentMethod=top_method,
-                PaymentMethodDistribution=methods
+                TopPaymentMethod=top_method_name, 
+                PaymentMethodDistribution=dist_dict
             )
 
         if use_cache:
-            return await get_or_create_async(cache_key, _calculate, ttl_seconds=300) # Cache de 5 min
+            return await get_or_create_async(cache_key, _calculate, ttl_seconds=300)
         return await _calculate()
 
     # ==================== CHARGEBACKS (CACHED) ====================

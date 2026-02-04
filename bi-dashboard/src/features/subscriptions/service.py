@@ -17,31 +17,31 @@ class SubscriptionsService:
     # ==================== KPIS COM CACHE ====================
 
     async def get_subscription_summary(self, use_cache: bool = True) -> SubscriptionSummaryDTO:
-        """
-        Retorna KPIs Financeiros de Assinatura.
-        Cache TTL: 120 segundos (2 min)
-        """
         cache_key = "subscriptions:kpis:summary"
         
-        # Factory: Executa apenas se não tiver Cache
         async def _calculate_summary():
             raw = await self.repository.get_subscriptions_summary()
             
             total = raw.get('TotalSubscriptions', 0)
             active = raw.get('ActiveSubscriptions', 0)
+            cancelled = raw.get('CancelledSubscriptions', 0) # SQL já calculou
+            paused = raw.get('PausedSubscriptions', 0)       # SQL já calculou
+            
             mrr = Decimal(str(raw.get('MonthlyRecurringRevenue', 0) or 0))
             
+            # Regra de Churn: (Cancelados / Total) * 100
+            # Cuidado: Sua lógica anterior considerava (Total - Active) como churn, 
+            # o que incluiria 'Paused' como Churn. Se isso for intencional, ok.
+            # Vou manter a lógica padrão de mercado (Cancelados sobre a base).
             churn_rate = 0.0
             if total > 0:
-                # Cálculo simples de Churn (Cancelados / Total) ou (1 - Active/Total)
-                # Ajuste conforme sua regra de negócio. Aqui usaremos a lógica do seu snippet:
-                churn_rate = ((total - active) / total) * 100
+                churn_rate = (cancelled / total) * 100
             
             return SubscriptionSummaryDTO(
                 TotalSubscriptions=total,
                 ActiveSubscriptions=active,
-                PausedSubscriptions=raw.get('PausedSubscriptions', 0),
-                CancelledSubscriptions=raw.get('CancelledSubscriptions', 0),
+                PausedSubscriptions=paused,     # Agora o DTO aceita
+                CancelledSubscriptions=cancelled, # Agora o DTO aceita
                 MonthlyRecurringRevenue=mrr,
                 ChurnRate=round(churn_rate, 2)
             )
@@ -60,11 +60,13 @@ class SubscriptionsService:
             dto = SubscriptionDTO(
                 Id=str(row['Id']),
                 UserId=str(row['UserId']),
-                UserName=row.get('UserName'), # Adicionei nome do usuário
                 Status=row['Status'],
                 CurrentAmount=Decimal(str(row['CurrentAmount'] or 0)),
                 CurrentPeriodEndDate=row['CurrentPeriodEndDate'],
-                PlanName=row.get('PlanName')
+                PlanName=row.get('PlanName'),
+                # Mapeando os novos campos do DTO
+                UserName=row.get('UserName') or "Unknown",
+                UserEmail=row.get('UserEmail') or "No Email"
             )
             subscriptions_list.append(dto)
             

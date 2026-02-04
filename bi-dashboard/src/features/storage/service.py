@@ -69,6 +69,10 @@ class StorageService:
         """Geralmente real-time, mas pode cachear se quiser"""
         files = await self.repository.get_largest_files(limit)
         return [self._map_file_to_dto(f) for f in files]
+    
+    async def get_files_by_category(self, category: str, limit: int = 50) -> List[FileDetailDTO]:
+        files = await self.repository.get_files_list_by_category(category, limit)
+        return [self._map_file_to_dto(f) for f in files]
 
     # Helper privado para mapeamento
     def _map_file_to_dto(self, file_dict: dict) -> FileDetailDTO:

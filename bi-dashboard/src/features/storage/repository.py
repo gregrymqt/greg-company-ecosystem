@@ -66,18 +66,37 @@ class StorageRepository:
             return [dict(row._mapping) for row in result]
 
     async def get_storage_growth_trend(self, days: int = 30) -> List[Dict[str, Any]]:
-        """Tendência de crescimento"""
-        query = text(f"""
+        # Use :days ao invés de f-string
+        query = text("""
         SELECT 
             CAST(CriadoEm AS DATE) AS Date,
             COUNT(*) AS FilesAdded,
             ISNULL(SUM(TamanhoBytes) / 1024.0 / 1024.0 / 1024.0, 0) AS GBAdded
         FROM EntityFiles
-        WHERE CriadoEm >= DATEADD(DAY, -{days}, GETDATE())
+        WHERE CriadoEm >= DATEADD(DAY, -:days, GETDATE())
         GROUP BY CAST(CriadoEm AS DATE)
         ORDER BY Date ASC
         """)
         
         async with get_db_session() as session:
-            result = await session.execute(query)
+            # Passe o parâmetro aqui
+            result = await session.execute(query, {"days": days})
             return [dict(row._mapping) for row in result]
+        
+    async def get_files_list_by_category(self, category: str, limit: int = 50) -> List[Dict[str, Any]]:
+        """Busca lista de arquivos de uma categoria específica"""
+        # Usamos :category para evitar SQL Injection e bindar corretamente
+        query = text(f"""
+        SELECT TOP {limit}
+            Id, FileName, FeatureCategoria, TamanhoBytes,
+            TamanhoBytes / 1024.0 / 1024.0 AS SizeMB,
+            CriadoEm, ModificadoEm
+        FROM EntityFiles
+        WHERE FeatureCategoria = :category
+        ORDER BY CriadoEm DESC
+        """)
+        
+        async with get_db_session() as session:
+            # Passamos o parâmetro de forma segura
+            result = await session.execute(query, {"category": category})
+            return [dict(row._mapping) for row in result]    

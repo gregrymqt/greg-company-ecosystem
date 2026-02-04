@@ -53,6 +53,7 @@ async def lifespan(app: FastAPI):
         await get_redis_client()
         await db_connection.test_connection() # Teste SQL
         await mongo_connection.test_connection() # Teste MongoDB
+        await mongo_connection.create_indexes()
         logger.info("✅ Infraestrutura (Redis/SQL/MongoDB) conectada.")
     except Exception as e:
         logger.critical(f"⚠️ Falha na Infraestrutura: {str(e)}")
@@ -160,7 +161,7 @@ async def broadcast_kpis_periodically():
         try:
             tasks = [
                 claims_ws.ClaimsHubHandlers().broadcast_claims_update(type="Auto"),
-                financial_ws.FinancialHubHandlers().broadcast_revenue_update(type="Auto"),
+                financial_ws.FinancialHubHandlers().broadcast_full_financial_update(type="Auto"),
                 content_ws.ContentHubHandlers().broadcast_content_update(type="Auto"),
                 support_ws.SupportHubHandlers().broadcast_support_update(type="Auto"),
                 storage_ws.StorageHubHandlers().broadcast_storage_update(type="Auto"),
