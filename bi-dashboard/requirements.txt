@@ -1,46 +1,8 @@
-# ============================================================
-# BI DASHBOARD - PYTHON DEPENDENCIES
-# Analytics & ETL Engine for Greg Company
-# ============================================================
-
-# === Core Python ===
-python-dotenv==1.2.1
-typing_extensions==4.15.0
-
-# === Data Processing & Analytics ===
-numpy==2.4.1
-pandas==2.3.3
-openpyxl==3.1.5
-
-# === HTTP & API Clients ===
-requests==2.32.5
-urllib3==2.5.0
-
-# === Database Drivers ===
-# SQL Server
-pyodbc>=5.0.0
-sqlalchemy>=2.0.0
-pymssql>=2.2.0
-
-# MongoDB
-pymongo>=4.6.0
-
-# Redis (Cache & Token Blocklist)
-redis>=5.0.0
-
-# === Web Framework & API ===
-fastapi>=0.109.0
-uvicorn[standard]>=0.27.0
-pydantic>=2.5.0
-websockets>=12.0
-python-multipart>=0.0.6
-
-# === Security & Authentication ===
-python-jose[cryptography]>=3.3.0
-passlib[bcrypt]>=1.7.4
-
-# === Utilities ===
-colorama==0.4.6
-python-dateutil==2.9.0.post0
-pytz==2025.2
-certifi==2025.11.12
+fastapi
+uvicorn[standard]
+sqlalchemy
+pymongo
+pydantic
+pydantic-settings
+pyodbc
+websockets
