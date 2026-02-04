@@ -18,13 +18,13 @@ class DatabaseConfig:
     """Configuração centralizada do banco de dados SQL Server"""
     
     def __init__(self):
-        self.server = os.getenv("SQL_SERVER", "localhost")
-        self.database = os.getenv("SQL_DATABASE", "GregCompanyDB")
-        self.username = os.getenv("SQL_USERNAME", "sa")
-        self.password = os.getenv("SQL_PASSWORD", "")
+        self.server = os.getenv("DB_SERVER", "localhost")
+        self.database = os.getenv("DB_NAME", "GregCompanyDB")
+        self.username = os.getenv("DB_USERNAME", "sa")
+        self.password = os.getenv("DB_PASSWORD", "")
         # Nota: O driver ODBC do sistema continua o mesmo, mas o wrapper muda
-        self.driver = os.getenv("SQL_DRIVER", "ODBC Driver 17 for SQL Server")
-        self.port = os.getenv("SQL_PORT", "1433")
+        self.driver = os.getenv("DB_DRIVER", "ODBC Driver 17 for SQL Server")
+        self.port = os.getenv("DB_PORT", "1433")
         
     def get_connection_string(self) -> str:
         """

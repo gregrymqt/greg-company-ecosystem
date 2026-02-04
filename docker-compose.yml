@@ -1,11 +1,14 @@
 # ==========================================================
-# GREG COMPANY - INFRASTRUCTURE ORCHESTRATION
+# GREG COMPANY - INFRASTRUCTURE ORCHESTRATION (V2.0)
 # Stack: .NET Core | React | SQL Server | MongoDB | Redis
+# Modo: Hybrid (Secure by default / Dev ready)
 # ==========================================================
+
+version: '3.8'
 
 services:
 
-  # --- [ INFRASTRUCTURE LAYER: DATABASES & CACHE ] ---
+  # --- [ INFRASTRUCTURE LAYER ] ---
 
   sql-server:
     image: "mcr.microsoft.com/mssql/server:2022-latest"
@@ -13,39 +16,52 @@ services:
     environment:
       - ACCEPT_EULA=Y
       - SA_USERNAME=sa
-      - MSSQL_SA_PASSWORD=Opala@1704.Test!
-    ports:
-      - "1433:1433"
+      # DICA: Em produção, use um arquivo .env para esta senha!
+      - MSSQL_SA_PASSWORD=${DB_PASSWORD}
+    # --- SEGURANÇA ---
+    # Manter COMENTADO na VPS (Nuvem) para evitar ataques.
+    # Descomentar no Desktop se precisar usar SSMS / DBeaver.
+    # ports:
+    #   - "1433:1433"
     volumes:
       - sql-server-data:/var/opt/mssql
+    networks:
+      - greg-network
     healthcheck:
-      test: ["CMD", "/opt/mssql-tools18/bin/sqlcmd", "-S", "127.0.0.1,1433",
-       "-U", "sa", "-P", "Opala@1704.Test!", "-Q", "SELECT 1", "-C"]   
-      interval: 20s
-      timeout: 15s
-      retries: 10
+      test: ["CMD", "/opt/mssql-tools18/bin/sqlcmd", "-S", "localhost", "-U", "sa", "-P", "${DB_PASSWORD}", "-Q", "SELECT 1", "-C"]   
+      interval: 10s
+      timeout: 5s
+      retries: 5
     restart: always
 
   mongodb:
     image: mongo:latest
     container_name: mongodb-store
-    ports:
-      - "27017:27017"
+    # --- SEGURANÇA ---
+    # Manter COMENTADO na VPS. Descomentar localmente para usar MongoDB Compass.
+    # ports:
+    #   - "27017:27017"
     volumes:
       - mongo-data:/data/db
+    networks:
+      - greg-network
     restart: always
 
   redis:
     image: "redis:alpine"
     container_name: redis-cache
     command: redis-server --appendonly yes
-    ports:
-      - "6379:6379"
+    # --- SEGURANÇA ---
+    # Manter COMENTADO na VPS. O Redis não tem senha por padrão aqui!
+    # ports:
+    #   - "6379:6379"
     volumes:
       - redis-data:/data
+    networks:
+      - greg-network
     restart: always
 
-  # --- [ APPLICATION LAYER: BACKEND API ] ---
+  # --- [ APPLICATION LAYER ] ---
 
   backend:
     container_name: backend-api
@@ -53,13 +69,13 @@ services:
       context: ./system-app/backend
       dockerfile: Dockerfile
     ports:
-      - "5045:8080" # Mapeamento limpo
+      - "5045:8080" # Porta Web API (Exposta para Web/Frontend)
     env_file:
       - .env
     environment:
       - ASPNETCORE_URLS=http://+:8080
       - ConnectionStrings__DefaultConnection=${ConnectionStrings__DefaultConnection}
-      - ConnectionStrings__MongoConnection=mongodb://mongodb:27017
+      - ConnectionStrings__MongoConnection=${MONGO_CONNECTION_STRING}
       - ConnectionStrings__Redis=${ConnectionStrings__Redis}
       - MercadoPago__AccessToken=${MercadoPago__AccessToken}
       - MercadoPago__WebhookSecret=${MercadoPago__WebhookSecret}
@@ -73,17 +89,17 @@ services:
       - General__BaseUrl=${GENERAL_BASEURL}
       - USE_REDIS=${USE_REDIS}
     depends_on:
+      sql-server:
+        condition: service_healthy # Só inicia quando o SQL estiver 100% pronto
       redis:
         condition: service_started
       mongodb:
         condition: service_started
-      sql-server:
-        condition: service_healthy
+    networks:
+      - greg-network
     volumes:
       - ./uploads:/app/wwwroot/uploads
       - ./logs:/app/logs    
-
-  # --- [ FRONTEND LAYER: REACT + VITE ] ---
 
   frontend:
     container_name: frontend-app
@@ -93,24 +109,39 @@ services:
       args:
         - VITE_GENERAL_BASEURL=${GENERAL_BASEURL} 
     ports:
-      - "5173:80"
+      - "5173:80" # Porta do Site (Exposta para Web)
     depends_on:
       - backend
+    networks:
+      - greg-network
 
   bi-engine:
+    container_name: greg_company_bi
     build:
       context: .
       dockerfile: bi-dashboard/Dockerfile
-    container_name: greg_company_bi
     env_file: .env
     environment:
-      - PYTHONDONTWRITEBYTECODE=1 # Impede a criação de __pycache__ no container
-      - PYTHONUNBUFFERED=1        # Garante que os logs do ETL apareçam na hora
+      - PYTHONDONTWRITEBYTECODE=1
+      - PYTHONUNBUFFERED=1
+      # No Python, as variáveis de conexão devem ser:
+      - DB_SERVER=${DB_SERVER} 
+      - DB_PORT=${DB_PORT} 
+      - DB_NAME=${DB_NAME} 
+      - DB_USER=${DB_USERNAME} 
+      - DB_PASSWORD=${DB_PASSWORD} 
     depends_on:
       - backend
+      - sql-server
+    networks:
+      - greg-network
     restart: on-failure   
 
-# --- [ PERSISTENCE LAYER ] ---
+# --- [ NETWORKING & PERSISTENCE ] ---
+
+networks:
+  greg-network:
+    driver: bridge
 
 volumes:
   sql-server-data:
