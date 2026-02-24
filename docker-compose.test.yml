@@ -1,0 +1,14 @@
+services:
+  tests:
+    build:
+      context: . # Mudamos para a raiz para enxergar todas as pastas
+      dockerfile: tests/Dockerfile # Apontamos onde o Dockerfile está
+    environment:
+      - USE_REDIS=true
+      - ConnectionStrings__Redis=redis-cache:6379
+      - ConnectionStrings__DefaultConnection=Server=mssql-db;Database=TestDb;User Id=sa;Password=SuaSenha;
+    depends_on:
+      mssql-db:
+        condition: service_healthy
+      redis-cache:
+        condition: service_started
