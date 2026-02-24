@@ -37,7 +37,7 @@ Ecossistema completo para gestão de cursos online com sistema integrado de paga
 ### Sistema Principal (C# & React)
 A aplicação principal foca na escalabilidade, manutenibilidade e experiência do usuário:
 
-*   **Backend (C#):** Clean Architecture com Vertical Slices - cada feature (Auth, Courses, MercadoPago, Support, Videos) possui sua própria estrutura completa (Controllers, Services, Repositories, ViewModels). Auto-registro de dependências via Scrutor. Implementa princípios SOLID para regras de negócio complexas, autenticação JWT + OAuth, e integrações financeiras seguras.
+*   **Backend (C#):** Clean Architecture com Vertical Slices - cada feature (Auth, Courses, MercadoPago, Support, Videos) possui sua própria estrutura completa (Controllers, Services, Repositories, DTOs, Interfaces, Mappers). Auto-registro de dependências via Scrutor. Implementa princípios SOLID para regras de negócio complexas, autenticação JWT + OAuth, e integrações financeiras seguras.
 
 *   **Frontend (React + TypeScript):** Arquitetura features-based espelhando estritamente os Controllers do Backend.
     *   **Padrão Vertical Slice:** Cada feature em `src/features/` é subdividida internamente em contextos:
@@ -49,13 +49,15 @@ A aplicação principal foca na escalabilidade, manutenibilidade e experiência 
 *   **Features Implementadas:**
     - `auth/` - Autenticação (JWT, Google OAuth)
     - `course/` - Gestão de cursos (Admin + Allow)
-    - `Videos/` - Player e gerenciamento de vídeos
+    - `video/` - Player e gerenciamento de vídeos
     - `Payment/` - Checkout (PIX, Cartão, Preferências)
     - `Subscription/` - Gestão de assinaturas
+    - `Plan/` - Gerenciamento de planos
     - `Wallet/` - Carteira digital
     - `Transactions/` - Histórico de pagamentos
     - `Chargeback/` - Gestão de estornos
     - `Claim/` - Sistema de reclamações
+    - `analytics/` - Métricas e relatórios
     - `profile/`, `support/`, `home/`, `about/`
 
 *   **Infraestrutura:** Docker Compose orquestrando SQL Server, MongoDB, Redis e aplicação. Hangfire para jobs assíncronos (renovação de assinaturas, webhooks).
@@ -73,21 +75,25 @@ Plataforma de inteligência de negócios com **FastAPI + WebSocket** para análi
 - **infrastructure/**: Componentes compartilhados
   - `database.py` - SQL Server connection (SQLAlchemy)
   - `mongo_client.py` - MongoDB connection
+  - `redis_client.py` - Redis connection (cache)
+  - `rows_client.py` - Rows.com API client
   - `websocket.py` - WebSocket Manager (Hub pattern similar ao SignalR)
-- **enums/**: `hub_enums.py` - AppHubs enum (Claims, Financial, Subscriptions, Support)
+- **enums/**: `hub_enums.py` - AppHubs enum (Claims, Financial, Subscriptions, Support, Users, Content, Storage)
 - **websocket_server.py**: Configuração de rotas WebSocket
 
-**Feature Slices** (`src/features/`) - Cada feature auto-contida:
-- **claims/**: Analytics de disputas (repository, service, schemas, websocket_handlers)
-- **financial/**: Métricas financeiras e receitas (repository, service, schemas, websocket_handlers)
+**Feature Slices** (`src/features/`) - Cada feature auto-contida com `repository.py`, `service.py`, `schemas.py`, `handlers.py` e `routes.py`:
+- **claims/**: Analytics de disputas e reclamações
+- **financial/**: Métricas financeiras e receitas
 - **subscriptions/**: Análise de MRR, churn rate, renovações
 - **support/**: Tickets de suporte (MongoDB)
 - **content/**: Métricas de cursos e vídeos
 - **users/**: Análise de usuários
+- **rows/**: Integração e sync com Rows.com
+- **storage/**: Analytics de armazenamento de arquivos
 
 **API Layer** (`src/api/`):
 - **main.py**: FastAPI application com REST + WebSocket
-- **routes/**: REST endpoints por feature (claims_routes, financial_routes)
+- As rotas REST ficam dentro de cada feature (`src/features/{feature}/routes.py`), não em uma pasta `routes/` centralizada.
 
 **Métricas Processadas:**
 - 💰 Receita total e MRR (Monthly Recurring Revenue)
@@ -208,19 +214,21 @@ greg-company-ecosystem/
 │       │   ├── enums/             # AppHubs enum
 │       │   └── websocket_server.py # WebSocket routes setup
 │       ├── features/              # Vertical Slices (domain-based)
-│       │   ├── claims/           # repository, service, schemas, websocket_handlers
-│       │   ├── financial/        # repository, service, schemas, websocket_handlers
-│       │   ├── subscriptions/    # repository, service, schemas
-│       │   ├── support/          # repository, service, schemas
-│       │   ├── content/          # repository, schemas
-│       │   └── users/            # repository, schemas
+│       │   ├── claims/           # repository, service, schemas, handlers, routes
+│       │   ├── financial/        # repository, service, schemas, handlers, routes
+│       │   ├── subscriptions/    # repository, service, schemas, handlers, routes
+│       │   ├── support/          # repository, service, schemas, handlers, routes
+│       │   ├── content/          # repository, service, schemas, handlers, routes
+│       │   ├── users/            # repository, service, schemas, handlers, routes
+│       │   ├── rows/             # repository, service, schemas (Rows.com sync)
+│       │   └── storage/          # repository, service, schemas, handlers, routes
 │       └── api/                   # FastAPI application
-│           ├── main.py            # App + background tasks
-│           └── routes/            # REST endpoints
+│           └── main.py            # App + CORS + background tasks + router registration
 │   └── run_api.py                 # Script to run FastAPI server
 │
 ├── mcp-servers/                   # Model Context Protocol servers
-│   ├── greg_context_mcp.py       # Architecture context for AI
+│   ├── greg_context_mcp.py       # Architecture context and project structure for AI
+│   ├── greg_network_mcp.py       # Network and connectivity context for AI
 │   └── log_mcp_server.py         # Log analysis for AI
 │
 ├── docker-compose.yml             # Infrastructure orchestration
