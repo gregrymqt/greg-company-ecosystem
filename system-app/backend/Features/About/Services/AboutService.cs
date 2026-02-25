@@ -20,7 +20,12 @@ public class AboutService : IAboutService
     private const string CAT_SECTION = "AboutSection"; // Categorias para organizar arquivos
     private const string CAT_TEAM = "AboutTeam";
 
-    public AboutService(IAboutRepository repository, ICacheService cache, IFileService fileService, IUnitOfWork unitOfWork)
+    public AboutService(
+        IAboutRepository repository,
+        ICacheService cache,
+        IFileService fileService,
+        IUnitOfWork unitOfWork
+    )
     {
         _repository = repository;
         _cache = cache;
@@ -40,8 +45,9 @@ public class AboutService : IAboutService
 
                     return new AboutPageContentDto
                     {
-                        Sections = sections
-                            .Select(s => new AboutSectionDto
+                        Sections =
+                        [
+                            .. sections.Select(s => new AboutSectionDto
                             {
                                 Id = s.Id,
                                 Title = s.Title,
@@ -49,16 +55,17 @@ public class AboutService : IAboutService
                                 ImageUrl = s.ImageUrl,
                                 ImageAlt = s.ImageAlt,
                                 ContentType = "section1",
-                            })
-                            .ToList(),
+                            }),
+                        ],
 
                         TeamSection = new AboutTeamSectionDto
                         {
                             Title = "Nosso Time",
                             Description = "Conheça os especialistas",
                             ContentType = "section2",
-                            Members = members
-                                .Select(m => new TeamMemberDto
+                            Members =
+                            [
+                                .. members.Select(m => new TeamMemberDto
                                 {
                                     Id = m.Id,
                                     Name = m.Name,
@@ -66,8 +73,8 @@ public class AboutService : IAboutService
                                     PhotoUrl = m.PhotoUrl,
                                     LinkedinUrl = m.LinkedinUrl,
                                     GithubUrl = m.GithubUrl,
-                                })
-                                .ToList(),
+                                }),
+                            ],
                         },
                     };
                 }
@@ -150,9 +157,9 @@ public class AboutService : IAboutService
         // Só busca a entidade se NÃO for um chunk intermediário (pra economizar banco)
         // OU se for chunk, só busca no último passo.
         // Mas para simplificar validação, buscamos logo.
-        var entity = await _repository.GetSectionByIdAsync(id);
-        if (entity == null)
-            throw new ResourceNotFoundException($"Seção {id} não encontrada.");
+        var entity =
+            await _repository.GetSectionByIdAsync(id)
+            ?? throw new ResourceNotFoundException($"Seção {id} não encontrada.");
 
         // === Lógica de Arquivo ===
         if (dto is { IsChunk: true, File: not null })
@@ -230,9 +237,9 @@ public class AboutService : IAboutService
 
     public async Task DeleteSectionAsync(int id)
     {
-        var entity = await _repository.GetSectionByIdAsync(id);
-        if (entity == null)
-            throw new ResourceNotFoundException($"Seção {id} não encontrada.");
+        var entity =
+            await _repository.GetSectionByIdAsync(id)
+            ?? throw new ResourceNotFoundException($"Seção {id} não encontrada.");
 
         // DELETE: Apaga o arquivo físico e registro do arquivo
         if (entity.FileId.HasValue)
@@ -310,9 +317,9 @@ public class AboutService : IAboutService
 
     public async Task<bool> UpdateTeamMemberAsync(int id, CreateUpdateTeamMemberDto dto)
     {
-        var entity = await _repository.GetTeamMemberByIdAsync(id);
-        if (entity == null)
-            throw new ResourceNotFoundException($"Membro {id} não encontrado.");
+        var entity =
+            await _repository.GetTeamMemberByIdAsync(id)
+            ?? throw new ResourceNotFoundException($"Membro {id} não encontrado.");
 
         entity.Name = dto.Name;
         entity.Role = dto.Role;
@@ -348,9 +355,9 @@ public class AboutService : IAboutService
 
     public async Task DeleteTeamMemberAsync(int id)
     {
-        var entity = await _repository.GetTeamMemberByIdAsync(id);
-        if (entity == null)
-            throw new ResourceNotFoundException($"Membro {id} não encontrado.");
+        var entity =
+            await _repository.GetTeamMemberByIdAsync(id)
+            ?? throw new ResourceNotFoundException($"Membro {id} não encontrado.");
 
         // DELETE: Limpeza do arquivo
         if (entity.FileId.HasValue)
