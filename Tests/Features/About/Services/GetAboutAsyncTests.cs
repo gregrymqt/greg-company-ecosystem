@@ -14,7 +14,7 @@ using System;
 
 namespace Tests.Features.About.Services;
 
-public class AboutServiceTest
+public class GetAboutAsyncTests
 {
     private readonly Mock<IAboutRepository> _aboutRepositoryMock;
     private readonly Mock<ICacheService> _cacheServiceMock;
@@ -30,7 +30,7 @@ public class AboutServiceTest
     private const string CAT_SECTION = "AboutSection"; // Categorias para organizar arquivos
     private const string CAT_TEAM = "AboutTeam";
 
-    public AboutServiceTest()
+    public GetAboutAsyncTests()
     {
         _aboutRepositoryMock = new Mock<IAboutRepository>();
         _cacheServiceMock = new Mock<ICacheService>();
@@ -206,69 +206,5 @@ public class AboutServiceTest
     // TESTES de Seção e Membro
     // =================================================================
 
-    [Fact]
-    public async Task CreateSectionAsync_WhenChunksAreValid_ShouldAddSectionToRepository()
-    {
-        var aboutchunk = new CreateUpdateAboutSectionDto
-        {
-            File = new Mock<IFormFile>().Object, // Mock do arquivo
-            IsChunk = true,
-            ChunkIndex = 0,
-            TotalChunks = 1,
-            FileName = "test_image.jpg",
-            Title = "Test Section",
-            Description = "Test Description",
-            ImageAlt = "Test Image Alt",
-            OrderIndex = 0,
-        };
-
-        _fileServiceMock.Setup(service => service.ProcessChunkAsync(
-            aboutchunk.File,
-            aboutchunk.FileName,
-            aboutchunk.ChunkIndex,
-            aboutchunk.TotalChunks)
-            )
-            .ReturnsAsync("processed_test_image.jpg");
-
-        var resultTestChunk = await _fileService.ProcessChunkAsync(
-            aboutchunk.File,
-            aboutchunk.FileName,
-            aboutchunk.ChunkIndex,
-            aboutchunk.TotalChunks);
-
-        _fileServiceMock.Setup(service => service.SalvarArquivoDoTempAsync(
-            resultTestChunk,
-            aboutchunk.FileName),
-            CAT_SECTION
-            )
-            .ReturnsAsync(It.IsAny<EntityFile>());
-
-        var resultSalvarArquivo = await _fileService.SalvarArquivoDoTempAsync(
-            resultTestChunk,
-            aboutchunk.FileName,
-            CAT_SECTION);
-
-        var entity = new AboutSection {
-            Title = aboutchunk.Title,
-            Description = aboutchunk.Description,
-            ImageUrl =resultSalvarArquivo.CaminhoRelativo,
-            ImageAlt = aboutchunk.ImageAlt,
-            OrderIndex = aboutchunk.OrderIndex,
-            FileId = resultSalvarArquivo.Id
-        };
-
-        _aboutRepositoryMock.Setup(repo => repo.AddSectionAsync(entity))
-            .Returns(Task.CompletedTask);
-        _unitOfWorkMock.Setup(unitOfWork => unitOfWork.CommitAsync())
-            .Returns(Task.CompletedTask);
-        _cacheServiceMock.Setup(cache => cache.RemoveAsync(ABOUT_CACHE_KEY))
-            .Returns(Task.CompletedTask);
-
-        var finalResult = _aboutService.CreateSectionAsync(aboutchunk);
-
-        Assert.NotNull(finalResult);
-        Assert.Equal("Test Section", finalResult.Result.Title);
-
-
-    }
+    
 }

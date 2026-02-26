@@ -291,17 +291,60 @@ Documentação completa disponível em:
 
 ---
 
-## 🧪 Testes
+## 🧪 Testes Unitários
+
+O projeto possui uma suíte de testes unitários focada no backend (C#), utilizando **xUnit** e **Moq**.
+
+### Estrutura dos Testes
+Os testes seguem a mesma arquitetura de *Vertical Slices* do backend, espelhando a organização das features. Eles estão localizados na pasta `Tests/`.
+
+Exemplo de estrutura:
+```text
+Tests/
+└── Features/
+    └── About/
+        └── Services/
+            ├── CreateAboutAsyncTests.cs
+            └── GetAboutAsyncTests.cs
+```
+
+### Padrões Utilizados
+- **AAA (Arrange, Act, Assert):** Todos os testes são estruturados dividindo a preparação dos dados (Arrange), a execução do método (Act) e a validação dos resultados (Assert).
+- **Mocking:** Utilização da biblioteca `Moq` para simular dependências externas (como Repositórios, Serviços de Cache e File System), garantindo que os testes sejam isolados e testem apenas a regra de negócio do *System Under Test* (SUT).
+- **Nomenclatura:** Os métodos de teste seguem o padrão `NomeDoMetodo_Condicao_ResultadoEsperado` (ex: `CreateTeamMemberAsync_WhenFileIsChunk_ShouldReturnDtoAndSaveCorrectly`).
+
+### Como Executar
 
 ```bash
-# Backend
+# Executar testes localmente
 cd system-app/backend
 dotnet test
 
-# Frontend
-cd system-app/frontend
-npm run test
+# Ou via Docker (utilizado no CI)
+docker-compose -f docker-compose.test.yml up --build
 ```
+
+---
+
+## 🔄 CI/CD (Integração e Entrega Contínuas)
+
+O projeto utiliza **GitHub Actions** para automatizar o pipeline de CI/CD, garantindo a qualidade do código e a estabilidade dos deploys. O workflow está definido em `.github/workflows/ci-cd.yml`.
+
+### Pipeline de CI/CD
+O pipeline é acionado automaticamente em `push` ou `pull_request` nas branches `main` e `develop`, ou manualmente via `workflow_dispatch`.
+
+Ele é composto por dois jobs principais:
+
+1. **Build & Unit Tests (`test`):**
+   - Cria um ambiente isolado utilizando o `docker-compose.test.yml`.
+   - Sobe instâncias efêmeras do SQL Server e Redis.
+   - Executa toda a suíte de testes unitários do backend.
+   - Se algum teste falhar, o pipeline é interrompido, impedindo o deploy de código quebrado.
+
+2. **Build & Deploy Stack Completa (`deploy`):**
+   - Executado apenas se o job de testes passar com sucesso.
+   - Realiza o build de todos os serviços (Backend, Frontend, BI Dashboard) utilizando o `docker-compose.yml` principal.
+   - Sobe a stack completa em ambiente de produção/staging.
 
 ---
 
