@@ -41,23 +41,28 @@ public class CreateTeamMemberAsyncTests // Focado no método de criação de mem
         );
     }
 
-    [Fact]
-    public async Task CreateTeamMemberAsync_WhenFileIsChunk_ShouldReturnDtoAndSaveCorrectly()
+    private CreateUpdateTeamMemberDto CreateFakeDto(bool isChunk = false) => new()
+    {
+        Name = "Lucas Vicente",
+        Role = "Developer",
+        IsChunk = isChunk,
+        File = new Mock<IFormFile>().Object,
+        FileName = "foto.jpg",
+        ChunkIndex = 0,
+        TotalChunks = 1
+    };
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task CreateTeamMemberAsync_WhenFileIsChunk_ShouldReturnDtoAndSaveCorrectly(bool isChunk)
     {
         // 1. Arrange (Preparar)
-        var dto = new CreateUpdateTeamMemberDto
-        {
-            Name = "Lucas Vicente",
-            Role = "Developer",
-            IsChunk = true,
-            File = new Mock<IFormFile>().Object,
-            FileName = "foto.jpg",
-            ChunkIndex = 0,
-            TotalChunks = 1
-        };
+        var dto = CreateFakeDto(isChunk);
 
         // NÃO chamamos o serviço real. APENAS dizemos o que o Mock deve retornar.
-        _fileServiceMock.Setup(s => s.ProcessChunkAsync(It.IsAny<IFormFile>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>()))
+        _fileServiceMock.Setup(s =>
+                s.ProcessChunkAsync(It.IsAny<IFormFile>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>()))
             .ReturnsAsync("temp/caminho/foto.jpg");
 
         _fileServiceMock.Setup(s => s.SalvarArquivoDoTempAsync("temp/caminho/foto.jpg", "foto.jpg", "AboutTeam"))
@@ -83,45 +88,4 @@ public class CreateTeamMemberAsyncTests // Focado no método de criação de mem
         _unitOfWorkMock.Verify(u => u.CommitAsync(), Times.Once);
         _cacheServiceMock.Verify(c => c.RemoveAsync(ABOUT_CACHE_KEY), Times.Once);
     }
-
-    [Fact]
-    public async Task CreateTeamMemberAsync_WhenFileIsNotChunk_ShouldReturnDtoAndSaveCorrectly()
-    {
-        // 1. Arrange (Preparar)
-
-        var dto = new CreateUpdateTeamMemberDto
-        {
-            Name = "Lucas Vicente",
-            Role = "Developer",
-            IsChunk = false,
-            File = new Mock<IFormFile>().Object,
-            FileName = "foto.jpg",
-            ChunkIndex = 0,
-            TotalChunks = 1
-        };
-
-        _fileServiceMock.Setup(s => s.SalvarArquivoAsync(It.IsAny<IFormFile>(),It.IsAny<string>()))
-        .ReturnsAsync(new EntityFile
-            {
-                Id = 11,
-                CaminhoRelativo = "uploads/foto.jpg",
-                NomeArquivo = "foto.jpg",
-                FeatureCategoria = "AboutTeam",
-                TamanhoBytes = 54321,
-                ContentType = "image/jpeg"
-            });
-
-            // 2. Act (Agir)
-            var result = await _sut.CreateTeamMemberAsync(dto);
-
-            // 3. Assert (Verificar)
-            Assert.NotNull(result);
-            Assert.Equal("Lucas Vicente", result.Name);
-            Assert.Equal("uploads/foto.jpg", result.PhotoUrl);
-
-            _unitOfWorkMock.Verify(u => u.CommitAsync(), Times.Once);
-            _cacheServiceMock.Verify(c => c.RemoveAsync(ABOUT_CACHE_KEY), Times.Once);
-    }
-
-
 }

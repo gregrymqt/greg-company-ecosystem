@@ -37,48 +37,48 @@ public class AboutService : IAboutService
     {
         // Lógica de leitura mantida igual
         return await _cache.GetOrCreateAsync(
-                ABOUT_CACHE_KEY,
-                async () =>
-                {
-                    var sections = await _repository.GetAllSectionsAsync();
-                    var members = await _repository.GetAllTeamMembersAsync();
+            ABOUT_CACHE_KEY,
+            async () =>
+            {
+                var sections = await _repository.GetAllSectionsAsync();
+                var members = await _repository.GetAllTeamMembersAsync();
 
-                    return new AboutPageContentDto
+                return new AboutPageContentDto
+                {
+                    Sections =
+                    [
+                        .. sections.Select(s => new AboutSectionDto
+                        {
+                            Id = s.Id,
+                            Title = s.Title,
+                            Description = s.Description,
+                            ImageUrl = s.ImageUrl,
+                            ImageAlt = s.ImageAlt,
+                            ContentType = "section1",
+                        }),
+                    ],
+
+                    TeamSection = new AboutTeamSectionDto
                     {
-                        Sections =
+                        Title = "Nosso Time",
+                        Description = "Conheça os especialistas",
+                        ContentType = "section2",
+                        Members =
                         [
-                            .. sections.Select(s => new AboutSectionDto
+                            .. members.Select(m => new TeamMemberDto
                             {
-                                Id = s.Id,
-                                Title = s.Title,
-                                Description = s.Description,
-                                ImageUrl = s.ImageUrl,
-                                ImageAlt = s.ImageAlt,
-                                ContentType = "section1",
+                                Id = m.Id,
+                                Name = m.Name,
+                                Role = m.Role,
+                                PhotoUrl = m.PhotoUrl,
+                                LinkedinUrl = m.LinkedinUrl,
+                                GithubUrl = m.GithubUrl,
                             }),
                         ],
-
-                        TeamSection = new AboutTeamSectionDto
-                        {
-                            Title = "Nosso Time",
-                            Description = "Conheça os especialistas",
-                            ContentType = "section2",
-                            Members =
-                            [
-                                .. members.Select(m => new TeamMemberDto
-                                {
-                                    Id = m.Id,
-                                    Name = m.Name,
-                                    Role = m.Role,
-                                    PhotoUrl = m.PhotoUrl,
-                                    LinkedinUrl = m.LinkedinUrl,
-                                    GithubUrl = m.GithubUrl,
-                                }),
-                            ],
-                        },
-                    };
-                }
-            ) ?? new AboutPageContentDto();
+                    },
+                };
+            }
+        ) ?? new AboutPageContentDto();
     }
 
     // ==========================================
@@ -166,8 +166,8 @@ public class AboutService : IAboutService
         {
             var tempPath = await _fileService.ProcessChunkAsync(
                 dto.File,
-                dto.FileName,
-                dto.ChunkIndex,
+                dto.FileName ?? throw new NullReferenceException("FileName is required"),
+                dto.ChunkIndex, 
                 dto.TotalChunks
             );
 
@@ -178,29 +178,23 @@ public class AboutService : IAboutService
             // Acabou! Substitui o arquivo usando o temp
             if (entity.FileId.HasValue)
             {
-                if (dto.FileName != null)
-                {
-                    var arquivoAtualizado = await _fileService.SubstituirArquivoDoTempAsync(
-                        entity.FileId.Value,
-                        tempPath,
-                        dto.FileName
-                    );
-                    entity.ImageUrl = arquivoAtualizado.CaminhoRelativo;
-                    entity.FileId = arquivoAtualizado.Id;
-                }
+                var arquivoAtualizado = await _fileService.SubstituirArquivoDoTempAsync(
+                    entity.FileId.Value,
+                    tempPath,
+                    dto.FileName
+                );
+                entity.ImageUrl = arquivoAtualizado.CaminhoRelativo;
+                entity.FileId = arquivoAtualizado.Id;
             }
             else
             {
-                if (dto.FileName != null)
-                {
-                    var arquivoSalvo = await _fileService.SalvarArquivoDoTempAsync(
-                        tempPath,
-                        dto.FileName,
-                        CAT_SECTION
-                    );
-                    entity.ImageUrl = arquivoSalvo.CaminhoRelativo;
-                    entity.FileId = arquivoSalvo.Id;
-                }
+                var arquivoSalvo = await _fileService.SalvarArquivoDoTempAsync(
+                    tempPath,
+                    dto.FileName,
+                    CAT_SECTION
+                );
+                entity.ImageUrl = arquivoSalvo.CaminhoRelativo;
+                entity.FileId = arquivoSalvo.Id;
             }
         }
         else if (dto.File != null) // Upload normal
