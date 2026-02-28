@@ -252,10 +252,10 @@ public class AboutService : IAboutService
 
     public async Task<TeamMemberDto?> CreateTeamMemberAsync(CreateUpdateTeamMemberDto dto)
     {
-        string photoUrl = string.Empty;
+        var photoUrl = string.Empty;
         int? fileId = null;
 
-        if (dto.IsChunk && dto.File != null)
+        if (dto is { IsChunk: true, File: not null })
         {
             var tempPath = await _fileService.ProcessChunkAsync(
                 dto.File,
