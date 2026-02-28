@@ -2,13 +2,14 @@ using System;
 using MeuCrudCsharp.Models;
 using Microsoft.AspNetCore.Http;
 using Moq;
+
 namespace Tests.Features.About.Services.Section;
 
 public class CreateSectionAsyncTest : AboutServiceTestBase
 {
     [Theory]
-    [InlineData(false, true)]  // Cenário 1: Upload Normal (Arquivo Pequeno)
-    [InlineData(true, true)]   // Cenário 2: Chunking (Último pedaço, arquivo completo)
+    [InlineData(false, true)] // Cenário 1: Upload Normal (Arquivo Pequeno)
+    [InlineData(true, true)] // Cenário 2: Chunking (Último pedaço, arquivo completo)
     [InlineData(false, false)] // Cenário 3: Criação sem nenhum arquivo
     public async Task CreateSection_CaminhosDeSucesso_DeveSalvarEntidade(bool isChunk, bool hasFile)
     {
@@ -21,17 +22,28 @@ public class CreateSectionAsyncTest : AboutServiceTestBase
         if (isChunk && hasFile)
         {
             // Simula que o ProcessChunk retornou o caminho temporário (ou seja, completou)
-            _fileService.Setup(f => f.ProcessChunkAsync(dto.File, dto.FileName, It.IsAny<int>(), It.IsAny<int>()))
+            _fileService
+                .Setup(f =>
+                    f.ProcessChunkAsync(dto.File, dto.FileName, It.IsAny<int>(), It.IsAny<int>())
+                )
                 .ReturnsAsync("/temp/path/foto.jpg");
 
             // Simula o salvamento final do arquivo que estava no temp
-            _fileService.Setup(f => f.SalvarArquivoDoTempAsync("/temp/path/foto.jpg", dto.FileName, It.IsAny<string>()))
+            _fileService
+                .Setup(f =>
+                    f.SalvarArquivoDoTempAsync(
+                        "/temp/path/foto.jpg",
+                        dto.FileName,
+                        It.IsAny<string>()
+                    )
+                )
                 .ReturnsAsync(CreateFakeEntityFile());
         }
         else if (!isChunk && hasFile)
         {
             // Simula o upload normal
-            _fileService.Setup(f => f.SalvarArquivoAsync(dto.File, It.IsAny<string>()))
+            _fileService
+                .Setup(f => f.SalvarArquivoAsync(dto.File, It.IsAny<string>()))
                 .ReturnsAsync(CreateFakeEntityFile());
         }
 
@@ -50,18 +62,50 @@ public class CreateSectionAsyncTest : AboutServiceTestBase
         // Verificações específicas de arquivo dependendo do cenário
         if (isChunk && hasFile)
         {
-            _fileService.Verify(f => f.ProcessChunkAsync(It.IsAny<IFormFile>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>()), Times.Once);
-            _fileService.Verify(f => f.SalvarArquivoDoTempAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+            _fileService.Verify(
+                f =>
+                    f.ProcessChunkAsync(
+                        It.IsAny<IFormFile>(),
+                        It.IsAny<string>(),
+                        It.IsAny<int>(),
+                        It.IsAny<int>()
+                    ),
+                Times.Once
+            );
+            _fileService.Verify(
+                f =>
+                    f.SalvarArquivoDoTempAsync(
+                        It.IsAny<string>(),
+                        It.IsAny<string>(),
+                        It.IsAny<string>()
+                    ),
+                Times.Once
+            );
         }
         else if (!isChunk && hasFile)
         {
-            _fileService.Verify(f => f.SalvarArquivoAsync(It.IsAny<IFormFile>(), It.IsAny<string>()), Times.Once);
+            _fileService.Verify(
+                f => f.SalvarArquivoAsync(It.IsAny<IFormFile>(), It.IsAny<string>()),
+                Times.Once
+            );
         }
         else
         {
             // Se não tem arquivo, NÃO deve ter chamado nenhum serviço de arquivo
-            _fileService.Verify(f => f.SalvarArquivoAsync(It.IsAny<IFormFile>(), It.IsAny<string>()), Times.Never);
-            _fileService.Verify(f => f.ProcessChunkAsync(It.IsAny<IFormFile>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>()), Times.Never);
+            _fileService.Verify(
+                f => f.SalvarArquivoAsync(It.IsAny<IFormFile>(), It.IsAny<string>()),
+                Times.Never
+            );
+            _fileService.Verify(
+                f =>
+                    f.ProcessChunkAsync(
+                        It.IsAny<IFormFile>(),
+                        It.IsAny<string>(),
+                        It.IsAny<int>(),
+                        It.IsAny<int>()
+                    ),
+                Times.Never
+            );
         }
     }
 
@@ -72,7 +116,10 @@ public class CreateSectionAsyncTest : AboutServiceTestBase
         var dto = CreateFakeAboutSectionDto(isChunk: true);
 
         // Simula que ainda faltam pedaços (retorna null)
-        _fileService.Setup(f => f.ProcessChunkAsync(dto.File, dto.FileName, It.IsAny<int>(), It.IsAny<int>()))
+        _fileService
+            .Setup(f =>
+                f.ProcessChunkAsync(dto.File, dto.FileName, It.IsAny<int>(), It.IsAny<int>())
+            )
             .ReturnsAsync((string)null!);
 
         // Act
@@ -82,7 +129,15 @@ public class CreateSectionAsyncTest : AboutServiceTestBase
         Assert.Null(result); // O DTO retornado deve ser nulo
 
         // A Malícia: Garante que o fluxo foi interrompido antes de ir pro banco
-        _fileService.Verify(f => f.SalvarArquivoDoTempAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+        _fileService.Verify(
+            f =>
+                f.SalvarArquivoDoTempAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
+                    It.IsAny<string>()
+                ),
+            Times.Never
+        );
         _repository.Verify(r => r.AddSectionAsync(It.IsAny<AboutSection>()), Times.Never);
         _unitOfWork.Verify(u => u.CommitAsync(), Times.Never);
     }

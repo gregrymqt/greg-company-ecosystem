@@ -30,21 +30,9 @@ public class AboutController : ApiControllerBase
         }
         catch (Exception ex)
         {
-            return StatusCode(
-                500,
-                new
-                {
-                    success = false,
-                    message = "Erro ao carregar a página Sobre.",
-                    error = ex.Message,
-                }
-            );
+            return HandleException(ex, "Erro ao carregar a página Sobre.");
         }
     }
-
-    // ==========================================
-    // SEÇÕES (Upload de Imagem)
-    // ==========================================
 
     [HttpPost("sections")]
     [AllowLargeFile(2048)]
@@ -55,21 +43,18 @@ public class AboutController : ApiControllerBase
 
         try
         {
-            // O resultado pode ser NULL se for um chunk intermediário
             var result = await _service.CreateSectionAsync(dto);
 
             if (result == null)
             {
-                // Chunk recebido com sucesso, mande o próximo!
                 return Ok(new { message = $"Chunk {dto.ChunkIndex} recebido." });
             }
 
-            // Upload completo e registro criado
-            return CreatedAtAction(nameof(GetAboutPageContent), null, result); // Ajuste o nameof conforme sua rota de GET
+            return CreatedAtAction(nameof(GetAboutPageContent), null, result);
         }
         catch (Exception ex)
         {
-            return BadRequest(new { success = false, message = ex.Message });
+            return HandleException(ex, "Erro ao criar a seção.");
         }
     }
 
@@ -89,15 +74,11 @@ public class AboutController : ApiControllerBase
                 return Ok(new { message = $"Chunk {dto.ChunkIndex} atualizado." });
             }
 
-            return NoContent(); // Update concluído com sucesso
-        }
-        catch (ResourceNotFoundException ex)
-        {
-            return NotFound(new { success = false, message = ex.Message });
+            return NoContent();
         }
         catch (Exception ex)
         {
-            return BadRequest(new { success = false, message = ex.Message });
+            return HandleException(ex, "Erro ao atualizar a seção.");
         }
     }
 
@@ -109,15 +90,11 @@ public class AboutController : ApiControllerBase
             await _service.DeleteSectionAsync(id);
             return NoContent();
         }
-        catch (ResourceNotFoundException ex)
+        catch (Exception ex)
         {
-            return NotFound(new { success = false, message = ex.Message });
+            return HandleException(ex, "Erro ao deletar a seção.");
         }
     }
-
-    // ==========================================
-    // EQUIPE (Upload de Foto)
-    // ==========================================
 
     [HttpPost("team")]
     [AllowLargeFile(2048)]
@@ -139,12 +116,12 @@ public class AboutController : ApiControllerBase
         }
         catch (Exception ex)
         {
-            return BadRequest(new { success = false, message = ex.Message });
+            return HandleException(ex, "Erro ao criar o membro da equipe.");
         }
     }
 
     [HttpPut("team/{id}")]
-    [AllowLargeFile(2048)] // Permite upload de arquivos até 2GB
+    [AllowLargeFile(2048)]
     public async Task<IActionResult> UpdateTeamMember(
         int id,
         [FromForm] CreateUpdateTeamMemberDto dto
@@ -160,13 +137,9 @@ public class AboutController : ApiControllerBase
 
             return NoContent();
         }
-        catch (ResourceNotFoundException ex)
-        {
-            return NotFound(new { success = false, message = ex.Message });
-        }
         catch (Exception ex)
         {
-            return BadRequest(new { success = false, message = ex.Message });
+            return HandleException(ex, "Erro ao atualizar o membro da equipe.");
         }
     }
 
@@ -178,9 +151,9 @@ public class AboutController : ApiControllerBase
             await _service.DeleteTeamMemberAsync(id);
             return NoContent();
         }
-        catch (ResourceNotFoundException ex)
+        catch (Exception ex)
         {
-            return NotFound(new { success = false, message = ex.Message });
+            return HandleException(ex, "Erro ao deletar o membro da equipe.");
         }
     }
 }

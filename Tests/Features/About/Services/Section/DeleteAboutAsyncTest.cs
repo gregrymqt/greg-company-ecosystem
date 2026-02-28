@@ -11,7 +11,6 @@ namespace Tests.Features.About.Services.Section;
 
 public class DeleteAboutAsyncTest : AboutServiceTestBase
 {
-
     [Theory]
     [InlineData(null)]
     [InlineData(10)]

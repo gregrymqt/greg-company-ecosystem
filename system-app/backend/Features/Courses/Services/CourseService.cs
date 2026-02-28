@@ -20,7 +20,6 @@ namespace MeuCrudCsharp.Features.Courses.Services
 
         public async Task<IEnumerable<CourseDto>> SearchCoursesByNameAsync(string name)
         {
-            // Usa o método otimizado do Repository
             var courses = await repository.SearchByNameAsync(name);
             return courses.Select(CourseMapper.ToDto);
         }
@@ -39,7 +38,6 @@ namespace MeuCrudCsharp.Features.Courses.Services
                     {
                         logger.LogInformation("Buscando cursos do banco (cache miss)...");
 
-                        // CORREÇÃO 2: Usa a lógica de paginação do Repository
                         var (items, totalCount) = await repository.GetPaginatedWithVideosAsync(
                             pageNumber,
                             pageSize
@@ -60,7 +58,6 @@ namespace MeuCrudCsharp.Features.Courses.Services
 
         public async Task<CourseDto> CreateCourseAsync(CreateUpdateCourseDto createDto)
         {
-            // Validação usando Repository
             if (await repository.ExistsByNameAsync(createDto.Name!))
             {
                 throw new AppServiceException("Já existe um curso com este nome.");
@@ -72,9 +69,8 @@ namespace MeuCrudCsharp.Features.Courses.Services
                 Description = createDto.Description ?? string.Empty,
             };
 
-            // Persistência via Repository
             await repository.AddAsync(newCourse);
-            await unitOfWork.CommitAsync(); // Persiste no banco
+            await unitOfWork.CommitAsync();
 
             await cacheService.InvalidateCacheByKeyAsync(CoursesCacheVersionKey);
 
@@ -87,15 +83,13 @@ namespace MeuCrudCsharp.Features.Courses.Services
             CreateUpdateCourseDto updateDto
         )
         {
-            // Busca usando método interno que já usa repository
             var course = await FindCourseByPublicIdOrFailAsync(publicId);
 
             course.Name = updateDto.Name!;
             course.Description = updateDto.Description ?? string.Empty;
 
-            // O EF Core rastreia mudanças
             repository.Update(course);
-            await unitOfWork.CommitAsync(); // Persiste no banco
+            await unitOfWork.CommitAsync();
 
             await cacheService.InvalidateCacheByKeyAsync(CoursesCacheVersionKey);
 
@@ -105,7 +99,6 @@ namespace MeuCrudCsharp.Features.Courses.Services
 
         public async Task DeleteCourseAsync(Guid publicId)
         {
-            // CORREÇÃO 3: Usa o método específico do repo que já traz os vídeos (Include)
             var course = await repository.GetByPublicIdWithVideosAsync(publicId);
 
             if (course == null)
@@ -121,7 +114,7 @@ namespace MeuCrudCsharp.Features.Courses.Services
             }
 
             repository.Delete(course);
-            await unitOfWork.CommitAsync(); // Persiste no banco
+            await unitOfWork.CommitAsync();
 
             await cacheService.InvalidateCacheByKeyAsync(CoursesCacheVersionKey);
 
@@ -152,8 +145,6 @@ namespace MeuCrudCsharp.Features.Courses.Services
             logger.LogInformation("Criando curso '{CourseName}'...", courseName);
             course = new Course { Name = courseName };
 
-            // Adiciona mas NÃO salva ainda (Unit of Work implícito na chamada pai)
-            // Se isso for chamado isoladamente, quem chamar deve garantir o Save.
             await repository.AddAsync(course);
 
             return course;

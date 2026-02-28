@@ -15,15 +15,9 @@ public class AboutRepository : IAboutRepository
         _context = context;
     }
 
-    // ==========================================
-    // GENERIC SECTIONS
-    // ==========================================
     public async Task<List<AboutSection>> GetAllSectionsAsync()
     {
-        return await _context
-            .AboutSections.OrderBy(s => s.OrderIndex) // Ordenação sugerida no seu model [cite: 14]
-            .AsNoTracking()
-            .ToListAsync();
+        return await _context.AboutSections.OrderBy(s => s.OrderIndex).AsNoTracking().ToListAsync();
     }
 
     public async Task<AboutSection?> GetSectionByIdAsync(int id)
@@ -34,26 +28,20 @@ public class AboutRepository : IAboutRepository
     public async Task AddSectionAsync(AboutSection section)
     {
         await _context.AboutSections.AddAsync(section);
-        // NÃO chama SaveChangesAsync - deixa pro UnitOfWork
     }
 
     public Task UpdateSectionAsync(AboutSection section)
     {
         _context.AboutSections.Update(section);
-        // NÃO chama SaveChangesAsync - deixa pro UnitOfWork
         return Task.CompletedTask;
     }
 
     public Task DeleteSectionAsync(AboutSection section)
     {
         _context.AboutSections.Remove(section);
-        // NÃO chama SaveChangesAsync - deixa pro UnitOfWork
         return Task.CompletedTask;
     }
 
-    // ==========================================
-    // TEAM MEMBERS
-    // ==========================================
     public async Task<List<TeamMember>> GetAllTeamMembersAsync()
     {
         return await _context.TeamMembers.AsNoTracking().ToListAsync();
@@ -67,20 +55,17 @@ public class AboutRepository : IAboutRepository
     public async Task AddTeamMemberAsync(TeamMember member)
     {
         await _context.TeamMembers.AddAsync(member);
-        // NÃO chama SaveChangesAsync - deixa pro UnitOfWork
     }
 
     public Task UpdateTeamMemberAsync(TeamMember member)
     {
         _context.TeamMembers.Update(member);
-        // NÃO chama SaveChangesAsync - deixa pro UnitOfWork
         return Task.CompletedTask;
     }
 
     public Task DeleteTeamMemberAsync(TeamMember member)
     {
         _context.TeamMembers.Remove(member);
-        // NÃO chama SaveChangesAsync - deixa pro UnitOfWork
         return Task.CompletedTask;
     }
 }

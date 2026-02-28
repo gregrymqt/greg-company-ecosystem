@@ -11,8 +11,6 @@ namespace Tests.Features.About.Services.TeamMember;
 
 public class CreateTeamMemberAsyncTests : AboutServiceTestBase // Focado no método de criação de membros
 {
-    
-
     [Theory]
     [InlineData(true)]
     [InlineData(false)]

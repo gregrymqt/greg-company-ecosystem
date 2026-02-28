@@ -39,9 +39,11 @@ public static class AuthExtensions
                     .Configuration.GetSection("Google")
                     .Get<GoogleSettings>();
 
-                if (googleSettings is null || 
-                    string.IsNullOrEmpty(googleSettings.ClientId) || 
-                    string.IsNullOrEmpty(googleSettings.ClientSecret))
+                if (
+                    googleSettings is null
+                    || string.IsNullOrEmpty(googleSettings.ClientId)
+                    || string.IsNullOrEmpty(googleSettings.ClientSecret)
+                )
                 {
                     throw new InvalidOperationException("Credenciais do Google não encontradas.");
                 }
@@ -92,16 +94,21 @@ public static class AuthExtensions
             });
 
         // --- 2. Configuração da Autorização ---
-        builder.Services.AddAuthorizationBuilder()
+        builder
+            .Services.AddAuthorizationBuilder()
             // --- 2. Configuração da Autorização ---
-            .AddPolicy("RequireJwtToken", policy =>
+            .AddPolicy(
+                "RequireJwtToken",
+                policy =>
                 {
                     policy.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme);
                     policy.RequireAuthenticatedUser();
                 }
             )
             // --- 2. Configuração da Autorização ---
-            .AddPolicy("ActiveSubscription", policy =>
+            .AddPolicy(
+                "ActiveSubscription",
+                policy =>
                 {
                     policy.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme);
                     policy.RequireAuthenticatedUser();

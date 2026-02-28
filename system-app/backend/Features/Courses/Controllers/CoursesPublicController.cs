@@ -9,20 +9,12 @@ using Microsoft.Extensions.Logging;
 
 namespace MeuCrudCsharp.Features.Courses.Controllers
 {
-    /// <summary>
-    /// Endpoints públicos para a visualização de cursos, acessível por usuários e administradores.
-    /// </summary>
     [Route("api/public/courses")]
     public class PublicCoursesController : ApiControllerBase
     {
         private readonly ICourseService _courseService;
         private readonly ILogger<PublicCoursesController> _logger;
 
-        /// <summary>
-        /// Inicializa uma nova instância do controlador público de cursos.
-        /// </summary>
-        /// <param name="courseService">O serviço para operações de curso.</param>
-        /// <param name="logger">O logger para registrar informações e erros.</param>
         public PublicCoursesController(
             ICourseService courseService,
             ILogger<PublicCoursesController> logger
@@ -32,12 +24,6 @@ namespace MeuCrudCsharp.Features.Courses.Controllers
             _logger = logger;
         }
 
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="pageNumber"></param>
-        /// <param name="pageSize"></param>
-        /// <returns></returns>
         [HttpGet("paginated")]
         public async Task<IActionResult> GetCoursesPaginated(
             [FromQuery] int pageNumber = 1,
@@ -54,11 +40,7 @@ namespace MeuCrudCsharp.Features.Courses.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao buscar cursos paginados.");
-                return StatusCode(
-                    500,
-                    new { message = "Não foi possível carregar os cursos no momento." }
-                );
+                return HandleException(ex, "Não foi possível carregar os cursos no momento.");
             }
         }
     }
