@@ -37,48 +37,48 @@ public class AboutService : IAboutService
     {
         // Lógica de leitura mantida igual
         return await _cache.GetOrCreateAsync(
-            ABOUT_CACHE_KEY,
-            async () =>
-            {
-                var sections = await _repository.GetAllSectionsAsync();
-                var members = await _repository.GetAllTeamMembersAsync();
-
-                return new AboutPageContentDto
+                ABOUT_CACHE_KEY,
+                async () =>
                 {
-                    Sections =
-                    [
-                        .. sections.Select(s => new AboutSectionDto
-                        {
-                            Id = s.Id,
-                            Title = s.Title,
-                            Description = s.Description,
-                            ImageUrl = s.ImageUrl,
-                            ImageAlt = s.ImageAlt,
-                            ContentType = "section1",
-                        }),
-                    ],
+                    var sections = await _repository.GetAllSectionsAsync();
+                    var members = await _repository.GetAllTeamMembersAsync();
 
-                    TeamSection = new AboutTeamSectionDto
+                    return new AboutPageContentDto
                     {
-                        Title = "Nosso Time",
-                        Description = "Conheça os especialistas",
-                        ContentType = "section2",
-                        Members =
+                        Sections =
                         [
-                            .. members.Select(m => new TeamMemberDto
+                            .. sections.Select(s => new AboutSectionDto
                             {
-                                Id = m.Id,
-                                Name = m.Name,
-                                Role = m.Role,
-                                PhotoUrl = m.PhotoUrl,
-                                LinkedinUrl = m.LinkedinUrl,
-                                GithubUrl = m.GithubUrl,
+                                Id = s.Id,
+                                Title = s.Title,
+                                Description = s.Description,
+                                ImageUrl = s.ImageUrl,
+                                ImageAlt = s.ImageAlt,
+                                ContentType = "section1",
                             }),
                         ],
-                    },
-                };
-            }
-        ) ?? new AboutPageContentDto();
+
+                        TeamSection = new AboutTeamSectionDto
+                        {
+                            Title = "Nosso Time",
+                            Description = "Conheça os especialistas",
+                            ContentType = "section2",
+                            Members =
+                            [
+                                .. members.Select(m => new TeamMemberDto
+                                {
+                                    Id = m.Id,
+                                    Name = m.Name,
+                                    Role = m.Role,
+                                    PhotoUrl = m.PhotoUrl,
+                                    LinkedinUrl = m.LinkedinUrl,
+                                    GithubUrl = m.GithubUrl,
+                                }),
+                            ],
+                        },
+                    };
+                }
+            ) ?? new AboutPageContentDto();
     }
 
     // ==========================================
@@ -167,7 +167,7 @@ public class AboutService : IAboutService
             var tempPath = await _fileService.ProcessChunkAsync(
                 dto.File,
                 dto.FileName ?? throw new NullReferenceException("FileName is required"),
-                dto.ChunkIndex, 
+                dto.ChunkIndex,
                 dto.TotalChunks
             );
 
