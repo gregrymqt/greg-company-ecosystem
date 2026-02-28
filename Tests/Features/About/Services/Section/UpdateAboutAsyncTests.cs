@@ -14,24 +14,6 @@ namespace Tests.Features.About.Services.Section;
 
 public class UpdateAboutAsyncTests : AboutServiceTestBase
 {
-    // --- MÉTODOS AUXILIARES (A Malícia) ---
-    private AboutSection CreateFakeEntity(int? fileId = null) =>
-        new()
-        {
-            Id = 1,
-            Title = "Velho",
-            FileId = fileId,
-        };
-
-    private CreateUpdateAboutSectionDto CreateFakeDto(bool isChunk = false) =>
-        new()
-        {
-            Title = "Novo",
-            IsChunk = isChunk,
-            FileName = "foto.jpg",
-            File = new Mock<IFormFile>().Object,
-        };
-
     // --- TESTES ---
 
     [Theory]
@@ -40,21 +22,10 @@ public class UpdateAboutAsyncTests : AboutServiceTestBase
     public async Task UpdateSection_WhenFileExists_ShouldUpdateSuccessfully(bool isChunk)
     {
         // Arrange
-        var entity = CreateFakeEntity(fileId: 10);
-        var dto = CreateFakeDto(isChunk);
+        var entity = CreateFakeSectionEntity(fileId: 10);
+        var dto = CreateFakeAboutSectionDto(isChunk);
 
         _repository.Setup(r => r.GetSectionByIdAsync(It.IsAny<int>())).ReturnsAsync(entity);
-
-        // Mock do retorno do arquivo (para ambos os casos de substituição)
-        var fileResult = new EntityFile
-        {
-            Id = 10,
-            CaminhoRelativo = "uploads/foto.jpg",
-            NomeArquivo = "foto.jpg",
-            FeatureCategoria = "AboutTeam",
-            TamanhoBytes = 12345,
-            ContentType = "image/jpeg",
-        };
 
         _fileService
             .Setup(f =>
@@ -75,11 +46,11 @@ public class UpdateAboutAsyncTests : AboutServiceTestBase
                     It.IsAny<string>()
                 )
             )
-            .ReturnsAsync(fileResult);
+            .ReturnsAsync(CreateFakeEntityFile());
 
         _fileService
             .Setup(f => f.SubstituirArquivoAsync(It.IsAny<int>(), It.IsAny<IFormFile>()))
-            .ReturnsAsync(fileResult);
+            .ReturnsAsync(CreateFakeEntityFile());
 
         // Act - IMPORTANTE: Usar await aqui!
         var result = await _sut.UpdateSectionAsync(1, dto);
@@ -96,7 +67,7 @@ public class UpdateAboutAsyncTests : AboutServiceTestBase
         // Arrange
         _repository
             .Setup(r => r.GetSectionByIdAsync(It.IsAny<int>()))
-            .ReturnsAsync(CreateFakeEntity());
+            .ReturnsAsync(CreateFakeSectionEntity());
         _fileService
             .Setup(f =>
                 f.ProcessChunkAsync(
@@ -109,7 +80,7 @@ public class UpdateAboutAsyncTests : AboutServiceTestBase
             .ReturnsAsync((string)null!); // Simula que ainda não é o último chunk
 
         // Act
-        var result = await _sut.UpdateSectionAsync(1, CreateFakeDto(isChunk: true));
+        var result = await _sut.UpdateSectionAsync(1, CreateFakeAboutSectionDto(isChunk: true));
 
         // Assert
         Assert.False(result);
@@ -123,7 +94,7 @@ public class UpdateAboutAsyncTests : AboutServiceTestBase
     {
         // Arrange
         int idInexistente = 999;
-        var dto = CreateFakeDto();
+        var dto = CreateFakeAboutSectionDto(isChunk: false);
 
         // O repositório retorna nulo, simulando que a seção não existe no banco
         _repository
@@ -160,8 +131,8 @@ public class UpdateAboutAsyncTests : AboutServiceTestBase
     {
         // Arrange
         int idValido = 1;
-        var entity = CreateFakeEntity(fileId: 10); // Entidade com arquivo existente
-        var dto = CreateFakeDto(isChunk: false); // Simula upload normal (sem ser chunk)
+        var entity = CreateFakeSectionEntity(fileId: 10); // Entidade com arquivo existente
+        var dto = CreateFakeAboutSectionDto(isChunk: false); // Simula upload normal (sem ser chunk)
 
         _repository.Setup(r => r.GetSectionByIdAsync(idValido)).ReturnsAsync(entity);
 

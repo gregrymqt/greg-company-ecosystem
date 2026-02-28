@@ -4,25 +4,14 @@ using MeuCrudCsharp.Features.About.Services;
 using MeuCrudCsharp.Features.Caching.Interfaces;
 using MeuCrudCsharp.Features.Files.Interfaces;
 using MeuCrudCsharp.Features.Shared.Work;
-using MeuCrudCsharp.Models;
 using Microsoft.AspNetCore.Http;
 using Moq;
 
-namespace Tests.Features.About.Services.Section;
+namespace Tests.Features.About.Services.TeamMember;
 
 public class CreateTeamMemberAsyncTests : AboutServiceTestBase // Focado no método de criação de membros
 {
-    private CreateUpdateTeamMemberDto CreateFakeDto(bool isChunk = false) =>
-        new()
-        {
-            Name = "Lucas Vicente",
-            Role = "Developer",
-            IsChunk = isChunk,
-            File = new Mock<IFormFile>().Object,
-            FileName = "foto.jpg",
-            ChunkIndex = 0,
-            TotalChunks = 1,
-        };
+    
 
     [Theory]
     [InlineData(true)]
@@ -32,7 +21,7 @@ public class CreateTeamMemberAsyncTests : AboutServiceTestBase // Focado no mét
     )
     {
         // 1. Arrange (Preparar)
-        var dto = CreateFakeDto(isChunk);
+        var dto = CreateFakeTeamMemberDto(isChunk);
 
         // NÃO chamamos o serviço real. APENAS dizemos o que o Mock deve retornar.
         _fileService
@@ -50,17 +39,7 @@ public class CreateTeamMemberAsyncTests : AboutServiceTestBase // Focado no mét
             .Setup(s =>
                 s.SalvarArquivoDoTempAsync("temp/caminho/foto.jpg", "foto.jpg", "AboutTeam")
             )
-            .ReturnsAsync(
-                new EntityFile
-                {
-                    Id = 10,
-                    CaminhoRelativo = "uploads/foto.jpg",
-                    NomeArquivo = "foto.jpg",
-                    FeatureCategoria = "AboutTeam",
-                    TamanhoBytes = 12345,
-                    ContentType = "image/jpeg",
-                }
-            );
+            .ReturnsAsync(CreateFakeEntityFile());
 
         // 2. Act (Agir)
         var result = await _sut.CreateTeamMemberAsync(dto);
@@ -80,7 +59,7 @@ public class CreateTeamMemberAsyncTests : AboutServiceTestBase // Focado no mét
     {
         // 1. Arrange (Preparar)
         // Reutilizamos o seu método auxiliar para criar o DTO
-        var dto = CreateFakeDto(false);
+        var dto = CreateFakeTeamMemberDto(false);
 
         // Aqui está o "pulo do gato": Forçamos o Mock do serviço de arquivo a falhar!
         // Em vez de .ReturnsAsync, usamos .ThrowsAsync

@@ -16,7 +16,7 @@ namespace Tests.Features.About.Services;
 
 public class GetAboutAsyncTests : AboutServiceTestBase
 {
-    public AboutPageContentDto CreateFakeDto() =>
+    public AboutPageContentDto CreateFakeAboutPageContentDto() =>
         new()
         {
             Sections =
@@ -53,7 +53,7 @@ public class GetAboutAsyncTests : AboutServiceTestBase
     public async Task GetAboutPageContent_ShouldHandleCacheFlow(bool isCacheHit)
     {
         // ARRANGE
-        var cachedDto = isCacheHit ? CreateFakeDto() : null;
+        var cachedDto = isCacheHit ? CreateFakeAboutPageContentDto() : null;
 
         _cache
             .Setup(c =>

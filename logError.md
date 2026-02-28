@@ -1,84 +1,112 @@
-public async Task<AboutSectionDto?> CreateSectionAsync(CreateUpdateAboutSectionDto dto)
+public async Task<bool> UpdateTeamMemberAsync(int id, CreateUpdateTeamMemberDto dto)
     {
-        var imageUrl = string.Empty;
-        int? fileId = null;
+        var entity =
+            await _repository.GetTeamMemberByIdAsync(id)
+            ?? throw new ResourceNotFoundException($"Membro {id} não encontrado.");
 
-        // 1. Lógica de Chunking (Arquivo Grande)
-        if (dto is { IsChunk: true, File: not null })
+        entity.Name = dto.Name;
+        entity.Role = dto.Role;
+        entity.LinkedinUrl = dto.LinkedinUrl;
+        entity.GithubUrl = dto.GithubUrl;
+
+        // UPDATE: Substituição inteligente
+        if (dto.File != null)
         {
-            // Processa o pedaço e vê se completou
-            if (dto.FileName != null)
+            if (entity.FileId.HasValue)
             {
-                var tempPath = await _fileService.ProcessChunkAsync(
-                    dto.File,
-                    dto.FileName,
-                    dto.ChunkIndex,
-                    dto.TotalChunks
+                var arquivoAtualizado = await _fileService.SubstituirArquivoAsync(
+                    entity.FileId.Value,
+                    dto.File
                 );
-
-                // Se for null, ainda faltam pedaços. Retorna null para o Controller dar OK.
-                if (tempPath == null)
-                    return null;
-
-                // Se retornou path, o arquivo está completo na pasta temp! Vamos salvar.
-                var arquivoSalvo = await _fileService.SalvarArquivoDoTempAsync(
-                    tempPath,
-                    dto.FileName,
-                    CAT_SECTION
-                );
-                imageUrl = arquivoSalvo.CaminhoRelativo;
-                fileId = arquivoSalvo.Id;
+                entity.PhotoUrl = arquivoAtualizado.CaminhoRelativo;
+                entity.FileId = arquivoAtualizado.Id;
+            }
+            else
+            {
+                var arquivoSalvo = await _fileService.SalvarArquivoAsync(dto.File, CAT_TEAM);
+                entity.PhotoUrl = arquivoSalvo.CaminhoRelativo;
+                entity.FileId = arquivoSalvo.Id;
             }
         }
-        // 2. Lógica de Upload Normal (Arquivo Pequeno)
-        else if (dto.File != null)
-        {
-            var arquivoSalvo = await _fileService.SalvarArquivoAsync(dto.File, CAT_SECTION);
-            imageUrl = arquivoSalvo.CaminhoRelativo;
-            fileId = arquivoSalvo.Id;
-        }
 
-        // 3. Criação da Entidade (Só roda se não for chunk ou se for o ÚLTIMO chunk)
-        var entity = new AboutSection
-        {
-            Title = dto.Title,
-            Description = dto.Description,
-            ImageAlt = dto.ImageAlt,
-            ImageUrl = imageUrl,
-            FileId = fileId,
-            OrderIndex = dto.OrderIndex, // Use lógica de Max + 1 se quiser
-        };
-
-        await _repository.AddSectionAsync(entity);
+        await _repository.UpdateTeamMemberAsync(entity);
         await _unitOfWork.CommitAsync(); // Persiste no banco
         await _cache.RemoveAsync(ABOUT_CACHE_KEY);
 
-        return new AboutSectionDto
-        {
-            Id = entity.Id,
-            Title = entity.Title,
-            Description = entity.Description,
-            ImageUrl = entity.ImageUrl,
-            ImageAlt = entity.ImageAlt,
-            ContentType = "section1",
-        };
+        return true;
+    }
+---
+using MeuCrudCsharp.Features.About.Interfaces;
+using MeuCrudCsharp.Features.About.Services;
+using MeuCrudCsharp.Features.Caching.Interfaces;
+using MeuCrudCsharp.Features.Files.Interfaces;
+using MeuCrudCsharp.Features.Shared.Work;
+
+namespace Tests.Features.About.Services;
+
+using MeuCrudCsharp.Features.About.DTOs;
+using MeuCrudCsharp.Models;
+using Microsoft.AspNetCore.Http;
+using Moq;
+
+public abstract class AboutServiceTestBase
+{
+    // Usamos 'protected' para as classes que herdarem conseguirem usar
+    protected readonly Mock<IAboutRepository> _repository;
+    protected readonly Mock<IFileService> _fileService;
+    protected readonly Mock<IUnitOfWork> _unitOfWork;
+    protected readonly Mock<ICacheService> _cache;
+
+    // O seu Service pronto para ser testado
+    protected readonly AboutService _sut;
+
+    protected AboutServiceTestBase()
+    {
+        // Inicializa todos os mocks do zero para cada teste
+        _repository = new Mock<IAboutRepository>();
+        _fileService = new Mock<IFileService>();
+        _unitOfWork = new Mock<IUnitOfWork>();
+        _cache = new Mock<ICacheService>();
+
+        // Instancia o serviço injetando os objetos falsos
+        _sut = new AboutService(
+            _repository.Object,
+            _cache.Object,
+            _fileService.Object,
+            _unitOfWork.Object
+        );
     }
 
----
+    // Na sua classe base abstrata:
+    protected AboutSection CreateFakeSectionEntity(int? fileId = null) =>
+        new() { Id = 1, Title = "Velho", FileId = fileId };
 
-private AboutSection CreateFakeEntity(int? fileId = null) =>
-        new()
-        {
-            Id = 1,
-            Title = "Velho",
-            FileId = fileId,
-        };
+    protected CreateUpdateAboutSectionDto CreateFakeAboutSectionDto(bool isChunk = false) =>
+        new() { Title = "Novo", IsChunk = isChunk, FileName = "foto.jpg", File = new Mock<IFormFile>().Object };
 
-    private CreateUpdateAboutSectionDto CreateFakeDto(bool isChunk = false) =>
-        new()
+    protected TeamMember CreateFakeTeamMemberEntity(int? fileId = null) =>
+        new() { Id = 1, Name = "Lucas Vicente", Role = "Developer", FileId = fileId };
+
+    protected CreateUpdateTeamMemberDto CreateFakeTeamMemberDto(bool isChunk = false) =>
+    new()
+    {
+        Name = "Lucas Vicente",
+        Role = "Developer",
+        IsChunk = isChunk,
+        File = new Mock<IFormFile>().Object,
+        FileName = "foto.jpg",
+        ChunkIndex = 0,
+        TotalChunks = 1,
+    };
+
+    protected EntityFile CreateFakeEntityFile() =>
+        new EntityFile
         {
-            Title = "Novo",
-            IsChunk = isChunk,
-            FileName = "foto.jpg",
-            File = new Mock<IFormFile>().Object,
+            Id = 10,
+            CaminhoRelativo = "uploads/foto.jpg",
+            NomeArquivo = "foto.jpg",
+            FeatureCategoria = "About",
+            TamanhoBytes = 12345,
+            ContentType = "image/jpeg",
         };
+}

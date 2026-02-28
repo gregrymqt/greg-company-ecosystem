@@ -11,13 +11,6 @@ namespace Tests.Features.About.Services.Section;
 
 public class DeleteAboutAsyncTest : AboutServiceTestBase
 {
-    private AboutSection CreateFakeEntity(int? fileId = null) =>
-        new()
-        {
-            Id = 1,
-            Title = "Velho",
-            FileId = fileId,
-        };
 
     [Theory]
     [InlineData(null)]
@@ -25,7 +18,7 @@ public class DeleteAboutAsyncTest : AboutServiceTestBase
     public async Task DeleteSection_DeveExecutarFluxoCompleto(int? fileId)
     {
         // Arrange
-        var entity = CreateFakeEntity(fileId);
+        var entity = CreateFakeSectionEntity(fileId);
 
         _repository.Setup(r => r.GetSectionByIdAsync(It.IsAny<int>())).ReturnsAsync(entity);
 
