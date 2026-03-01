@@ -1,5 +1,6 @@
 using MeuCrudCsharp.Features.Base;
 using Microsoft.AspNetCore.Antiforgery;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MeuCrudCsharp.Features.Shared.Token;
@@ -16,6 +17,7 @@ public class AntiforgeryController : ApiControllerBase
     }
 
     [HttpGet("token")]
+    [AllowAnonymous]
     [IgnoreAntiforgeryToken]
     public IActionResult GetToken()
     {
