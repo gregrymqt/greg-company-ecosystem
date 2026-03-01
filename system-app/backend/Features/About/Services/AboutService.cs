@@ -17,10 +17,15 @@ public class AboutService : IAboutService
     private readonly IUnitOfWork _unitOfWork;
 
     private const string ABOUT_CACHE_KEY = "ABOUT_PAGE_CONTENT";
-    private const string CAT_SECTION = "AboutSection"; // Categorias para organizar arquivos
+    private const string CAT_SECTION = "AboutSection";
     private const string CAT_TEAM = "AboutTeam";
 
-    public AboutService(IAboutRepository repository, ICacheService cache, IFileService fileService, IUnitOfWork unitOfWork)
+    public AboutService(
+        IAboutRepository repository,
+        ICacheService cache,
+        IFileService fileService,
+        IUnitOfWork unitOfWork
+    )
     {
         _repository = repository;
         _cache = cache;
@@ -30,7 +35,6 @@ public class AboutService : IAboutService
 
     public async Task<AboutPageContentDto> GetAboutPageContentAsync()
     {
-        // Lógica de leitura mantida igual
         return await _cache.GetOrCreateAsync(
                 ABOUT_CACHE_KEY,
                 async () =>
@@ -40,8 +44,9 @@ public class AboutService : IAboutService
 
                     return new AboutPageContentDto
                     {
-                        Sections = sections
-                            .Select(s => new AboutSectionDto
+                        Sections =
+                        [
+                            .. sections.Select(s => new AboutSectionDto
                             {
                                 Id = s.Id,
                                 Title = s.Title,
@@ -49,16 +54,17 @@ public class AboutService : IAboutService
                                 ImageUrl = s.ImageUrl,
                                 ImageAlt = s.ImageAlt,
                                 ContentType = "section1",
-                            })
-                            .ToList(),
+                            }),
+                        ],
 
                         TeamSection = new AboutTeamSectionDto
                         {
                             Title = "Nosso Time",
                             Description = "Conheça os especialistas",
                             ContentType = "section2",
-                            Members = members
-                                .Select(m => new TeamMemberDto
+                            Members =
+                            [
+                                .. members.Select(m => new TeamMemberDto
                                 {
                                     Id = m.Id,
                                     Name = m.Name,
@@ -66,27 +72,21 @@ public class AboutService : IAboutService
                                     PhotoUrl = m.PhotoUrl,
                                     LinkedinUrl = m.LinkedinUrl,
                                     GithubUrl = m.GithubUrl,
-                                })
-                                .ToList(),
+                                }),
+                            ],
                         },
                     };
                 }
             ) ?? new AboutPageContentDto();
     }
 
-    // ==========================================
-    // SEÇÕES
-    // ==========================================
-
     public async Task<AboutSectionDto?> CreateSectionAsync(CreateUpdateAboutSectionDto dto)
     {
         var imageUrl = string.Empty;
         int? fileId = null;
 
-        // 1. Lógica de Chunking (Arquivo Grande)
         if (dto is { IsChunk: true, File: not null })
         {
-            // Processa o pedaço e vê se completou
             if (dto.FileName != null)
             {
                 var tempPath = await _fileService.ProcessChunkAsync(
@@ -96,11 +96,9 @@ public class AboutService : IAboutService
                     dto.TotalChunks
                 );
 
-                // Se for null, ainda faltam pedaços. Retorna null para o Controller dar OK.
                 if (tempPath == null)
                     return null;
 
-                // Se retornou path, o arquivo está completo na pasta temp! Vamos salvar.
                 var arquivoSalvo = await _fileService.SalvarArquivoDoTempAsync(
                     tempPath,
                     dto.FileName,
@@ -110,7 +108,6 @@ public class AboutService : IAboutService
                 fileId = arquivoSalvo.Id;
             }
         }
-        // 2. Lógica de Upload Normal (Arquivo Pequeno)
         else if (dto.File != null)
         {
             var arquivoSalvo = await _fileService.SalvarArquivoAsync(dto.File, CAT_SECTION);
@@ -118,7 +115,6 @@ public class AboutService : IAboutService
             fileId = arquivoSalvo.Id;
         }
 
-        // 3. Criação da Entidade (Só roda se não for chunk ou se for o ÚLTIMO chunk)
         var entity = new AboutSection
         {
             Title = dto.Title,
@@ -126,11 +122,11 @@ public class AboutService : IAboutService
             ImageAlt = dto.ImageAlt,
             ImageUrl = imageUrl,
             FileId = fileId,
-            OrderIndex = dto.OrderIndex, // Use lógica de Max + 1 se quiser
+            OrderIndex = dto.OrderIndex,
         };
 
         await _repository.AddSectionAsync(entity);
-        await _unitOfWork.CommitAsync(); // Persiste no banco
+        await _unitOfWork.CommitAsync();
         await _cache.RemoveAsync(ABOUT_CACHE_KEY);
 
         return new AboutSectionDto
@@ -144,59 +140,46 @@ public class AboutService : IAboutService
         };
     }
 
-    // Retorna TRUE se finalizou o update, FALSE se está esperando mais chunks
     public async Task<bool> UpdateSectionAsync(int id, CreateUpdateAboutSectionDto dto)
     {
-        // Só busca a entidade se NÃO for um chunk intermediário (pra economizar banco)
-        // OU se for chunk, só busca no último passo.
-        // Mas para simplificar validação, buscamos logo.
-        var entity = await _repository.GetSectionByIdAsync(id);
-        if (entity == null)
-            throw new ResourceNotFoundException($"Seção {id} não encontrada.");
+        var entity =
+            await _repository.GetSectionByIdAsync(id)
+            ?? throw new ResourceNotFoundException($"Seção {id} não encontrada.");
 
-        // === Lógica de Arquivo ===
         if (dto is { IsChunk: true, File: not null })
         {
             var tempPath = await _fileService.ProcessChunkAsync(
                 dto.File,
-                dto.FileName,
+                dto.FileName ?? throw new NullReferenceException("FileName is required"),
                 dto.ChunkIndex,
                 dto.TotalChunks
             );
 
-            // Se ainda não acabou os chunks, retorna false
             if (tempPath == null)
                 return false;
 
-            // Acabou! Substitui o arquivo usando o temp
             if (entity.FileId.HasValue)
             {
-                if (dto.FileName != null)
-                {
-                    var arquivoAtualizado = await _fileService.SubstituirArquivoDoTempAsync(
-                        entity.FileId.Value,
-                        tempPath,
-                        dto.FileName
-                    );
-                    entity.ImageUrl = arquivoAtualizado.CaminhoRelativo;
-                    entity.FileId = arquivoAtualizado.Id;
-                }
+                var arquivoAtualizado = await _fileService.SubstituirArquivoDoTempAsync(
+                    entity.FileId.Value,
+                    tempPath,
+                    dto.FileName
+                );
+                entity.ImageUrl = arquivoAtualizado.CaminhoRelativo;
+                entity.FileId = arquivoAtualizado.Id;
             }
             else
             {
-                if (dto.FileName != null)
-                {
-                    var arquivoSalvo = await _fileService.SalvarArquivoDoTempAsync(
-                        tempPath,
-                        dto.FileName,
-                        CAT_SECTION
-                    );
-                    entity.ImageUrl = arquivoSalvo.CaminhoRelativo;
-                    entity.FileId = arquivoSalvo.Id;
-                }
+                var arquivoSalvo = await _fileService.SalvarArquivoDoTempAsync(
+                    tempPath,
+                    dto.FileName,
+                    CAT_SECTION
+                );
+                entity.ImageUrl = arquivoSalvo.CaminhoRelativo;
+                entity.FileId = arquivoSalvo.Id;
             }
         }
-        else if (dto.File != null) // Upload normal
+        else if (dto.File != null)
         {
             if (entity.FileId.HasValue)
             {
@@ -215,46 +198,39 @@ public class AboutService : IAboutService
             }
         }
 
-        // === Atualiza Dados ===
-        // Só atualiza os dados de texto se for upload normal OU se for o último chunk
         entity.Title = dto.Title;
         entity.Description = dto.Description;
         entity.ImageAlt = dto.ImageAlt;
 
         await _repository.UpdateSectionAsync(entity);
-        await _unitOfWork.CommitAsync(); // Persiste no banco
+        await _unitOfWork.CommitAsync();
         await _cache.RemoveAsync(ABOUT_CACHE_KEY);
 
-        return true; // Update concluído
+        return true;
     }
 
     public async Task DeleteSectionAsync(int id)
     {
-        var entity = await _repository.GetSectionByIdAsync(id);
-        if (entity == null)
-            throw new ResourceNotFoundException($"Seção {id} não encontrada.");
+        var entity =
+            await _repository.GetSectionByIdAsync(id)
+            ?? throw new ResourceNotFoundException($"Seção {id} não encontrada.");
 
-        // DELETE: Apaga o arquivo físico e registro do arquivo
         if (entity.FileId.HasValue)
         {
             await _fileService.DeletarArquivoAsync(entity.FileId.Value);
         }
 
         await _repository.DeleteSectionAsync(entity);
-        await _unitOfWork.CommitAsync(); // Persiste no banco
+        await _unitOfWork.CommitAsync();
         await _cache.RemoveAsync(ABOUT_CACHE_KEY);
     }
 
-    // ==========================================
-    // EQUIPE
-    // ==========================================
-
     public async Task<TeamMemberDto?> CreateTeamMemberAsync(CreateUpdateTeamMemberDto dto)
     {
-        string photoUrl = string.Empty;
+        var photoUrl = string.Empty;
         int? fileId = null;
 
-        if (dto.IsChunk && dto.File != null)
+        if (dto is { IsChunk: true, File: not null })
         {
             var tempPath = await _fileService.ProcessChunkAsync(
                 dto.File,
@@ -263,7 +239,7 @@ public class AboutService : IAboutService
                 dto.TotalChunks
             );
             if (tempPath == null)
-                return null; // Esperando mais chunks
+                return null;
 
             if (dto.FileName != null)
             {
@@ -294,7 +270,7 @@ public class AboutService : IAboutService
         };
 
         await _repository.AddTeamMemberAsync(entity);
-        await _unitOfWork.CommitAsync(); // Persiste no banco
+        await _unitOfWork.CommitAsync();
         await _cache.RemoveAsync(ABOUT_CACHE_KEY);
 
         return new TeamMemberDto
@@ -310,16 +286,15 @@ public class AboutService : IAboutService
 
     public async Task<bool> UpdateTeamMemberAsync(int id, CreateUpdateTeamMemberDto dto)
     {
-        var entity = await _repository.GetTeamMemberByIdAsync(id);
-        if (entity == null)
-            throw new ResourceNotFoundException($"Membro {id} não encontrado.");
+        var entity =
+            await _repository.GetTeamMemberByIdAsync(id)
+            ?? throw new ResourceNotFoundException($"Membro {id} não encontrado.");
 
         entity.Name = dto.Name;
         entity.Role = dto.Role;
         entity.LinkedinUrl = dto.LinkedinUrl;
         entity.GithubUrl = dto.GithubUrl;
 
-        // UPDATE: Substituição inteligente
         if (dto.File != null)
         {
             if (entity.FileId.HasValue)
@@ -340,7 +315,7 @@ public class AboutService : IAboutService
         }
 
         await _repository.UpdateTeamMemberAsync(entity);
-        await _unitOfWork.CommitAsync(); // Persiste no banco
+        await _unitOfWork.CommitAsync();
         await _cache.RemoveAsync(ABOUT_CACHE_KEY);
 
         return true;
@@ -348,18 +323,17 @@ public class AboutService : IAboutService
 
     public async Task DeleteTeamMemberAsync(int id)
     {
-        var entity = await _repository.GetTeamMemberByIdAsync(id);
-        if (entity == null)
-            throw new ResourceNotFoundException($"Membro {id} não encontrado.");
+        var entity =
+            await _repository.GetTeamMemberByIdAsync(id)
+            ?? throw new ResourceNotFoundException($"Membro {id} não encontrado.");
 
-        // DELETE: Limpeza do arquivo
         if (entity.FileId.HasValue)
         {
             await _fileService.DeletarArquivoAsync(entity.FileId.Value);
         }
 
         await _repository.DeleteTeamMemberAsync(entity);
-        await _unitOfWork.CommitAsync(); // Persiste no banco
+        await _unitOfWork.CommitAsync();
         await _cache.RemoveAsync(ABOUT_CACHE_KEY);
     }
 }

@@ -27,9 +27,6 @@ public class PixPaymentService(
     IUserContext userContext)
     : IPixPaymentService
 {
-    // REMOVIDO: private readonly ApiDbContext _dbContext;
-    // ADICIONADO: Repository e UnitOfWork
-
     private readonly GeneralSettings _generalsettings = settings.Value;
     private const string IDEMPOTENCY_PREFIX = "PixPayment";
 
@@ -108,7 +105,6 @@ public class PixPaymentService(
                 new PaymentStatusUpdate("A processar o seu pagamento...", "processing", false)
             );
 
-            // 1. Prepara a Entidade (apenas em memória, NÃO persiste ainda)
             var novoPixPayment = new Models.Payments()
             {
                 UserId = userId,
@@ -122,7 +118,6 @@ public class PixPaymentService(
                 CustomerCpf = request.Payer.Identification.Number,
             };
 
-            // 2. Marca para adição (NÃO persiste ainda)
             await paymentRepository.AddAsync(novoPixPayment);
 
             logger.LogInformation(
@@ -139,7 +134,6 @@ public class PixPaymentService(
                 )
             );
 
-            // 3. Chama Mercado Pago
             var requestOptions = new RequestOptions
             {
                 CustomHeaders = { { "X-Idempotency-Key", externalReference } },
@@ -168,14 +162,11 @@ public class PixPaymentService(
 
             var payment = await paymentClient.CreateAsync(paymentRequest, requestOptions);
 
-            // 4. Atualiza a Entidade com dados do MP (ainda em memória)
             novoPixPayment.PaymentId = payment.Id.ToString();
             novoPixPayment.Status = PaymentStatusMapper.MapFromMercadoPago(payment.Status);
             novoPixPayment.DateApproved = payment.DateApproved;
             novoPixPayment.UpdatedAt = DateTime.UtcNow;
 
-            // 5. ✅ COMMIT ÚNICO - ATOMICIDADE GARANTIDA
-            // Persiste o payment com TODOS os dados já preenchidos (incluindo resposta do MP)
             await unitOfWork.CommitAsync();
 
             logger.LogInformation(
@@ -185,7 +176,6 @@ public class PixPaymentService(
                 novoPixPayment.Status
             );
 
-            // 6. Notifica via Hub
             if (
                 payment.Status == "approved"
                 || payment.Status == "pending"
@@ -215,7 +205,6 @@ public class PixPaymentService(
                 );
             }
 
-            // 7. Retorno
             return new PaymentResponseDto(
                 payment.Status,
                 payment.Id.GetValueOrDefault(), // Safe unwrap
@@ -248,9 +237,6 @@ public class PixPaymentService(
                 );
             }
 
-            // ✅ ROLLBACK AUTOMÁTICO
-            // Como não fizemos commit ainda, o UnitOfWork descarta todas as mudanças automaticamente
-            // Não precisa remover manualmente - o Entity Framework faz isso
             logger.LogWarning(
                 "Pagamento PIX para o usuário {UserId} NÃO foi persistido devido a uma falha. Rollback automático.",
                 userId

@@ -9,10 +9,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace MeuCrudCsharp.Features.Videos.Controller
 {
-    /// <summary>
-    /// Serves HLS (HTTP Live Streaming) video content to authenticated users.
-    /// This controller handles requests for both the main manifest file (.m3u8) and the individual video segments (.ts).
-    /// </summary>
     [Route("/api/videos")]
     public class VideosController : ApiControllerBase
     {
@@ -20,12 +16,6 @@ namespace MeuCrudCsharp.Features.Videos.Controller
         private readonly IWebHostEnvironment _env;
         private readonly ILogger<VideosController> _logger;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="VideosController"/> class.
-        /// </summary>
-        /// <param name="context">The database context.</param>
-        /// <param name="env">The web hosting environment for file path information.</param>
-        /// <param name="logger">The logger for recording events and errors.</param>
         public VideosController(
             ApiDbContext context,
             IWebHostEnvironment env,
@@ -37,19 +27,6 @@ namespace MeuCrudCsharp.Features.Videos.Controller
             _logger = logger;
         }
 
-        /// <summary>
-        /// Retrieves the HLS manifest file (.m3u8) for a specific video.
-        /// </summary>
-        /// <remarks>
-        /// This endpoint is the entry point for video playback. It validates that the requested video
-        /// exists and is available before serving the manifest file to the client's player.
-        /// </remarks>
-        /// <param name="storageIdentifier">The unique identifier of the video.</param>
-        /// <returns>The manifest file if the video is found and available.</returns>
-        /// <response code="200">Returns the manifest file with the correct content type.</response>
-        /// <response code="401">If the user is not authenticated.</response>
-        /// <response code="404">If the video is not found or is not yet available.</response>
-        /// <response code="500">If the manifest file is missing on the server, indicating a processing error.</response>
         [HttpGet("{storageIdentifier}/manifest.m3u8")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(FileResult))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -67,9 +44,9 @@ namespace MeuCrudCsharp.Features.Videos.Controller
 
             var manifestPath = Path.Combine(
                 _env.WebRootPath,
-                "uploads",   // <--- Adicionado
+                "uploads",
                 "Videos",
-                storageIdentifier, // Assume-se que o Job criou uma subpasta com o ID ou GUID
+                storageIdentifier,
                 "hls",
                 "manifest.m3u8"
             );
@@ -83,27 +60,12 @@ namespace MeuCrudCsharp.Features.Videos.Controller
             return PhysicalFile(manifestPath, "application/vnd.apple.mpegurl");
         }
 
-        /// <summary>
-        /// Retrieves an HLS video segment file (.ts).
-        /// </summary>
-        /// <remarks>
-        /// This endpoint serves the individual video chunks requested by the player. For performance,
-        /// it does not re-validate against the database for every segment request, assuming the
-        /// initial manifest request was already authorized and validated.
-        /// </remarks>
-        /// <param name="storageIdentifier">The unique identifier of the video.</param>
-        /// <param name="segmentName">The name of the video segment file (e.g., "segment001.ts").</param>
-        /// <returns>The video segment file if it exists.</returns>
-        /// <response code="200">Returns the video segment file with the correct content type.</response>
-        /// <response code="401">If the user is not authenticated.</response>
-        /// <response code="404">If the requested segment file does not exist.</response>
         [HttpGet("{storageIdentifier}/hls/{segmentName}")]
         public IActionResult GetVideoSegment(string storageIdentifier, string segmentName)
         {
-            // NOVO CAMINHO TAMBÉM AQUI:
             var segmentPath = Path.Combine(
                 _env.WebRootPath,
-                "uploads",   // <--- Adicionado
+                "uploads",
                 "Videos",
                 storageIdentifier,
                 "hls",

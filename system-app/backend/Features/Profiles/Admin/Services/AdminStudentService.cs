@@ -7,12 +7,12 @@ namespace MeuCrudCsharp.Features.Profiles.Admin.Services
 {
     public class AdminStudentService : IAdminStudentService
     {
-        private readonly IStudentRepository _repository; // <--- Mudou aqui
+        private readonly IStudentRepository _repository;
         private readonly ICacheService _cacheService;
         private readonly ILogger<AdminStudentService> _logger;
 
         public AdminStudentService(
-            IStudentRepository repository, // <--- Injeção do Repository
+            IStudentRepository repository,
             ICacheService cacheService,
             ILogger<AdminStudentService> logger
         )
@@ -36,13 +36,11 @@ namespace MeuCrudCsharp.Features.Profiles.Admin.Services
                             "Buscando a lista de alunos do banco de dados (cache miss)."
                         );
 
-                        // Chamada ao Repositório
                         var (users, totalCount) = await _repository.GetAllWithSubscriptionsAsync(
                             page,
                             pageSize
                         );
 
-                        // Se não tiver registros, retorna vazio
                         if (totalCount == 0)
                         {
                             return new PaginatedResult<StudentDto>
@@ -54,7 +52,6 @@ namespace MeuCrudCsharp.Features.Profiles.Admin.Services
                             };
                         }
 
-                        // Mapeamento (Entity -> DTO)
                         var studentDtos = users
                             .Select(u => new StudentDto(
                                 u.PublicId.ToString(),
@@ -67,7 +64,6 @@ namespace MeuCrudCsharp.Features.Profiles.Admin.Services
                             ))
                             .ToList();
 
-                        // Monta o objeto de resultado
                         return new PaginatedResult<StudentDto>
                         {
                             Items = studentDtos,
@@ -95,7 +91,6 @@ namespace MeuCrudCsharp.Features.Profiles.Admin.Services
             {
                 _logger.LogInformation("Buscando o aluno pelo id no banco de dados (cache miss).");
 
-                // Chamada ao Repositório
                 var user = await _repository.GetByPublicIdWithSubscriptionAsync(id);
 
                 if (user == null)
@@ -104,7 +99,6 @@ namespace MeuCrudCsharp.Features.Profiles.Admin.Services
                     throw new KeyNotFoundException($"Aluno com ID {id} não encontrado.");
                 }
 
-                // Mapeamento (Entity -> DTO)
                 var studentDto = new StudentDto(
                     user.PublicId.ToString(),
                     user.Name ?? "N/A",

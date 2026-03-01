@@ -58,10 +58,6 @@ public class UserWalletController : MercadoPagoApiControllerBase
             await _clientService.RemoveCardFromWalletAsync(userId, cardId);
             return NoContent();
         }
-        catch (InvalidOperationException ex)
-        {
-            return BadRequest(new { message = ex.Message });
-        }
         catch (Exception ex)
         {
             return HandleException(ex, "Erro ao remover cartão");

@@ -7,9 +7,6 @@ using MeuCrudCsharp.Models;
 
 namespace MeuCrudCsharp.Features.MercadoPago.Subscriptions.Interfaces
 {
-    /// <summary>
-    /// Defines the contract for a service that manages user subscriptions with a payment provider.
-    /// </summary>
     public interface ISubscriptionService
     {
         Task<Subscription> CreateSubscriptionAsync(

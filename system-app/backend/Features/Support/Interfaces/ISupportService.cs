@@ -11,7 +11,6 @@ namespace MeuCrudCsharp.Features.Support.Interfaces
             int pageSize
         );
 
-        // Adicione esta linha:
         Task<SupportTicketResponseDto> GetTicketByIdAsync(string id);
 
         Task UpdateTicketStatusAsync(string id, UpdateSupportTicketDto dto);

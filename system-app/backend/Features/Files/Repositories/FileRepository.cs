@@ -12,20 +12,17 @@ public class FileRepository(ApiDbContext context) : IFileRepository
     public async Task AddAsync(EntityFile arquivo)
     {
         await context.Files.AddAsync(arquivo);
-        // NÃO chama SaveChangesAsync - deixa pro UnitOfWork
     }
 
     public Task UpdateAsync(EntityFile arquivo)
     {
         context.Files.Update(arquivo);
-        // NÃO chama SaveChangesAsync - deixa pro UnitOfWork
         return Task.CompletedTask;
     }
 
     public Task DeleteAsync(EntityFile arquivo)
     {
         context.Files.Remove(arquivo);
-        // NÃO chama SaveChangesAsync - deixa pro UnitOfWork
         return Task.CompletedTask;
     }
 }

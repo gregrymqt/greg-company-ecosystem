@@ -13,15 +13,12 @@ public class MercadoPagoIntegrationService(
 {
     private const string BaseEndpoint = "post-purchase/v1/claims";
 
-    // [cite: 44, 45]
-
     public async Task<MpClaimSearchResponse> SearchClaimsAsync(
         string role,
         int offset = 0,
         int limit = 30
     )
     {
-        // Agora injetamos a role na URL
         var endpoint = $"{BaseEndpoint}/search?role={role}&offset={offset}&limit={limit}";
 
         var jsonResponse = await SendMercadoPagoRequestAsync<object>(
@@ -48,7 +45,6 @@ public class MercadoPagoIntegrationService(
 
     public async Task EscalateToMediationAsync(long claimId)
     {
-        // Endpoint de mediação
         var endpoint = $"{BaseEndpoint}/{claimId}/actions/open-dispute";
         await SendMercadoPagoRequestAsync<object>(HttpMethod.Post, endpoint, null);
     }
@@ -74,7 +70,6 @@ public class MercadoPagoIntegrationService(
         string receiverRole = "complainant"
     )
     {
-        // Documentação: POST /v1/claims/{id}/actions/send-message
         var endpoint = $"{BaseEndpoint}/{claimId}/actions/send-message";
 
         var payload = new MpPostMessageRequest
@@ -84,7 +79,6 @@ public class MercadoPagoIntegrationService(
             Attachments = attachments,
         };
 
-        // Envia usando POST
         await SendMercadoPagoRequestAsync(HttpMethod.Post, endpoint, payload);
     }
 }

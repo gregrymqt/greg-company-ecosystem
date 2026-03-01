@@ -1,13 +1,9 @@
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 using MeuCrudCsharp.Features.Files.DTOs;
-using Microsoft.AspNetCore.Http; // Necessário para IFormFile
+using Microsoft.AspNetCore.Http;
 
 namespace MeuCrudCsharp.Features.Home.DTOs;
-
-// =================================================================
-// DTOs DE LEITURA (SAÍDA - GET)
-// =================================================================
 
 public class HomeContentDto
 {
@@ -37,11 +33,6 @@ public class ServiceDto
     public string ActionText { get; set; } = string.Empty;
     public string ActionUrl { get; set; } = string.Empty;
 }
-
-// =================================================================
-// DTOs DE ESCRITA (ENTRADA - POST/PUT)
-// Devem ser usados com [FromForm] nos Controllers
-// =================================================================
 
 public class CreateUpdateHeroDto : BaseUploadDto
 {

@@ -15,21 +15,17 @@ public class AntiforgeryController : ApiControllerBase
         _antiforgery = antiforgery;
     }
 
-    // Este endpoint NÃO deve ter [Authorize] para que o front-end possa
-    // pegar o token antes mesmo de o usuário estar logado, se necessário.
     [HttpGet("token")]
-    [IgnoreAntiforgeryToken] // Ignora a validação para si mesmo
+    [IgnoreAntiforgeryToken]
     public IActionResult GetToken()
     {
-        // Gera o par de tokens (um para o cookie, outro para o header)
         var tokens = _antiforgery.GetAndStoreTokens(HttpContext);
 
-        // Envia o token que o JavaScript precisa colocar no cabeçalho
         return Ok(
             new
             {
                 token = tokens.RequestToken,
-                headerName = tokens.HeaderName, // O nome do header que o ASP.NET Core espera
+                headerName = tokens.HeaderName,
             }
         );
     }

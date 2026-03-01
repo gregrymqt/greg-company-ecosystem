@@ -42,13 +42,8 @@ public class UserSubscriptionService : IUserSubscriptionService
             $"SubscriptionDetails_{userId}",
             async () =>
             {
-                // 1. Busca dados locais usando a query unificada
-                var subscription = await _repository.GetActiveSubscriptionByUserIdAsync(userId);
 
-                if (subscription?.Plan == null)
-                    return null;
 
-                // 2. Busca dados externos para ter o status real e data de cobrança
                 var mpSubscription = await _mpSubscriptionService.GetSubscriptionByIdAsync(
                     subscription.ExternalId ?? string.Empty
                 );
@@ -56,14 +51,13 @@ public class UserSubscriptionService : IUserSubscriptionService
                 if (mpSubscription == null)
                     return null;
 
-                // 3. CORREÇÃO DO ERRO: Uso do Construtor Positional do Record
                 return new SubscriptionDetailsDto(
-                    subscription.ExternalId, // subscriptionId
-                    subscription.Plan.Name, // planName
-                    mpSubscription.Status, // status (vem do MP)
-                    (decimal)subscription.CurrentAmount, // amount (cast explícito se necessário)
-                    subscription.LastFourCardDigits, // lastFourCardDigits
-                    mpSubscription.NextPaymentDate // nextBillingDate
+                    subscription.ExternalId,
+                    subscription.Plan.Name,
+                    mpSubscription.Status,
+                    (decimal)subscription.CurrentAmount,
+                    subscription.LastFourCardDigits,
+                    mpSubscription.NextPaymentDate
                 );
             }
         );
@@ -73,38 +67,33 @@ public class UserSubscriptionService : IUserSubscriptionService
     {
         var userId = await _userContext.GetCurrentUserId();
 
-        // 1. Validação usando o Enum para segurança
         var statusEnum = SubscriptionStatusExtensions.FromMpString(newStatus);
         if (statusEnum == SubscriptionStatus.Unknown)
         {
             throw new AppServiceException($"Status '{newStatus}' inválido.");
         }
 
-        // 2. Busca assinatura ativa (precisa ser rastreada para atualização)
         var subscription = await _repository.GetByExternalIdAsync(
             await GetActiveSubscriptionExternalIdAsync(userId),
             includePlan: false,
-            asNoTracking: false // ✅ Rastreada para poder atualizar
+            asNoTracking: false
         ) ?? throw new ResourceNotFoundException(
             "Nenhuma assinatura ativa encontrada para atualização."
         );
 
         var originalStatus = subscription.Status;
 
-        // 3. Atualiza localmente (apenas em memória)
         subscription.Status = statusEnum.ToMpString();
         subscription.UpdatedAt = DateTime.UtcNow;
 
         try
         {
-            // 4. Chama o MercadoPago primeiro
             var dto = new UpdateSubscriptionStatusDto(statusEnum.ToMpString());
             var result = await _mpSubscriptionService.UpdateSubscriptionStatusAsync(
                 subscription.ExternalId ?? string.Empty,
                 dto
             );
 
-            // 5. Verifica se MP retornou o status esperado
             if (result.Status != statusEnum.ToMpString())
             {
                 _logger.LogWarning(
@@ -112,13 +101,11 @@ public class UserSubscriptionService : IUserSubscriptionService
                     result.Status,
                     statusEnum.ToMpString()
                 );
-                subscription.Status = result.Status; // Usa o status que MP retornou
+                subscription.Status = result.Status;
             }
 
-            // 6. ✅ COMMIT ÚNICO - Se MP OK, persiste localmente
             await _unitOfWork.CommitAsync();
 
-            // 7. Limpa cache
             await _cacheService.RemoveAsync($"SubscriptionDetails_{userId}");
 
             _logger.LogInformation(
@@ -136,8 +123,6 @@ public class UserSubscriptionService : IUserSubscriptionService
                 newStatus
             );
 
-            // ✅ ROLLBACK AUTOMÁTICO
-            // Como a entidade está rastreada mas não foi comitada, precisamos reverter manualmente
             subscription.Status = originalStatus;
 
             _logger.LogInformation(
@@ -149,9 +134,6 @@ public class UserSubscriptionService : IUserSubscriptionService
         }
     }
 
-    /// <summary>
-    /// Helper method para buscar ExternalId da assinatura ativa.
-    /// </summary>
     private async Task<string> GetActiveSubscriptionExternalIdAsync(string userId)
     {
         var subscription = await _repository.GetActiveSubscriptionByUserIdAsync(userId);

@@ -18,8 +18,6 @@ public class AdminClaimsController : MercadoPagoApiControllerBase
         _adminClaimService = adminClaimService;
     }
 
-    // GET: api/admin/claims?searchTerm=pnr&statusFilter=opened&page=1
-    // Retorna a lista paginada (Inbox) [cite: 1]
     [HttpGet]
     public async Task<ActionResult<MercadoPagoClaimsViewModels.ClaimsIndexViewModel>> GetClaims(
         [FromQuery] string? searchTerm,
@@ -31,8 +29,6 @@ public class AdminClaimsController : MercadoPagoApiControllerBase
         return Ok(result);
     }
 
-    // GET: api/admin/claims/{id}
-    // Entra na "Sala de Guerra" (Detalhes + Chat) [cite: 2]
     [HttpGet("{id}")]
     public async Task<
         ActionResult<MercadoPagoClaimsViewModels.ClaimDetailViewModel>
@@ -45,16 +41,14 @@ public class AdminClaimsController : MercadoPagoApiControllerBase
         }
         catch (Exception ex)
         {
-            // Se não achar no banco ou der erro no MP
-            return NotFound(new { message = ex.Message });
+            return HandleException(ex, "Erro ao obter detalhes da reclamação.");
         }
     }
 
-    // Rota fica: POST api/admin/claims/15/reply
     [HttpPost("{id}/reply")]
     public async Task<IActionResult> ReplyToClaim(
         long id,
-        [FromBody] MercadoPagoClaimsViewModels.ReplyClaimViewModel model // Reutilize o DTO simples que tem só a mensagem
+        [FromBody] MercadoPagoClaimsViewModels.ReplyClaimViewModel model
     )
     {
         if (!ModelState.IsValid)
@@ -67,7 +61,7 @@ public class AdminClaimsController : MercadoPagoApiControllerBase
         }
         catch (Exception ex)
         {
-            return BadRequest(new { message = "Erro ao enviar resposta: " + ex.Message });
+            return HandleException(ex, "Erro ao enviar resposta.");
         }
     }
 }

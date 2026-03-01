@@ -6,19 +6,11 @@ using SendGrid.Helpers.Mail;
 
 namespace MeuCrudCsharp.Features.Emails.Services
 {
-    /// <summary>
-    /// Implementação de <see cref="IEmailSenderService"/> que utiliza o serviço SendGrid para enviar e-mails.
-    /// </summary>
     public class SendGridEmailSenderService : IEmailSenderService
     {
         private readonly SendGridSettings _settings;
         private readonly ILogger<SendGridEmailSenderService> _logger;
 
-        /// <summary>
-        /// Inicializa uma nova instância da classe <see cref="SendGridEmailSenderService"/>.
-        /// </summary>
-        /// <param name="options">As configurações do SendGrid injetadas via Options Pattern.</param>
-        /// <param name="logger">O serviço de logging.</param>
         public SendGridEmailSenderService(
             IOptions<SendGridSettings> options,
             ILogger<SendGridEmailSenderService> logger
@@ -28,15 +20,6 @@ namespace MeuCrudCsharp.Features.Emails.Services
             _logger = logger;
         }
 
-        /// <summary>
-        /// Envia um e-mail utilizando o serviço SendGrid.
-        /// </summary>
-        /// <param name="to">O endereço de e-mail do destinatário.</param>
-        /// <param name="subject">O assunto do e-mail.</param>
-        /// <param name="htmlBody">O corpo do e-mail em formato HTML.</param>
-        /// <param name="plainTextBody">O corpo do e-mail em formato de texto simples, como alternativa ao HTML.</param>
-        /// <returns>Uma <see cref="Task"/> que representa a operação de envio assíncrona.</returns>
-        /// <exception cref="AppServiceException">Lançada quando ocorre um erro ao enviar o e-mail.</exception>
         public async Task SendEmailAsync(
             string to,
             string subject,
@@ -44,7 +27,6 @@ namespace MeuCrudCsharp.Features.Emails.Services
             string plainTextBody
         )
         {
-            // Validação de parâmetros de entrada
             if (string.IsNullOrWhiteSpace(to))
                 throw new ArgumentException("O endereço de e-mail do destinatário não pode ser vazio.", nameof(to));
 
@@ -104,7 +86,6 @@ namespace MeuCrudCsharp.Features.Emails.Services
             }
             catch (AppServiceException)
             {
-                // Re-lança AppServiceException sem envolver em outra exceção
                 throw;
             }
             catch (Exception ex)
