@@ -6,7 +6,7 @@ using MeuCrudCsharp.Features.Exceptions;
 using MeuCrudCsharp.Features.Files.Interfaces;
 using MeuCrudCsharp.Features.Shared.Work;
 using MeuCrudCsharp.Models;
-using Microsoft.AspNetCore.DataProtection.KeyManagement.Internal;
+using MeuCrudCsharp.Tests.Features.About;
 using Microsoft.AspNetCore.Http;
 using Moq;
 
@@ -17,13 +17,13 @@ public class UpdateAboutAsyncTests : AboutServiceTestBase
     // --- TESTES ---
 
     [Theory]
-    [InlineData(true)] // Testa como Chunk
-    [InlineData(false)] // Testa como Upload Normal
+    [InlineData(true)] // Scenario 1: Updating with a chunked file (simulating an upload in progress)
+    [InlineData(false)] // Scenario 2: Updating with a complete file (simulating a regular update)
     public async Task UpdateSection_WhenFileExists_ShouldUpdateSuccessfully(bool isChunk)
     {
         // Arrange
-        var entity = CreateFakeSectionEntity(fileId: 10);
-        var dto = CreateFakeAboutSectionDto(isChunk);
+        var entity = AboutTestFakes.CreateFakeSectionEntity(fileId: 10);
+        var dto = AboutTestFakes.CreateFakeAboutSectionDto(isChunk);
 
         _repository.Setup(r => r.GetSectionByIdAsync(It.IsAny<int>())).ReturnsAsync(entity);
 
@@ -46,13 +46,13 @@ public class UpdateAboutAsyncTests : AboutServiceTestBase
                     It.IsAny<string>()
                 )
             )
-            .ReturnsAsync(CreateFakeEntityFile());
+            .ReturnsAsync(AboutTestFakes.CreateFakeEntityFile());
 
         _fileService
             .Setup(f => f.SubstituirArquivoAsync(It.IsAny<int>(), It.IsAny<IFormFile>()))
-            .ReturnsAsync(CreateFakeEntityFile());
+            .ReturnsAsync(AboutTestFakes.CreateFakeEntityFile());
 
-        // Act - IMPORTANTE: Usar await aqui!
+        // Act
         var result = await _sut.UpdateSectionAsync(1, dto);
 
         // Assert
@@ -67,7 +67,7 @@ public class UpdateAboutAsyncTests : AboutServiceTestBase
         // Arrange
         _repository
             .Setup(r => r.GetSectionByIdAsync(It.IsAny<int>()))
-            .ReturnsAsync(CreateFakeSectionEntity());
+            .ReturnsAsync(AboutTestFakes.CreateFakeSectionEntity());
         _fileService
             .Setup(f =>
                 f.ProcessChunkAsync(
@@ -77,15 +77,18 @@ public class UpdateAboutAsyncTests : AboutServiceTestBase
                     It.IsAny<int>()
                 )
             )
-            .ReturnsAsync((string)null!); // Simula que ainda não é o último chunk
+            .ReturnsAsync((string)null!); // Simulate an incomplete upload
 
         // Act
-        var result = await _sut.UpdateSectionAsync(1, CreateFakeAboutSectionDto(isChunk: true));
+        var result = await _sut.UpdateSectionAsync(
+            1,
+            AboutTestFakes.CreateFakeAboutSectionDto(isChunk: true)
+        );
 
         // Assert
         Assert.False(result);
 
-        _unitOfWork.Verify(u => u.CommitAsync(), Times.Never); // Malícia: garante que não salvou no banco
+        _unitOfWork.Verify(u => u.CommitAsync(), Times.Never);
         _cache.Verify(c => c.RemoveAsync(It.IsAny<string>()), Times.Never);
     }
 
@@ -94,19 +97,17 @@ public class UpdateAboutAsyncTests : AboutServiceTestBase
     {
         // Arrange
         int idInexistente = 999;
-        var dto = CreateFakeAboutSectionDto(isChunk: false);
+        var dto = AboutTestFakes.CreateFakeAboutSectionDto(isChunk: false);
 
-        // O repositório retorna nulo, simulando que a seção não existe no banco
         _repository
             .Setup(r => r.GetSectionByIdAsync(idInexistente))
-            .ReturnsAsync((AboutSection)null!); // Null com "!" para evitar warning do compilador
+            .ReturnsAsync((AboutSection)null!);
 
         // Act & Assert
         await Assert.ThrowsAsync<ResourceNotFoundException>(() =>
             _sut.UpdateSectionAsync(idInexistente, dto)
         );
 
-        // Verificações de segurança: Garantia de que NADA foi feito indevidamente
         _fileService.Verify(
             f =>
                 f.ProcessChunkAsync(
@@ -131,12 +132,11 @@ public class UpdateAboutAsyncTests : AboutServiceTestBase
     {
         // Arrange
         int idValido = 1;
-        var entity = CreateFakeSectionEntity(fileId: 10); // Entidade com arquivo existente
-        var dto = CreateFakeAboutSectionDto(isChunk: false); // Simula upload normal (sem ser chunk)
+        var entity = AboutTestFakes.CreateFakeSectionEntity(fileId: 10);
+        var dto = AboutTestFakes.CreateFakeAboutSectionDto(isChunk: false);
 
         _repository.Setup(r => r.GetSectionByIdAsync(idValido)).ReturnsAsync(entity);
 
-        // Simulamos uma falha no serviço de arquivos (ex: erro de permissão na pasta, disco cheio, etc)
         _fileService
             .Setup(f => f.SubstituirArquivoAsync(It.IsAny<int>(), It.IsAny<IFormFile>()))
             .ThrowsAsync(new Exception("Falha simulada no disco ao salvar o arquivo."));
@@ -146,10 +146,8 @@ public class UpdateAboutAsyncTests : AboutServiceTestBase
             _sut.UpdateSectionAsync(idValido, dto)
         );
 
-        // Valida se a mensagem que subiu é a mesma que o serviço de arquivo estourou
         Assert.Equal("Falha simulada no disco ao salvar o arquivo.", exception.Message);
 
-        // A malícia: O banco NÃO pode ter sido commitado se a foto falhou!
         _unitOfWork.Verify(u => u.CommitAsync(), Times.Never);
         _cache.Verify(c => c.RemoveAsync(It.IsAny<string>()), Times.Never);
     }

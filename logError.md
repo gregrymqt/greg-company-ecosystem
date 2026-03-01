@@ -1,137 +1,180 @@
-using System;
-using Humanizer;
-using MeuCrudCsharp.Features.About.DTOs;
-using MeuCrudCsharp.Features.About.Interfaces;
-using MeuCrudCsharp.Features.About.Services;
-using MeuCrudCsharp.Features.Caching.Interfaces;
-using MeuCrudCsharp.Features.Files.Interfaces;
-using MeuCrudCsharp.Features.Files.Services;
-using MeuCrudCsharp.Features.Shared.Work;
-using MeuCrudCsharp.Models;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using Moq;
 
-namespace Tests.Features.About.Services;
+services:
+  tests:
+    build:
+      context: . 
+      dockerfile: tests/Dockerfile 
+    environment:
+      - USE_REDIS=true
+      - ConnectionStrings__Redis=redis-test:6379
+      - ConnectionStrings__DefaultConnection=Server=mssql-test;Database=TestDb;User Id=sa;Password=TestPassword123!;TrustServerCertificate=True;
+    depends_on:
+      mssql-test:
+        condition: service_healthy
+      redis-test:
+        condition: service_started
 
-public class GetAboutAsyncTests : AboutServiceTestBase
-{
-    public AboutPageContentDto CreateFakeAboutPageContentDto() =>
-        new()
-        {
-            Sections =
-            [
-                new AboutSectionDto
-                {
-                    Id = 1,
-                    Title = "Cached Section",
-                    Description = "Cached Description",
-                    ImageUrl = "cached_url",
-                    ImageAlt = "cached_alt",
-                },
-            ],
-            TeamSection = new AboutTeamSectionDto
-            {
-                Members =
-                [
-                    new TeamMemberDto
-                    {
-                        Id = 1,
-                        Name = "Cached John Doe",
-                        Role = "Cached Developer",
-                        PhotoUrl = "cached_photo",
-                        LinkedinUrl = "https://linkedin.com/in/cachedjohndoe",
-                        GithubUrl = "https://github.com/cachedjohndoe",
-                    },
-                ],
-            },
-        };
+  mssql-test:
+    image: "mcr.microsoft.com/mssql/server:2022-latest"
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_USERNAME=sa
+      - MSSQL_SA_PASSWORD=TestPassword123!
+    healthcheck:
+      test: ["CMD", "/opt/mssql-tools18/bin/sqlcmd", "-S", "localhost", "-U", "sa", "-P", "TestPassword123!", "-Q", "SELECT 1", "-C"]   
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-    [Theory]
-    [InlineData(true)] // Cenário 1: Cache tem dados (Hit)
-    [InlineData(false)] // Cenário 2: Cache está vazio (Miss)
-    public async Task GetAboutPageContent_ShouldHandleCacheFlow(bool isCacheHit)
-    {
-        // ARRANGE
-        var cachedDto = isCacheHit ? CreateFakeAboutPageContentDto() : null;
-
-        _cache
-            .Setup(c =>
-                c.GetOrCreateAsync(
-                    It.IsAny<string>(),
-                    It.IsAny<Func<Task<AboutPageContentDto>>>(),
-                    It.IsAny<TimeSpan?>()
-                )
-            )
-            .Returns(
-                async (string key, Func<Task<AboutPageContentDto>> factory, TimeSpan? expiry) =>
-                    isCacheHit ? cachedDto : await factory()
-            );
-
-        // Se for Miss (false), precisamos que o Repo retorne algo para a factory não quebrar
-        _repository.Setup(r => r.GetAllSectionsAsync()).ReturnsAsync([]);
-        _repository.Setup(r => r.GetAllTeamMembersAsync()).ReturnsAsync([]);
-
-        // ACT
-        var result = await _sut.GetAboutPageContentAsync();
-
-        // ASSERT
-        Assert.NotNull(result);
-
-        // A mágica: se isCacheHit é true, o repo deve ser chamado ZERO vezes (Never).
-        // Se for false, deve ser chamado UMA vez (Once).
-        var expectedCalls = isCacheHit ? Times.Never() : Times.Once();
-        _repository.Verify(r => r.GetAllSectionsAsync(), expectedCalls);
-    }
-
-    [Fact]
-    public async Task GetAboutPageContent_QuandoRepositorioFalhar_DeveSubirExcecao()
-    {
-        // 1. Plantamos a bomba: O Repositório vai dar erro!
-        _repository
-            .Setup(r => r.GetAllSectionsAsync())
-            .ThrowsAsync(new Exception("Falha de conexão com o banco de dados"));
-
-        // 2 e 3. Armamos a rede do xUnit e chamamos o método de verdade lá dentro
-        var excecao = await Assert.ThrowsAsync<Exception>(() => _sut.GetAboutPageContentAsync());
-
-        // Opcional: Validamos se a bomba que explodiu foi a mesma que plantamos
-        Assert.Equal("Falha de conexão com o banco de dados", excecao.Message);
-    }
-}
+  redis-test:
+    image: "redis:alpine"
 ---
-using MeuCrudCsharp.Features.About.DTOs;
-using MeuCrudCsharp.Features.About.Interfaces;
-using MeuCrudCsharp.Features.Base;
-using MeuCrudCsharp.Features.Exceptions;
-using MeuCrudCsharp.Features.Files.Attributes;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+# ==========================================================
+# GREG COMPANY - INFRASTRUCTURE ORCHESTRATION (V2.0)
+# Stack: .NET Core | React | SQL Server | MongoDB | Redis
+# Modo: Hybrid (Secure by default / Dev ready)
+# ==========================================================
 
-namespace MeuCrudCsharp.Features.About.Controllers;
+version: '3.8'
 
-[Route("api/[controller]")]
-public class AboutController : ApiControllerBase
-{
-    private readonly IAboutService _service;
+services:
 
-    public AboutController(IAboutService service)
-    {
-        _service = service;
-    }
+  # --- [ INFRASTRUCTURE LAYER ] ---
 
-    [HttpGet]
-    [AllowAnonymous]
-    public async Task<IActionResult> GetAboutPageContent()
-    {
-        try
-        {
-            var content = await _service.GetAboutPageContentAsync();
-            return Ok(content);
-        }
-        catch (Exception ex)
-        {
-            return HandleException(ex, "Erro ao carregar a página Sobre.");
-        }
-    }
+  sql-server:
+    image: "mcr.microsoft.com/mssql/server:2022-latest"
+    container_name: mssql-db
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_USERNAME=sa
+      # DICA: Em produção, use um arquivo .env para esta senha!
+      - MSSQL_SA_PASSWORD=${DB_PASSWORD}
+    # --- SEGURANÇA ---
+    # Manter COMENTADO na VPS (Nuvem) para evitar ataques.
+    # Descomentar no Desktop se precisar usar SSMS / DBeaver.
+    # ports:
+    #   - "1433:1433"
+    volumes:
+      - sql-server-data:/var/opt/mssql
+    networks:
+      - greg-network
+    healthcheck:
+      test: ["CMD", "/opt/mssql-tools18/bin/sqlcmd", "-S", "localhost", "-U", "sa", "-P", "${DB_PASSWORD}", "-Q", "SELECT 1", "-C"]   
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: always
+
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb-store
+    # --- SEGURANÇA ---
+    # Manter COMENTADO na VPS. Descomentar localmente para usar MongoDB Compass.
+    # ports:
+    #   - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - greg-network
+    restart: always
+
+  redis:
+    image: "redis:alpine"
+    container_name: redis-cache
+    command: redis-server --appendonly yes
+    # --- SEGURANÇA ---
+    # Manter COMENTADO na VPS. O Redis não tem senha por padrão aqui!
+    # ports:
+    #   - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - greg-network
+    restart: always
+
+  # --- [ APPLICATION LAYER ] ---
+
+  backend:
+    container_name: backend-api
+    build: 
+      context: ./system-app/backend
+      dockerfile: Dockerfile
+    ports:
+      - "5045:8080" # Porta Web API (Exposta para Web/Frontend)
+    env_file:
+      - .env
+    environment:
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=${ConnectionStrings__DefaultConnection}
+      - ConnectionStrings__MongoConnection=${MONGO_CONNECTION_STRING}
+      - ConnectionStrings__Redis=${ConnectionStrings__Redis}
+      - MercadoPago__AccessToken=${MercadoPago__AccessToken}
+      - MercadoPago__WebhookSecret=${MercadoPago__WebhookSecret}
+      - MercadoPago__PublicKey=${MercadoPago__PublicKey}
+      - Jwt__Key=${Jwt__Key}
+      - Google__ClientId=${Google__ClientId}
+      - Google__ClientSecret=${Google__ClientSecret}
+      - SendGrid__ApiKey=${SendGrid__ApiKey}
+      - SendGrid__FromEmail=${SendGrid__FromEmail}
+      - SendGrid__FromName=${SendGrid__FromName}
+      - General__BaseUrl=${GENERAL_BASEURL}
+      - USE_REDIS=${USE_REDIS}
+    depends_on:
+      sql-server:
+        condition: service_healthy # Só inicia quando o SQL estiver 100% pronto
+      redis:
+        condition: service_started
+      mongodb:
+        condition: service_started
+    networks:
+      - greg-network
+    volumes:
+      - ./uploads:/app/wwwroot/uploads
+      - ./logs:/app/logs    
+
+  frontend:
+    container_name: frontend-app
+    build:
+      context: ./system-app/frontend
+      dockerfile: Dockerfile
+      args:
+        - VITE_GENERAL_BASEURL=${GENERAL_BASEURL} 
+    ports:
+      - "5173:80" # Porta do Site (Exposta para Web)
+    depends_on:
+      - backend
+    networks:
+      - greg-network
+
+  bi-engine:
+    container_name: greg_company_bi
+    build:
+      context: .
+      dockerfile: bi-dashboard/Dockerfile
+    env_file: .env
+    environment:
+      - PYTHONDONTWRITEBYTECODE=1
+      - PYTHONUNBUFFERED=1
+      # No Python, as variáveis de conexão devem ser:
+      - DB_SERVER=${DB_SERVER} 
+      - DB_PORT=${DB_PORT} 
+      - DB_NAME=${DB_NAME} 
+      - DB_USER=${DB_USERNAME} 
+      - DB_PASSWORD=${DB_PASSWORD} 
+    depends_on:
+      - backend
+      - sql-server
+    networks:
+      - greg-network
+    restart: on-failure   
+
+# --- [ NETWORKING & PERSISTENCE ] ---
+
+networks:
+  greg-network:
+    driver: bridge
+
+volumes:
+  sql-server-data:
+  mongo-data:
+  redis-data:    

@@ -1,14 +1,30 @@
+
 services:
   tests:
     build:
-      context: . # Mudamos para a raiz para enxergar todas as pastas
-      dockerfile: tests/Dockerfile # Apontamos onde o Dockerfile está
+      context: . 
+      dockerfile: tests/Dockerfile 
     environment:
       - USE_REDIS=true
-      - ConnectionStrings__Redis=redis-cache:6379
-      - ConnectionStrings__DefaultConnection=Server=mssql-db;Database=TestDb;User Id=sa;Password=SuaSenha;
+      - ConnectionStrings__Redis=redis-test:6379
+      - ConnectionStrings__DefaultConnection=Server=mssql-test;Database=TestDb;User Id=sa;Password=TestPassword123!;TrustServerCertificate=True;
     depends_on:
-      mssql-db:
+      mssql-test:
         condition: service_healthy
-      redis-cache:
+      redis-test:
         condition: service_started
+
+  mssql-test:
+    image: "mcr.microsoft.com/mssql/server:2022-latest"
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_USERNAME=sa
+      - MSSQL_SA_PASSWORD=TestPassword123!
+    healthcheck:
+      test: ["CMD", "/opt/mssql-tools18/bin/sqlcmd", "-S", "localhost", "-U", "sa", "-P", "TestPassword123!", "-Q", "SELECT 1", "-C"]   
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis-test:
+    image: "redis:alpine"

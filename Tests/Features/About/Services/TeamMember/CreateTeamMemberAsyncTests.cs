@@ -4,6 +4,7 @@ using MeuCrudCsharp.Features.About.Services;
 using MeuCrudCsharp.Features.Caching.Interfaces;
 using MeuCrudCsharp.Features.Files.Interfaces;
 using MeuCrudCsharp.Features.Shared.Work;
+using MeuCrudCsharp.Tests.Features.About;
 using Microsoft.AspNetCore.Http;
 using Moq;
 
@@ -18,36 +19,43 @@ public class CreateTeamMemberAsyncTests : AboutServiceTestBase // Focado no mét
         bool isChunk
     )
     {
-        // 1. Arrange (Preparar)
-        var dto = CreateFakeTeamMemberDto(isChunk);
+        // Arrange
+        var dto = AboutTestFakes.CreateFakeTeamMemberDto(isChunk);
 
-        // NÃO chamamos o serviço real. APENAS dizemos o que o Mock deve retornar.
-        _fileService
-            .Setup(s =>
-                s.ProcessChunkAsync(
-                    It.IsAny<IFormFile>(),
-                    It.IsAny<string>(),
-                    It.IsAny<int>(),
-                    It.IsAny<int>()
+        if (isChunk)
+        {
+            _fileService
+                .Setup(s =>
+                    s.ProcessChunkAsync(
+                        It.IsAny<IFormFile>(),
+                        It.IsAny<string>(),
+                        It.IsAny<int>(),
+                        It.IsAny<int>()
+                    )
                 )
-            )
-            .ReturnsAsync("temp/caminho/foto.jpg");
+                .ReturnsAsync("temp/caminho/foto.jpg");
 
-        _fileService
-            .Setup(s =>
-                s.SalvarArquivoDoTempAsync("temp/caminho/foto.jpg", "foto.jpg", "AboutTeam")
-            )
-            .ReturnsAsync(CreateFakeEntityFile());
+            _fileService
+                .Setup(s =>
+                    s.SalvarArquivoDoTempAsync("temp/caminho/foto.jpg", "foto.jpg", "AboutTeam")
+                )
+                .ReturnsAsync(AboutTestFakes.CreateFakeEntityFile());
+        }
+        else
+        {
+            _fileService
+                .Setup(s => s.SalvarArquivoAsync(It.IsAny<IFormFile>(), It.IsAny<string>()))
+                .ReturnsAsync(AboutTestFakes.CreateFakeEntityFile());
+        }
 
-        // 2. Act (Agir)
+        // Act
         var result = await _sut.CreateTeamMemberAsync(dto);
 
-        // 3. Assert (Verificar)
+        // Assert
         Assert.NotNull(result);
         Assert.Equal("Lucas Vicente", result.Name);
         Assert.Equal("uploads/foto.jpg", result.PhotoUrl);
 
-        // Verifica se o banco e o cache foram acionados
         _unitOfWork.Verify(u => u.CommitAsync(), Times.Once);
         _cache.Verify(c => c.RemoveAsync(It.IsAny<string>()), Times.Once);
     }
@@ -55,12 +63,9 @@ public class CreateTeamMemberAsyncTests : AboutServiceTestBase // Focado no mét
     [Fact]
     public async Task CreateTeamMemberAsync_WhenFileServiceFails_ShouldThrowExceptionAndNotCommit()
     {
-        // 1. Arrange (Preparar)
-        // Reutilizamos o seu método auxiliar para criar o DTO
-        var dto = CreateFakeTeamMemberDto(false);
+        // Arrange
+        var dto = AboutTestFakes.CreateFakeTeamMemberDto(false);
 
-        // Aqui está o "pulo do gato": Forçamos o Mock do serviço de arquivo a falhar!
-        // Em vez de .ReturnsAsync, usamos .ThrowsAsync
         _fileService
             .Setup(s =>
                 s.ProcessChunkAsync(
@@ -72,18 +77,12 @@ public class CreateTeamMemberAsyncTests : AboutServiceTestBase // Focado no mét
             )
             .ThrowsAsync(new Exception("Erro simulado no upload do arquivo"));
 
-        // 2 & 3. Act & Assert (Agir e Verificar JUNTOS)
-        // Executamos o método DENTRO do Assert usando () =>
+        // Act & Assert
         var exception = await Assert.ThrowsAsync<Exception>(() => _sut.CreateTeamMemberAsync(dto));
 
-        // (Opcional) Podemos verificar se a mensagem da exceção é exatamente a que esperamos
         Assert.Equal("Erro simulado no upload do arquivo", exception.Message);
 
-        // 4. Verificações de segurança (Garantir que nada foi salvo pela metade)
-        // O banco NÃO pode ter sido commitado
         _unitOfWork.Verify(u => u.CommitAsync(), Times.Never);
-
-        // O cache NÃO pode ter sido limpo
         _cache.Verify(c => c.RemoveAsync(It.IsAny<string>()), Times.Never);
     }
 }

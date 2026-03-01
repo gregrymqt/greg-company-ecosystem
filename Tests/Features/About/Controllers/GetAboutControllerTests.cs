@@ -11,7 +11,7 @@ namespace Tests.Features.About.Controllers;
 public class GetAboutControllerTests : AboutControllerTestBase
 {
     [Fact]
-    public async Task GetAboutPageContent_Sucesso_DeveRetornar200OkComOsDados()
+    public async Task GetAboutPageContent_WhenSuccessful_ShouldReturn200OkWithData()
     {
         var contentFake = new AboutPageContentDto();
 
@@ -25,7 +25,7 @@ public class GetAboutControllerTests : AboutControllerTestBase
     }
 
     [Fact]
-    public async Task GetAboutPageContent_FalhaNoServico_DeveRetornar500InternalServerError()
+    public async Task GetAboutPageContent_WhenServiceFails_ShouldReturn500InternalServerError()
     {
         _serviceMock
             .Setup(s => s.GetAboutPageContentAsync())
