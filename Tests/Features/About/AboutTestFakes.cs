@@ -3,7 +3,7 @@ using MeuCrudCsharp.Models;
 using Microsoft.AspNetCore.Http;
 using Moq;
 
-namespace MeuCrudCsharp.Tests.Features.About;
+namespace Tests.Features.About;
 
 public static class AboutTestFakes
 {

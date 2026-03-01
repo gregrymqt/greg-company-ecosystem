@@ -12,7 +12,7 @@ This is a **multi-service business suite** with three core components:
 
 ### Architecture Pattern: Clean Architecture with Vertical Slice
 - **Features-first organization**: All features live under `Features/` directory (Auth, Authorization, Courses, MercadoPago, Support, Videos, etc.)
-- Each feature contains its own: Controllers, Services, Repositories, ViewModels, DTOs
+- Each feature contains its own: Controllers, Services, Repositories, DTOs, Interfaces, Mappers
 - **Extension-based startup**: `Program.cs` uses extension methods from `Extensions/` for clean dependency registration
   - `AddApplicationServices()` - Registers services/repos using Scrutor scanning
   - `AddPersistence()` - Configures EF Core, Identity, Redis, Hangfire
@@ -85,6 +85,8 @@ src/
 │   ├── infrastructure/
 │   │   ├── database.py           # SQL Server (SQLAlchemy)
 │   │   ├── mongo_client.py       # MongoDB connection
+│   │   ├── redis_client.py       # Redis connection (cache)
+│   │   ├── rows_client.py        # Rows.com API client
 │   │   └── websocket.py          # WebSocket Manager (Hub pattern)
 │   ├── enums/
 │   │   └── hub_enums.py          # AppHubs enum
@@ -96,18 +98,18 @@ src/
 │   │   ├── service.py            # Business logic + factory
 │   │   ├── schemas.py            # DTOs (Pydantic)
 │   │   ├── enums.py              # Domain enums
-│   │   └── websocket_handlers.py # WebSocket event handlers
+│   │   ├── handlers.py           # WebSocket event handlers
+│   │   └── routes.py             # REST endpoints (FastAPI router)
 │   ├── financial/                # Financial analytics
 │   ├── subscriptions/            # MRR, churn rate
 │   ├── support/                  # Support tickets (MongoDB)
 │   ├── content/                  # Course metrics
-│   └── users/                    # User analytics
+│   ├── users/                    # User analytics
+│   ├── rows/                     # Rows.com sync and integration
+│   └── storage/                  # Storage analytics
 │
 └── api/                          # FastAPI application
-    ├── main.py                   # App + CORS + background tasks
-    └── routes/                   # REST endpoints
-        ├── claims_routes.py
-        └── financial_routes.py
+    └── main.py                   # App + CORS + background tasks + router registration
 ```
 
 ### Key Features
@@ -160,9 +162,10 @@ docker-compose up -d --build backend
 
 Located in `mcp-servers/`:
 - **greg_context_mcp.py**: Provides architecture patterns and project structure to AI agents
+- **greg_network_mcp.py**: Provides network topology and connectivity context to AI agents
 - **log_mcp_server.py**: Exposes application logs to AI assistants
 
-These enable AI tools to understand project conventions and debug issues via log analysis.
+These enable AI tools to understand project conventions, inspect network config, and debug issues via log analysis.
 
 ## Critical Conventions
 
@@ -191,7 +194,7 @@ These enable AI tools to understand project conventions and debug issues via log
 
 ### Backend Feature
 1. Create folder under `Features/{FeatureName}/`
-2. Add subfolders: `Controllers/`, `Services/`, `Repositories/`, `ViewModels/`
+2. Add subfolders: `Controllers/`, `Services/`, `Repositories/`, `DTOs/`, `Interfaces/`, `Mappers/`
 3. Services/Repos auto-register if namespace matches pattern in `DependencyInjectionExtensions.cs`
 4. Add DbSet to `ApiDbContext.cs` if feature has database entity
 5. Create migration: `dotnet ef migrations add {FeatureName}Initial`
@@ -212,12 +215,12 @@ These enable AI tools to understand project conventions and debug issues via log
    - `repository.py` - Data access layer (SQL/MongoDB queries)
    - `service.py` - Business logic + `create_{feature}_service()` factory
    - `schemas.py` - Pydantic models (DTOs)
-   - `websocket_handlers.py` - WebSocket event handlers (optional)
+   - `handlers.py` - WebSocket event handlers (optional)
+   - `routes.py` - REST endpoints (FastAPI `APIRouter`)
    - `enums.py` - Domain-specific enums (if needed)
-3. Create REST routes in `src/api/routes/{feature}_routes.py`
-4. Register routes in `src/api/main.py`: `app.include_router({feature}_routes.router)`
-5. Setup WebSocket handlers in `startup_event()` if real-time needed
-6. Feature is now fully isolated and self-contained!
+3. Register routes in `src/api/main.py`: `app.include_router({feature}_routes.router)`
+4. Setup WebSocket handlers in the `lifespan` function in `main.py` if real-time needed
+5. Feature is now fully isolated and self-contained!
 
 ## Key Files Reference
 - Backend entry: [system-app/backend/Program.cs](system-app/backend/Program.cs)
