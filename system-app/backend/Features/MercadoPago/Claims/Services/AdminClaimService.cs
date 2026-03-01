@@ -6,6 +6,10 @@ using static MeuCrudCsharp.Features.MercadoPago.Claims.ViewModels.MercadoPagoCla
 
 namespace MeuCrudCsharp.Features.MercadoPago.Claims.Services;
 
+/// <summary>
+/// Service responsável por operações de Claims do lado ADMINISTRATIVO.
+/// Apenas leitura e envio de mensagens para o Mercado Pago (não precisa de UoW).
+/// </summary>
 public class AdminClaimService(
     IClaimRepository claimRepository,
     IMercadoPagoIntegrationService mpService,
@@ -16,12 +20,17 @@ public class AdminClaimService(
     private const int PageSize = 10;
     private const string ClaimsCacheVersionKey = "claims_cache_version";
 
+    /// <summary>
+    /// Obtém lista paginada de claims com filtros opcionais.
+    /// Utiliza cache de 5 minutos para otimizar performance.
+    /// </summary>
     public async Task<ClaimsIndexViewModel> GetClaimsAsync(
         string? searchTerm,
         string? statusFilter,
         int page
     )
     {
+        // Validação básica
         if (page < 1)
         {
             logger.LogWarning("Página inválida recebida: {Page}. Usando página 1.", page);
@@ -67,6 +76,9 @@ public class AdminClaimService(
         ) ?? new ClaimsIndexViewModel();
     }
 
+    /// <summary>
+    /// Obtém detalhes de uma claim específica com mensagens atualizadas do Mercado Pago.
+    /// </summary>
     public async Task<ClaimDetailViewModel> GetClaimDetailsAsync(long localId)
     {
         var localClaim = await claimRepository.GetByIdAsync(localId);
@@ -108,8 +120,13 @@ public class AdminClaimService(
         };
     }
 
+    /// <summary>
+    /// Envia uma resposta do administrador para uma reclamação.
+    /// A mensagem é enviada diretamente para a API do Mercado Pago.
+    /// </summary>
     public async Task ReplyToClaimAsync(long localId, string messageText)
     {
+        // Validação de entrada
         if (string.IsNullOrWhiteSpace(messageText))
             throw new ArgumentException("Mensagem não pode ser vazia.", nameof(messageText));
 
@@ -117,6 +134,7 @@ public class AdminClaimService(
         if (localClaim == null)
             throw new ResourceNotFoundException("Reclamação não encontrada.");
 
+        // Envia mensagem para o Mercado Pago
         await mpService.SendMessageAsync(localClaim.MpClaimId, messageText);
 
         logger.LogInformation("Resposta enviada para a claim MP {MpId}", localClaim.MpClaimId);

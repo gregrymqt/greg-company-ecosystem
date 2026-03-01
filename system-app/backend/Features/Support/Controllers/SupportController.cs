@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using MeuCrudCsharp.Features.Base;
+using MeuCrudCsharp.Features.Exceptions; // Importante para ResourceNotFoundException
 using MeuCrudCsharp.Features.Support.DTOs;
 using MeuCrudCsharp.Features.Support.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -11,10 +12,12 @@ namespace MeuCrudCsharp.Features.Support.Controllers
     public class SupportController : ApiControllerBase
     {
         private readonly ISupportService _service;
+        private readonly ILogger<SupportController> _logger;
 
-        public SupportController(ISupportService service)
+        public SupportController(ISupportService service, ILogger<SupportController> logger)
         {
             _service = service;
+            _logger = logger;
         }
 
         [HttpPost]
@@ -36,7 +39,11 @@ namespace MeuCrudCsharp.Features.Support.Controllers
             }
             catch (Exception ex)
             {
-                return HandleException(ex, "Erro ao criar ticket.");
+                _logger.LogError(ex, "Erro ao criar ticket.");
+                return StatusCode(
+                    500,
+                    new { success = false, message = "Erro ao processar sua solicitação." }
+                );
             }
         }
 
@@ -54,12 +61,14 @@ namespace MeuCrudCsharp.Features.Support.Controllers
             }
             catch (Exception ex)
             {
-                return HandleException(ex, "Erro ao buscar tickets.");
+                _logger.LogError(ex, "Erro ao buscar tickets.");
+                return StatusCode(500, new { success = false, message = "Erro interno." });
             }
         }
 
+        // --- NOVO: BUSCA POR ID DO TICKET ---
         [HttpGet("{id}")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")] // Apenas Admin vê detalhes por enquanto
         public async Task<IActionResult> GetById(string id)
         {
             try
@@ -67,11 +76,18 @@ namespace MeuCrudCsharp.Features.Support.Controllers
                 var ticket = await _service.GetTicketByIdAsync(id);
                 return Ok(new { success = true, data = ticket });
             }
+            catch (ResourceNotFoundException ex)
+            {
+                return NotFound(new { success = false, message = ex.Message });
+            }
             catch (Exception ex)
             {
-                return HandleException(ex, "Erro ao buscar ticket.");
+                _logger.LogError(ex, $"Erro ao buscar ticket {id}.");
+                return StatusCode(500, new { success = false, message = "Erro interno." });
             }
         }
+
+        // ------------------------------------
 
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin")]
@@ -87,7 +103,11 @@ namespace MeuCrudCsharp.Features.Support.Controllers
             }
             catch (Exception ex)
             {
-                return HandleException(ex, "Erro ao atualizar ticket.");
+                _logger.LogError(ex, "Erro ao atualizar ticket.");
+                if (ex.Message.Contains("não encontrado"))
+                    return NotFound(new { success = false, message = ex.Message });
+
+                return StatusCode(500, new { success = false, message = "Erro interno." });
             }
         }
     }

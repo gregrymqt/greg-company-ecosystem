@@ -10,6 +10,9 @@ namespace MeuCrudCsharp.Features.Support.Repositories
 
         public SupportRepository(IMongoDatabase database)
         {
+            // --- MUDANÇA AQUI ---
+            // Em vez de "support_tickets" fixo, usamos a propriedade estática da classe.
+            // Isso evita erros de digitação e mantém tudo centralizado na Model.
             _tickets = database.GetCollection<SupportTicketDocument>(
                 SupportTicketDocument.CollectionName
             );
@@ -27,11 +30,12 @@ namespace MeuCrudCsharp.Features.Support.Repositories
         {
             var filter = Builders<SupportTicketDocument>.Filter.Empty;
 
+            // Contagem total para saber se tem mais páginas
             var total = await _tickets.CountDocumentsAsync(filter);
 
             var data = await _tickets
                 .Find(filter)
-                .SortByDescending(t => t.CreatedAt)
+                .SortByDescending(t => t.CreatedAt) // Mais recentes primeiro
                 .Skip((page - 1) * pageSize)
                 .Limit(pageSize)
                 .ToListAsync();

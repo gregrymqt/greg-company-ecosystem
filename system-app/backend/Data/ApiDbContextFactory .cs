@@ -9,6 +9,7 @@ namespace MeuCrudCsharp.Data
     {
         public ApiDbContext CreateDbContext(string[] args)
         {
+            // Detecta o ambiente atual (Development, Production, etc.)
             var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 
             var builder = new ConfigurationBuilder()
@@ -17,6 +18,8 @@ namespace MeuCrudCsharp.Data
                 .AddJsonFile($"appsettings.{environment}.json", optional: true)
                 .AddEnvironmentVariables();
 
+            // A MÁGICA ACONTECE AQUI!
+            // Se estivermos em desenvolvimento, carregue os User Secrets.
             if (environment == "Development")
             {
                 builder.AddUserSecrets<ApiDbContextFactory>();

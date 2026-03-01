@@ -71,12 +71,3 @@ export default defineConfig([
   },
 ])
 ```
-
-## 🔄 CI/CD e Testes
-
-O ecossistema completo (incluindo este Frontend) utiliza **GitHub Actions** para CI/CD.
-
-- **Testes Unitários:** Atualmente focados no backend C#. O pipeline de CI executa os testes antes de qualquer deploy.
-- **Deploy Automatizado:** Após a aprovação dos testes, o pipeline realiza o build da stack completa (incluindo o container `frontend` via Nginx) e faz o deploy em ambiente de staging/produção.
-
-Para mais detalhes sobre a estrutura de testes e o pipeline de CI/CD, consulte o [README principal do projeto](../../README.md).

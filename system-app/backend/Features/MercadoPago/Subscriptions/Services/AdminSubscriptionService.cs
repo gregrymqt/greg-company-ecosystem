@@ -54,11 +54,12 @@ namespace MeuCrudCsharp.Features.MercadoPago.Subscriptions.Services
                     $"Plano com ID externo '{planExternalId}' não encontrado."
                 );
 
+            // 1. Prepara a Entidade (apenas em memória, NÃO persiste ainda)
             var newSubscription = new Subscription
             {
                 UserId = userId,
                 Status = SubscriptionStatus.Pending.ToMpString(),
-                ExternalId = planExternalId,
+                ExternalId = planExternalId, // Temporário até vir do MP
                 CardTokenId = savedCardId,
                 PayerEmail = payerEmail,
                 PlanId = localPlan.Id,
@@ -67,10 +68,11 @@ namespace MeuCrudCsharp.Features.MercadoPago.Subscriptions.Services
                 CurrentAmount = (int)localPlan.TransactionAmount,
                 CurrentPeriodStartDate = DateTime.UtcNow,
                 CurrentPeriodEndDate = DateTime.UtcNow.AddMonths(localPlan.FrequencyInterval),
-                PayerMpId = "pending_mp_id",
+                PayerMpId = "pending_mp_id", // Placeholder obrigatório até o MP responder
                 PaymentMethodId = "credit_card",
             };
 
+            // Marca para adição (NÃO persiste ainda)
             await _subscriptionRepository.AddAsync(newSubscription);
 
             _logger.LogInformation(
@@ -78,6 +80,7 @@ namespace MeuCrudCsharp.Features.MercadoPago.Subscriptions.Services
                 userId
             );
 
+            // 2. Prepara payload para MercadoPago
             var periodStartDate = DateTime.UtcNow;
             var periodEndDate = periodStartDate.AddMonths(localPlan.FrequencyInterval);
             var frequencyType =
@@ -103,6 +106,7 @@ namespace MeuCrudCsharp.Features.MercadoPago.Subscriptions.Services
 
             try
             {
+                // 3. Chamada ao MercadoPago
                 var subscriptionResponse = await _mpSubscriptionService.CreateSubscriptionAsync(
                     payloadForMp
                 );
@@ -112,6 +116,7 @@ namespace MeuCrudCsharp.Features.MercadoPago.Subscriptions.Services
                     subscriptionResponse.Id
                 );
 
+                // 4. Atualiza a entidade com dados do MP (ainda em memória)
                 newSubscription.ExternalId = subscriptionResponse.Id;
                 newSubscription.PayerMpId = subscriptionResponse.PayerId.ToString();
                 newSubscription.PaymentMethodId = subscriptionResponse.PaymentMethodId;
@@ -121,6 +126,8 @@ namespace MeuCrudCsharp.Features.MercadoPago.Subscriptions.Services
                 newSubscription.CurrentPeriodEndDate = subscriptionResponse.AutoRecurring.EndDate;
                 newSubscription.Status = subscriptionResponse.Status;
 
+                // 5. ✅ COMMIT ÚNICO - ATOMICIDADE GARANTIDA
+                // Persiste a subscription com TODOS os dados preenchidos (incluindo dados do MP)
                 await _unitOfWork.CommitAsync();
 
                 _logger.LogInformation(
@@ -140,6 +147,10 @@ namespace MeuCrudCsharp.Features.MercadoPago.Subscriptions.Services
                     userId
                 );
 
+                // ✅ ROLLBACK AUTOMÁTICO
+                // Como não fizemos commit, o UnitOfWork descarta todas as mudanças automaticamente
+                // Não precisa remover manualmente - o Entity Framework faz isso
+
                 _logger.LogInformation(
                     "Rollback automático concluído. Assinatura para o usuário {UserId} NÃO foi persistida.",
                     userId
@@ -149,11 +160,15 @@ namespace MeuCrudCsharp.Features.MercadoPago.Subscriptions.Services
             }
             catch (DbUpdateException dbEx)
             {
+                // Se falhar ao salvar no banco local APÓS sucesso no MP, temos um problema
+                // Neste caso, precisamos cancelar no MP (compensação)
                 _logger.LogError(
                     dbEx,
                     "Erro ao salvar assinatura local após sucesso no MP. Cancelando no MP..."
                 );
 
+                // Aqui subscriptionResponse está disponível porque só entra neste catch após sucesso do MP
+                // Mas para evitar warning, vamos buscar o ExternalId da entidade
                 if (string.IsNullOrEmpty(newSubscription.ExternalId) ||
                     newSubscription.ExternalId == planExternalId)
                     throw new AppServiceException(
@@ -206,23 +221,28 @@ namespace MeuCrudCsharp.Features.MercadoPago.Subscriptions.Services
 
             var originalAmount = localSubscription.CurrentAmount;
 
+            // Verifica se realmente precisa atualizar
             if (originalAmount == dto.TransactionAmount)
             {
                 return await _mpSubscriptionService.GetSubscriptionByIdAsync(subscriptionId) ??
                        throw new InvalidOperationException();
             }
 
+            // 1. Atualiza localmente (apenas em memória)
             localSubscription.CurrentAmount = (int)dto.TransactionAmount;
 
             try
             {
+                // 2. Atualiza no MercadoPago primeiro
                 var mpResponse = await _mpSubscriptionService.UpdateSubscriptionValueAsync(
                     subscriptionId,
                     dto
                 );
 
+                // 3. ✅ COMMIT ÚNICO - Se MP OK, persiste localmente
                 await _unitOfWork.CommitAsync();
 
+                // 4. Limpa cache
                 await _cacheService.RemoveAsync($"SubscriptionDetails_{localSubscription.UserId}");
 
                 _logger.LogInformation(
@@ -241,6 +261,8 @@ namespace MeuCrudCsharp.Features.MercadoPago.Subscriptions.Services
                     subscriptionId
                 );
 
+                // ✅ ROLLBACK AUTOMÁTICO
+                // Como a entidade está rastreada mas não foi comitada, precisamos reverter manualmente
                 localSubscription.CurrentAmount = originalAmount;
 
                 _logger.LogInformation(
@@ -266,18 +288,22 @@ namespace MeuCrudCsharp.Features.MercadoPago.Subscriptions.Services
 
             var originalStatus = localSubscription.Status;
 
+            // 1. Atualiza localmente (apenas em memória)
             localSubscription.Status = dto.Status;
             localSubscription.UpdatedAt = DateTime.UtcNow;
 
             try
             {
+                // 2. Atualiza no MercadoPago primeiro
                 var mpResponse = await _mpSubscriptionService.UpdateSubscriptionStatusAsync(
                     subscriptionId,
                     dto
                 );
 
+                // 3. ✅ COMMIT ÚNICO - Se MP OK, persiste localmente
                 await _unitOfWork.CommitAsync();
 
+                // 4. Limpa cache
                 await _cacheService.RemoveAsync($"SubscriptionDetails_{localSubscription.UserId}");
 
                 _logger.LogInformation(
@@ -296,6 +322,8 @@ namespace MeuCrudCsharp.Features.MercadoPago.Subscriptions.Services
                     subscriptionId
                 );
 
+                // ✅ ROLLBACK AUTOMÁTICO
+                // Como a entidade está rastreada mas não foi comitada, precisamos reverter manualmente
                 localSubscription.Status = originalStatus;
 
                 _logger.LogInformation(
@@ -308,12 +336,18 @@ namespace MeuCrudCsharp.Features.MercadoPago.Subscriptions.Services
             }
         }
 
+        // --- Métodos de Leitura e Helper ---
+
         public async Task<SubscriptionResponseDto> GetSubscriptionByIdAsync(string subscriptionId)
         {
             return await _mpSubscriptionService.GetSubscriptionByIdAsync(subscriptionId) ??
                    throw new InvalidOperationException();
         }
 
+        /// <summary>
+        /// Método auxiliar para ativar assinatura a partir de um pagamento único (Pix/Boleto).
+        /// Usado quando o cliente paga sem criar uma assinatura recorrente no MP.
+        /// </summary>
         public async Task<Subscription> ActivateSubscriptionFromSinglePaymentAsync(
             string userId,
             Guid planPublicId,
@@ -333,7 +367,7 @@ namespace MeuCrudCsharp.Features.MercadoPago.Subscriptions.Services
             {
                 UserId = userId,
                 PlanId = localPlan.Id,
-                ExternalId = paymentId,
+                ExternalId = paymentId, // Em caso de pagamento avulso, o ID externo é o PaymentId
                 Status = SubscriptionStatus.Authorized.ToMpString(),
                 PayerEmail = payerEmail,
                 PaymentId = paymentId,

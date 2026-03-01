@@ -12,6 +12,10 @@ using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Interfaces;
 
 namespace MeuCrudCsharp.Features.MercadoPago.Notification.Services;
 
+/// <summary>
+/// Service responsável por processar notificações de Claims do Mercado Pago.
+/// Usa o padrão Unit of Work para garantir transações atômicas.
+/// </summary>
 public class ClaimNotificationService(
     IClaimRepository claimRepository,
     IPaymentRepository paymentRepository,
@@ -32,6 +36,7 @@ public class ClaimNotificationService(
         {
             logger.LogInformation("Iniciando processamento da Claim ID: {ClaimId}", claimPayload.Id);
 
+            // Validação de entrada
             if (string.IsNullOrWhiteSpace(claimPayload.Id))
             {
                 logger.LogWarning("Id da claim inválido.");
@@ -44,6 +49,7 @@ public class ClaimNotificationService(
                 return;
             }
 
+            // 1. Busca detalhes na API do Mercado Pago
             var claimDetails = await mpIntegrationService.GetClaimByIdAsync(mpClaimId);
 
             if (claimDetails == null)
@@ -57,6 +63,7 @@ public class ClaimNotificationService(
 
             logger.LogInformation("Claim vinculada ao Recurso: {ResourceId}, Tipo: {Type}", resourceId, resourceTypeEnum);
 
+            // 2. Localiza o usuário através do Payment ou Subscription
             Users? user;
 
             if (resourceTypeEnum == ClaimResource.Payment)
@@ -66,6 +73,7 @@ public class ClaimNotificationService(
             }
             else
             {
+                // Para outros tipos de recursos (como assinatura), tenta buscar subscription
                 var subscription = await subscriptionRepository.GetByIdAsync(resourceId);
                 user = subscription?.User;
             }
@@ -75,10 +83,12 @@ public class ClaimNotificationService(
                 logger.LogWarning("Nenhum usuário encontrado para o Recurso ID '{ResourceId}'.", resourceId);
             }
 
+            // 3. Verifica se a claim já existe no banco local
             var existingClaim = await claimRepository.GetByMpClaimIdAsync(mpClaimId);
 
             if (existingClaim == null)
             {
+                // CREATE - Nova claim
                 var newClaimRecord = new Models.Claims
                 {
                     MpClaimId = mpClaimId,
@@ -96,12 +106,20 @@ public class ClaimNotificationService(
             }
             else
             {
+                // UPDATE - Atualiza status se necessário
                 logger.LogInformation("Claim ID {ClaimId} já existe. Verificando atualizações.", mpClaimId);
+                
+                // Aqui você pode adicionar lógica para atualizar o status baseado no stage do MP
+                // Por exemplo:
+                // existingClaim.CurrentStage = claimDetails.Stage;
+                // _claimRepository.Update(existingClaim);
             }
 
+            // 4. Persiste todas as mudanças (Commit da Transação)
             await unitOfWork.CommitAsync();
 
-            if (user != null && existingClaim == null)
+            // 5. Envia e-mail (somente após persistência bem-sucedida)
+            if (user != null && existingClaim == null) // Envia apenas para claims novas
             {
                 await SendClaimReceivedEmailAsync(user, mpClaimId);
             }
@@ -153,6 +171,7 @@ public class ClaimNotificationService(
 
         try
         {
+            // Usa o modelo que foi passado como parâmetro.
             var htmlBody = await razorViewToStringRenderer.RenderViewToStringAsync(
                 viewPath,
                 model

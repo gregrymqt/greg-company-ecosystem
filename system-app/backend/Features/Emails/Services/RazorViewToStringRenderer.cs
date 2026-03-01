@@ -12,12 +12,22 @@ using Microsoft.AspNetCore.Mvc.ViewFeatures;
 
 namespace MeuCrudCsharp.Features.Emails.Services
 {
+    /// <summary>
+    /// Implementa <see cref="IRazorViewToStringRenderer"/> para fornecer um mecanismo para renderizar views Razor para uma string.
+    /// Isso é particularmente útil para gerar corpos de e-mail em HTML a partir de templates .cshtml fora do contexto de uma requisição MVC padrão.
+    /// </summary>
     public class RazorViewToStringRenderer : IRazorViewToStringRenderer
     {
         private readonly IRazorViewEngine _viewEngine;
         private readonly ITempDataProvider _tempDataProvider;
         private readonly IServiceProvider _serviceProvider;
 
+        /// <summary>
+        /// Inicializa uma nova instância da classe <see cref="RazorViewToStringRenderer"/>.
+        /// </summary>
+        /// <param name="viewEngine">O motor de views Razor para encontrar e renderizar as views.</param>
+        /// <param name="tempDataProvider">O provedor de dados temporários necessário para o contexto da view.</param>
+        /// <param name="serviceProvider">O provedor de serviços para criar um contexto de requisição.</param>
         public RazorViewToStringRenderer(
             IRazorViewEngine viewEngine,
             ITempDataProvider tempDataProvider,
@@ -29,6 +39,13 @@ namespace MeuCrudCsharp.Features.Emails.Services
             _serviceProvider = serviceProvider;
         }
 
+        /// <summary>
+        /// Renderiza uma view Razor para uma string.
+        /// </summary>
+        /// <typeparam name="TModel">O tipo do modelo a ser passado para a view.</typeparam>
+        /// <param name="viewName">O nome da view a ser renderizada.</param>
+        /// <param name="model">O modelo a ser passado para a view.</param>
+        /// <returns>Uma <see cref="Task{TResult}"/> que representa a operação assíncrona, contendo a string renderizada da view.</returns>
         public async Task<string> RenderViewToStringAsync<TModel>(string viewName, TModel model)
         {
             if (string.IsNullOrWhiteSpace(viewName))
@@ -59,6 +76,13 @@ namespace MeuCrudCsharp.Features.Emails.Services
             return output.ToString();
         }
 
+        /// <summary>
+        /// Encontra a view Razor especificada usando o motor de views.
+        /// </summary>
+        /// <param name="actionContext">O contexto da ação atual.</param>
+        /// <param name="viewName">O nome da view a ser encontrada.</param>
+        /// <returns>A instância de <see cref="IView"/> se encontrada.</returns>
+        /// <exception cref="InvalidOperationException">Lançada se a view não puder ser localizada.</exception>
         private IView FindView(ActionContext actionContext, string viewName)
         {
             var getViewResult = _viewEngine.GetView(
@@ -82,6 +106,10 @@ namespace MeuCrudCsharp.Features.Emails.Services
             );
         }
 
+        /// <summary>
+        /// Cria um <see cref="ActionContext"/> padrão, necessário para que o motor de views renderize uma view fora de um ciclo de requisição-resposta HTTP.
+        /// </summary>
+        /// <returns>Uma nova instância de <see cref="ActionContext"/>.</returns>
         private ActionContext GetActionContext()
         {
             var httpContext = new DefaultHttpContext { RequestServices = _serviceProvider };

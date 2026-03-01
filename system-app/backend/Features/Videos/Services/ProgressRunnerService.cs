@@ -17,7 +17,7 @@ public class ProgressRunnerService : IProcessRunnerService
             FileName = filePath,
             Arguments = arguments,
             RedirectStandardOutput = true,
-            RedirectStandardError = true,
+            RedirectStandardError = true, // FFMPEG manda logs no Error
             UseShellExecute = false,
             CreateNoWindow = true,
         };
@@ -26,6 +26,7 @@ public class ProgressRunnerService : IProcessRunnerService
         if (process == null)
             throw new AppServiceException($"Não foi possível iniciar o processo '{filePath}'.");
 
+        // Lê o stream em tempo real para pegar a duração/tempo
         while (!process.StandardError.EndOfStream)
         {
             var line = await process.StandardError.ReadLineAsync();

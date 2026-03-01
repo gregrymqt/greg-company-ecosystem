@@ -49,6 +49,7 @@ public class AdminVideoService : IAdminVideoService
         var thumbnailUrl = string.Empty;
         var storageIdentifier = Guid.NewGuid().ToString();
 
+        // 1. Lógica de Chunking (Para o VÍDEO)
         if (dto is { IsChunk: true, File: not null })
         {
             var fileName = dto.FileName ?? $"{Guid.NewGuid()}.tmp";
@@ -61,7 +62,7 @@ public class AdminVideoService : IAdminVideoService
             );
 
             if (tempPath == null)
-                return null;
+                return null; // Ainda recebendo pedaços
 
             var videoSalvo = await _fileService.SalvarArquivoDoTempAsync(
                 tempPath,
@@ -77,12 +78,14 @@ public class AdminVideoService : IAdminVideoService
             fileId = videoSalvo.Id;
         }
 
+        // 2. Lógica da Thumbnail
         if (dto.ThumbnailFile != null)
         {
             var thumbSalva = await _fileService.SalvarArquivoAsync(dto.ThumbnailFile, CatThumb);
             thumbnailUrl = thumbSalva.CaminhoRelativo;
         }
 
+        // 3. Preparar entidade (apenas em memória)
         var entity = new Video
         {
             Title = dto.Title ?? "Sem Título",
@@ -96,8 +99,10 @@ public class AdminVideoService : IAdminVideoService
             Duration = TimeSpan.Zero,
         };
 
+        // 4. Marca para adição (NÃO persiste)
         await _videoRepository.AddAsync(entity);
 
+        // 5. ✅ COMMIT ÚNICO - ATOMICIDADE GARANTIDA
         await _unitOfWork.CommitAsync();
 
         _logger.LogInformation(
@@ -106,6 +111,8 @@ public class AdminVideoService : IAdminVideoService
             entity.StorageIdentifier
         );
 
+        // 6. ✅ AGENDAR PROCESSAMENTO EM BACKGROUND
+        // Agenda job Hangfire para processar o vídeo para formato HLS
         _jobs.Enqueue<IVideoProcessingService>(
             service => service.ProcessVideoToHlsAsync(entity.Id, entity.FileId)
         );
@@ -141,12 +148,14 @@ public class AdminVideoService : IAdminVideoService
             {
                 _logger.LogInformation("Cache miss. Buscando vídeos página {Page} no banco.", page);
 
+                // Busca paginada no repositório [cite: 18]
                 var result = await _videoRepository.GetAllPaginatedAsync(page, pageSize);
 
+                // Mapeamento Entity -> DTO usando a lógica do seu arquivo [cite: 19]
                 var dtos = result
                     .Items.Select(v => new VideoDto
                     {
-                        Id = v.PublicId,
+                        Id = v.PublicId, // Usando PublicId (Guid) para o DTO conforme boas práticas
                         Title = v.Title,
                         Description = v.Description,
                         StorageIdentifier = v.StorageIdentifier,
@@ -164,11 +173,13 @@ public class AdminVideoService : IAdminVideoService
 
     public async Task<Video> UpdateVideoAsync(Guid id, UpdateVideoDto dto)
     {
+        // Busca pelo Guid (PublicId)
         var video = await _videoRepository.GetByPublicIdAsync(id);
 
         if (video == null)
             throw new ResourceNotFoundException("Vídeo não encontrado.");
 
+        // Atualiza Thumbnail se enviada
         if (dto.ThumbnailFile is { Length: > 0 })
         {
             var novaThumb = await _fileService.SalvarArquivoAsync(dto.ThumbnailFile, CatThumb);
@@ -178,10 +189,13 @@ public class AdminVideoService : IAdminVideoService
         video.Title = dto.Title ?? video.Title;
         video.Description = dto.Description ?? video.Description;
 
+        // Marca para atualização (NÃO persiste)
         await _videoRepository.UpdateAsync(video);
 
+        // ✅ COMMIT ÚNICO - ATOMICIDADE GARANTIDA
         await _unitOfWork.CommitAsync();
 
+        // Invalida cache
         await _cacheService.InvalidateCacheByKeyAsync(VideosCacheVersionKey);
 
         _logger.LogInformation(
@@ -198,13 +212,16 @@ public class AdminVideoService : IAdminVideoService
         if (video == null)
             throw new ResourceNotFoundException("Vídeo não encontrado.");
 
+        // Guarda informações para possível rollback
         var fileId = video.FileId;
         var storageIdentifier = video.StorageIdentifier;
 
         try
         {
+            // 1. Marca vídeo para remoção (NÃO persiste ainda)
             await _videoRepository.DeleteAsync(video);
 
+            // 2. ✅ COMMIT ÚNICO - Remove do banco primeiro
             await _unitOfWork.CommitAsync();
 
             _logger.LogInformation(
@@ -212,13 +229,16 @@ public class AdminVideoService : IAdminVideoService
                 video.PublicId
             );
 
+            // 3. Após sucesso no banco, deleta arquivos físicos
             try
             {
+                // Deletar Arquivo Original MP4
                 if (fileId > 0)
                 {
                     await _fileService.DeletarArquivoAsync(fileId);
                 }
 
+                // Deletar Pasta HLS
                 VideoDirectoryHelper.DeleteHlsFolder(_env.WebRootPath, storageIdentifier);
 
                 _logger.LogInformation(
@@ -228,13 +248,17 @@ public class AdminVideoService : IAdminVideoService
             }
             catch (Exception fileEx)
             {
+                // ⚠️ Se falhar ao deletar arquivos físicos, apenas loga
+                // O banco já foi atualizado, então não fazemos rollback
                 _logger.LogError(
                     fileEx,
                     "Erro ao deletar arquivos físicos do vídeo {VideoId}. Registro já foi removido do banco.",
                     video.PublicId
                 );
+                // Não lança exceção - consideramos sucesso parcial
             }
 
+            // 4. Limpa cache
             await _cacheService.InvalidateCacheByKeyAsync(VideosCacheVersionKey);
         }
         catch (Exception ex)

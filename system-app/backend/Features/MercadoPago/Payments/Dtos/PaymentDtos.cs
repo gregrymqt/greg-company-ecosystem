@@ -1,27 +1,41 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
+// Namespace unificado para todos os DTOs relacionados a pagamentos do Mercado Pago.
 namespace MeuCrudCsharp.Features.MercadoPago.Payments.Dtos;
 
+/// <summary>
+/// Requisição para criar um pagamento via PIX.
+/// </summary>
 public record CreatePixPaymentRequest(
     string? Description,
     decimal TransactionAmount,
     PayerRequestDto? Payer
 );
 
+/// <summary>
+/// Representa os dados de uma requisição de pagamento com cartão de crédito enviada pelo frontend.
+/// </summary>
 public record CreditCardPaymentRequestDto(
     [Required] string Token,
     [Required] int Installments,
     [Required] string PaymentMethodId,
     [Required] string IssuerId,
     [Required] decimal Amount,
-    string? Plano,
-    string? PlanExternalId,
+    // Opcionais (pois dependem se é assinatura ou pagamento único)
+    string? Plano, // "anual", "mensal"
+    string? PlanExternalId, // Guid do plano no seu banco
     [Required] PayerRequestDto Payer
 );
 
+/// <summary>
+/// Representa os dados de identificação de um pagador (Payer).
+/// </summary>
 public record IdentificationDto(string? Type, string? Number);
 
+/// <summary>
+/// Detalhes do pagamento retornados pela API do Mercado Pago.
+/// </summary>
 public record MercadoPagoPaymentDetails(
     [property: JsonPropertyName("id")] long Id,
     [property: JsonPropertyName("status")] string Status,
@@ -29,6 +43,9 @@ public record MercadoPagoPaymentDetails(
     [property: JsonPropertyName("payer")] PayerRequestDto Payer
 );
 
+/// <summary>
+/// Representa os dados do pagador (payer) em uma requisição de pagamento.
+/// </summary>
 public record PayerRequestDto(
     string? Email,
     string? FirstName,
@@ -36,6 +53,10 @@ public record PayerRequestDto(
     IdentificationDto? Identification
 );
 
+/// <summary>
+/// Representa a resposta simplificada de uma operação de pagamento.
+/// Contém as informações essenciais para o frontend e para o armazenamento local.
+/// </summary>
 public record PaymentResponseDto(
     string? Status,
     long? Id,
@@ -47,12 +68,13 @@ public record PaymentResponseDto(
 
 public record CreatePreferenceDto(
     decimal Amount,
-    string Title,
+    string Title, // Ex: "Curso de Psicologia"
     string Description
 );
 
 public class PaymentHistoryDto
 {
+    // Mapeia para 'id' no JSON (Pode ser o ExternalId do MP ou o PublicId do seu banco)
     [JsonPropertyName("id")]
     public string Id { get; set; } = string.Empty;
 
@@ -68,6 +90,6 @@ public class PaymentHistoryDto
     [JsonPropertyName("createdAt")]
     public DateTime CreatedAt { get; set; }
 
-    [JsonPropertyName("paymentMethod")]
+    [JsonPropertyName("paymentMethod")] // Extra útil
     public string? PaymentMethod { get; set; }
 }

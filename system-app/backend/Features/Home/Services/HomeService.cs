@@ -56,13 +56,19 @@ public class HomeService(
             ) ?? new HomeContentDto();
     }
 
+    // =========================================================================
+    // HERO (COM LÓGICA DE CHUNKS)
+    // =========================================================================
+
     public async Task<HeroSlideDto?> CreateHeroAsync(CreateUpdateHeroDto dto)
     {
         var imageUrl = string.Empty;
         int? fileId = null;
 
+        // 1. Lógica de Chunking (Arquivos Grandes/Fatiados)
         if (dto is { IsChunk: true, File: not null })
         {
+            // Processa o pedaço atual
             if (dto.FileName != null)
             {
                 var tempPath = await fileService.ProcessChunkAsync(
@@ -72,9 +78,13 @@ public class HomeService(
                     dto.TotalChunks
                 );
 
+                // Se retornar null, significa que ainda faltam pedaços.
+                // Retornamos null para a Controller avisar o Front para mandar o próximo.
                 if (tempPath == null)
                     return null;
 
+                // Se chegou aqui, o arquivo foi remontado com sucesso no Temp!
+                // Agora movemos para a pasta oficial e registramos no banco.
                 var arquivoSalvo = await fileService.SalvarArquivoDoTempAsync(
                     tempPath,
                     dto.FileName,
@@ -84,6 +94,7 @@ public class HomeService(
                 fileId = arquivoSalvo.Id;
             }
         }
+        // 2. Lógica de Upload Normal (Direto)
         else if (dto.File != null)
         {
             var arquivoSalvo = await fileService.SalvarArquivoAsync(dto.File, FEATURE_CATEGORY);
@@ -91,7 +102,7 @@ public class HomeService(
             fileId = arquivoSalvo.Id;
         }
 
-
+        // 3. Cria a Entidade no Banco (Só executa se não for chunk ou se for o ÚLTIMO chunk)
         var entity = new Models.HomeHero
         {
             Title = dto.Title,
@@ -103,7 +114,7 @@ public class HomeService(
         };
 
         await repository.AddHeroAsync(entity);
-        await unitOfWork.CommitAsync();
+        await unitOfWork.CommitAsync(); // Persiste no banco
         await cache.RemoveAsync(HOME_CACHE_KEY);
 
         return new HeroSlideDto
@@ -123,6 +134,7 @@ public class HomeService(
         if (entity == null)
             throw new ResourceNotFoundException($"Hero com ID {id} não encontrado.");
 
+        // --- LÓGICA DE ARQUIVO ---
         if (dto is { IsChunk: true, File: not null })
         {
             if (dto.FileName != null)
@@ -134,9 +146,11 @@ public class HomeService(
                     dto.TotalChunks
                 );
 
+                // Se ainda não acabou os chunks, retorna false
                 if (tempPath == null)
                     return false;
 
+                // Acabou! Substitui o arquivo usando o temp
                 if (entity.FileId.HasValue)
                 {
                     var arquivoAtualizado = await fileService.SubstituirArquivoDoTempAsync(
@@ -159,7 +173,7 @@ public class HomeService(
                 }
             }
         }
-        else if (dto.File != null)
+        else if (dto.File != null) // Upload normal
         {
             if (entity.FileId.HasValue)
             {
@@ -181,16 +195,18 @@ public class HomeService(
             }
         }
 
+        // --- ATUALIZA DADOS DE TEXTO ---
+        // Só atualizamos os textos se for upload normal OU o último chunk
         entity.Title = dto.Title;
         entity.Subtitle = dto.Subtitle;
         entity.ActionText = dto.ActionText;
         entity.ActionUrl = dto.ActionUrl;
 
         await repository.UpdateHeroAsync(entity);
-        await unitOfWork.CommitAsync();
+        await unitOfWork.CommitAsync(); // Persiste no banco
         await cache.RemoveAsync(HOME_CACHE_KEY);
 
-        return true;
+        return true; // Update finalizado
     }
 
     public async Task DeleteHeroAsync(int id)
@@ -205,12 +221,17 @@ public class HomeService(
         }
 
         await repository.DeleteHeroAsync(entity);
-        await unitOfWork.CommitAsync();
+        await unitOfWork.CommitAsync(); // Persiste no banco
         await cache.RemoveAsync(HOME_CACHE_KEY);
     }
 
+    // =========================================================================
+    // SERVICES (SEM ARQUIVOS - JSON PURO)
+    // =========================================================================
+
     public async Task<ServiceDto> CreateServiceAsync(CreateUpdateServiceDto dto)
     {
+        // Aqui usamos o namespace completo ou alias se houver conflito com "Service" do sistema
         var entity = new Models.HomeService
         {
             Title = dto.Title,
@@ -221,7 +242,7 @@ public class HomeService(
         };
 
         await repository.AddServiceAsync(entity);
-        await unitOfWork.CommitAsync();
+        await unitOfWork.CommitAsync(); // Persiste no banco
         await cache.RemoveAsync(HOME_CACHE_KEY);
 
         return new ServiceDto
@@ -248,7 +269,7 @@ public class HomeService(
         entity.ActionUrl = dto.ActionUrl;
 
         await repository.UpdateServiceAsync(entity);
-        await unitOfWork.CommitAsync();
+        await unitOfWork.CommitAsync(); // Persiste no banco
         await cache.RemoveAsync(HOME_CACHE_KEY);
     }
 
@@ -259,7 +280,7 @@ public class HomeService(
             throw new ResourceNotFoundException($"Serviço com ID {id} não encontrado.");
 
         await repository.DeleteServiceAsync(entity);
-        await unitOfWork.CommitAsync();
+        await unitOfWork.CommitAsync(); // Persiste no banco
         await cache.RemoveAsync(HOME_CACHE_KEY);
     }
 }

@@ -1,8 +1,8 @@
 using System.Reflection;
 using Hangfire;
 using MeuCrudCsharp.Data;
-using MeuCrudCsharp.Documents.Attributes;
-using MeuCrudCsharp.Documents.Interfaces;
+using MeuCrudCsharp.Documents.Attributes; // <--- CERTIFIQUE-SE QUE ESTE USING APONTA PARA ONDE CRIOU O ATRIBUTO
+using MeuCrudCsharp.Documents.Interfaces; // Certifique-se que IMongoDocument está aqui
 using MeuCrudCsharp.Features.Hubs;
 using MeuCrudCsharp.Models;
 using Microsoft.AspNetCore.Identity;
@@ -16,6 +16,7 @@ public static class PipelineExtensions
 {
     public static async Task<WebApplication> UseAppPipeline(this WebApplication app)
     {
+        // --- 1. Configuração de Erros e Segurança Básica ---
         if (app.Environment.IsDevelopment())
         {
             app.UseSwagger();
@@ -33,20 +34,27 @@ public static class PipelineExtensions
         app.UseStaticFiles();
         app.UseCookiePolicy();
 
+        // --- 2. Inicialização do Banco de Dados ---
         await ApplyMigrations(app);
         await SeedInitialRoles(app);
 
+        // NOVO: Chama a configuração dos índices do Mongo
         await ConfigureMongoDbIndexes(app);
 
+        // --- 3. Roteamento e CORS ---
         app.UseRouting();
         app.UseCors(WebServicesExtensions.CorsPolicyName);
 
+        // --- 3.5. Monitoramento de Rede (MCP) ---
         app.UseGregNetworkMonitoring();
 
+        // --- 4. Autenticação e Autorização ---
         app.UseAuthFeatures();
 
+        // --- 5. Middlewares Específicos ---
         app.UseHangfireDashboard();
 
+        // --- 6. Endpoints ---
         app.MapHub<VideoProcessingHub>("/videoProcessingHub");
         app.MapHub<RefundProcessingHub>("/RefundProcessingHub");
         app.MapHub<PaymentProcessingHub>("/PaymentProcessingHub");
@@ -100,6 +108,8 @@ public static class PipelineExtensions
         if (database == null)
             return;
 
+        // --- CORREÇÃO: Escaneie apenas o Assembly que contém seus documentos ---
+        // Substitua 'IMongoDocument' por uma classe que esteja no mesmo projeto dos seus modelos
         var documentTypes = typeof(IMongoDocument)
             .Assembly.GetTypes()
             .Where(p =>

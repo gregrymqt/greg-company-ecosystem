@@ -21,6 +21,7 @@ public class MercadoPagoSubscriptionService
         CreateSubscriptionDto payload
     )
     {
+        // Criação: POST /preapproval
         const string endpoint = "/preapproval";
         var responseBody = await SendMercadoPagoRequestAsync(HttpMethod.Post, endpoint, payload);
 
@@ -32,8 +33,10 @@ public class MercadoPagoSubscriptionService
 
     public async Task<SubscriptionResponseDto?> GetSubscriptionByIdAsync(string subscriptionId)
     {
+        // Leitura: GET /preapproval/{id}
         var endpoint = $"/preapproval/{subscriptionId}";
 
+        // Passamos null no payload pois é um GET
         var responseBody = await SendMercadoPagoRequestAsync(
             HttpMethod.Get,
             endpoint,
@@ -46,6 +49,7 @@ public class MercadoPagoSubscriptionService
 
     public async Task UpdateSubscriptionCardAsync(string subscriptionId, string newCardToken)
     {
+        // Update Cartão: PUT /preapproval/{id}
         var endpoint = $"/preapproval/{subscriptionId}";
         var payload = new { card_token_id = newCardToken };
 
@@ -57,8 +61,11 @@ public class MercadoPagoSubscriptionService
         UpdateSubscriptionValueDto dto
     )
     {
+        // Update Valor: PUT /preapproval/{id}
+        // Nota: O MP às vezes exige /v1 para updates específicos, mas /preapproval costuma funcionar
         var endpoint = $"/preapproval/{subscriptionId}";
 
+        // Estrutura específica exigida pelo MP para update de valor recorrente
         var payload = new { auto_recurring = new { transaction_amount = dto.TransactionAmount } };
 
         var responseBody = await SendMercadoPagoRequestAsync(HttpMethod.Put, endpoint, payload);
@@ -83,6 +90,7 @@ public class MercadoPagoSubscriptionService
 
     public async Task CancelSubscriptionAsync(string subscriptionId)
     {
+        // Usa o Enum para garantir a string correta "cancelled"
         await UpdateSubscriptionStatusAsync(
             subscriptionId,
             new UpdateSubscriptionStatusDto(SubscriptionStatus.Cancelled.ToMpString())

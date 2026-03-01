@@ -3,6 +3,8 @@ using MeuCrudCsharp.Features.MercadoPago.Jobs;
 using MeuCrudCsharp.Features.MercadoPago.Jobs.Job;
 using MeuCrudCsharp.Features.MercadoPago.Jobs.Services;
 
+// ... (mantenha os outros usings necessários)
+
 namespace MeuCrudCsharp.Extensions;
 
 public static class DependencyInjectionExtensions
@@ -13,14 +15,20 @@ public static class DependencyInjectionExtensions
             scan.FromEntryAssembly()
                 .AddClasses(classes =>
                     classes.InNamespaces(
+                        // --- 1. Features com Repositórios (CRÍTICO: Adicionados os Repositories) ---
+                        // Courses
                         "MeuCrudCsharp.Features.Courses.Services",
                         "MeuCrudCsharp.Features.Courses.Repositories",
+                        // Support (Feature Nova)
                         "MeuCrudCsharp.Features.Support.Services",
                         "MeuCrudCsharp.Features.Support.Repositories",
+                        // Admin Profile
                         "MeuCrudCsharp.Features.Profiles.Admin.Services",
                         "MeuCrudCsharp.Features.Profiles.Admin.Repositories",
+                        // Auth Feature
                         "MeuCrudCsharp.Features.Auth.Services",
                         "MeuCrudCsharp.Features.Auth.Repositories",
+                        // --- 2. Features Gerais (Baseado nas Imagens) ---
                         "MeuCrudCsharp.Features.Files.Services",
                         "MeuCrudCsharp.Features.Files.Repositories",
                         "MeuCrudCsharp.Features.Profiles.UserAccount.Services",
@@ -34,8 +42,10 @@ public static class DependencyInjectionExtensions
                         "MeuCrudCsharp.Features.About.Repositories",
                         "MeuCrudCsharp.Features.Home.Services",
                         "MeuCrudCsharp.Features.Home.Repositories",
+                        // Essenciais (Caching e Emails geralmente têm a implementação dentro de .Services)
                         "MeuCrudCsharp.Features.Caching.Services",
                         "MeuCrudCsharp.Features.Emails.Services",
+                        // --- 3. Mercado Pago (Sub-features) ---
                         "MeuCrudCsharp.Features.MercadoPago.Payments.Services",
                         "MeuCrudCsharp.Features.MercadoPago.Payments.Repositories",
                         "MeuCrudCsharp.Features.MercadoPago.Notification.Services",
@@ -53,6 +63,7 @@ public static class DependencyInjectionExtensions
                         "MeuCrudCsharp.Features.MercadoPago.Claims.Services",
                         "MeuCrudCsharp.Features.MercadoPago.Claims.Repositories",
                         "MeuCrudCsharp.Features.MercadoPago.Hub",
+                        // --- 4. Configurações Globais ---
                         "MeuCrudCsharp.AppSettings",
                         "MeuCrudCsharp.Features.Shared.Work"
                     )
@@ -61,6 +72,8 @@ public static class DependencyInjectionExtensions
                 .WithScopedLifetime()
         );
 
+        // --- Configurações Manuais (Jobs e Settings) ---
+        // Estes não entram no Scan automáticos pois precisam de config específica ou são Jobs
         builder.Services.AddScoped<ProcessPaymentNotificationJob>();
 
         builder.Services.Configure<GeneralSettings>(

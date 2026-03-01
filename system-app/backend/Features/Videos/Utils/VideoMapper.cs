@@ -3,20 +3,21 @@ using MeuCrudCsharp.Models;
 
 namespace MeuCrudCsharp.Features.Videos.Utils
 {
+    // Features/Videos/DTOs/VideoMapper.cs
     public static class VideoMapper
     {
         public static VideoDto ToDto(Video video)
         {
             return new VideoDto
             {
-                Id = video.PublicId,
+                Id = video.PublicId, // ⭐️ Expondo o PublicId para o front-end
                 Title = video.Title,
                 Description = video.Description,
                 StorageIdentifier = video.StorageIdentifier,
                 UploadDate = video.UploadDate,
                 Duration = video.Duration,
                 Status = video.Status.ToString(),
-                CourseName = video.Course?.Name ?? string.Empty,
+                CourseName = video.Course?.Name ?? string.Empty, // O '?' protege contra Course nulo
                 ThumbnailUrl = video.ThumbnailUrl ?? string.Empty,
             };
         }

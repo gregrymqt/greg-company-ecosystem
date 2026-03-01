@@ -2,6 +2,8 @@ using MeuCrudCsharp.Features.MercadoPago.Plans.DTOs;
 using MeuCrudCsharp.Features.MercadoPago.Plans.Utils;
 using MeuCrudCsharp.Models;
 
+// Importe seus Utils
+
 namespace MeuCrudCsharp.Features.MercadoPago.Plans.Mappers
 {
     public static class PlanMapper

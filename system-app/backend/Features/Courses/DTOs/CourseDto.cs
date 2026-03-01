@@ -7,7 +7,7 @@ namespace MeuCrudCsharp.Features.Courses.DTOs
 {
     public class CourseDto
     {
-        public Guid PublicId { get; set; }
+        public Guid PublicId { get; set; } // Representa o PublicId
         public string? Name { get; set; }
         public string? Description { get; set; }
         public List<VideoDto> Videos { get; set; } = new();

@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace MeuCrudCsharp.Features.MercadoPago.Refunds.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/[controller]")] // Rota final: api/refunds
     public class RefundsController : MercadoPagoApiControllerBase
     {
         private readonly IRefundService _refundService;
@@ -19,6 +19,8 @@ namespace MeuCrudCsharp.Features.MercadoPago.Refunds.Controllers
         {
             try
             {
+                // Validação básica: O ID do pagamento no MP é numérico (Long),
+                // mas chega como string na rota. Validamos isso antes de chamar a service.
                 if (!long.TryParse(paymentId, out var paymentIdLong))
                 {
                     return BadRequest(
@@ -26,12 +28,14 @@ namespace MeuCrudCsharp.Features.MercadoPago.Refunds.Controllers
                     );
                 }
 
+                // Chama o serviço passando o ID convertido
                 await _refundService.RequestRefundAsync(paymentIdLong);
 
                 return Ok(new { success = true, message = "Reembolso solicitado com sucesso." });
             }
             catch (Exception ex)
             {
+                // Usa seu método da classe base para padronizar o erro (400, 404 ou 500)
                 return HandleException(ex, "Não foi possível processar o reembolso.");
             }
         }

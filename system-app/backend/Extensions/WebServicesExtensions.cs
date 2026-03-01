@@ -7,10 +7,17 @@ namespace MeuCrudCsharp.Extensions;
 
 public static class WebServicesExtensions
 {
+    // Define o nome da política de CORS como uma constante para evitar "magic strings".
     public const string CorsPolicyName = "_myAllowSpecificOrigins";
 
+    /// <summary>
+    /// Configura os serviços web essenciais, incluindo HttpClient para APIs externas,
+    /// políticas de CORS, tratamento de cookies e suporte para proxy reverso (Forwarded Headers).
+    /// </summary>
     public static WebApplicationBuilder AddWebServices(this WebApplicationBuilder builder)
     {
+        // --- 1. Configuração do HttpClient para a API do Mercado Pago ---
+        // Obtém configurações do Mercado Pago
         var mercadoPagoSettings = builder
             .Configuration.GetSection("MercadoPago")
             .Get<MercadoPagoSettings>();
@@ -34,9 +41,12 @@ public static class WebServicesExtensions
                             mercadoPagoSettings.AccessToken
                         );
 
+                    // ✅ TIMEOUT: Define tempo máximo de espera de 30 segundos
                     client.Timeout = TimeSpan.FromSeconds(30);
                 }
             )
+            // ✅ RETRY POLICY: Tenta novamente até 3x com backoff exponencial (1s, 2s, 4s)
+            // Trata automaticamente: HTTP 5xx, HttpRequestException (timeout, DNS failure)
             .AddTransientHttpErrorPolicy(policyBuilder =>
                 policyBuilder.WaitAndRetryAsync(
                     retryCount: 3,
@@ -44,12 +54,15 @@ public static class WebServicesExtensions
                         TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
                     onRetry: (outcome, timespan, retryAttempt, context) =>
                     {
+                        // Log opcional para rastrear tentativas
                         Console.WriteLine(
                             $"[Mercado Pago] Tentativa {retryAttempt} de 3 após {timespan.TotalSeconds}s. Erro: {outcome.Exception?.Message ?? outcome.Result?.StatusCode.ToString()}"
                         );
                     }
                 )
             )
+            // ✅ CIRCUIT BREAKER: Abre o circuito após 5 falhas consecutivas por 30 segundos
+            // Evita sobrecarregar a API quando ela está indisponível
             .AddTransientHttpErrorPolicy(policyBuilder =>
                 policyBuilder.CircuitBreakerAsync(
                     handledEventsAllowedBeforeBreaking: 5,
@@ -69,8 +82,10 @@ public static class WebServicesExtensions
                 )
             );
 
+        // Configuração global do SDK do Mercado Pago
         MercadoPagoConfig.AccessToken = mercadoPagoSettings.AccessToken;
 
+        // --- 2. Configuração da Política de CORS ---
         builder.Services.AddCors(options =>
         {
             var generalSettings = builder
@@ -100,27 +115,35 @@ public static class WebServicesExtensions
             );
         });
 
+        // --- 3. Configuração para Confiança em Headers de Proxy (Essencial para Ngrok/IIS/Nginx) ---
         builder.Services.Configure<ForwardedHeadersOptions>(options =>
         {
             options.ForwardedHeaders =
                 ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
         });
 
+        // --- 4. Configuração de Cookies ---
         builder.ConfigureCookiePolicies();
 
         return builder;
     }
 
+    /// <summary>
+    /// Middleware customizado para a Greg Company:
+    /// Envia logs de rede em tempo real para o servidor MCP na porta 8888.
+    /// </summary>
     public static IApplicationBuilder UseGregNetworkMonitoring(this IApplicationBuilder app)
     {
         return app.Use(
             async (context, next) =>
             {
+                // Deixa a requisição seguir o fluxo normal
                 await next();
 
+                // Após a resposta, capturamos os dados para o monitor
                 var logData = new
                 {
-                    source = "Back",
+                    source = "Back", // Identifica que o log veio do C# no porto 5045
                     method = context.Request.Method,
                     url = context.Request.Path.Value,
                     status = context.Response.StatusCode,
@@ -129,15 +152,21 @@ public static class WebServicesExtensions
                 try
                 {
                     using var client = new HttpClient();
+                    // Envia para o coletor que criamos anteriormente
                     await client.PostAsJsonAsync("http://localhost:8888/log", logData);
                 }
                 catch
                 {
+                    // Falha silenciosa: não interrompe o app se o monitor MCP estiver fechado
                 }
             }
         );
     }
 
+    /// <summary>
+    /// Configura o comportamento dos cookies da aplicação, incluindo o tratamento
+    /// de redirecionamentos para APIs e o SameSite para logins externos.
+    /// </summary>
     private static void ConfigureCookiePolicies(this WebApplicationBuilder builder)
     {
         builder.Services.ConfigureApplicationCookie(options =>
@@ -146,6 +175,7 @@ public static class WebServicesExtensions
             options.LogoutPath = "/Account/Logout";
             options.AccessDeniedPath = "/Account/AccessDenied";
 
+            // Lógica para APIs: em vez de redirecionar, retorna códigos de erro HTTP
             options.Events.OnRedirectToLogin = context =>
             {
                 if (context.Request.Path.StartsWithSegments("/api"))
@@ -169,11 +199,13 @@ public static class WebServicesExtensions
             };
         });
 
+        // Ajusta a política de SameSite para ser compatível com logins externos (ex: Google)
         builder.Services.Configure<CookiePolicyOptions>(options =>
         {
             options.MinimumSameSitePolicy = SameSiteMode.Lax;
             options.OnAppendCookie = cookieContext =>
             {
+                // Aplica SameSite=None apenas para cookies específicos do processo de login externo
                 if (
                     cookieContext.CookieName.StartsWith(".AspNetCore.Correlation.")
                     || cookieContext.CookieName.StartsWith(".AspNetCore.OpenIdConnect.Nonce.")

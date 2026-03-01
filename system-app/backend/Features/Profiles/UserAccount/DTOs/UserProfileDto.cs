@@ -7,6 +7,7 @@
         public required string AvatarUrl { get; set; }
     }
 
+    // DTO específico para resposta de upload, se preferir separar
     public class AvatarUpdateResponse
     {
         public required string AvatarUrl { get; set; }

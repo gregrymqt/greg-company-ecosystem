@@ -33,10 +33,12 @@ public class PreferencePaymentService(
         if (model.Amount <= 0)
             throw new ArgumentException("O valor deve ser maior que zero.");
 
+        // 1. Gera a Referência que vai ligar o MP ao seu Banco
         var externalReference = Guid.NewGuid().ToString();
 
         try
         {
+            // 2. Prepara a Entidade (apenas em memória, NÃO persiste ainda)
             var initialPayment = new Models.Payments
             {
                 UserId = user.Id,
@@ -49,8 +51,10 @@ public class PreferencePaymentService(
                 UpdatedAt = DateTime.UtcNow,
             };
 
+            // Marca para adição (NÃO persiste ainda)
             await paymentRepository.AddAsync(initialPayment);
 
+            // 3. Cria a Preferência no MercadoPago
             var requestOptions = new RequestOptions();
             requestOptions.CustomHeaders.Add("x-idempotency-key", Guid.NewGuid().ToString());
 
@@ -86,9 +90,12 @@ public class PreferencePaymentService(
             var client = new PreferenceClient();
             var preference = await client.CreateAsync(preferenceRequest, requestOptions);
 
+            // 4. Atualiza o Payment com o ID da Preferência (ainda em memória)
             initialPayment.PaymentId = preference.Id;
             initialPayment.UpdatedAt = DateTime.UtcNow;
 
+            // 5. ✅ COMMIT ÚNICO - ATOMICIDADE GARANTIDA
+            // Persiste o payment com TODOS os dados preenchidos (incluindo Preference ID do MP)
             await unitOfWork.CommitAsync();
 
             logger.LogInformation(
@@ -102,12 +109,14 @@ public class PreferencePaymentService(
         }
         catch (Exception ex)
         {
+            // ✅ ROLLBACK AUTOMÁTICO
+            // Como não fizemos commit ainda, o UnitOfWork descarta todas as mudanças automaticamente
             logger.LogError(
-                ex,
-                "Erro ao criar preferência de pagamento para o usuário {UserId}.",
+                ex, 
+                "Erro ao criar preferência de pagamento para o usuário {UserId}. Rollback automático.",
                 userId
             );
-
+            
             throw new AppServiceException("Erro ao gerar link de pagamento.", ex);
         }
     }

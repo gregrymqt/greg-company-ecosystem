@@ -11,6 +11,11 @@ using Microsoft.Extensions.Options;
 
 namespace MeuCrudCsharp.Features.MercadoPago.Notification.Services;
 
+/// <summary>
+/// Service responsável por processar notificações de atualização de cartão do Mercado Pago.
+/// Atualiza a assinatura ativa do usuário com os novos dados do cartão.
+/// Usa UnitOfWork para garantir transações atômicas.
+/// </summary>
 public class CardUpdateNotificationService(
     ILogger<CardUpdateNotificationService> logger,
     ISubscriptionRepository subscriptionRepository,
@@ -25,6 +30,7 @@ public class CardUpdateNotificationService(
 
     public async Task VerifyAndProcessCardUpdate(CardUpdateNotificationPayload cardUpdatePayload)
     {
+        // Validação de entrada
         if (string.IsNullOrWhiteSpace(cardUpdatePayload.CustomerId))
         {
             logger.LogWarning("Payload com CustomerId inválido. Processo será ignorado.");
@@ -44,6 +50,7 @@ public class CardUpdateNotificationService(
                 cardUpdatePayload.CustomerId
             );
 
+            // 1. Busca a assinatura ativa do usuário pelo CustomerId via Repository
             var subscription = await subscriptionRepository.GetActiveSubscriptionByCustomerIdAsync(
                 cardUpdatePayload.CustomerId
             );
@@ -57,6 +64,13 @@ public class CardUpdateNotificationService(
                 return;
             }
 
+            // 2. Busca os detalhes do novo cartão na API do Mercado Pago
+            logger.LogInformation(
+                "Buscando detalhes do cartão {CardId} para o cliente {CustomerId}",
+                cardUpdatePayload.NewCardId,
+                cardUpdatePayload.CustomerId
+            );
+
             var cardDetails = await mpService.GetCardAsync(
                 cardUpdatePayload.CustomerId,
                 cardUpdatePayload.NewCardId
@@ -69,11 +83,12 @@ public class CardUpdateNotificationService(
                 );
             }
 
+            // 3. Atualiza a assinatura com os novos dados do cartão
             subscription.CardTokenId = cardDetails.Id;
             subscription.LastFourCardDigits = cardDetails.LastFourDigits;
             subscription.UpdatedAt = DateTime.UtcNow;
 
-            subscriptionRepository.Update(subscription);
+            subscriptionRepository.Update(subscription); // ✅ Marca para Update
 
             logger.LogInformation(
                 "Assinatura {SubscriptionId} marcada para atualização com o novo cartão de final {LastFourDigits}.",
@@ -81,6 +96,7 @@ public class CardUpdateNotificationService(
                 cardDetails.LastFourDigits
             );
 
+            // ✅ 4. COMMIT - Salva todas as mudanças atomicamente
             await unitOfWork.CommitAsync();
 
             logger.LogInformation(
@@ -88,6 +104,7 @@ public class CardUpdateNotificationService(
                 subscription.Id
             );
 
+            // 5. Envia e-mail de notificação para o usuário (após persistência bem-sucedida)
             await SendCardUpdateEmailAsync(subscription.User, cardDetails.LastFourDigits);
 
             logger.LogInformation(
@@ -102,7 +119,7 @@ public class CardUpdateNotificationService(
                 "Erro ao processar atualização de cartão para CustomerId: {CustomerId}",
                 cardUpdatePayload.CustomerId
             );
-            throw;
+            throw; // Rollback automático (não chamou CommitAsync)
         }
     }
 

@@ -13,6 +13,11 @@ namespace MeuCrudCsharp.Features.MercadoPago.Plans.Services;
 
 public class MercadoPagoPlanService : MercadoPagoServiceBase, IMercadoPagoPlanService
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="PlanService"/> class.
+    /// </summary>
+    /// <param name="httpClient">The HTTP client for making API requests, passed to the base class.</param>
+    /// <param name="logger">The logger for recording events and errors, passed to the base class.</param>
     public MercadoPagoPlanService(
         IHttpClientFactory httpClient,
         ILogger<IMercadoPagoPlanService> logger
@@ -62,6 +67,7 @@ public class MercadoPagoPlanService : MercadoPagoServiceBase, IMercadoPagoPlanSe
         string criteria
     )
     {
+        // Usamos um StringBuilder para construir a query string dinamicamente
         var queryString = new StringBuilder();
         queryString.Append($"/preapproval_plan/search?status={status}");
         queryString.Append($"&limit={limit}");
@@ -78,6 +84,7 @@ public class MercadoPagoPlanService : MercadoPagoServiceBase, IMercadoPagoPlanSe
         );
         var apiResponse = JsonSerializer.Deserialize<PlanSearchResponseDto>(responseBody);
 
+        // A filtragem de status agora é feita pela API, então o .Where() foi removido.
         return apiResponse?.Results?.Where(plan => plan.AutoRecurring != null) ?? [];
     }
 }

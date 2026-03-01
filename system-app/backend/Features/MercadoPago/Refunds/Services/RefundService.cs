@@ -2,10 +2,10 @@
 using MeuCrudCsharp.Features.Base;
 using MeuCrudCsharp.Features.Exceptions;
 using MeuCrudCsharp.Features.MercadoPago.Base;
-using MeuCrudCsharp.Features.MercadoPago.Payments.Interfaces;
+using MeuCrudCsharp.Features.MercadoPago.Payments.Interfaces; // Ajuste conforme seu namespace
 using MeuCrudCsharp.Features.MercadoPago.Refunds.Interfaces;
-using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Interfaces;
-using MeuCrudCsharp.Features.Shared.Work;
+using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Interfaces; // Ajuste conforme seu namespace
+using MeuCrudCsharp.Features.Shared.Work; // Ajuste conforme seu namespace
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -23,10 +23,12 @@ namespace MeuCrudCsharp.Features.MercadoPago.Refunds.Services
         {
             var externalIdStr = paymentId.ToString();
 
+            // 1. Busca usando o novo método do Repository que traz a Assinatura
             var payment = await paymentRepository.GetByExternalIdWithSubscriptionAsync(
                 externalIdStr
             );
 
+            // 2. Validações
             if (payment == null)
             {
                 throw new ResourceNotFoundException(
@@ -50,21 +52,27 @@ namespace MeuCrudCsharp.Features.MercadoPago.Refunds.Services
 
             try
             {
+                // 3. Chama a API do Mercado Pago
                 await RefundPaymentOnMercadoPagoAsync(payment.ExternalId);
 
+                // 4. Atualiza o status via Repository
                 payment.Status = "refunded";
                 payment.UpdatedAt = DateTime.UtcNow;
 
+                // Marca o objeto Payment como modificado no contexto
                 paymentRepository.Update(payment);
 
+                // Se houver assinatura vinculada, atualizamos via Repository dela
                 if (payment.Subscription != null)
                 {
                     payment.Subscription.Status = "refund_pending";
                     payment.Subscription.UpdatedAt = DateTime.UtcNow;
 
+                    // Marca o objeto Subscription como modificado
                     subscriptionRepository.Update(payment.Subscription);
                 }
 
+                // 5. Persiste tudo de uma vez (Atomicidade)
                 await unitOfWork.CommitAsync();
 
                 logger.LogInformation(

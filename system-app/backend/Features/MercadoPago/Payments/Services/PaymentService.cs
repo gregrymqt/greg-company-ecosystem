@@ -13,17 +13,21 @@ public class PaymentService(
 {
     public async Task<List<PaymentHistoryDto>> GetUserPaymentHistoryAsync(string userId)
     {
+        // 1. Usa o método exato do seu Repository
         var payments = await paymentRepository.GetPaymentsByUserIdAndTypeAsync(userId);
 
+        // 2. Mapeia a Model (Banco) para o DTO (Front)
         var historyDtos = payments
             .Select(p => new PaymentHistoryDto
             {
+                // Usando ExternalId (do MP) como ID visual, ou p.PublicId.ToString() se preferir
                 Id = p.ExternalId ?? p.Id.ToString(),
-                Amount = p.Amount,
+                Amount = p.Amount, // Assumindo que o nome da coluna no banco é TransactionAmount
                 Status = p.Status,
                 CreatedAt = p.CreatedAt,
-                PaymentMethod = p.Method,
+                PaymentMethod = p.Method, // ex: pix, credit_card
 
+                // Lógica simples para descrição se estiver vazia
                 Description = string.IsNullOrEmpty(p.Description)
                     ? $"Pagamento via {p.Method}"
                     : p.Description,

@@ -19,8 +19,10 @@ namespace MeuCrudCsharp.Features.Profiles.Admin.Repositories
             int pageSize
         )
         {
+            // 1. Query base (apenas leitura)
             var query = _context.Users.AsNoTracking();
 
+            // 2. Contagem total
             var totalCount = await query.CountAsync();
 
             if (totalCount == 0)
@@ -28,10 +30,11 @@ namespace MeuCrudCsharp.Features.Profiles.Admin.Repositories
                 return ([], 0);
             }
 
+            // 3. Busca paginada com relacionamentos
             var items = await query
                 .Include(u => u.Subscription)
                 .ThenInclude(s => s!.Plan)
-                .OrderBy(u => u.Name ?? string.Empty)
+                .OrderBy(u => u.Name ?? string.Empty) // Trata null como string vazia para ordenação
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();

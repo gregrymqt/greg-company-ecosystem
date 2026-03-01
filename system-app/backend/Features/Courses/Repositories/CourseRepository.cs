@@ -15,7 +15,7 @@ namespace MeuCrudCsharp.Features.Courses.Repositories
         public async Task<Course?> GetByPublicIdWithVideosAsync(Guid publicId)
         {
             return await context
-                .Courses.Include(c => c.Videos)
+                .Courses.Include(c => c.Videos) // Carrega os vídeos (usado no DeleteCourseAsync)
                 .FirstOrDefaultAsync(c => c.PublicId == publicId);
         }
 
@@ -73,5 +73,7 @@ namespace MeuCrudCsharp.Features.Courses.Repositories
         {
             context.Courses.Remove(course);
         }
+
+        // SaveChangesAsync removido - UnitOfWork é responsável por persistir
     }
 }

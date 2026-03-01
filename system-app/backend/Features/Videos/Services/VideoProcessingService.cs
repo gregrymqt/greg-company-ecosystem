@@ -9,6 +9,10 @@ using Microsoft.Extensions.Options;
 
 namespace MeuCrudCsharp.Features.Videos.Services;
 
+/// <summary>
+/// Service responsável por processar vídeos em formato HLS usando FFmpeg.
+/// Roda em background via Hangfire e notifica progresso via SignalR.
+/// </summary>
 public class VideoProcessingService : IVideoProcessingService
 {
     private readonly ILogger<VideoProcessingService> _logger;
@@ -20,6 +24,7 @@ public class VideoProcessingService : IVideoProcessingService
     private readonly IWebHostEnvironment _env;
     private readonly IUnitOfWork _unitOfWork;
 
+    // Regex para extrair progresso do FFmpeg
     private static readonly Regex FfmpegProgressRegex = new(
         @"time=(\d{2}):(\d{2}):(\d{2})\.(\d{2})",
         RegexOptions.Compiled
@@ -46,6 +51,7 @@ public class VideoProcessingService : IVideoProcessingService
         _unitOfWork = unitOfWork;
     }
 
+    // Assinatura ajustada para receber IDs (usada pelo AdminVideoService)
     public async Task ProcessVideoToHlsAsync(int videoId, int fileId)
     {
         Video? video = null;
@@ -53,6 +59,7 @@ public class VideoProcessingService : IVideoProcessingService
 
         try
         {
+            // 1. Buscar Entidades
             video = await _videoRepository.GetByIdAsync(videoId);
             var originalFile = await _fileRepository.GetByIdAsync(fileId);
 
@@ -61,10 +68,13 @@ public class VideoProcessingService : IVideoProcessingService
                     "Vídeo ou Arquivo original não encontrados no banco."
                 );
 
-            groupName = video.StorageIdentifier;
+            groupName = video.StorageIdentifier; // Usamos o ID do storage como grupo do SignalR
 
+            // 2. Definir Caminhos
+            // Caminho Entrada: wwwroot/uploads/Videos/guid_nome.mp4
             var inputFilePath = Path.Combine(_env.WebRootPath, originalFile.CaminhoRelativo);
 
+            // Caminho Saída Base: wwwroot/uploads/Videos/{StorageIdentifier}
             var videoDirectory = Path.Combine(
                 _env.WebRootPath,
                 "uploads",
@@ -72,26 +82,32 @@ public class VideoProcessingService : IVideoProcessingService
                 video.StorageIdentifier
             );
 
+            // Subpasta HLS: wwwroot/uploads/Videos/{StorageIdentifier}/hls
             var hlsOutputDirectory = Path.Combine(videoDirectory, "hls");
 
+            // Cria a pasta HLS se não existir
             if (!Directory.Exists(hlsOutputDirectory))
                 Directory.CreateDirectory(hlsOutputDirectory);
 
+            // Validação física
             if (!File.Exists(inputFilePath))
                 throw new FileNotFoundException(
                     $"Arquivo físico não encontrado em: {inputFilePath}"
                 );
 
+            // 3. Início do Processo
             await _videoNotificationService.SendProgressUpdate(
                 groupName,
                 "Iniciando análise...",
                 0
             );
 
+            // 4. Obter Duração do vídeo
             var duration = await GetVideoDurationAsync(inputFilePath);
             video.Duration = duration;
             await _videoRepository.UpdateAsync(video);
             
+            // ✅ COMMIT - Persiste a duração
             await _unitOfWork.CommitAsync();
             
             _logger.LogInformation(
@@ -100,12 +116,15 @@ public class VideoProcessingService : IVideoProcessingService
                 duration
             );
 
+            // 5. Configurar FFMPEG para HLS
             var manifestPath = Path.Combine(hlsOutputDirectory, "manifest.m3u8");
             var segmentPattern = Path.Combine(hlsOutputDirectory, "segment%03d.ts");
 
+            // Comando ajustado: Entrada -> HLS (segmentos de 10s) -> Saída na pasta hls/
             var arguments =
                 $"-i \"{inputFilePath}\" -c:v libx264 -c:a aac -hls_time 10 -hls_playlist_type vod -hls_segment_filename \"{segmentPattern}\" \"{manifestPath}\"";
 
+            // 6. Callback de Progresso
             Task OnProgress(string rawOutput)
             {
                 var progressPercent = ParseFfmpegProgress(rawOutput, duration.TotalSeconds);
@@ -120,14 +139,17 @@ public class VideoProcessingService : IVideoProcessingService
                 5
             );
 
+            // Executa FFMPEG
             await _processRunnerService.RunProcessWithProgressAsync(
                 _ffmpegSettings.FfmpegPath,
                 arguments,
                 OnProgress
             );
 
+            // 7. Finalização - Atualiza status para Available
             await _videoRepository.UpdateStatusAsync(videoId, VideoStatus.Available);
             
+            // ✅ COMMIT - Persiste o status final
             await _unitOfWork.CommitAsync();
 
             await _videoNotificationService.SendProgressUpdate(
@@ -147,10 +169,12 @@ public class VideoProcessingService : IVideoProcessingService
         {
             _logger.LogError(ex, "Erro no processamento do vídeo ID {VideoId}", videoId);
 
-            if (video == null) throw;
+            if (video == null) throw; // Relança para o Hangfire marcar como Failed
             
+            // Marca vídeo com status de erro
             await _videoRepository.UpdateStatusAsync(videoId, VideoStatus.Error);
             
+            // ✅ COMMIT - Persiste o status de erro
             await _unitOfWork.CommitAsync();
             
             await _videoNotificationService.SendProgressUpdate(
@@ -160,7 +184,7 @@ public class VideoProcessingService : IVideoProcessingService
                 isError: true
             );
 
-            throw;
+            throw; // Relança para o Hangfire marcar como Failed
         }
     }
 
@@ -209,7 +233,7 @@ public class VideoProcessingService : IVideoProcessingService
         var processedTime = new TimeSpan(0, hours, minutes, seconds, milliseconds * 10);
         var progress = (int)(processedTime.TotalSeconds / totalDurationSeconds * 100);
 
-        return Math.Min(99, progress);
+        return Math.Min(99, progress); // Trava em 99% até terminar o processo
 
     }
 }

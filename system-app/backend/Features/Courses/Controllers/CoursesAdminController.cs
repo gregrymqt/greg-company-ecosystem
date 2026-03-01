@@ -29,32 +29,39 @@ namespace MeuCrudCsharp.Features.Courses.Controllers
                 );
                 return Ok(paginatedResult);
             }
-            catch (Exception ex)
+            catch (AppServiceException ex)
             {
-                return HandleException(ex, "Erro ao buscar cursos.");
+                return StatusCode(
+                    500,
+                    new { message = "Erro ao buscar cursos.", details = ex.Message }
+                );
             }
         }
 
         [HttpGet("{id:guid}")]
         public async Task<IActionResult> GetCoursesByPublicId(Guid id)
         {
+            // CORREÇÃO: Guid nunca é null. Verifica se é vazio (0000-000...)
             if (id == Guid.Empty)
             {
                 return BadRequest(new { message = "O ID não pode ser vazio." });
             }
 
+            // A Service retorna a entidade 'Course' (conforme sua interface)
             var course = await courseService.FindCourseByPublicIdOrFailAsync(id);
 
+            // Mapeamento manual para DTO (Correto)
             var courseDto = new CourseDto
             {
                 PublicId = course.PublicId,
                 Name = course.Name,
                 Description = course.Description,
+                // Mapeie os vídeos se necessário
                 Videos =
                     course
                         .Videos?.Select(v => new VideoDto
                         {
-                            Id = v.PublicId,
+                            Id = v.PublicId, // Assumindo que VideoDto tem Id/PublicId
                             Title = v.Title,
                         })
                         .ToList() ?? [],
@@ -78,6 +85,7 @@ namespace MeuCrudCsharp.Features.Courses.Controllers
         }
 
         [HttpPost]
+        // CORREÇÃO: Usando o nome correto do DTO definido na interface
         public async Task<IActionResult> CreateCourse([FromBody] CreateUpdateCourseDto createDto)
         {
             if (!ModelState.IsValid)
@@ -87,18 +95,19 @@ namespace MeuCrudCsharp.Features.Courses.Controllers
             {
                 var newCourse = await courseService.CreateCourseAsync(createDto);
                 return CreatedAtAction(
-                    nameof(GetCoursesByPublicId),
+                    nameof(GetCoursesByPublicId), // Melhor apontar para o GetById
                     new { id = newCourse.PublicId },
                     newCourse
                 );
             }
-            catch (Exception ex)
+            catch (AppServiceException ex)
             {
-                return HandleException(ex, "Erro ao criar curso.");
+                return BadRequest(new { message = ex.Message });
             }
         }
 
         [HttpPut("{id:guid}")]
+        // CORREÇÃO: Usando o nome correto do DTO definido na interface
         public async Task<IActionResult> UpdateCourse(
             Guid id,
             [FromBody] CreateUpdateCourseDto updateDto
@@ -112,9 +121,13 @@ namespace MeuCrudCsharp.Features.Courses.Controllers
                 var updatedCourse = await courseService.UpdateCourseAsync(id, updateDto);
                 return Ok(updatedCourse);
             }
-            catch (Exception ex)
+            catch (ResourceNotFoundException ex)
             {
-                return HandleException(ex, "Erro ao atualizar curso.");
+                return NotFound(new { message = ex.Message });
+            }
+            catch (AppServiceException ex)
+            {
+                return BadRequest(new { message = ex.Message });
             }
         }
 
@@ -133,10 +146,6 @@ namespace MeuCrudCsharp.Features.Courses.Controllers
             catch (AppServiceException ex)
             {
                 return Conflict(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return HandleException(ex, "Erro ao deletar curso.");
             }
         }
     }

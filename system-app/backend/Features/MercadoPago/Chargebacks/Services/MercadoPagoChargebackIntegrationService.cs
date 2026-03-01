@@ -18,10 +18,13 @@ public class MercadoPagoChargebackIntegrationService(
         string chargebackId
     )
     {
+        // Endpoint: v1/chargebacks/{id}
         var endpoint = $"v1/chargebacks/{chargebackId}";
 
         try
         {
+            // Reutilizando seu método genérico da Base Class
+            // Passamos 'object' no payload porque GET não tem corpo
             var jsonResponse = await SendMercadoPagoRequestAsync<object>(
                 HttpMethod.Get,
                 endpoint,

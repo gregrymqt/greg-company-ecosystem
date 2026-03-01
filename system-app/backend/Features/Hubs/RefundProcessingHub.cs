@@ -1,4 +1,5 @@
-﻿using System.Security.Claims;
+﻿// Features/Hubs/RefundProcessingHub.cs
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 
@@ -7,12 +8,15 @@ namespace MeuCrudCsharp.Features.Hubs
     [Authorize]
     public class RefundProcessingHub(ConnectionMapping<string> mapping) : Hub
     {
+        // 1. Injetamos nosso serviço de mapeamento genérico
+
         public override async Task OnConnectedAsync()
         {
             var userId = Context.User?.FindFirstValue(ClaimTypes.NameIdentifier);
 
             if (!string.IsNullOrEmpty(userId))
             {
+                // 2. Usamos o mapper para registrar a conexão do usuário
                 mapping.Add(userId, Context.ConnectionId);
             }
 
@@ -21,6 +25,8 @@ namespace MeuCrudCsharp.Features.Hubs
 
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
+            // 3. Na desconexão, apenas pedimos ao mapper para remover a conexão.
+            // A lógica de encontrar a qual usuário ela pertencia está centralizada no mapper.
             mapping.Remove(Context.ConnectionId);
             await base.OnDisconnectedAsync(exception);
         }

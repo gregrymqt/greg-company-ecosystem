@@ -1,5 +1,6 @@
 using MeuCrudCsharp.Documents.Models;
 using MeuCrudCsharp.Features.Exceptions;
+// Confirme se sua Model está aqui ou apenas em .Documents
 using MeuCrudCsharp.Features.Support.DTOs;
 using MeuCrudCsharp.Features.Support.Interfaces;
 using MeuCrudCsharp.Features.Support.Utils;
@@ -30,15 +31,19 @@ namespace MeuCrudCsharp.Features.Support.Services
             await _repository.CreateAsync(document);
         }
 
+        // --- NOVO MÉTODO GET BY ID ---
         public async Task<SupportTicketResponseDto> GetTicketByIdAsync(string id)
         {
+            // 1. Busca no banco
             var ticket = await _repository.GetByIdAsync(id);
 
+            // 2. Valida se existe
             if (ticket == null)
             {
                 throw new ResourceNotFoundException("Ticket de suporte não encontrado.");
             }
 
+            // 3. Mapeia para DTO
             return new SupportTicketResponseDto
             {
                 Id = ticket.Id,
@@ -50,15 +55,20 @@ namespace MeuCrudCsharp.Features.Support.Services
             };
         }
 
+        // -----------------------------
+
         public async Task<PaginatedResultDto<SupportTicketResponseDto>> GetAllTicketsPaginatedAsync(
             int page,
             int pageSize
         )
         {
+            // 1. Busca os dados paginados do repositório
             var (documents, total) = await _repository.GetAllPaginatedAsync(page, pageSize);
 
+            // 2. Usa o Mapper para converter (IEnumerable -> List)
             var itemsDto = SupportMapper.ToDtoList(documents);
 
+            // O PaginatedResultDto calcula TotalPages internamente com base no count e pageSize.
             return new PaginatedResultDto<SupportTicketResponseDto>(
                 itemsDto,
                 (int)total,

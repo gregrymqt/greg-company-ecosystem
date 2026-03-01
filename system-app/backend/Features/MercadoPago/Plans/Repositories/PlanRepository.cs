@@ -6,12 +6,29 @@ using Microsoft.EntityFrameworkCore;
 
 namespace MeuCrudCsharp.Features.MercadoPago.Plans.Repositories;
 
+/// <summary>
+/// Repository para gerenciar operações de persistência de Plans.
+/// Apenas marca as mudanças no DbContext - NÃO persiste diretamente.
+/// O Service é responsável por chamar UnitOfWork.CommitAsync().
+/// </summary>
 public class PlanRepository(ApiDbContext context) : IPlanRepository
 {
+    /// <summary>
+    /// Marca um plano para adição.
+    /// NÃO persiste - O Service chamará UnitOfWork.CommitAsync().
+    /// </summary>
     public async Task AddAsync(Plan plan) => await context.Plans.AddAsync(plan);
 
+    /// <summary>
+    /// Marca um plano para atualização.
+    /// NÃO persiste - O Service chamará UnitOfWork.CommitAsync().
+    /// </summary>
     public void Update(Plan plan) => context.Plans.Update(plan);
 
+    /// <summary>
+    /// Marca um objeto para remoção.
+    /// NÃO persiste - O Service chamará UnitOfWork.CommitAsync().
+    /// </summary>
     public void Remove(object payload) => context.Remove(payload);
 
     public async Task<Plan?> GetByPublicIdAsync(Guid publicId, bool asNoTracking = true)

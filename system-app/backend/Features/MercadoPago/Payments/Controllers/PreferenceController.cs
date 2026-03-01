@@ -28,13 +28,15 @@ public class PreferenceController : MercadoPagoApiControllerBase
     {
         try
         {
+            // O Service agora resolve o User internamente via IUserContext
             var preferenceId = await _preferencePaymentService.CreatePreferenceAsync(model);
 
             return Ok(new { preferenceId });
         }
         catch (Exception ex)
         {
-            return HandleException(ex, "Erro ao criar preferência de pagamento.");
+            // Seus tratamentos de erro padronizados
+            return BadRequest(new { message = ex.Message });
         }
     }
 }

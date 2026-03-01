@@ -8,6 +8,10 @@ using Microsoft.Extensions.Options;
 
 namespace MeuCrudCsharp.Features.MercadoPago.Notification.Services;
 
+/// <summary>
+/// Service responsável por processar notificações de atualização de planos do Mercado Pago.
+/// Usa o padrão Unit of Work para garantir transações atômicas.
+/// </summary>
 public class PlanUpdateNotificationService(
     IPlanRepository planRepository,
     IUnitOfWork unitOfWork,
@@ -30,6 +34,7 @@ public class PlanUpdateNotificationService(
 
         try
         {
+            // 1. Busca o plano na API do Mercado Pago
             var mpPlan = await mercadoPagoApiService.GetPlanByExternalIdAsync(externalId);
             if (mpPlan?.Id is null || mpPlan.AutoRecurring is null)
             {
@@ -40,6 +45,7 @@ public class PlanUpdateNotificationService(
                 return;
             }
 
+            // 2. Busca o plano no banco de dados local via Repository
             var localPlan = await planRepository.GetActiveByExternalIdAsync(externalId);
 
             if (localPlan is null)
@@ -60,6 +66,7 @@ public class PlanUpdateNotificationService(
                 { "cancelled", false },
             };
 
+            // 3. Compara os valores e detecta mudanças
             if (localPlan.IsActive != statusMapping[mpPlan.Status!])
             {
                 logger.LogInformation(
@@ -105,8 +112,10 @@ public class PlanUpdateNotificationService(
 
             if (needsUpdate)
             {
+                // 4. Marca plano para atualização
                 planRepository.Update(localPlan);
 
+                // ✅ 5. COMMIT - Salva as mudanças no banco (AGORA AS MUDANÇAS SÃO SALVAS!)
                 await unitOfWork.CommitAsync();
 
                 logger.LogInformation(
@@ -114,6 +123,7 @@ public class PlanUpdateNotificationService(
                     externalId
                 );
 
+                // 6. Envia e-mail ao admin APÓS persistência bem-sucedida
                 await SendAdminNotificationEmailAsync(
                     adminEmail: await userContext.GetCurrentEmail(),
                     planName: localPlan.Name,
@@ -136,7 +146,7 @@ public class PlanUpdateNotificationService(
                 "Erro ao processar atualização do plano {ExternalId}",
                 externalId
             );
-            throw;
+            throw; // Rollback automático
         }
     }
 

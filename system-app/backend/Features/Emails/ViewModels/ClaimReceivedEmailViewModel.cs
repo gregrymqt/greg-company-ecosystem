@@ -1,5 +1,8 @@
 namespace MeuCrudCsharp.Features.Emails.ViewModels
 {
+    /// <summary>
+    /// ViewModel para o template de e-mail de notificação de recebimento de claim.
+    /// </summary>
     public class ClaimReceivedEmailViewModel
     {
         public string UserName { get; }

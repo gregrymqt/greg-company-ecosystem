@@ -10,12 +10,12 @@ using Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using Models;
+using Models; // Substitua pelo seu namespace
 
 public class JwtService : IJwtService
 {
     private readonly UserManager<Users> _userManager;
-    private readonly JwtSettings _jwtSettings;
+    private readonly JwtSettings _jwtSettings; // Sua classe de configurações
     private readonly ILogger<JwtService> _logger;
 
     public JwtService(
@@ -29,6 +29,7 @@ public class JwtService : IJwtService
         _logger = logger;
     }
 
+    // A lógica de geração de token foi movida para cá.
     public async Task<string> GenerateJwtTokenAsync(Users user)
     {
         if (user == null)
@@ -64,6 +65,9 @@ public class JwtService : IJwtService
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
+    /// <summary>
+    /// Gera um JWT Token e retorna junto com a data de expiração
+    /// </summary>
     public async Task<(string Token, DateTime Expiration)> GenerateJwtTokenWithExpirationAsync(
         Users user
     )

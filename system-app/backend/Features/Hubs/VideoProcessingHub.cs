@@ -13,6 +13,7 @@ namespace MeuCrudCsharp.Features.Hubs
 
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
+            // Agora funciona! Pegamos a chave (storageIdentifier) a partir da conexão.
             var key = mapping.GetKey(Context.ConnectionId);
 
             if (key != null)

@@ -5,17 +5,39 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace MeuCrudCsharp.Features.Profiles.Admin.Controllers
 {
+    /// <summary>
+    /// Manages administrative operations related to student profiles.
+    /// Requires 'Admin' role for access.
+    /// </summary>
     [Authorize(Roles = "Admin")]
     [Route("api/admin/students")]
     public class AdminStudentsController : ApiControllerBase
     {
         private readonly IAdminStudentService _studentService;
+        private readonly ILogger<AdminStudentsController> _logger;
 
-        public AdminStudentsController(IAdminStudentService studentService)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AdminStudentsController"/> class.
+        /// </summary>
+        /// <param name="studentService">The service responsible for student-related business logic.</param>
+        /// <param name="logger">The logger for recording events and errors.</param>
+        public AdminStudentsController(
+            IAdminStudentService studentService,
+            ILogger<AdminStudentsController> logger
+        )
         {
             _studentService = studentService;
+            _logger = logger;
         }
 
+        /// <summary>
+        /// Retrieves a list of all students.
+        /// </summary>
+        /// <returns>A list of all student profiles.</returns>
+        /// <response code="200">Returns the list of students.</response>
+        /// <response code="401">If the user is not authenticated.</response>
+        /// <response code="403">If the user is not in the 'Admin' role.</response>
+        /// <response code="500">If an unexpected server error occurs.</response>
         [HttpGet]
         public async Task<IActionResult> GetAllStudents(
             [FromQuery] int page = 1,
@@ -24,12 +46,14 @@ namespace MeuCrudCsharp.Features.Profiles.Admin.Controllers
         {
             try
             {
+                // ALTERADO: Repassa os parâmetros para o método do serviço.
                 var paginatedStudents = await _studentService.GetAllStudentsAsync(page, pageSize);
                 return Ok(paginatedStudents);
             }
             catch (Exception ex)
             {
-                return HandleException(ex, "Erro ao buscar alunos.");
+                _logger.LogError(ex, "An error occurred while fetching students.");
+                return StatusCode(500, "An internal error occurred while fetching students.");
             }
         }
 
@@ -43,7 +67,8 @@ namespace MeuCrudCsharp.Features.Profiles.Admin.Controllers
             }
             catch (Exception ex)
             {
-                return HandleException(ex, "Erro ao buscar aluno.");
+                _logger.LogError(ex, "An error occurred while fetching students.");
+                return StatusCode(500, "An internal error occurred while fetching students.");
             }
         }
     }

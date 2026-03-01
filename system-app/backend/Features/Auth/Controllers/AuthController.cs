@@ -25,10 +25,15 @@ namespace MeuCrudCsharp.Features.Auth.Controllers
         ICacheService cacheService
     ) : ApiControllerBase
     {
+        /// <summary>
+        /// 1. O React redireciona o usuário para cá para iniciar o login
+        /// GET: api/auth/google-login
+        /// </summary>
         [HttpGet("google-login")]
         [AllowAnonymous]
         public IActionResult GoogleLogin()
         {
+            // Define que, após o Google logar, ele deve chamar a nossa action 'GoogleCallback' abaixo
             var redirectUrl = Url.Action(nameof(GoogleCallback), "Auth");
 
             var properties = signInManager.ConfigureExternalAuthenticationProperties(
@@ -36,13 +41,19 @@ namespace MeuCrudCsharp.Features.Auth.Controllers
                 redirectUrl
             );
 
+            // Isso lança o desafio (302 Redirect) para a URL do Google Accounts
             return new ChallengeResult("Google", properties);
         }
 
+        /// <summary>
+        /// 2. O Google traz o usuário de volta para cá
+        /// </summary>
         [HttpGet("google-callback")]
         [AllowAnonymous]
         public async Task<IActionResult> GoogleCallback(string? remoteError = null)
         {
+            // URL do seu Frontend (React)
+            // Idealmente, coloque isso no appsettings.json como "FrontendUrl"
             var frontendUrl = configuration["General:BaseUrl"] ?? "http://localhost:5173";
             var frontendCallbackUrl = $"{frontendUrl}/google-callback";
 
@@ -61,12 +72,18 @@ namespace MeuCrudCsharp.Features.Auth.Controllers
 
             try
             {
+                // REUTILIZANDO SUA LÓGICA EXISTENTE
+                // O método SignInWithGoogleAsync já cria o usuário, faz updates e gera o cookie se necessário
                 var user = await authService.SignInWithGoogleAsync(info.Principal, HttpContext);
 
+                // REUTILIZANDO SEU SERVIÇO DE JWT [cite: 56, 62]
                 var tokenString = await jwtService.GenerateJwtTokenAsync(user);
 
+                // Limpa o cookie temporário do Identity External
                 await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
 
+                // REDIRECIONAMENTO FINAL:
+                // Mandamos o usuário de volta para o React com o Token na Query String
                 return Redirect($"{frontendCallbackUrl}?token={tokenString}");
             }
             catch (Exception ex)
@@ -85,19 +102,30 @@ namespace MeuCrudCsharp.Features.Auth.Controllers
                     System.Security.Claims.ClaimTypes.NameIdentifier
                 )?.Value;
 
-                if (string.IsNullOrEmpty(userId))
+                if (string.IsNullOrEmpty(userId)) // [cite: 33]
                     return Unauthorized("Token inválido.");
 
+                // 2. Chama o serviço otimizado
+                // O retorno agora é o DTO leve com booleanos
                 var userSession = await authService.GetAuthenticatedUserDataAsync(userId);
 
-                return Ok(userSession);
+                return Ok(userSession); // [cite: 35]
+            }
+            catch (ResourceNotFoundException ex)
+            {
+                return NotFound(ex.Message);
             }
             catch (Exception ex)
             {
-                return HandleException(ex, "Erro ao recuperar dados do usuário.");
+                logger.LogError(ex, "Erro ao recuperar dados do usuário.");
+                return StatusCode(500, "Erro interno ao obter dados do usuário.");
             }
         }
 
+        /// <summary>
+        /// Login com email e senha
+        /// POST: api/auth/login
+        /// </summary>
         [HttpPost("login")]
         [AllowAnonymous]
         public async Task<IActionResult> Login([FromBody] LoginRequestDto request)
@@ -113,10 +141,15 @@ namespace MeuCrudCsharp.Features.Auth.Controllers
             }
             catch (Exception ex)
             {
-                return HandleException(ex, "Erro ao processar login.");
+                logger.LogError(ex, "Erro ao processar login.");
+                return StatusCode(500, new { message = "Erro interno ao processar login." });
             }
         }
 
+        /// <summary>
+        /// Registro de novo usuário
+        /// POST: api/auth/register
+        /// </summary>
         [HttpPost("register")]
         [AllowAnonymous]
         public async Task<IActionResult> Register([FromBody] RegisterRequestDto request)
@@ -126,17 +159,26 @@ namespace MeuCrudCsharp.Features.Auth.Controllers
                 var response = await authService.RegisterAsync(request);
                 return Ok(response);
             }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
             catch (Exception ex)
             {
-                return HandleException(ex, "Erro ao processar registro.");
+                logger.LogError(ex, "Erro ao processar registro.");
+                return StatusCode(500, new { message = "Erro interno ao processar registro." });
             }
         }
 
+        /// <summary>
+        /// Realiza o Logout e invalida o token JWT atual adicionando-o à Blacklist do Redis.
+        /// </summary>
         [HttpPost("logout")]
         public async Task<IActionResult> Logout()
         {
             try
             {
+                // 1. Pega o Token do Header Authorization
                 var token = HttpContext
                     .Request.Headers.Authorization.ToString()
                     .Replace("Bearer ", "");
@@ -144,15 +186,20 @@ namespace MeuCrudCsharp.Features.Auth.Controllers
                 if (string.IsNullOrEmpty(token))
                     return BadRequest("Token não encontrado.");
 
+                // 2. Lê o tempo de expiração do Token (exp)
                 var handler = new JwtSecurityTokenHandler();
                 var jwtToken = handler.ReadJwtToken(token);
 
+                // Calcula quanto tempo falta para o token morrer naturalmente
                 var expiration = jwtToken.ValidTo;
                 var now = DateTime.UtcNow;
                 var ttl = expiration - now;
 
+                // 3. Se o token ainda não venceu, adiciona na Blacklist do Redis
+                // Usamos o TTL exato, assim o Redis limpa a memória sozinho quando o token expirar de verdade
                 if (ttl.TotalSeconds > 0)
                 {
+                    // A chave será "blacklist:eyJhbGci..."
                     await cacheService.GetOrCreateAsync<string>(
                         $"blacklist:{token}",
                         () => Task.FromResult("revoked"), // Valor dummy
@@ -165,13 +212,15 @@ namespace MeuCrudCsharp.Features.Auth.Controllers
                     );
                 }
 
+                // 4. Logout do Identity (Cookie) caso esteja usando cookie híbrido
                 await signInManager.SignOutAsync();
 
                 return Ok(new { message = "Logout realizado com sucesso." });
             }
             catch (Exception ex)
             {
-                return HandleException(ex, "Erro ao processar logout.");
+                logger.LogError(ex, "Erro ao processar logout.");
+                return BadRequest("Erro ao processar logout.");
             }
         }
     }

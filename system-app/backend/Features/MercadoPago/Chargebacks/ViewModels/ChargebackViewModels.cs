@@ -15,6 +15,7 @@ public class ChargeBackViewModels
         public DateTime? DataLimiteDisputa { get; set; }
         public DateTime DataCriacao { get; set; }
 
+        // Lista simplificada de arquivos para o front mostrar links
         public List<ChargebackFileViewModel> ArquivosEnviados { get; set; } = new();
     }
 
@@ -29,9 +30,11 @@ public class ChargeBackViewModels
     {
         public List<ChargebackSummaryViewModel> Chargebacks { get; set; } = new();
 
+        // Filtros
         public string? SearchTerm { get; set; }
         public string? StatusFilter { get; set; }
 
+        // Paginação
         public int CurrentPage { get; set; }
         public int TotalPages { get; set; }
         public bool HasPreviousPage => CurrentPage > 1;
@@ -45,7 +48,8 @@ public class ChargeBackViewModels
         public decimal Amount { get; set; }
         public DateTime Date { get; set; }
 
-        public int Status { get; set; }
+        // ChargebackSummaryViewModel
+        public int Status { get; set; } // Retorna 0, 1, 2...
         public required string MercadoPagoUrl { get; set; }
     }
 }

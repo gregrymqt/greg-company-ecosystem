@@ -5,6 +5,7 @@ using MeuCrudCsharp.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using MongoDB.Driver;
+// Necessário para acessar a classe Roles
 
 namespace MeuCrudCsharp.Extensions;
 
@@ -12,21 +13,27 @@ public static class PersistenceExtensions
 {
     public static WebApplicationBuilder AddPersistence(this WebApplicationBuilder builder)
     {
+        // --- 1. Configuração do Banco de Dados Principal (SQL Server) ---
         builder.Services.AddDbContextFactory<ApiDbContext>(options =>
             options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
         );
 
+        // --- CORREÇÃO AQUI ---
+        // Alterado de <Users, IdentityRole> para <Users, Roles>
         builder
             .Services.AddIdentity<Users, Roles>(options =>
             {
                 options.SignIn.RequireConfirmedAccount = true;
 
+                // Configurações opcionais úteis para teste (remova se não quiser)
                 options.Password.RequireDigit = false;
                 options.Password.RequiredLength = 6;
             })
             .AddEntityFrameworkStores<ApiDbContext>()
             .AddDefaultTokenProviders();
 
+        // --- 2. Configuração do MongoDB (NOVO) ---
+        // Aqui configuramos para que qualquer Service possa pedir um IMongoDatabase
         builder.Services.AddSingleton<IMongoClient>(_ =>
         {
             var mongoConnString = builder.Configuration.GetConnectionString("MongoConnection");
@@ -36,9 +43,11 @@ public static class PersistenceExtensions
         builder.Services.AddScoped<IMongoDatabase>(sp =>
         {
             var client = sp.GetRequiredService<IMongoClient>();
+            // Defina o nome do banco aqui (ou pegue do appsettings se preferir)
             return client.GetDatabase("MeuCrudSupportDb");
         });
 
+        // --- 3. Configuração Condicional de Cache e Hangfire ---
         var useRedis = builder.Configuration.GetValue<bool>("USE_REDIS");
         var redisConnectionString = builder.Configuration.GetConnectionString("Redis");
 
@@ -60,6 +69,7 @@ public static class PersistenceExtensions
         return builder;
     }
 
+    // ... Os métodos AddRedisPersistence e AddInMemoryPersistence continuam iguais ...
     private static void AddRedisPersistence(
         this WebApplicationBuilder builder,
         string redisConnectionString

@@ -8,6 +8,10 @@ using Microsoft.Extensions.Options;
 
 namespace MeuCrudCsharp.Features.MercadoPago.Notification.Services;
 
+/// <summary>
+/// Service responsável por processar criação de assinatura.
+/// Usa o padrão Unit of Work para garantir transações atômicas.
+/// </summary>
 public class SubscriptionCreateNotificationService(
     ILogger<SubscriptionCreateNotificationService> logger,
     ISubscriptionRepository subscriptionRepository,
@@ -19,6 +23,10 @@ public class SubscriptionCreateNotificationService(
 {
     private readonly GeneralSettings _generalSettings = generalSettings.Value;
 
+    /// <summary>
+    /// Verifica e processa a criação de uma assinatura.
+    /// </summary>
+    /// <param name="externalId">ID externo da assinatura.</param>
     public async Task VerifyAndProcessSubscriptionAsync(string externalId)
     {
         logger.LogInformation(
@@ -28,10 +36,11 @@ public class SubscriptionCreateNotificationService(
 
         try
         {
+            // 1. Busca assinatura via Repository (com User e Plan incluídos)
             var subscription = await subscriptionRepository.GetByExternalIdAsync(
                 externalId,
                 includePlan: true,
-                asNoTracking: false
+                asNoTracking: false // ✅ Precisa rastrear para salvar mudanças
             );
 
             if (subscription == null)
@@ -41,6 +50,7 @@ public class SubscriptionCreateNotificationService(
                 );
             }
 
+            // 2. Verifica idempotência - se já foi processado
             if (subscription.Status != "pending" && subscription.Status != "in_process")
             {
                 logger.LogInformation(
@@ -51,14 +61,16 @@ public class SubscriptionCreateNotificationService(
                 return;
             }
 
-            subscription.Status = "active";
-            subscriptionRepository.Update(subscription);
+            // 3. Atualiza status da assinatura
+            subscription.Status = "active"; // ✅ Status correto
+            subscriptionRepository.Update(subscription); // ✅ Marca para update
 
             logger.LogInformation(
                 "Assinatura {ExternalId} marcada para atualização com status 'active'.",
                 externalId
             );
 
+            // ✅ 4. COMMIT - Salva a mudança no banco (AGORA É SALVO!)
             await unitOfWork.CommitAsync();
 
             logger.LogInformation(
@@ -66,6 +78,7 @@ public class SubscriptionCreateNotificationService(
                 externalId
             );
 
+            // 5. Envia email APÓS persistência bem-sucedida
             if (subscription is { User: not null, Plan: not null })
             {
                 await SendSubscriptionCreatedEmailAsync(subscription);
@@ -85,10 +98,13 @@ public class SubscriptionCreateNotificationService(
                 "Erro ao processar criação de assinatura {ExternalId}",
                 externalId
             );
-            throw;
+            throw; // Rollback automático
         }
     }
 
+    /// <summary>
+    /// Envia email de confirmação de criação de assinatura.
+    /// </summary>
     private async Task SendSubscriptionCreatedEmailAsync(Models.Subscription subscription)
     {
         if (string.IsNullOrEmpty(subscription.User?.Email))
