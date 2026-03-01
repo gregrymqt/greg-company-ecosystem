@@ -2,7 +2,7 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS test
 
 WORKDIR /app
 
-COPY Tests.csproj .
+COPY Tests/Tests.csproj .
 RUN dotnet restore
 
 COPY . .
