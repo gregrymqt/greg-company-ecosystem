@@ -11,6 +11,4 @@ public class UserAccountRepository(ApiDbContext context) : IUserAccountRepositor
     {
         return await context.Users.FirstOrDefaultAsync(u => u.Id == userId);
     }
-
-    // SaveChangesAsync removido - UnitOfWork é responsável por persistir
 }

@@ -14,7 +14,7 @@ public class ConfiguracaoController : ApiControllerBase
         _mercadoPagoSettings = mercadoPagoSettings.Value;
     }
 
-    [HttpGet("public-key")] // Rota mais descritiva
+    [HttpGet("public-key")]
     public async Task<IActionResult> GetPublicKey()
     {
         return Ok(new { publicKey = _mercadoPagoSettings.PublicKey });

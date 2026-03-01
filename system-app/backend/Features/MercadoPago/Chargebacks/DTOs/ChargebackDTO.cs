@@ -44,7 +44,7 @@ public class MercadoPagoChargebackResponse
 public class MercadoPagoChargebackPayment
 {
     [JsonPropertyName("id")]
-    public string? Id { get; set; } // ID do pagamento no MP
+    public string? Id { get; set; }
 
     [JsonPropertyName("status")]
     public string? Status { get; set; }

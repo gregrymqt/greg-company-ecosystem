@@ -61,7 +61,6 @@ namespace MeuCrudCsharp.Features.MercadoPago.Webhooks.Services
                     return false;
                 }
 
-                // --- CORREÇÃO 1: Acesso direto ao objeto, sem TryGetProperty ---
                 if (string.IsNullOrEmpty(notification.Data.Id))
                 {
                     _logger.LogWarning("Payload sem Data.Id para validação.");
@@ -69,7 +68,6 @@ namespace MeuCrudCsharp.Features.MercadoPago.Webhooks.Services
                 }
 
                 var dataId = notification.Data.Id;
-                // ----------------------------------------------------------------
 
                 var manifest = $"id:{dataId};request-id:{xRequestId};ts:{ts};";
 
@@ -101,7 +99,6 @@ namespace MeuCrudCsharp.Features.MercadoPago.Webhooks.Services
             MercadoPagoWebhookNotification notification
         )
         {
-            // --- CORREÇÃO 2: Verificação de nulo padrão do C# ---
             if (string.IsNullOrEmpty(notification.Data.Id))
             {
                 _logger.LogWarning(
@@ -109,19 +106,14 @@ namespace MeuCrudCsharp.Features.MercadoPago.Webhooks.Services
                 );
                 return;
             }
-            // ----------------------------------------------------
 
             try
             {
-                // Como o objeto já veio deserializado, nós apenas repassamos o ID para os Jobs.
-                // O Webhook do MP geralmente só manda o ID dentro do Data mesmo.
-
                 var entityId = notification.Data.Id;
 
                 switch (notification.Type)
                 {
                     case "payment":
-                        // --- CORREÇÃO 3: Criamos o DTO manualmente em vez de deserializar de novo ---
                         var paymentData = new PaymentNotificationData { Id = entityId };
 
                         _logger.LogInformation("Job Pagamento ID: {Id}", paymentData.Id);
@@ -165,7 +157,6 @@ namespace MeuCrudCsharp.Features.MercadoPago.Webhooks.Services
                         break;
 
                     case "claim":
-                        // Atenção: Certifique-se que ClaimNotificationPayload tem a propriedade Id compatível
                         var claimData = new ClaimNotificationPayload { Id = entityId };
 
                         _logger.LogInformation("Job Claim ID: {Id}", claimData.Id);
@@ -176,8 +167,7 @@ namespace MeuCrudCsharp.Features.MercadoPago.Webhooks.Services
                         break;
 
                     case "automatic-payments":
-                        // Atenção: Aqui o ID costuma ser do cliente ou do cartão. Ajuste conforme sua DTO.
-                        var cardData = new CardUpdateNotificationPayload { CustomerId = entityId }; // Suposição baseada no log anterior
+                        var cardData = new CardUpdateNotificationPayload { CustomerId = entityId };
 
                         _logger.LogInformation("Job Cartão Cliente: {Id}", cardData.CustomerId);
                         await _queueService.EnqueueJobAsync<

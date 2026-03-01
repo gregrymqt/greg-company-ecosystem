@@ -13,11 +13,6 @@ using Microsoft.Extensions.Options;
 
 namespace MeuCrudCsharp.Features.MercadoPago.Notification.Services;
 
-/// <summary>
-/// Service responsável por processar notificações de pagamento do Mercado Pago.
-/// Usa o padrão Unit of Work para garantir transações atômicas.
-/// Coordena Payment, Subscription e envio de emails.
-/// </summary>
 public class NotificationPaymentService(
     IPaymentRepository paymentRepository,
     ISubscriptionRepository subscriptionRepository,
@@ -32,10 +27,6 @@ public class NotificationPaymentService(
     : INotificationPayment
 {
 
-    /// <summary>
-    /// Verifica e processa uma notificação de pagamento do Mercado Pago.
-    /// </summary>
-    /// <param name="internalPaymentId">ID interno do pagamento.</param>
     public async Task VerifyAndProcessNotificationAsync(string internalPaymentId)
     {
         logger.LogInformation(
@@ -45,7 +36,6 @@ public class NotificationPaymentService(
 
         try
         {
-            // 1. Busca o pagamento via Repository (com User incluído)
             var localPayment = await paymentRepository.GetByIdWithUserAsync(internalPaymentId);
             
             if (localPayment == null)
@@ -59,7 +49,6 @@ public class NotificationPaymentService(
                     $"Usuário associado ao pagamento {internalPaymentId} não foi encontrado."
                 );
 
-            // 2. Verifica idempotência - se já foi processado, não faz nada
             if (localPayment.Status != "pending" && localPayment.Status != "in_process")
             {
                 logger.LogInformation(
@@ -70,7 +59,6 @@ public class NotificationPaymentService(
                 return;
             }
 
-            // 3. Busca o status mais recente do pagamento no Mercado Pago
             if (string.IsNullOrEmpty(localPayment.ExternalId))
             {
                 throw new InvalidOperationException(
@@ -91,10 +79,8 @@ public class NotificationPaymentService(
                 );
             }
 
-            // 4. Processa baseado no status retornado pelo MP
             await ProcessPaymentStatusAsync(localPayment, externPayment, user);
 
-            // ✅ 5. COMMIT - Salva todas as mudanças atomicamente
             await unitOfWork.CommitAsync();
 
             logger.LogInformation(
@@ -103,7 +89,6 @@ public class NotificationPaymentService(
                 localPayment.Status
             );
 
-            // 6. Envia email APÓS persistência bem-sucedida
             await SendEmailBasedOnStatusAsync(localPayment.Status, user, internalPaymentId);
         }
         catch (Exception ex)
@@ -113,13 +98,10 @@ public class NotificationPaymentService(
                 "Erro ao processar notificação para PaymentId: {PaymentId}",
                 internalPaymentId
             );
-            throw; // Rollback automático
+            throw;
         }
     }
 
-    /// <summary>
-    /// Processa o status do pagamento retornado pelo Mercado Pago.
-    /// </summary>
     private async Task ProcessPaymentStatusAsync(
         Models.Payments localPayment,
         dynamic externPayment,
@@ -149,24 +131,18 @@ public class NotificationPaymentService(
         }
     }
 
-    /// <summary>
-    /// Processa pagamento aprovado - atualiza status e cria assinatura se necessário.
-    /// </summary>
     private async Task ProcessApprovedPaymentAsync(
         Models.Payments localPayment,
         dynamic externPayment,
         Users user)
     {
-        // Verifica se a assinatura JÁ EXISTE
         if (string.IsNullOrEmpty(localPayment.SubscriptionId))
         {
-            // SE NÃO EXISTE, é um pagamento único (PIX ou Cartão) - CRIAR A ASSINATURA
             logger.LogInformation(
                 "Pagamento {PaymentId} aprovado. Nenhuma assinatura encontrada, criando uma nova...",
                 localPayment.Id
             );
 
-            // Extrai os metadados que foram salvos na criação do pagamento
             var metadata = JsonSerializer.Deserialize<PaymentMetadata>(
                 externPayment.ExternalReference
             );
@@ -178,7 +154,6 @@ public class NotificationPaymentService(
                 );
             }
 
-            // Chama o serviço especializado para criar a assinatura no banco
             if (externPayment.Payer.Email != null)
             {
                 await subscriptionService.ActivateSubscriptionFromSinglePaymentAsync(
@@ -197,7 +172,6 @@ public class NotificationPaymentService(
         }
         else
         {
-            // SE JÁ EXISTE, é um pagamento de uma assinatura recorrente - ATUALIZAR STATUS
             logger.LogInformation(
                 "Pagamento {PaymentId} aprovado. Atualizando status da assinatura existente {SubscriptionId}.",
                 localPayment.Id,
@@ -208,22 +182,18 @@ public class NotificationPaymentService(
             if (subscription != null)
             {
                 subscription.Status = "active";
-                subscriptionRepository.Update(subscription); // ✅ Marca para update
+                subscriptionRepository.Update(subscription);
             }
         }
 
-        // Atualiza o status do pagamento local para 'approved'
         localPayment.Status = "approved";
-        paymentRepository.Update(localPayment); // ✅ Marca para update
+        paymentRepository.Update(localPayment);
     }
 
-    /// <summary>
-    /// Processa pagamento rejeitado ou cancelado.
-    /// </summary>
     private async Task ProcessRejectedPaymentAsync(Models.Payments localPayment, dynamic externPayment)
     {
         localPayment.Status = externPayment.Status;
-        paymentRepository.Update(localPayment); // ✅ Marca para update
+        paymentRepository.Update(localPayment);
 
         if (!string.IsNullOrEmpty(localPayment.SubscriptionId))
         {
@@ -231,18 +201,15 @@ public class NotificationPaymentService(
             if (subscription != null)
             {
                 subscription.Status = externPayment.Status;
-                subscriptionRepository.Update(subscription); // ✅ Marca para update
+                subscriptionRepository.Update(subscription);
             }
         }
     }
 
-    /// <summary>
-    /// Processa pagamento reembolsado.
-    /// </summary>
     private async Task ProcessRefundedPaymentAsync(Models.Payments localPayment)
     {
         localPayment.Status = "refunded";
-        paymentRepository.Update(localPayment); // ✅ Marca para update
+        paymentRepository.Update(localPayment);
 
         if (!string.IsNullOrEmpty(localPayment.SubscriptionId))
         {
@@ -250,11 +217,10 @@ public class NotificationPaymentService(
             if (subscription != null)
             {
                 subscription.Status = "refunded";
-                subscriptionRepository.Update(subscription); // ✅ Marca para update
+                subscriptionRepository.Update(subscription);
             }
         }
 
-        // Envia notificação SignalR de reembolso
         await refundNotification.SendRefundStatusUpdate(
             localPayment.UserId,
             "completed",
@@ -262,9 +228,6 @@ public class NotificationPaymentService(
         );
     }
 
-    /// <summary>
-    /// Envia email baseado no status do pagamento.
-    /// </summary>
     private async Task SendEmailBasedOnStatusAsync(string status, Users user, string paymentId)
     {
         switch (status)

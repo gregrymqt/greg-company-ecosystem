@@ -9,10 +9,6 @@ using Microsoft.Extensions.Options;
 
 namespace MeuCrudCsharp.Features.MercadoPago.Notification.Services;
 
-/// <summary>
-/// Service responsável por processar renovação de assinatura.
-/// Usa o padrão Unit of Work para garantir transações atômicas.
-/// </summary>
 public class SubscriptionRenewalNotificationService(
     ILogger<SubscriptionRenewalNotificationService> logger,
     ISubscriptionRepository subscriptionRepository,
@@ -24,10 +20,6 @@ public class SubscriptionRenewalNotificationService(
 {
     private readonly GeneralSettings _generalSettings = generalSettings.Value;
 
-    /// <summary>
-    /// Processa a renovação de uma assinatura.
-    /// </summary>
-    /// <param name="paymentId">ID do pagamento que renovou a assinatura.</param>
     public async Task ProcessRenewalAsync(string paymentId)
     {
         logger.LogInformation(
@@ -37,7 +29,6 @@ public class SubscriptionRenewalNotificationService(
 
         try
         {
-            // 1. Busca assinatura pelo PaymentId via Repository
             var subscription = await subscriptionRepository.GetByPaymentIdAsync(
                 paymentId,
                 includePlan: true,
@@ -53,7 +44,6 @@ public class SubscriptionRenewalNotificationService(
                 return;
             }
 
-            // 2. Verifica idempotência - se já foi renovada (data futura)
             if (subscription.CurrentPeriodEndDate > DateTime.UtcNow)
             {
                 logger.LogInformation(
@@ -71,7 +61,6 @@ public class SubscriptionRenewalNotificationService(
                 );
             }
 
-            // 3. Calcula nova data de expiração
             var planInterval = subscription.Plan.FrequencyInterval;
             var planFrequency = subscription.Plan.FrequencyType;
 
@@ -83,10 +72,9 @@ public class SubscriptionRenewalNotificationService(
                 _ => newExpirationDate
             };
 
-            // 4. Atualiza assinatura
             subscription.CurrentPeriodEndDate = newExpirationDate;
             subscription.Status = "active";
-            subscriptionRepository.Update(subscription); // ✅ Marca
+            subscriptionRepository.Update(subscription);
 
             logger.LogInformation(
                 "Assinatura {SubscriptionId} marcada. Nova data: {NewDate}",
@@ -94,7 +82,6 @@ public class SubscriptionRenewalNotificationService(
                 newExpirationDate
             );
 
-            // ✅ 5. COMMIT - SALVA!
             await unitOfWork.CommitAsync();
 
             logger.LogInformation(
@@ -102,7 +89,6 @@ public class SubscriptionRenewalNotificationService(
                 subscription.Id
             );
 
-            // 6. Email APÓS commit
             if (subscription.User != null && !string.IsNullOrEmpty(subscription.User.Email))
             {
                 await SendRenewalEmailAsync(subscription, newExpirationDate);
@@ -149,7 +135,6 @@ public class SubscriptionRenewalNotificationService(
 
         try
         {
-            // Usa o modelo que foi passado como parâmetro.
             var htmlBody = await razorViewToStringRenderer.RenderViewToStringAsync(
                 viewPath,
                 model

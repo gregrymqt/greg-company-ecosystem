@@ -18,8 +18,6 @@ public class UserClaimsController : MercadoPagoApiControllerBase
         _userClaimService = userClaimService;
     }
 
-    // GET: api/user/claims
-    // Lista apenas as reclamações DO usuário logado [cite: 4]
     [HttpGet]
     public async Task<
         ActionResult<List<MercadoPagoClaimsViewModels.ClaimSummaryViewModel>>
@@ -29,8 +27,6 @@ public class UserClaimsController : MercadoPagoApiControllerBase
         return Ok(result);
     }
 
-    // GET: api/user/claims/{id}
-    // Detalhes (Chat) - Valida se a claim pertence mesmo ao usuário [cite: 4]
     [HttpGet("{id}")]
     public async Task<
         ActionResult<MercadoPagoClaimsViewModels.ClaimDetailViewModel>
@@ -43,16 +39,14 @@ public class UserClaimsController : MercadoPagoApiControllerBase
         }
         catch (UnauthorizedAccessException)
         {
-            return Forbid(); // Retorna 403 se tentar ver claim de outro
+            return Forbid();
         }
         catch (Exception ex)
         {
-            return NotFound(new { message = ex.Message });
+            return HandleException(ex, "Erro ao obter detalhe da reclamação.");
         }
     }
 
-    // POST: api/user/claims/{id}/reply
-    // Aluno responde a loja [cite: 4]
     [HttpPost("{id}/reply")]
     public async Task<IActionResult> Reply(int id, [FromBody] ReplyRequestDto request)
     {
@@ -70,12 +64,10 @@ public class UserClaimsController : MercadoPagoApiControllerBase
         }
         catch (Exception ex)
         {
-            return BadRequest(new { message = ex.Message });
+            return HandleException(ex, "Erro ao enviar resposta.");
         }
     }
 
-    // POST: api/user/claims/{id}/mediation
-    // Aluno pede ajuda ao Mercado Pago (Escalar disputa) [cite: 4]
     [HttpPost("{id}/mediation")]
     public async Task<IActionResult> RequestMediation(int id)
     {

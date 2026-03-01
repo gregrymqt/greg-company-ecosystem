@@ -10,10 +10,6 @@ using Microsoft.Extensions.Options;
 
 namespace MeuCrudCsharp.Features.MercadoPago.Plans.Services
 {
-    /// <summary>
-    /// Implements <see cref="IPlanService"/> to manage the lifecycle of subscription plans.
-    /// This service coordinates operations between the local database and the Mercado Pago API.
-    /// </summary>
     public class PlanService : IPlanService
     {
         private static class CacheKeys
@@ -29,15 +25,6 @@ namespace MeuCrudCsharp.Features.MercadoPago.Plans.Services
         private readonly ILogger<PlanService> _logger;
         private readonly IUnitOfWork _unitOfWork;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="PlanService"/> class.
-        /// </summary>
-        /// <param name="cacheService">The caching service for performance optimization.</param>
-        /// <param name="logger">The logger for recording events and errors.</param>
-        /// <param name="planRepository">Repository for plan data operations.</param>
-        /// <param name="mercadoPagoPlanService">Service for Mercado Pago API calls.</param>
-        /// <param name="generalSettings">General application settings.</param>
-        /// <param name="unitOfWork">Unit of work for transaction management.</param>
         public PlanService(
             ICacheService cacheService,
             ILogger<PlanService> logger,
@@ -57,21 +44,17 @@ namespace MeuCrudCsharp.Features.MercadoPago.Plans.Services
 
         public async Task<PlanEditDto> GetPlanEditDtoByIdAsync(Guid publicId)
         {
-            // Este método interno continua buscando a entidade do banco
             var plan = await _planRepository.GetByPublicIdAsync(publicId, asNoTracking: true);
 
             return (
                     plan == null
                         ? null
-                        : // Não encontrado
-                        // Usa o novo método de mapeamento para retornar o DTO de edição
-                        PlanMapper.MapPlanToEditDto(plan)
+                        : PlanMapper.MapPlanToEditDto(plan)
                 ) ?? throw new InvalidOperationException();
         }
 
         public async Task<PlanDto> CreatePlanAsync(CreatePlanDto createDto)
         {
-            // 1. Validação de Lógica de Negócio
             if (
                 !Enum.TryParse<PlanFrequencyType>(
                     createDto.AutoRecurring.FrequencyType,
@@ -85,7 +68,6 @@ namespace MeuCrudCsharp.Features.MercadoPago.Plans.Services
                 );
             }
 
-            // 2. Criação da Entidade Local (apenas em memória)
             var newPlan = new Plan
             {
                 Name = createDto.Reason,
@@ -97,10 +79,8 @@ namespace MeuCrudCsharp.Features.MercadoPago.Plans.Services
                 IsActive = true,
             };
 
-            // Marca para adição (NÃO persiste ainda)
             await _planRepository.AddAsync(newPlan);
 
-            // 3. Criação do plano na API externa
             try
             {
                 var mercadoPagoPayload = new
@@ -115,14 +95,10 @@ namespace MeuCrudCsharp.Features.MercadoPago.Plans.Services
                     mercadoPagoPayload
                 );
 
-                // 4. Atualiza a entidade local com o ID externo (ainda em memória)
                 newPlan.ExternalPlanId = mpPlanResponse.Id;
 
-                // 5. ✅ COMMIT ÚNICO - ATOMICIDADE GARANTIDA
-                // Persiste o plan com TODOS os dados preenchidos (incluindo ExternalPlanId)
                 await _unitOfWork.CommitAsync();
 
-                // 6. Pós-processamento (cache, log)
                 await _cacheService.RemoveAsync(CacheKeys.ActiveDbPlans);
                 await _cacheService.RemoveAsync(CacheKeys.ActiveApiPlans);
 
@@ -143,10 +119,6 @@ namespace MeuCrudCsharp.Features.MercadoPago.Plans.Services
                     createDto.Reason
                 );
 
-                // ✅ ROLLBACK AUTOMÁTICO
-                // Como não fizemos commit, o UnitOfWork descarta todas as mudanças automaticamente
-                // Não precisa remover manualmente - o Entity Framework faz isso
-
                 _logger.LogInformation(
                     "Rollback automático concluído. Plano '{PlanName}' NÃO foi persistido.",
                     createDto.Reason
@@ -158,24 +130,20 @@ namespace MeuCrudCsharp.Features.MercadoPago.Plans.Services
 
         public async Task<PlanDto> UpdatePlanAsync(Guid publicId, UpdatePlanDto updateDto)
         {
-            // 1. Busca a entidade local (rastreada pelo EF Core)
             var localPlan =
                 await _planRepository.GetByPublicIdAsync(publicId, asNoTracking: false)
                 ?? throw new ResourceNotFoundException($"Plano com ID {publicId} não encontrado.");
 
-            // 2. Guarda os valores originais para possível rollback
             var originalName = localPlan.Name;
             var originalTransactionAmount = localPlan.TransactionAmount;
             var originalFrequencyInterval = localPlan.FrequencyInterval;
             var originalFrequencyType = localPlan.FrequencyType;
             var originalDescription = localPlan.Description;
 
-            // 3. Aplica as mudanças (apenas em memória)
             PlanUtils.ApplyUpdateDtoToPlan(localPlan, updateDto);
 
             try
             {
-                // 4. Atualiza no MercadoPago primeiro
                 var payloadForMercadoPago = new
                 {
                     reason = updateDto.Reason,
@@ -187,11 +155,8 @@ namespace MeuCrudCsharp.Features.MercadoPago.Plans.Services
                     payloadForMercadoPago
                 );
 
-                // 5. ✅ COMMIT ÚNICO - ATOMICIDADE GARANTIDA
-                // Se chegou aqui, MP foi atualizado com sucesso, agora persiste localmente
                 await _unitOfWork.CommitAsync();
 
-                // 6. Pós-processamento
                 await _cacheService.RemoveAsync(CacheKeys.ActiveDbPlans);
                 await _cacheService.RemoveAsync(CacheKeys.ActiveApiPlans);
 
@@ -210,9 +175,6 @@ namespace MeuCrudCsharp.Features.MercadoPago.Plans.Services
                     localPlan.Name
                 );
 
-                // ✅ ROLLBACK AUTOMÁTICO
-                // Como não fizemos commit, o EF vai descartar as mudanças automaticamente
-                // Mas como a entidade está sendo rastreada, precisamos reverter manualmente
                 localPlan.Name = originalName;
                 localPlan.TransactionAmount = originalTransactionAmount;
                 localPlan.FrequencyInterval = originalFrequencyInterval;
@@ -242,19 +204,14 @@ namespace MeuCrudCsharp.Features.MercadoPago.Plans.Services
                 return;
             }
 
-            // 1. Marca como inativo (apenas em memória)
             localPlan.IsActive = false;
 
             try
             {
-                // 2. Desativa no MercadoPago primeiro
                 await _mercadoPagoPlanService.CancelPlanAsync(localPlan.ExternalPlanId);
 
-                // 3. ✅ COMMIT ÚNICO - ATOMICIDADE GARANTIDA
-                // Se chegou aqui, MP foi cancelado com sucesso, agora persiste localmente
                 await _unitOfWork.CommitAsync();
 
-                // 4. Pós-processamento
                 await _cacheService.RemoveAsync(CacheKeys.ActiveDbPlans);
                 await _cacheService.RemoveAsync(CacheKeys.ActiveApiPlans);
 
@@ -271,9 +228,6 @@ namespace MeuCrudCsharp.Features.MercadoPago.Plans.Services
                     localPlan.Name
                 );
 
-                // ✅ ROLLBACK AUTOMÁTICO
-                // Como não fizemos commit, o EF vai descartar as mudanças automaticamente
-                // Mas como a entidade está sendo rastreada, precisamos reverter manualmente
                 localPlan.IsActive = true;
 
                 _logger.LogInformation(
@@ -307,7 +261,6 @@ namespace MeuCrudCsharp.Features.MercadoPago.Plans.Services
 
             var totalCount = await GetTotalActiveApiPlansCountAsync();
 
-            // 3. O resto da lógica permanece, mas agora opera em uma lista pequena (apenas a página atual)
             var planResponseDtos = activePlansFromApi.ToList();
             if (planResponseDtos.Count == 0)
             {
@@ -337,16 +290,12 @@ namespace MeuCrudCsharp.Features.MercadoPago.Plans.Services
             return new PagedResultDto<PlanDto>(mappedPlans, page, pageSize, totalCount);
         }
 
-        // NOVO MÉTODO AUXILIAR: Para obter o total de planos e cachear o resultado.
         private async Task<int> GetTotalActiveApiPlansCountAsync()
         {
             return await _cacheService.GetOrCreateAsync(
-                "TotalActiveApiPlansCount", // Chave de cache específica para a contagem
+                    "TotalActiveApiPlansCount",
                 async () =>
                 {
-                    // Chamada leve para a API, apenas para contar.
-                    // O ideal seria que o MP tivesse um endpoint só para contagem.
-                    // Na ausência disso, buscamos a lista e contamos.
                     var allPlans = await _mercadoPagoPlanService.SearchActivePlansAsync(
                         1000,
                         0,
@@ -360,22 +309,16 @@ namespace MeuCrudCsharp.Features.MercadoPago.Plans.Services
             );
         }
 
-        /// <summary>
-        /// Busca os planos ativos diretamente do banco de dados local.
-        /// </summary>
         public async Task<PagedResultDto<PlanDto>> GetActiveDbPlansAsync(int page, int pageSize)
         {
             _logger.LogInformation("Buscando planos ativos paginados do banco de dados.");
 
             try
             {
-                // 1. Chama o repositório com os parâmetros de paginação
                 var pagedResult = await _planRepository.GetActivePlansAsync(page, pageSize);
 
-                // 2. Mapeia apenas os itens da página atual para DTOs
                 var planDtos = pagedResult.Items.Select(PlanMapper.MapDbPlanToDto).ToList();
 
-                // 3. Cria um novo PagedResultDto com os itens mapeados e os metadados
                 return new PagedResultDto<PlanDto>(
                     planDtos,
                     pagedResult.CurrentPage,

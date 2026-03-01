@@ -2,7 +2,6 @@ using System.ComponentModel.DataAnnotations;
 
 namespace MeuCrudCsharp.Features.Support.DTOs
 {
-    // O que o usuário envia para criar (já tínhamos falado dessa, ajustei para DTO)
     public class CreateSupportTicketDto
     {
         [Required(ErrorMessage = "O contexto é obrigatório.")]
@@ -14,14 +13,12 @@ namespace MeuCrudCsharp.Features.Support.DTOs
         public string? Explanation { get; set; } = string.Empty;
     }
 
-    // O que o Admin envia para atualizar o status
     public class UpdateSupportTicketDto
     {
         [Required]
-        public string? Status { get; set; } // "Open", "InProgress", "Closed"
+        public string? Status { get; set; }
     }
 
-    // O que a API devolve para o Front (Response)
     public class SupportTicketResponseDto
     {
         public string? Id { get; set; }

@@ -1,6 +1,5 @@
 using Hangfire;
 using MeuCrudCsharp.Features.Base;
-using MeuCrudCsharp.Features.Exceptions;
 using MeuCrudCsharp.Features.Files.Attributes;
 using MeuCrudCsharp.Features.Videos.DTOs;
 using MeuCrudCsharp.Features.Videos.Interfaces;
@@ -15,15 +14,13 @@ namespace MeuCrudCsharp.Features.Videos.Controller
     {
         private readonly IAdminVideoService _videoService;
 
-        // Removemos IWebHostEnvironment e IBackgroundJobClient daqui.
-        // Quem usa eles agora é o Service (internamente).
         public AdminVideosController(IAdminVideoService videoService)
         {
             _videoService = videoService;
         }
 
         [HttpPost]
-        [AllowLargeFile(3072)] // 3GB
+        [AllowLargeFile(3072)]
         public async Task<IActionResult> CreateVideo([FromForm] CreateVideoDto dto)
         {
             if (!ModelState.IsValid)
@@ -31,7 +28,6 @@ namespace MeuCrudCsharp.Features.Videos.Controller
 
             try
             {
-                // Retorna NULL se for chunk intermediário
                 var result = await _videoService.HandleVideoUploadAsync(dto);
 
                 if (result == null)
@@ -39,12 +35,11 @@ namespace MeuCrudCsharp.Features.Videos.Controller
                     return Ok(new { message = $"Chunk {dto.ChunkIndex} do vídeo recebido." });
                 }
 
-                // Tudo concluído
                 return CreatedAtAction(nameof(GetAllVideos), new { id = result.Id }, result);
             }
             catch (Exception ex)
             {
-                return BadRequest(new { success = false, message = ex.Message });
+                return HandleException(ex, "Erro ao criar vídeo.");
             }
         }
 
@@ -59,7 +54,7 @@ namespace MeuCrudCsharp.Features.Videos.Controller
         }
 
         [HttpPut("{id:guid}")]
-        [AllowLargeFile(1024)] // Permite uploads de até 1GB para atualizações
+        [AllowLargeFile(1024)]
         public async Task<IActionResult> UpdateVideo(Guid id, [FromForm] UpdateVideoDto dto)
         {
             try
@@ -67,9 +62,9 @@ namespace MeuCrudCsharp.Features.Videos.Controller
                 var updated = await _videoService.UpdateVideoAsync(id, dto);
                 return Ok(updated);
             }
-            catch (ResourceNotFoundException ex)
+            catch (Exception ex)
             {
-                return NotFound(new { ex.Message });
+                return HandleException(ex, "Erro ao atualizar vídeo.");
             }
         }
 
@@ -81,9 +76,9 @@ namespace MeuCrudCsharp.Features.Videos.Controller
                 await _videoService.DeleteVideoAsync(id);
                 return Ok(new { Message = "Vídeo e arquivos deletados com sucesso." });
             }
-            catch (ResourceNotFoundException ex)
+            catch (Exception ex)
             {
-                return NotFound(new { ex.Message });
+                return HandleException(ex, "Erro ao deletar vídeo.");
             }
         }
     }

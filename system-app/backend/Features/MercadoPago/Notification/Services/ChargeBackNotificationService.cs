@@ -11,11 +11,6 @@ using Microsoft.Extensions.Options;
 
 namespace MeuCrudCsharp.Features.MercadoPago.Notification.Services;
 
-/// <summary>
-/// Service responsável por processar notificações de Chargeback do Mercado Pago.
-/// Coordena múltiplos repositories (Payment, Subscription, Chargeback) e usa UnitOfWork
-/// para garantir transações atômicas.
-/// </summary>
 public class ChargeBackNotificationService(
     IChargebackRepository chargebackRepository,
     IPaymentRepository paymentRepository,
@@ -28,13 +23,10 @@ public class ChargeBackNotificationService(
     IMercadoPagoChargebackIntegrationService mpIntegrationService)
     : IChargeBackNotificationService
 {
-    // ADICIONADO: Repositórios e UoW
-
     private readonly GeneralSettings _generalSettings = generalSettings.Value;
 
     public async Task VerifyAndProcessChargeBackAsync(ChargebackNotificationPayload chargebackData)
     {
-        // 1. Busca detalhes na API do MP
         var mpDetails = await mpIntegrationService.GetChargebackDetailsFromApiAsync(
             chargebackData.Id
         );
@@ -54,8 +46,6 @@ public class ChargeBackNotificationService(
         var mpPaymentId = long.Parse(paymentIdStr);
         var mpChargebackId = long.Parse(mpDetails.Id);
 
-        // --- ALTERAÇÃO: Transação via UnitOfWork (ou implícita no Commit) ---
-        // Se o seu UoW não tiver BeginTransaction explícito, apenas o CommitAsync no final garante a atomicidade do SaveChanges
         try
         {
             logger.LogInformation(
@@ -64,8 +54,6 @@ public class ChargeBackNotificationService(
                 mpPaymentId
             );
 
-            // 3. Localiza pagamento via Repository
-            // Substitui: _context.Payments.Include(p => p.User).FirstOrDefaultAsync(...)
             var payment = await paymentRepository.GetByExternalIdWithUserAsync(paymentIdStr);
 
             if (payment == null)
@@ -74,14 +62,11 @@ public class ChargeBackNotificationService(
             }
             else
             {
-                // Atualiza Pagamento
                 payment.Status = "chargeback";
-                paymentRepository.Update(payment); // Marca explicitamente para update
+                paymentRepository.Update(payment);
 
-                // Atualiza Assinatura se existir
                 if (!string.IsNullOrEmpty(payment.SubscriptionId))
                 {
-                    // Substitui: _context.Subscriptions.FirstOrDefaultAsync(...)
                     var subscription = await subscriptionRepository.GetByIdAsync(
                         payment.SubscriptionId
                     );
@@ -98,15 +83,12 @@ public class ChargeBackNotificationService(
                 }
             }
 
-            // 4. Verifica/Cria Chargeback via Repository
-            // Substitui: _context.Chargebacks.FirstOrDefaultAsync(...)
             var existingChargeback = await chargebackRepository.GetByExternalIdAsync(
                 mpChargebackId
             );
 
             if (existingChargeback == null)
             {
-                // CREATE
                 var newChargeback = new Chargeback
                 {
                     ChargebackId = mpChargebackId,
@@ -120,16 +102,12 @@ public class ChargeBackNotificationService(
             }
             else
             {
-                // UPDATE
                 existingChargeback.Amount = mpDetails.Amount;
                 chargebackRepository.Update(existingChargeback);
             }
 
-            // 5. Persiste tudo (Commit da Transação)
-            // Substitui: await _context.SaveChangesAsync();
             await unitOfWork.CommitAsync();
 
-            // 6. Envia E-mail (Pós-persistência para garantir que salvou antes de avisar)
             if (payment?.User != null && !string.IsNullOrEmpty(payment.User.Email))
             {
                 await SendChargebackReceivedEmailAsync(payment.User, mpChargebackId);
@@ -139,7 +117,6 @@ public class ChargeBackNotificationService(
         }
         catch (Exception ex)
         {
-            // O Rollback geralmente é automático se não der o Commit, mas pode ser explícito dependendo da sua impl do UoW
             logger.LogError(ex, "Erro ao salvar Chargeback {Id}.", mpChargebackId);
             throw;
         }

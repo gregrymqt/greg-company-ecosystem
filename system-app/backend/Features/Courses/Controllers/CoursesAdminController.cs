@@ -50,7 +50,6 @@ namespace MeuCrudCsharp.Features.Courses.Controllers
                 PublicId = course.PublicId,
                 Name = course.Name,
                 Description = course.Description,
-                // Mapeie os vídeos se necessário
                 Videos =
                     course
                         .Videos?.Select(v => new VideoDto

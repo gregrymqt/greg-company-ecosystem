@@ -5,10 +5,6 @@ using static MeuCrudCsharp.Features.MercadoPago.Chargebacks.ViewModels.ChargeBac
 
 namespace MeuCrudCsharp.Features.MercadoPago.Chargebacks.Services;
 
-/// <summary>
-/// Service responsável por operações de LEITURA de Chargebacks.
-/// Para operações de escrita (Create/Update), veja ChargeBackNotificationService.
-/// </summary>
 public class ChargebackService(
     IChargebackRepository chargebackRepository,
     ICacheService cacheService,
@@ -18,17 +14,12 @@ public class ChargebackService(
 {
     private const int PageSize = 10;
 
-    /// <summary>
-    /// Obtém lista paginada de chargebacks com filtros opcionais.
-    /// Utiliza cache de 5 minutos para otimizar performance.
-    /// </summary>
     public async Task<ChargebacksIndexViewModel> GetChargebacksAsync(
         string? searchTerm,
         string? statusFilter,
         int page
     )
     {
-        // Validação básica
         if (page < 1)
         {
             logger.LogWarning("Página inválida recebida: {Page}. Usando página 1.", page);
@@ -82,29 +73,21 @@ public class ChargebackService(
             ) ?? throw new AppServiceException("Erro ao obter chargebacks.");
     }
 
-    /// <summary>
-    /// Obtém detalhes completos de um chargeback específico da API do Mercado Pago.
-    /// Utiliza cache de 10 minutos para reduzir chamadas à API externa.
-    /// </summary>
     public async Task<ChargebackDetailViewModel> GetChargebackDetailAsync(string chargebackId)
     {
-        // Validação de entrada
         if (string.IsNullOrWhiteSpace(chargebackId))
         {
             throw new ArgumentException("ID do chargeback não pode ser vazio.", nameof(chargebackId));
         }
 
-        // Chave de cache para detalhes individuais
         var cacheKey = $"mp_chargeback_detail:{chargebackId}";
 
-        // Usando seu ICacheService
         return await cacheService.GetOrCreateAsync(
                 cacheKey,
                 async () =>
                 {
                     logger.LogInformation("Buscando detalhes do chargeback {Id} na API do Mercado Pago", chargebackId);
-                    
-                    // 1. Busca na API externa
+
                     var mpData = await mpIntegrationService.GetChargebackDetailsFromApiAsync(
                         chargebackId
                     );
@@ -114,7 +97,6 @@ public class ChargebackService(
                             $"Chargeback {chargebackId} não encontrado no Mercado Pago."
                         );
 
-                    // 2. Mapeia para o ViewModel (Clean Code: Adapter Pattern implícito)
                     return new ChargebackDetailViewModel
                     {
                         ChargebackId = mpData.Id,
@@ -136,7 +118,7 @@ public class ChargebackService(
                                 .ToList() ?? [],
                     };
                 },
-                TimeSpan.FromMinutes(10) // Cache de 10 min para não bater na API toda hora
+                TimeSpan.FromMinutes(10)
             )
             ?? throw new AppServiceException(
                 "Não foi possível recuperar os detalhes do chargeback."

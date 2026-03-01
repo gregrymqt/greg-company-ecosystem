@@ -13,8 +13,8 @@ namespace MeuCrudCsharp.Features.Courses.Services
         ICourseRepository repository,
         ILogger<CourseService> logger,
         ICacheService cacheService,
-        IUnitOfWork unitOfWork)
-        : ICourseService
+        IUnitOfWork unitOfWork
+    ) : ICourseService
     {
         private const string CoursesCacheVersionKey = "courses_cache_version";
 
@@ -141,7 +141,8 @@ namespace MeuCrudCsharp.Features.Courses.Services
 
             var course = await repository.GetByNameAsync(courseName);
 
-            if (course != null) return course;
+            if (course != null)
+                return course;
             logger.LogInformation("Criando curso '{CourseName}'...", courseName);
             course = new Course { Name = courseName };
 

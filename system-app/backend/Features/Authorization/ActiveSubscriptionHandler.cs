@@ -9,7 +9,6 @@ namespace MeuCrudCsharp.Features.Authorization;
 public class ActiveSubscriptionHandler(IDbContextFactory<ApiDbContext> dbContextFactory)
     : AuthorizationHandler<ActiveSubscriptionRequirement>
 {
-
     protected override async Task HandleRequirementAsync(
         AuthorizationHandlerContext context,
         ActiveSubscriptionRequirement requirement

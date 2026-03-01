@@ -4,12 +4,10 @@ namespace MeuCrudCsharp.Features.MercadoPago.Subscriptions.Interfaces;
 
 public interface ISubscriptionRepository
 {
-    // Métodos de escrita (não chamam SaveChanges - Service usa UnitOfWork)
     Task AddAsync(Subscription subscription);
     void Update(Subscription subscription);
     void Remove(Subscription subscription);
 
-    // Métodos de leitura
     Task<Subscription?> GetByExternalIdAsync(
         string externalId,
         bool includePlan = false,

@@ -5,41 +5,21 @@ using Microsoft.EntityFrameworkCore;
 
 namespace MeuCrudCsharp.Features.MercadoPago.Subscriptions.Repositories;
 
-/// <summary>
-/// Repository para gerenciar operações de persistência de Subscriptions.
-/// Apenas marca as mudanças no DbContext - NÃO persiste diretamente.
-/// O Service é responsável por chamar UnitOfWork.CommitAsync().
-/// </summary>
 public class SubscriptionRepository(ApiDbContext context) : ISubscriptionRepository
 {
-    /// <summary>
-    /// Marca uma assinatura para adição.
-    /// NÃO persiste - O Service chamará UnitOfWork.CommitAsync().
-    /// </summary>
     public async Task AddAsync(Subscription subscription)
     {
         await context.Subscriptions.AddAsync(subscription);
-        // NÃO chama SaveChanges - deixa pro Service via UnitOfWork
     }
 
-    /// <summary>
-    /// Marca uma assinatura para atualização.
-    /// NÃO persiste - O Service chamará UnitOfWork.CommitAsync().
-    /// </summary>
     public void Update(Subscription subscription)
     {
         context.Subscriptions.Update(subscription);
-        // NÃO chama SaveChanges - deixa pro Service via UnitOfWork
     }
 
-    /// <summary>
-    /// Marca uma assinatura para remoção.
-    /// NÃO persiste - O Service chamará UnitOfWork.CommitAsync().
-    /// </summary>
     public void Remove(Subscription subscription)
     {
         context.Subscriptions.Remove(subscription);
-        // NÃO chama SaveChanges - deixa pro Service via UnitOfWork
     }
 
     public async Task<Subscription?> GetByExternalIdAsync(
@@ -65,7 +45,6 @@ public class SubscriptionRepository(ApiDbContext context) : ISubscriptionReposit
 
     public async Task<Subscription?> GetActiveSubscriptionByUserIdAsync(string userId)
     {
-        // Status que consideramos "Vigentes"
         var activeStatuses = new[] { "authorized", "pending", "paused" };
 
         return await context
@@ -78,7 +57,6 @@ public class SubscriptionRepository(ApiDbContext context) : ISubscriptionReposit
 
     public async Task<Subscription?> GetActiveSubscriptionByCustomerIdAsync(string customerId)
     {
-        // Status que consideramos "Vigentes"
         var activeStatuses = new[] { "authorized", "pending", "paused" };
 
         return await context

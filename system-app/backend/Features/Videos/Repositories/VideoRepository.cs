@@ -5,11 +5,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace MeuCrudCsharp.Features.Videos.Repositories
 {
-    /// <summary>
-    /// Repository para gerenciar operações de persistência de Videos.
-    /// Apenas marca as mudanças no DbContext - NÃO persiste diretamente.
-    /// O Service é responsável por chamar UnitOfWork.CommitAsync().
-    /// </summary>
     public class VideoRepository : IVideoRepository
     {
         private readonly ApiDbContext _context;
@@ -33,42 +28,26 @@ namespace MeuCrudCsharp.Features.Videos.Repositories
                 throw new InvalidOperationException("Vídeo não encontrado.");
         }
 
-        /// <summary>
-        /// Marca um vídeo para adição.
-        /// NÃO persiste - O Service chamará UnitOfWork.CommitAsync().
-        /// </summary>
         public async Task AddAsync(Video video)
         {
             await _context.Videos.AddAsync(video);
-            // NÃO chama SaveChanges - deixa pro Service via UnitOfWork
         }
 
-        /// <summary>
-        /// Marca um vídeo para atualização.
-        /// NÃO persiste - O Service chamará UnitOfWork.CommitAsync().
-        /// </summary>
         public async Task UpdateAsync(Video video)
         {
             _context.Videos.Update(video);
-            // NÃO chama SaveChanges - deixa pro Service via UnitOfWork
-            await Task.CompletedTask; // Para manter assinatura async
+            await Task.CompletedTask;
         }
 
-        /// <summary>
-        /// Marca um vídeo para atualização de status.
-        /// NÃO persiste - O Service chamará UnitOfWork.CommitAsync().
-        /// </summary>
         public async Task UpdateStatusAsync(int videoId, VideoStatus newStatus)
         {
             var video = await _context.Videos.FindAsync(videoId);
             if (video != null)
             {
                 video.Status = newStatus;
-                // NÃO chama SaveChanges - deixa pro Service via UnitOfWork
             }
         }
 
-        // IMPLEMENTAÇÃO DA PAGINAÇÃO (apenas leitura)
         public async Task<(List<Video> Items, int TotalCount)> GetAllPaginatedAsync(
             int page,
             int pageSize
@@ -88,7 +67,6 @@ namespace MeuCrudCsharp.Features.Videos.Repositories
             return (items, totalCount);
         }
 
-        // IMPLEMENTAÇÃO DA BUSCA POR GUID (PUBLIC ID)
         public async Task<Video> GetByPublicIdAsync(Guid publicId)
         {
             return await _context
@@ -97,15 +75,10 @@ namespace MeuCrudCsharp.Features.Videos.Repositories
                 throw new InvalidOperationException("Vídeo não encontrado.");
         }
 
-        /// <summary>
-        /// Marca um vídeo para remoção.
-        /// NÃO persiste - O Service chamará UnitOfWork.CommitAsync().
-        /// </summary>
         public async Task DeleteAsync(Video video)
         {
             _context.Videos.Remove(video);
-            // NÃO chama SaveChanges - deixa pro Service via UnitOfWork
-            await Task.CompletedTask; // Para manter assinatura async
+            await Task.CompletedTask;
         }
     }
 }

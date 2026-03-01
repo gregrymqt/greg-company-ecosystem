@@ -18,9 +18,6 @@ public class HomeController : ApiControllerBase
         _service = service;
     }
 
-    // ==========================================
-    // LEITURA (GET)
-    // ==========================================
     [HttpGet]
     [AllowAnonymous]
     public async Task<IActionResult> GetHomeContent()
@@ -32,21 +29,9 @@ public class HomeController : ApiControllerBase
         }
         catch (Exception ex)
         {
-            return StatusCode(
-                500,
-                new
-                {
-                    success = false,
-                    message = "Erro ao carregar a home.",
-                    error = ex.Message,
-                }
-            );
+            return HandleException(ex, "Erro ao carregar a home.");
         }
     }
-
-    // ==========================================
-    // HERO (COM UPLOAD E CHUNKS)
-    // ==========================================
 
     [HttpPost("hero")]
     [AllowLargeFile(2048)]
@@ -57,21 +42,16 @@ public class HomeController : ApiControllerBase
 
         try
         {
-            // O retorno será NULL se for um chunk intermediário
             var result = await _service.CreateHeroAsync(dto);
 
             if (result == null)
-            {
-                // Responde 200 OK para o React mandar o próximo pedaço
                 return Ok(new { message = $"Chunk {dto.ChunkIndex} do Hero recebido." });
-            }
 
-            // Upload terminou e registro foi criado
             return CreatedAtAction(nameof(GetHomeContent), null, result);
         }
         catch (Exception ex)
         {
-            return BadRequest(new { success = false, message = ex.Message });
+            return HandleException(ex, "Erro ao criar Hero.");
         }
     }
 
@@ -81,23 +61,16 @@ public class HomeController : ApiControllerBase
     {
         try
         {
-            // O retorno será FALSE se for um chunk intermediário
             bool finished = await _service.UpdateHeroAsync(id, dto);
 
             if (!finished)
-            {
                 return Ok(new { message = $"Chunk {dto.ChunkIndex} do Hero atualizado." });
-            }
 
-            return NoContent(); // 204: Tudo pronto
-        }
-        catch (ResourceNotFoundException ex)
-        {
-            return NotFound(new { success = false, message = ex.Message });
+            return NoContent();
         }
         catch (Exception ex)
         {
-            return BadRequest(new { success = false, message = ex.Message });
+            return HandleException(ex, "Erro ao atualizar Hero.");
         }
     }
 
@@ -109,17 +82,12 @@ public class HomeController : ApiControllerBase
             await _service.DeleteHeroAsync(id);
             return NoContent();
         }
-        catch (ResourceNotFoundException ex)
+        catch (Exception ex)
         {
-            return NotFound(new { success = false, message = ex.Message });
+            return HandleException(ex, "Erro ao deletar Hero.");
         }
     }
 
-    // ==========================================
-    // SERVICES (JSON PURO - SEM CHUNKS)
-    // ==========================================
-
-    // Mantemos [FromBody] e removemos a herança de BaseUploadDto na classe DTO
     [HttpPost("services")]
     public async Task<IActionResult> CreateService([FromBody] CreateUpdateServiceDto dto)
     {
@@ -133,7 +101,7 @@ public class HomeController : ApiControllerBase
         }
         catch (Exception ex)
         {
-            return BadRequest(new { success = false, message = ex.Message });
+            return HandleException(ex, "Erro ao criar Service.");
         }
     }
 
@@ -145,9 +113,9 @@ public class HomeController : ApiControllerBase
             await _service.UpdateServiceAsync(id, dto);
             return NoContent();
         }
-        catch (ResourceNotFoundException ex)
+        catch (Exception ex)
         {
-            return NotFound(new { success = false, message = ex.Message });
+            return HandleException(ex, "Erro ao atualizar Service.");
         }
     }
 
@@ -159,9 +127,9 @@ public class HomeController : ApiControllerBase
             await _service.DeleteServiceAsync(id);
             return NoContent();
         }
-        catch (ResourceNotFoundException ex)
+        catch (Exception ex)
         {
-            return NotFound(new { success = false, message = ex.Message });
+            return HandleException(ex, "Erro ao deletar Service.");
         }
     }
 }

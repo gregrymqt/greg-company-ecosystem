@@ -18,6 +18,7 @@ namespace MeuCrudCsharp.Features.Auth.Services
         private readonly ILogger<AuthService> _logger;
         private readonly IPaymentRepository _paymentRepository;
         private readonly ISubscriptionRepository _subscriptionRepository;
+
         public AuthService(
             UserManager<Users> userManager,
             IUserRepository userRepository,

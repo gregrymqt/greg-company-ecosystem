@@ -1,8 +1,5 @@
 namespace MeuCrudCsharp.Features.Emails.ViewModels
 {
-    /// <summary>
-    /// ViewModel para o template de e-mail de confirmação de criação de assinatura.
-    /// </summary>
     public class SubscriptionCreateEmailViewModel
     {
         public string UserName { get; }

@@ -1,8 +1,5 @@
 namespace MeuCrudCsharp.Features.Emails.ViewModels
 {
-    /// <summary>
-    /// ViewModel para o template de e-mail de notificação de recebimento de chargeback.
-    /// </summary>
     public class ChargebackReceivedEmailViewModel
     {
         public string UserName { get; }

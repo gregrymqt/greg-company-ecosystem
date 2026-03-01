@@ -2,8 +2,8 @@ namespace MeuCrudCsharp.Features.Auth.Repositories;
 
 using Data;
 using Interfaces;
-using Models;
 using Microsoft.EntityFrameworkCore;
+using Models;
 
 public class UserRepository(ApiDbContext dbContext) : IUserRepository
 {

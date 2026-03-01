@@ -19,16 +19,13 @@ public class PaymentsController : MercadoPagoApiControllerBase
         _userContext = userContext;
     }
 
-    [HttpGet("history")] // Rota final: GET api/payments/history
+    [HttpGet("history")]
     [Authorize]
     public async Task<IActionResult> GetPaymentHistory()
     {
         try
         {
-            // 1. Pega o ID do usuário logado via Token
             var userId = _userContext.GetCurrentUserId().ToString();
-
-            // 2. Chama a service
             var history = await _paymentService.GetUserPaymentHistoryAsync(userId);
 
             return Ok(history);

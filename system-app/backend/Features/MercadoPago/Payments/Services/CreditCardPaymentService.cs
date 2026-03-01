@@ -19,9 +19,6 @@ using Microsoft.Extensions.Options;
 
 namespace MeuCrudCsharp.Features.MercadoPago.Payments.Services
 {
-    /// <summary>
-    /// Implementa <see cref="ICreditCardPaymentService"/> para processar pagamentos com cartão de crédito.
-    /// </summary>
     public class CreditCardPaymentService : ICreditCardPaymentService
     {
         private const string IDEMPOTENCY_PREFIX = "CreditCardPayment";
@@ -142,7 +139,6 @@ namespace MeuCrudCsharp.Features.MercadoPago.Payments.Services
 
             try
             {
-                // 1. Gerenciar cliente/cartão
                 if (string.IsNullOrEmpty(user.CustomerId))
                 {
                     _logger.LogInformation(
@@ -155,7 +151,7 @@ namespace MeuCrudCsharp.Features.MercadoPago.Payments.Services
                         paymentData.Token
                     );
                     user.CustomerId = customerWithCard.CustomerId;
-                    _userRepository.Update(user); // Marca para atualização
+                    _userRepository.Update(user);
                 }
                 else
                 {
@@ -171,7 +167,6 @@ namespace MeuCrudCsharp.Features.MercadoPago.Payments.Services
                     new PaymentStatusUpdate("A processar o seu pagamento...", "processing", false)
                 );
 
-                // 2. Criar registro inicial de pagamento
                 var novoPagamento = new Models.Payments()
                 {
                     UserId = userId,
@@ -186,8 +181,8 @@ namespace MeuCrudCsharp.Features.MercadoPago.Payments.Services
                     UpdatedAt = DateTime.UtcNow,
                 };
 
-                await _paymentRepository.AddAsync(novoPagamento); // Usa repository ao invés de _context
-                
+                await _paymentRepository.AddAsync(novoPagamento);
+
                 _logger.LogInformation(
                     "Registro de pagamento inicial criado com ID: {PaymentId}",
                     novoPagamento.Id
@@ -202,7 +197,6 @@ namespace MeuCrudCsharp.Features.MercadoPago.Payments.Services
                     )
                 );
 
-                // 3. Chamar MercadoPago
                 var paymentClient = new PaymentClient();
                 var requestOptions = new RequestOptions
                 {
@@ -232,20 +226,16 @@ namespace MeuCrudCsharp.Features.MercadoPago.Payments.Services
 
                 var payment = await paymentClient.CreateAsync(paymentRequest, requestOptions);
 
-                // 4. Atualizar pagamento com resposta do MercadoPago
                 novoPagamento.PaymentId = payment.Id.ToString();
                 novoPagamento.Status = PaymentStatusMapper.MapFromMercadoPago(payment.Status);
                 novoPagamento.DateApproved = payment.DateApproved;
                 novoPagamento.UpdatedAt = DateTime.UtcNow;
                 novoPagamento.LastFourDigits = payment.Card.LastFourDigits;
 
-                _paymentRepository.Update(novoPagamento); // Marca para atualização
+                _paymentRepository.Update(novoPagamento);
 
-                // 5. COMMIT ÚNICO - ATOMICIDADE GARANTIDA
-                // Salva todas as alterações (User.CustomerId + Payment) em uma única transação
                 await _unitOfWork.CommitAsync();
 
-                // 6. Notificar resultado
                 if (payment.Status is "approved" or "in_process")
                 {
                     await _notificationHub.SendStatusUpdateAsync(
@@ -381,8 +371,6 @@ namespace MeuCrudCsharp.Features.MercadoPago.Payments.Services
                     customerWithCard.Card.LastFourDigits
                 );
 
-                // Salva as alterações do usuário (CustomerId) usando o UnitOfWork
-                // OBS: A assinatura já foi salva pelo SubscriptionService
                 await _unitOfWork.CommitAsync();
 
                 _logger.LogInformation(
