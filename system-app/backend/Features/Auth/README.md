@@ -37,7 +37,7 @@ Base route: `/api/auth`
 | Método | Rota | Auth | Descrição |
 |--------|------|------|-----------|
 | `GET` | `/api/auth/google-login` | Anônimo | Inicia o fluxo OAuth com o Google (redirect) |
-| `GET` | `/api/auth/google-callback` | Anônimo | Callback do Google, retorna JWT via query string |
+| `GET` | `/api/auth/google-callback` | Anônimo | Callback do Google, retorna JWT via fragmento de URL |
 | `POST` | `/api/auth/login` | Anônimo | Login com email e senha |
 | `POST` | `/api/auth/register` | Anônimo | Registro de novo usuário |
 | `GET` | `/api/auth/me` | JWT | Retorna os dados da sessão do usuário autenticado |
@@ -58,7 +58,7 @@ Base route: `/api/auth`
 1. `GET /google-login` → redireciona para Google Accounts
 2. Google retorna para `GET /google-callback`
 3. Se o usuário não existir, cria conta e vincula o GoogleId
-4. Gera JWT e redireciona o frontend para `/google-callback?token=<jwt>`
+4. Gera JWT e redireciona o frontend para `/google-callback#token=<jwt>` (fragmento de URL, não enviado ao servidor)
 
 ### Logout (`POST /api/auth/logout`)
 

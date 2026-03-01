@@ -67,7 +67,7 @@ namespace MeuCrudCsharp.Features.Auth.Controllers
 
                 await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
 
-                return Redirect($"{frontendCallbackUrl}?token={tokenString}");
+                return Redirect($"{frontendCallbackUrl}#token={tokenString}");
             }
             catch (Exception ex)
             {
