@@ -324,9 +324,11 @@ Tests/
 ### Como Executar
 
 ```bash
-# Executar testes localmente
-cd system-app/backend
-dotnet test
+# Executar testes localmente (a partir da raiz do repositório)
+dotnet test Tests/Tests.csproj
+
+# Ou via solução completa
+dotnet test GregCompany.sln
 
 # Ou via Docker (utilizado no CI)
 docker-compose -f docker-compose.test.yml up --build
