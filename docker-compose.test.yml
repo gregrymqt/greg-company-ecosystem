@@ -3,7 +3,7 @@ services:
   tests:
     build:
       context: . 
-      dockerfile: tests/Dockerfile 
+      dockerfile: Tests/Dockerfile 
     environment:
       - USE_REDIS=true
       - ConnectionStrings__Redis=redis-test:6379
