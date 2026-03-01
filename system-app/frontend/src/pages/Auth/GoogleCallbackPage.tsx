@@ -1,10 +1,9 @@
 import { useEffect, useRef } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import styles from './GoogleCallbackPage.module.scss';
 
 export const GoogleCallbackPage = () => {
-  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { handleGoogleCallback } = useAuth();
 
@@ -13,16 +12,25 @@ export const GoogleCallbackPage = () => {
   useEffect(() => {
     if (processedRef.current) return;
 
-    const token = searchParams.get("token");
+    const hash = window.location.hash;
+    if (!hash) {
+      console.error("Token não encontrado na URL de retorno");
+      navigate("/login?error=no_token");
+      return;
+    }
+    const params = new URLSearchParams(hash.slice(1));
+    const token = params.get("token");
 
     if (token) {
       processedRef.current = true;
+      // Clear the fragment from the URL immediately so the token is not retained
+      window.history.replaceState(null, '', window.location.pathname);
       handleGoogleCallback(token);
     } else {
       console.error("Token não encontrado na URL de retorno");
       navigate("/login?error=no_token");
     }
-  }, [searchParams, handleGoogleCallback, navigate]);
+  }, [handleGoogleCallback, navigate]);
 
   return (
     <div className={styles["google-callback-page"]}>
