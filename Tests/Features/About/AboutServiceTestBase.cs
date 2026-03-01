@@ -1,14 +1,15 @@
+using MeuCrudCsharp.Features.About.DTOs;
 using MeuCrudCsharp.Features.About.Interfaces;
 using MeuCrudCsharp.Features.About.Services;
 using MeuCrudCsharp.Features.Caching.Interfaces;
 using MeuCrudCsharp.Features.Files.Interfaces;
 using MeuCrudCsharp.Features.Shared.Work;
-using MeuCrudCsharp.Features.About.DTOs;
 using MeuCrudCsharp.Models;
 using Microsoft.AspNetCore.Http;
 using Moq;
 
 namespace Tests.Features.About.Services;
+
 public abstract class AboutServiceTestBase
 {
     protected readonly Mock<IAboutRepository> _repository;

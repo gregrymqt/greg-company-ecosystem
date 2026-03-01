@@ -34,6 +34,7 @@ public class RateLimitAttribute : ActionFilterAttribute
         
         if (cacheService == null)
         {
+            await next();
             return;
         }
 
