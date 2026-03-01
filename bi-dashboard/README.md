@@ -277,7 +277,7 @@ Este BI Dashboard faz parte do **Greg Company Ecosystem**:
 
 ---
 
-## � CI/CD e Testes
+## 🔄 CI/CD e Testes
 
 O ecossistema completo (incluindo este BI Dashboard) utiliza **GitHub Actions** para CI/CD.
 
@@ -288,7 +288,7 @@ Para mais detalhes sobre a estrutura de testes e o pipeline de CI/CD, consulte o
 
 ---
 
-## �📚 Documentação Adicional
+## 📚 Documentação Adicional
 
 Este projeto segue as mesmas convenções do backend C# do ecosystem.  
 **Mantenha a arquitetura Vertical Slice ao adicionar features.**
