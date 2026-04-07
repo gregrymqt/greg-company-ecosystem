@@ -1,381 +1,70 @@
-﻿# 💼 Greg Company - Plataforma de Cursos Online
+# Lucas Vicente
 
-Ecossistema completo para gestão de cursos online com sistema integrado de pagamentos, assinaturas e inteligência de negócios. Plataforma Full-stack desenvolvida por Lucas Vicente De Souza, estudante de Desenvolvimento de Software Multiplataforma na FATEC.
+**Desenvolvedor de Software** | 4º Semestre — Desenvolvimento de Software Multiplataforma · FATEC Praia Grande
 
-**Features Principais:**
-- 🎓 Gestão completa de cursos e vídeos
-- 💳 Sistema de pagamentos com MercadoPago (PIX, Cartão, Assinaturas)
-- 👥 Autenticação e perfis de usuário
-- 📊 Dashboard de BI para métricas de negócio
-- 🔔 Suporte e sistema de reclamações
-- 💰 Gestão de carteira digital e transações
-
-<!-- Sugestão: Adicionar screenshots ou um GIF da aplicação em funcionamento torna o projeto muito mais atrativo. -->
-<!-- 
-## 📸 Screenshots
-
-*(coloque aqui um screenshot da área de cursos)*
-*(coloque aqui um screenshot do dashboard de assinaturas)*
-*(coloque aqui um screenshot do dashboard de BI)*
--->
-
-## 🚀 Tecnologias e Integrações
-
-*   **Sistema Transacional (Backend):** ASP.NET 8 (C#) para APIs RESTful.
-*   **Sistema Transacional (Frontend):** React com TypeScript.
-*   **Banco de Dados:** SQL Server para persistência de dados.
-*    **MongoDB:** Armazenamento NoSQL para dados flexíveis e documentos.
-*   **Cache:** Redis para caching de alta performance.
-*   **Pagamentos:** Integração completa com MercadoPago (Checkout Pro, Webhooks, PIX e Assinaturas).
-*   **Jobs em Background:** Hangfire para processamento de tarefas assíncronas (ex: renovação de assinaturas).
-*   **Business Intelligence (BI):** Motor de ETL desenvolvido em Python.
-*   **Visualização de Dados:** Integração com APIs da Rows e Notion para dashboards executivos.
-*   **Containerização:** Docker e Docker Compose para orquestração do ambiente de desenvolvimento.
-
-## 🏗️ Arquitetura
-
-### Sistema Principal (C# & React)
-A aplicação principal foca na escalabilidade, manutenibilidade e experiência do usuário:
-
-*   **Backend (C#):** Clean Architecture com Vertical Slices - cada feature (Auth, Courses, MercadoPago, Support, Videos) possui sua própria estrutura completa (Controllers, Services, Repositories, DTOs, Interfaces, Mappers). Auto-registro de dependências via Scrutor. Implementa princípios SOLID para regras de negócio complexas, autenticação JWT + OAuth, e integrações financeiras seguras.
-
-*   **Frontend (React + TypeScript):** Arquitetura features-based espelhando estritamente os Controllers do Backend.
-    *   **Padrão Vertical Slice:** Cada feature em `src/features/` é subdividida internamente em contextos:
-        *   `Admin/`: Área de gestão e backoffice.
-        *   `Public/`: Área do usuário final/vitrine.
-        *   `shared/`: DTOs e utilitários agnósticos.
-    *   **Clean Architecture:** Garante separação de concerns, onde componentes puramente visuais ficam em `components/` e regras de negócio isoladas em `hooks/` e `services/` dentro de cada contexto.
-
-*   **Features Implementadas:**
-    - `auth/` - Autenticação (JWT, Google OAuth)
-    - `course/` - Gestão de cursos (Admin + Allow)
-    - `video/` - Player e gerenciamento de vídeos
-    - `Payment/` - Checkout (PIX, Cartão, Preferências)
-    - `Subscription/` - Gestão de assinaturas
-    - `Plan/` - Gerenciamento de planos
-    - `Wallet/` - Carteira digital
-    - `Transactions/` - Histórico de pagamentos
-    - `Chargeback/` - Gestão de estornos
-    - `Claim/` - Sistema de reclamações
-    - `analytics/` - Métricas e relatórios
-    - `profile/`, `support/`, `home/`, `about/`
-
-*   **Infraestrutura:** Docker Compose orquestrando SQL Server, MongoDB, Redis e aplicação. Hangfire para jobs assíncronos (renovação de assinaturas, webhooks).
-
-### Módulo de BI (Python)
-Plataforma de inteligência de negócios com **FastAPI + WebSocket** para análise de métricas em tempo real da plataforma de cursos, seguindo **Vertical Slice Architecture** alinhada com o backend C#.
+Construo sistemas resilientes e soluções escaláveis com foco em arquitetura limpa, multi-database e automação de processos. Busco oportunidade de estágio em Engenharia de Software para consolidar experiência em ambientes de produção.
 
 ---
 
-### 🐍 Arquitetura do BI-Dashboard (Python)
+## 🧰 Toolbox
 
-**Vertical Slice Architecture** - Organização por domínio (features):
-
-**Core Infrastructure** (`src/core/`):
-- **infrastructure/**: Componentes compartilhados
-  - `database.py` - SQL Server connection (SQLAlchemy)
-  - `mongo_client.py` - MongoDB connection
-  - `redis_client.py` - Redis connection (cache)
-  - `rows_client.py` - Rows.com API client
-  - `websocket.py` - WebSocket Manager (Hub pattern similar ao SignalR)
-- **enums/**: `hub_enums.py` - AppHubs enum (Claims, Financial, Subscriptions, Support, Users, Content, Storage)
-- **websocket_server.py**: Configuração de rotas WebSocket
-
-**Feature Slices** (`src/features/`) - Cada feature auto-contida com `repository.py`, `service.py`, `schemas.py`, `handlers.py` e `routes.py`:
-- **claims/**: Analytics de disputas e reclamações
-- **financial/**: Métricas financeiras e receitas
-- **subscriptions/**: Análise de MRR, churn rate, renovações
-- **support/**: Tickets de suporte (MongoDB)
-- **content/**: Métricas de cursos e vídeos
-- **users/**: Análise de usuários
-- **rows/**: Integração e sync com Rows.com
-- **storage/**: Analytics de armazenamento de arquivos
-
-**API Layer** (`src/api/`):
-- **main.py**: FastAPI application com REST + WebSocket
-- As rotas REST ficam dentro de cada feature (`src/features/{feature}/routes.py`), não em uma pasta `routes/` centralizada.
-
-**Métricas Processadas:**
-- 💰 Receita total e MRR (Monthly Recurring Revenue)
-- 📈 Taxa de conversão e churn rate
-- ⚠️ Claims ativas e faturamento em risco
-- 💳 Análise de chargebacks e fraudes
-- 👥 Engajamento de alunos por curso
-- 📊 Status de assinaturas (Ativas, Canceladas, Inadimplentes)
+| Categoria | Tecnologias |
+|-----------|-------------|
+| **Back-end** | ![C#](https://img.shields.io/badge/C%23-239120?style=flat&logo=csharp&logoColor=white) ![.NET](https://img.shields.io/badge/.NET_8-512BD4?style=flat&logo=dotnet&logoColor=white) ![Java](https://img.shields.io/badge/Java-ED8B00?style=flat&logo=openjdk&logoColor=white) ![Spring Boot](https://img.shields.io/badge/Spring_Boot-6DB33F?style=flat&logo=springboot&logoColor=white) ![Python](https://img.shields.io/badge/Python-3776AB?style=flat&logo=python&logoColor=white) ![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=flat&logo=fastapi&logoColor=white) |
+| **Front-end** | ![React](https://img.shields.io/badge/React-20232A?style=flat&logo=react&logoColor=61DAFB) ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat&logo=typescript&logoColor=white) ![Vite](https://img.shields.io/badge/Vite-646CFF?style=flat&logo=vite&logoColor=white) |
+| **Dados** | ![SQL Server](https://img.shields.io/badge/SQL_Server-CC2927?style=flat&logo=microsoftsqlserver&logoColor=white) ![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=flat&logo=mongodb&logoColor=white) ![Redis](https://img.shields.io/badge/Redis-DC382D?style=flat&logo=redis&logoColor=white) |
+| **DevOps** | ![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat&logo=docker&logoColor=white) ![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?style=flat&logo=githubactions&logoColor=white) ![Git](https://img.shields.io/badge/Git-F05032?style=flat&logo=git&logoColor=white) |
 
 ---
 
-### 📊 Fluxo de Dados (API + WebSocket Real-time)
+## 🏗️ Projetos em Destaque
 
-**REST API** (Consulta sob demanda):
-1. **Extração**: Features consomem dados do SQL Server/MongoDB via repositories
-2. **Transformação**: Services processam:
-   - Cálculo de MRR e churn rate
-   - Agregação de receitas por plano
-   - Identificação de claims críticas (>30 dias)
-   - Análise de padrões de consumo de cursos
-3. **Resposta**: Endpoints REST retornam JSON para clientes
+### 💼 Greg Company — Plataforma de Cursos Online
+**Ecossistema full-stack multi-database com BI em tempo real**
 
-**WebSocket Hubs** (Push em tempo real):
-- **Claims Hub** (`/hubs/claims`): KPIs de disputas, alertas de claims críticas
-- **Financial Hub** (`/hubs/financial`): Updates de receita, novos pagamentos
-- **Subscriptions Hub**: Renovações, cancelamentos em tempo real
-- **Support Hub**: Status de tickets de suporte
+| | |
+|---|---|
+| **O Problema** | Plataformas de cursos convencionais acoplam toda a lógica em um único banco relacional, tornando difícil escalar métricas analíticas sem impactar as transações. A gestão de assinaturas com pagamentos recorrentes (PIX, cartão) exige processamento assíncrono confiável e rastreável. |
+| **A Solução** | Arquitetura Vertical Slice em .NET 8 com estratégia multi-database: SQL Server para transações, MongoDB para documentos flexíveis e Redis para cache distribuído. Motor de BI separado em Python/FastAPI com WebSocket Hubs (padrão SignalR) para broadcast de KPIs em tempo real. Jobs de renovação de assinaturas orquestrados via Hangfire. Pipeline CI/CD com GitHub Actions e suíte de testes unitários (xUnit + Moq). |
 
-**Background Tasks**:
-- Broadcast automático de KPIs a cada 30 segundos
-- Notificações push de eventos críticos
-- Sincronização periódica com Rows.com/Notion
+**Stack:** `.NET 8` · `C#` · `React/TypeScript` · `SQL Server` · `MongoDB` · `Redis` · `Python` · `FastAPI` · `Docker` · `Hangfire` · `xUnit`
 
 ---
 
-## 🛠️ Como Executar
+### 🏥 Usafa — Sistema de Agendamento de Saúde
+**Plataforma de agendamento de consultas médicas**
 
-### Pré-requisitos
-*   [.NET 8 SDK](https://dotnet.microsoft.com/download)
-*   [Node.js v20.x](https://nodejs.org/) (com npm ou yarn)
-*   [Python 3.10+](https://www.python.org/downloads/)
-*   [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+| | |
+|---|---|
+| **O Problema** | Unidades de saúde dependem de processos manuais ou sistemas legados para gerenciar consultas, resultando em conflitos de horários, falta de histórico centralizado e experiência degradada para pacientes e profissionais. |
+| **A Solução** | API REST em Java/Spring Boot com controle de disponibilidade de agenda, gerenciamento de pacientes e profissionais, e regras de negócio para validação de conflitos de horário. Estrutura orientada a domínio com separação clara de responsabilidades entre camadas. |
 
-### 1. Configuração do Ambiente
-Clone o repositório e crie o arquivo de variáveis de ambiente.
-
-```bash
-git clone https://github.com/seu-usuario/greg-company-ecosystem.git
-cd greg-company-ecosystem
-
-# Crie um arquivo .env na raiz e adicione as chaves necessárias.
-# Você pode usar o .env.example como base (recomendo criar um).
-cp .env.example .env 
-```
-
-Preencha o `.env` com suas chaves de API (Rows, MercadoPago, etc.) e a string de conexão do banco.
-
-### 2. Suba a Infraestrutura
-Inicie os containers do SQL Server e Redis.
-
-```bash
-docker-compose up -d
-```
-
-### 3. Execute o Backend (API)
-```bash
-cd system-app/backend
-dotnet run
-```
-A API estará disponível em `https://localhost:7035` (verifique o `launchSettings.json`). A documentação Swagger estará em `/swagger`.
-
-### 4. Execute o Frontend (React App)
-```bash
-cd system-app/frontend
-npm install
-npm run dev  # Vite dev server na porta 5173
-```
-A aplicação estará rodando em `http://localhost:5173`.
-
-### 5. Execute o Módulo de BI (FastAPI Server)
-```bash
-cd ../../bi-dashboard # a partir da pasta frontend
-pip install -r requirements.txt
-python run_api.py  # FastAPI server com WebSocket
-```
-
-A API de BI estará disponível em:
-- **REST API**: `http://localhost:8000`
-- **WebSocket**: `ws://localhost:8000/hubs/[hub-name]`
-- **Documentação**: `http://localhost:8000/docs`
-- **Status Hubs**: `http://localhost:8000/ws/status`
+**Stack:** `Java` · `Spring Boot` · `Spring Data JPA` · `SQL`
 
 ---
 
-## 📂 Estrutura do Projeto
+## 📊 GitHub Stats
 
-```
-greg-company-ecosystem/
-├── system-app/
-│   ├── backend/                    # .NET 8 API
-│   │   ├── Features/              # Vertical Slices (Auth, Courses, MercadoPago, etc.)
-│   │   ├── Extensions/            # DI, Auth, Persistence config
-│   │   ├── Data/                  # DbContext, Migrations
-│   │   └── Program.cs             # Entry point
-│   │
-│   └── frontend/                  # React + TypeScript + Vite
-│       └── src/
-│           ├── features/          # Features-based (auth, course, Payment, etc.)
-│           ├── components/        # UI components puros
-│           ├── pages/             # Route-level pages
-│           ├── shared/            # Shared utilities
-│           └── routes/            # Routing config
-│
-├── bi-dashboard/                  # Python BI Engine (FastAPI + WebSocket)
-│   └── src/
-│       ├── core/                  # Shared infrastructure
-│       │   ├── infrastructure/    # Database, MongoDB, WebSocket Manager
-│       │   ├── enums/             # AppHubs enum
-│       │   └── websocket_server.py # WebSocket routes setup
-│       ├── features/              # Vertical Slices (domain-based)
-│       │   ├── claims/           # repository, service, schemas, handlers, routes
-│       │   ├── financial/        # repository, service, schemas, handlers, routes
-│       │   ├── subscriptions/    # repository, service, schemas, handlers, routes
-│       │   ├── support/          # repository, service, schemas, handlers, routes
-│       │   ├── content/          # repository, service, schemas, handlers, routes
-│       │   ├── users/            # repository, service, schemas, handlers, routes
-│       │   ├── rows/             # repository, service, schemas (Rows.com sync)
-│       │   └── storage/          # repository, service, schemas, handlers, routes
-│       └── api/                   # FastAPI application
-│           └── main.py            # App + CORS + background tasks + router registration
-│   └── run_api.py                 # Script to run FastAPI server
-│
-├── mcp-servers/                   # Model Context Protocol servers
-│   ├── greg_context_mcp.py       # Architecture context and project structure for AI
-│   ├── greg_network_mcp.py       # Network and connectivity context for AI
-│   └── log_mcp_server.py         # Log analysis for AI
-│
-├── docker-compose.yml             # Infrastructure orchestration
-└── .env                           # Environment variables
-```
+<div align="center">
+
+![GitHub Stats](https://github-readme-stats.vercel.app/api?username=gregrymqt&show_icons=true&theme=dark&hide_border=true&include_all_commits=true&count_private=true)
+
+![Top Languages](https://github-readme-stats.vercel.app/api/top-langs/?username=gregrymqt&layout=compact&theme=dark&hide_border=true&langs_count=8)
+
+</div>
 
 ---
 
-## 🔑 Variáveis de Ambiente Necessárias
+## 🎯 Roadmap 2026
 
-Configure no arquivo `.env`:
-
-```env
-# Database
-ConnectionStrings__DefaultConnection=Server=localhost,1433;Database=GregCompany;...
-
-# MercadoPago
-MERCADOPAGO_ACCESS_TOKEN=your_access_token
-MERCADOPAGO_PUBLIC_KEY=your_public_key
-
-# JWT
-JWT_SECRET=your_secret_key
-JWT_ISSUER=GregCompanyAPI
-JWT_AUDIENCE=GregCompanyClient
-
-# Redis (opcional, use USE_REDIS=false para desabilitar)
-USE_REDIS=true
-REDIS_CONNECTION=localhost:6379
-
-# MongoDB
-MONGODB_CONNECTION=mongodb://localhost:27017
-
-# BI APIs
-ROWS_API_KEY=your_rows_api_key
-NOTION_API_KEY=your_notion_api_key
-```
+- [ ] 🏅 **Certificação GitHub Foundations** — em andamento (80% concluído)
+- [ ] Aprofundar conhecimento em Kubernetes para orquestração de containers em produção
+- [ ] Implementar padrões avançados de observabilidade (OpenTelemetry, distributed tracing)
+- [ ] Contribuir com projetos open source no ecossistema .NET
 
 ---
 
-## 🎯 Endpoints Principais da API
+## 📫 Contato
 
-### Sistema Transacional (.NET - Porta 7035)
-- **Auth**: `/api/auth/login`, `/api/auth/register`, `/api/auth/google`
-- **Courses**: `/api/courses`, `/api/courses/{id}/videos`
-- **Plans**: `/api/plans`, `/api/plans/{id}`
-- **Subscriptions**: `/api/subscriptions/my`, `/api/subscriptions/cancel`
-- **Payments**: `/api/payment/preference`, `/api/payment/webhook`
-- **Wallet**: `/api/wallet/cards`, `/api/wallet/add-card`
-- **Transactions**: `/api/transactions/history`
-- **Chargebacks**: `/api/chargebacks`
-- **Claims**: `/api/claims`, `/api/claims/{id}/messages`
-
-### BI Dashboard API (Python - Porta 8000)
-**REST Endpoints:**
-- **Claims**: `GET /api/claims/kpis`, `GET /api/claims/active`, `GET /api/claims/critical`
-- **Financial**: `GET /api/financial/summary`, `GET /api/financial/revenue`
-- **Status**: `GET /ws/status` - Status dos WebSocket hubs
-
-**WebSocket Hubs:**
-- **Claims**: `ws://localhost:8000/hubs/claims`
-- **Financial**: `ws://localhost:8000/hubs/financial`
-- **Subscriptions**: `ws://localhost:8000/hubs/subscriptions`
-- **Support**: `ws://localhost:8000/hubs/support`
-
-Documentação completa disponível em:
-- Backend .NET: `/swagger` 
-- BI Dashboard: `http://localhost:8000/docs`
-
----
-
-## 🧪 Testes Unitários
-
-O projeto possui uma suíte de testes unitários focada no backend (C#), utilizando **xUnit** e **Moq**.
-
-### Estrutura dos Testes
-Os testes seguem a mesma arquitetura de *Vertical Slices* do backend, espelhando a organização das features. Eles estão localizados na pasta `Tests/`.
-
-Exemplo de estrutura:
-```text
-Tests/
-└── Features/
-    └── About/
-        └── Services/
-            ├── CreateAboutAsyncTests.cs
-            └── GetAboutAsyncTests.cs
-```
-
-### Padrões Utilizados
-- **AAA (Arrange, Act, Assert):** Todos os testes são estruturados dividindo a preparação dos dados (Arrange), a execução do método (Act) e a validação dos resultados (Assert).
-- **Mocking:** Utilização da biblioteca `Moq` para simular dependências externas (como Repositórios, Serviços de Cache e File System), garantindo que os testes sejam isolados e testem apenas a regra de negócio do *System Under Test* (SUT).
-- **Nomenclatura:** Os métodos de teste seguem o padrão `NomeDoMetodo_Condicao_ResultadoEsperado` (ex: `CreateTeamMemberAsync_WhenFileIsChunk_ShouldReturnDtoAndSaveCorrectly`).
-
-### Como Executar
-
-```bash
-# Executar testes localmente (a partir da raiz do repositório)
-dotnet test Tests/Tests.csproj
-
-# Ou via solução completa
-dotnet test GregCompany.sln
-
-# Ou via Docker (utilizado no CI)
-docker-compose -f docker-compose.test.yml up --build
-```
-
----
-
-## 🔄 CI/CD (Integração e Entrega Contínuas)
-
-O projeto utiliza **GitHub Actions** para automatizar o pipeline de CI/CD, garantindo a qualidade do código e a estabilidade dos deploys. O workflow está definido em `.github/workflows/ci-cd.yml`.
-
-### Pipeline de CI/CD
-O pipeline é acionado automaticamente em `push` ou `pull_request` nas branches `main` e `develop`, ou manualmente via `workflow_dispatch`.
-
-Ele é composto por dois jobs principais:
-
-1. **Build & Unit Tests (`test`):**
-   - Cria um ambiente isolado utilizando o `docker-compose.test.yml`.
-   - Sobe instâncias efêmeras do SQL Server e Redis.
-   - Executa toda a suíte de testes unitários do backend.
-   - Se algum teste falhar, o pipeline é interrompido, impedindo o deploy de código quebrado.
-
-2. **Build & Deploy Stack Completa (`deploy`):**
-   - Executado apenas se o job de testes passar com sucesso.
-   - Realiza o build de todos os serviços (Backend, Frontend, BI Dashboard) utilizando o `docker-compose.yml` principal.
-   - Sobe a stack completa em ambiente de produção/staging.
-
----
-
-## 📝 Licença
-
-Este projeto foi desenvolvido como trabalho acadêmico na FATEC - Faculdade de Tecnologia de São Paulo.
-
----
-
-## 👨‍💻 Autor
-
-**Lucas Vicente De Souza**  
-Estudante de Desenvolvimento de Software Multiplataforma - FATEC
-
----
-
-## 🚀 Próximas Features
-
-- [ ] Sistema de avaliações de cursos
-- [ ] Certificados digitais automáticos
-- [ ] Relatórios de progresso do aluno
-- [ ] Integração com outras plataformas de pagamento
-- [ ] App mobile (React Native)
-- [ ] Gamificação (badges, rankings)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0A66C2?style=flat&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/lucasvicente-dev)
+[![GitHub](https://img.shields.io/badge/GitHub-181717?style=flat&logo=github&logoColor=white)](https://github.com/gregrymqt)
