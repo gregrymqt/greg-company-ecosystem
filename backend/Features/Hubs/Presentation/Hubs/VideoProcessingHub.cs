@@ -1,6 +1,7 @@
-﻿using Microsoft.AspNetCore.SignalR;
+using Microsoft.AspNetCore.SignalR;
 
-namespace MeuCrudCsharp.Features.Hubs
+using MeuCrudCsharp.Features.Hubs.Infrastructure.State;
+namespace MeuCrudCsharp.Features.Hubs.Presentation.Hubs
 {
     public class VideoProcessingHub(ConnectionMapping<string> mapping) : Hub
     {

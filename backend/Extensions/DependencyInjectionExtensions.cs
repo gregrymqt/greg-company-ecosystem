@@ -1,4 +1,5 @@
-using MeuCrudCsharp.Features.Hubs;
+using MeuCrudCsharp.Features.Hubs.Infrastructure.State;
+using MeuCrudCsharp.Features.Hubs.Presentation.Hubs;
 using MeuCrudCsharp.Features.MercadoPago.Jobs;
 using MeuCrudCsharp.Features.MercadoPago.Jobs.Job;
 using MeuCrudCsharp.Features.MercadoPago.Jobs.Services;

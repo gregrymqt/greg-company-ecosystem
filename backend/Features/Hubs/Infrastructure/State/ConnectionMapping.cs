@@ -1,7 +1,7 @@
 using System.Collections.Concurrent;
 using System.Linq;
 
-namespace MeuCrudCsharp.Features.Hubs
+namespace MeuCrudCsharp.Features.Hubs.Infrastructure.State
 {
     public class ConnectionMapping<T>
         where T : notnull

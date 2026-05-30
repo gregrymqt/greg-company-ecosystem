@@ -1,8 +1,9 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 
-namespace MeuCrudCsharp.Features.Hubs
+using MeuCrudCsharp.Features.Hubs.Infrastructure.State;
+namespace MeuCrudCsharp.Features.Hubs.Presentation.Hubs
 {
     [Authorize]
     public class RefundProcessingHub(ConnectionMapping<string> mapping) : Hub

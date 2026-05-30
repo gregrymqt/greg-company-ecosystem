@@ -3,7 +3,7 @@ using Hangfire;
 using MeuCrudCsharp.Data;
 using MeuCrudCsharp.Documents.Attributes;
 using MeuCrudCsharp.Documents.Interfaces;
-using MeuCrudCsharp.Features.Hubs;
+using MeuCrudCsharp.Features.Hubs.Presentation.Hubs;
 using MeuCrudCsharp.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
