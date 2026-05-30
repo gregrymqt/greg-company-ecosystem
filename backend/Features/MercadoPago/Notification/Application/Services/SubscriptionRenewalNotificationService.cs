@@ -4,7 +4,8 @@ using MeuCrudCsharp.Features.Emails.Application.ViewModels;
 using MeuCrudCsharp.Features.Exceptions;
 using MeuCrudCsharp.Features.MercadoPago.Notification.Application.Interfaces;
 using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Application.Interfaces;
-using MeuCrudCsharp.Features.Shared.Work;
+using MeuCrudCsharp.Features.Shared.Domain.Interfaces;
+using MeuCrudCsharp.Features.Shared.Infrastructure.Persistence;
 using MeuCrudCsharp.Models;
 using Microsoft.Extensions.Options;
 

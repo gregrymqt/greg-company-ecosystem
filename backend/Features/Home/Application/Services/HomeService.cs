@@ -4,7 +4,8 @@ using MeuCrudCsharp.Features.Files.Application.Interfaces;
 using MeuCrudCsharp.Features.Home.Application.DTOs;
 using MeuCrudCsharp.Features.Home.Application.Interfaces;
 using MeuCrudCsharp.Features.Home.Domain.Interfaces;
-using MeuCrudCsharp.Features.Shared.Work;
+using MeuCrudCsharp.Features.Shared.Domain.Interfaces;
+using MeuCrudCsharp.Features.Shared.Infrastructure.Persistence;
 
 namespace MeuCrudCsharp.Features.Home.Application.Services;
 

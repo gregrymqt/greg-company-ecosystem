@@ -1,0 +1,34 @@
+using MeuCrudCsharp.Features.Base;
+using Microsoft.AspNetCore.Antiforgery;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+
+namespace MeuCrudCsharp.Features.Shared.Presentation.Controllers;
+
+[ApiController]
+[Route("api/antiforgery")]
+public class AntiforgeryController : ApiControllerBase
+{
+    private readonly IAntiforgery _antiforgery;
+
+    public AntiforgeryController(IAntiforgery antiforgery)
+    {
+        _antiforgery = antiforgery;
+    }
+
+    [HttpGet("token")]
+    [AllowAnonymous]
+    [IgnoreAntiforgeryToken]
+    public IActionResult GetToken()
+    {
+        var tokens = _antiforgery.GetAndStoreTokens(HttpContext);
+
+        return Ok(
+            new
+            {
+                token = tokens.RequestToken,
+                headerName = tokens.HeaderName,
+            }
+        );
+    }
+}

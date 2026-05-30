@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using MeuCrudCsharp.Features.Courses.Application.DTOs;
 using MeuCrudCsharp.Features.Exceptions;
-using MeuCrudCsharp.Features.Videos.DTOs;
+using MeuCrudCsharp.Features.Videos.Application.DTOs;
 using MeuCrudCsharp.Models;
 
 namespace MeuCrudCsharp.Features.Courses.Application.Interfaces

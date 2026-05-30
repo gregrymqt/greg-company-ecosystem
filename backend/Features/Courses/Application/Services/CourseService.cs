@@ -4,8 +4,9 @@ using MeuCrudCsharp.Features.Courses.Application.Interfaces;
 using MeuCrudCsharp.Features.Courses.Domain.Interfaces;
 using MeuCrudCsharp.Features.Courses.Application.Mappers;
 using MeuCrudCsharp.Features.Exceptions;
-using MeuCrudCsharp.Features.Shared.Work;
-using MeuCrudCsharp.Features.Videos.DTOs;
+using MeuCrudCsharp.Features.Shared.Domain.Interfaces;
+using MeuCrudCsharp.Features.Shared.Infrastructure.Persistence;
+using MeuCrudCsharp.Features.Videos.Application.DTOs;
 using MeuCrudCsharp.Models;
 
 namespace MeuCrudCsharp.Features.Courses.Application.Services

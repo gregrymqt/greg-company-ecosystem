@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using MeuCrudCsharp.Features.Videos.DTOs;
+using MeuCrudCsharp.Features.Videos.Application.DTOs;
 
 namespace MeuCrudCsharp.Features.Courses.Application.DTOs
 {

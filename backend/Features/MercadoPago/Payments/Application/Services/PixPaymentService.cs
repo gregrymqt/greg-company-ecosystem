@@ -14,7 +14,8 @@ using MeuCrudCsharp.Features.MercadoPago.Notification.Application.DTOs;
 using MeuCrudCsharp.Features.MercadoPago.Payments.Application.DTOs;
 using MeuCrudCsharp.Features.MercadoPago.Payments.Application.Interfaces;
 using MeuCrudCsharp.Features.MercadoPago.Utils.Application.Utils;
-using MeuCrudCsharp.Features.Shared.Work;
+using MeuCrudCsharp.Features.Shared.Domain.Interfaces;
+using MeuCrudCsharp.Features.Shared.Infrastructure.Persistence;
 using Microsoft.Extensions.Options;
 
 namespace MeuCrudCsharp.Features.MercadoPago.Payments.Application.Services;
