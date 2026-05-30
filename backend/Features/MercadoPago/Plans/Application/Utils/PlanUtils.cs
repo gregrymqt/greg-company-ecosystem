@@ -1,7 +1,7 @@
-using MeuCrudCsharp.Features.MercadoPago.Plans.DTOs;
+using MeuCrudCsharp.Features.MercadoPago.Plans.Application.DTOs;
 using MeuCrudCsharp.Models;
 
-namespace MeuCrudCsharp.Features.MercadoPago.Plans.Utils
+namespace MeuCrudCsharp.Features.MercadoPago.Plans.Application.Utils
 {
     public static class PlanUtils
     {

@@ -4,12 +4,12 @@ using MeuCrudCsharp.Data;
 using MeuCrudCsharp.Features.Caching.Application.Interfaces;
 using MeuCrudCsharp.Features.Exceptions;
 using MeuCrudCsharp.Features.MercadoPago.Base;
-using MeuCrudCsharp.Features.MercadoPago.Plans.DTOs;
-using MeuCrudCsharp.Features.MercadoPago.Plans.Interfaces;
+using MeuCrudCsharp.Features.MercadoPago.Plans.Application.DTOs;
+using MeuCrudCsharp.Features.MercadoPago.Plans.Application.Interfaces;
 using MeuCrudCsharp.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace MeuCrudCsharp.Features.MercadoPago.Plans.Services;
+namespace MeuCrudCsharp.Features.MercadoPago.Plans.Application.Services;
 
 public class MercadoPagoPlanService : MercadoPagoServiceBase, IMercadoPagoPlanService
 {

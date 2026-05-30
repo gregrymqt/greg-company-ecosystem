@@ -1,10 +1,11 @@
+using MeuCrudCsharp.Features.MercadoPago.Plans.Domain.Interfaces;
 using MeuCrudCsharp.Data;
-using MeuCrudCsharp.Features.MercadoPago.Plans.DTOs;
-using MeuCrudCsharp.Features.MercadoPago.Plans.Interfaces;
+using MeuCrudCsharp.Features.MercadoPago.Plans.Application.DTOs;
+using MeuCrudCsharp.Features.MercadoPago.Plans.Application.Interfaces;
 using MeuCrudCsharp.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace MeuCrudCsharp.Features.MercadoPago.Plans.Repositories;
+namespace MeuCrudCsharp.Features.MercadoPago.Plans.Infrastructure.Persistence.Repositories;
 
 public class PlanRepository(ApiDbContext context) : IPlanRepository
 {

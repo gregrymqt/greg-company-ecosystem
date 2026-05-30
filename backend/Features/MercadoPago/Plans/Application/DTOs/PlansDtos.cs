@@ -1,7 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
-namespace MeuCrudCsharp.Features.MercadoPago.Plans.DTOs;
+namespace MeuCrudCsharp.Features.MercadoPago.Plans.Application.DTOs;
 
 public record AutoRecurringDto(
     [property: JsonPropertyName("frequency")] int Frequency,

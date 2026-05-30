@@ -1,14 +1,15 @@
+using MeuCrudCsharp.Features.MercadoPago.Plans.Domain.Interfaces;
 using MeuCrudCsharp.Features.Caching.Application.Interfaces;
 using MeuCrudCsharp.Features.Exceptions;
-using MeuCrudCsharp.Features.MercadoPago.Plans.DTOs;
-using MeuCrudCsharp.Features.MercadoPago.Plans.Interfaces;
-using MeuCrudCsharp.Features.MercadoPago.Plans.Mappers;
-using MeuCrudCsharp.Features.MercadoPago.Plans.Utils;
+using MeuCrudCsharp.Features.MercadoPago.Plans.Application.DTOs;
+using MeuCrudCsharp.Features.MercadoPago.Plans.Application.Interfaces;
+using MeuCrudCsharp.Features.MercadoPago.Plans.Application.Mappers;
+using MeuCrudCsharp.Features.MercadoPago.Plans.Application.Utils;
 using MeuCrudCsharp.Features.Shared.Work;
 using MeuCrudCsharp.Models;
 using Microsoft.Extensions.Options;
 
-namespace MeuCrudCsharp.Features.MercadoPago.Plans.Services
+namespace MeuCrudCsharp.Features.MercadoPago.Plans.Application.Services
 {
     public class PlanService : IPlanService
     {

@@ -1,9 +1,10 @@
+using MeuCrudCsharp.Features.MercadoPago.Plans.Domain.Interfaces;
 using MeuCrudCsharp.Features.Auth.Domain.Interfaces;
 using MeuCrudCsharp.Features.Auth.Application.Interfaces;
 using MeuCrudCsharp.Features.Emails.Application.Interfaces;
 using MeuCrudCsharp.Features.Emails.Application.ViewModels;
 using MeuCrudCsharp.Features.MercadoPago.Notification.Application.Interfaces;
-using MeuCrudCsharp.Features.MercadoPago.Plans.Interfaces;
+using MeuCrudCsharp.Features.MercadoPago.Plans.Application.Interfaces;
 using MeuCrudCsharp.Features.Shared.Work;
 using Microsoft.Extensions.Options;
 

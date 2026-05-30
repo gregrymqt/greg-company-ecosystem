@@ -1,8 +1,8 @@
-﻿using MeuCrudCsharp.Features.Base;
-using MeuCrudCsharp.Features.MercadoPago.Plans.Interfaces;
+using MeuCrudCsharp.Features.Base;
+using MeuCrudCsharp.Features.MercadoPago.Plans.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
-namespace MeuCrudCsharp.Features.MercadoPago.Plans.Controllers
+namespace MeuCrudCsharp.Features.MercadoPago.Plans.Presentation.Controllers
 {
     [Route("api/public/plans")]
     public class PublicPlansController : MercadoPagoApiControllerBase

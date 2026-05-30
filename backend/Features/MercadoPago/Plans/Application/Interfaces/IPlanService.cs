@@ -1,7 +1,7 @@
-﻿using MeuCrudCsharp.Features.MercadoPago.Plans.DTOs;
+using MeuCrudCsharp.Features.MercadoPago.Plans.Application.DTOs;
 using MeuCrudCsharp.Models;
 
-namespace MeuCrudCsharp.Features.MercadoPago.Plans.Interfaces;
+namespace MeuCrudCsharp.Features.MercadoPago.Plans.Application.Interfaces;
 
 public interface IPlanService
 {

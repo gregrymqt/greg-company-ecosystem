@@ -1,9 +1,9 @@
-Ôªøusing MeuCrudCsharp.Features.Base;
-using MeuCrudCsharp.Features.MercadoPago.Plans.DTOs;
-using MeuCrudCsharp.Features.MercadoPago.Plans.Interfaces;
+using MeuCrudCsharp.Features.Base;
+using MeuCrudCsharp.Features.MercadoPago.Plans.Application.DTOs;
+using MeuCrudCsharp.Features.MercadoPago.Plans.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
-namespace MeuCrudCsharp.Features.MercadoPago.Plans.Controllers;
+namespace MeuCrudCsharp.Features.MercadoPago.Plans.Presentation.Controllers;
 
 [Route("api/admin/plans")]
 public class AdminPlansController : MercadoPagoApiControllerBase
@@ -60,11 +60,11 @@ public class AdminPlansController : MercadoPagoApiControllerBase
             var planEditDto = await _planService.GetPlanEditDtoByIdAsync(guidId);
             if (planEditDto == null)
             {
-                return NotFound(new { message = $"Plano com ID {id} n√£o encontrado." });
+                return NotFound(new { message = $"Plano com ID {id} n„o encontrado." });
             }
             return Ok(planEditDto);
         }
-        return BadRequest(new { message = "ID inv√°lido." });
+        return BadRequest(new { message = "ID inv·lido." });
     }
 
     [HttpPut("{id}")]
@@ -77,7 +77,7 @@ public class AdminPlansController : MercadoPagoApiControllerBase
                 var updatedPlan = await _planService.UpdatePlanAsync(guidId, updateDto);
                 return Ok(updatedPlan);
             }
-            return BadRequest(new { message = "ID inv√°lido." });
+            return BadRequest(new { message = "ID inv·lido." });
         }
         catch (Exception ex)
         {

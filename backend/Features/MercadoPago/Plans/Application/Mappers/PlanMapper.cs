@@ -1,8 +1,8 @@
-using MeuCrudCsharp.Features.MercadoPago.Plans.DTOs;
-using MeuCrudCsharp.Features.MercadoPago.Plans.Utils;
+using MeuCrudCsharp.Features.MercadoPago.Plans.Application.DTOs;
+using MeuCrudCsharp.Features.MercadoPago.Plans.Application.Utils;
 using MeuCrudCsharp.Models;
 
-namespace MeuCrudCsharp.Features.MercadoPago.Plans.Mappers
+namespace MeuCrudCsharp.Features.MercadoPago.Plans.Application.Mappers
 {
     public static class PlanMapper
     {
