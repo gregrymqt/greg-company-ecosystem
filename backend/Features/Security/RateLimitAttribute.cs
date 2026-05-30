@@ -1,5 +1,5 @@
 using System;
-using MeuCrudCsharp.Features.Caching.Interfaces;
+using MeuCrudCsharp.Features.Caching.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 

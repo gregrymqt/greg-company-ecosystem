@@ -1,13 +1,14 @@
 namespace MeuCrudCsharp.Features.MercadoPago.Subscriptions.Services;
 
-using Auth.Interfaces;
-using Caching.Interfaces;
-using Exceptions;
-using MercadoPago.Subscriptions.DTOs;
-using MercadoPago.Subscriptions.Interfaces;
-using Models.Enums;
-using Shared.Work;
-
+using Microsoft.Extensions.Logging;
+using MeuCrudCsharp.Features.Auth.Application.Interfaces;
+using MeuCrudCsharp.Features.Auth.Domain.Interfaces;
+using MeuCrudCsharp.Features.Caching.Application.Interfaces;
+using MeuCrudCsharp.Features.Exceptions;
+using MeuCrudCsharp.Features.MercadoPago.Subscriptions.DTOs;
+using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Interfaces;
+using MeuCrudCsharp.Models.Enums;
+using MeuCrudCsharp.Features.Shared.Work;
 public class UserSubscriptionService : IUserSubscriptionService
 {
     private readonly IUserContext _userContext;

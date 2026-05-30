@@ -14,7 +14,7 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="2.5.3" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\system-app\backend\MeuCrudCsharp.csproj" />
+    <ProjectReference Include="..\backend\MeuCrudCsharp.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Using Include="Xunit" />

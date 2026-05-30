@@ -1,7 +1,8 @@
-Ôªøusing MercadoPago.Client;
+using MercadoPago.Client;
 using MercadoPago.Client.Preference;
 using Microsoft.Extensions.Options;
-using MeuCrudCsharp.Features.Auth.Interfaces;
+using MeuCrudCsharp.Features.Auth.Domain.Interfaces;
+using MeuCrudCsharp.Features.Auth.Application.Interfaces;
 using MeuCrudCsharp.Features.Exceptions;
 using MeuCrudCsharp.Features.MercadoPago.Payments.Dtos;
 using MeuCrudCsharp.Features.MercadoPago.Payments.Interfaces;
@@ -28,7 +29,7 @@ public class PreferencePaymentService(
         var user = await userRepository.GetByIdAsync(userId);
         
         if (userId == null)
-            throw new UnauthorizedAccessException("Usu√°rio n√£o encontrado.");
+            throw new UnauthorizedAccessException("Usu·rio n„o encontrado.");
 
         if (model.Amount <= 0)
             throw new ArgumentException("O valor deve ser maior que zero.");
@@ -92,7 +93,7 @@ public class PreferencePaymentService(
             await unitOfWork.CommitAsync();
 
             logger.LogInformation(
-                "Prefer√™ncia criada com sucesso: {PrefId} | ExternalRef: {Ref} | UserId: {UserId}",
+                "PreferÍncia criada com sucesso: {PrefId} | ExternalRef: {Ref} | UserId: {UserId}",
                 preference.Id,
                 externalReference,
                 userId
@@ -104,7 +105,7 @@ public class PreferencePaymentService(
         {
             logger.LogError(
                 ex,
-                "Erro ao criar prefer√™ncia de pagamento para o usu√°rio {UserId}.",
+                "Erro ao criar preferÍncia de pagamento para o usu·rio {UserId}.",
                 userId
             );
 

@@ -1,10 +1,11 @@
-Ôªøusing MercadoPago.Client;
+using MercadoPago.Client;
 using MercadoPago.Client.Common;
 using MercadoPago.Client.Payment;
 using MercadoPago.Error;
-using MeuCrudCsharp.Features.Auth.Interfaces;
-using MeuCrudCsharp.Features.Caching.Interfaces;
-using MeuCrudCsharp.Features.Caching.Record;
+using MeuCrudCsharp.Features.Auth.Domain.Interfaces;
+using MeuCrudCsharp.Features.Auth.Application.Interfaces;
+using MeuCrudCsharp.Features.Caching.Application.Interfaces;
+using MeuCrudCsharp.Features.Caching.Application.DTOs;
 using MeuCrudCsharp.Features.Exceptions;
 using MeuCrudCsharp.Features.MercadoPago.Clients.DTOs;
 using MeuCrudCsharp.Features.MercadoPago.Clients.Interfaces;
@@ -67,7 +68,7 @@ namespace MeuCrudCsharp.Features.MercadoPago.Payments.Services
             if (request == null)
                 throw new ArgumentNullException(
                     nameof(request),
-                    "Os dados do pagamento n√£o podem ser nulos."
+                    "Os dados do pagamento n„o podem ser nulos."
                 );
 
             var cacheKey = $"{IDEMPOTENCY_PREFIX}_idempotency_{idempotencyKey}";
@@ -134,7 +135,7 @@ namespace MeuCrudCsharp.Features.MercadoPago.Payments.Services
                 || paymentData.Payer.Identification?.Number is null
             )
             {
-                throw new ArgumentException("Dados do pagador (email, CPF) s√£o obrigat√≥rios.");
+                throw new ArgumentException("Dados do pagador (email, CPF) s„o obrigatÛrios.");
             }
 
             try
@@ -142,7 +143,7 @@ namespace MeuCrudCsharp.Features.MercadoPago.Payments.Services
                 if (string.IsNullOrEmpty(user.CustomerId))
                 {
                     _logger.LogInformation(
-                        "Usu√°rio {UserId} n√£o possui CustomerId. Criando novo cliente e cart√£o.",
+                        "Usu·rio {UserId} n„o possui CustomerId. Criando novo cliente e cart„o.",
                         userId
                     );
                     var customerWithCard = await _clientService.CreateCustomerWithCardAsync(
@@ -156,7 +157,7 @@ namespace MeuCrudCsharp.Features.MercadoPago.Payments.Services
                 else
                 {
                     _logger.LogInformation(
-                        "Usu√°rio {UserId} j√° possui CustomerId. Adicionando novo cart√£o.",
+                        "Usu·rio {UserId} j· possui CustomerId. Adicionando novo cart„o.",
                         userId
                     );
                     await _clientService.AddCardToCustomerAsync(user.CustomerId, paymentData.Token);
@@ -280,7 +281,7 @@ namespace MeuCrudCsharp.Features.MercadoPago.Payments.Services
             {
                 _logger.LogError(
                     ex,
-                    "Falha ao processar pagamento via MP para o usu√°rio {UserId}.",
+                    "Falha ao processar pagamento via MP para o usu·rio {UserId}.",
                     userId
                 );
 
@@ -310,7 +311,7 @@ namespace MeuCrudCsharp.Features.MercadoPago.Payments.Services
             var userId = await _userContext.GetCurrentUserId();
             var user = await _userRepository.GetByIdAsync(userId);
             if (user == null)
-                throw new AppServiceException("Usu√°rio n√£o encontrado.");
+                throw new AppServiceException("Usu·rio n„o encontrado.");
 
             await _notificationHub.SendStatusUpdateAsync(
                 userId,
@@ -324,7 +325,7 @@ namespace MeuCrudCsharp.Features.MercadoPago.Payments.Services
                 if (string.IsNullOrEmpty(user.CustomerId))
                 {
                     _logger.LogInformation(
-                        "Usu√°rio {UserId} n√£o possui CustomerId. Criando novo cliente e cart√£o.",
+                        "Usu·rio {UserId} n„o possui CustomerId. Criando novo cliente e cart„o.",
                         userId
                     );
                     customerWithCard = await _clientService.CreateCustomerWithCardAsync(
@@ -333,12 +334,12 @@ namespace MeuCrudCsharp.Features.MercadoPago.Payments.Services
                         subscriptionData.Token
                     );
                     user.CustomerId = customerWithCard.CustomerId;
-                    _userRepository.Update(user); // Marca para atualiza√ß√£o
+                    _userRepository.Update(user); // Marca para atualizaÁ„o
                 }
                 else
                 {
                     _logger.LogInformation(
-                        "Usu√°rio {UserId} j√° possui CustomerId. Adicionando novo cart√£o.",
+                        "Usu·rio {UserId} j· possui CustomerId. Adicionando novo cart„o.",
                         userId
                     );
                     var card = await _clientService.AddCardToCustomerAsync(
@@ -374,7 +375,7 @@ namespace MeuCrudCsharp.Features.MercadoPago.Payments.Services
                 await _unitOfWork.CommitAsync();
 
                 _logger.LogInformation(
-                    "Fluxo de cria√ß√£o de assinatura conclu√≠do para o usu√°rio {UserId}. ID da Assinatura: {SubscriptionId}",
+                    "Fluxo de criaÁ„o de assinatura concluÌdo para o usu·rio {UserId}. ID da Assinatura: {SubscriptionId}",
                     userId,
                     createdSubscription.Id
                 );
@@ -400,7 +401,7 @@ namespace MeuCrudCsharp.Features.MercadoPago.Payments.Services
             {
                 _logger.LogError(
                     ex,
-                    "Erro inesperado no fluxo de cria√ß√£o de assinatura para o usu√°rio {UserId}.",
+                    "Erro inesperado no fluxo de criaÁ„o de assinatura para o usu·rio {UserId}.",
                     userId
                 );
 

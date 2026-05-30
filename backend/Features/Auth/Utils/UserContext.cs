@@ -1,5 +1,6 @@
 using System.Security.Claims;
-using MeuCrudCsharp.Features.Auth.Interfaces;
+using MeuCrudCsharp.Features.Auth.Domain.Interfaces;
+using MeuCrudCsharp.Features.Auth.Application.Interfaces;
 
 namespace MeuCrudCsharp.Features.Auth.Utils;
 

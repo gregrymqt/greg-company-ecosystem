@@ -1,0 +1,143 @@
+using System;
+using System.Threading.Tasks;
+using MeuCrudCsharp.Features.Base;
+using MeuCrudCsharp.Features.Courses.Application.DTOs;
+using MeuCrudCsharp.Features.Courses.Application.Interfaces;
+using MeuCrudCsharp.Features.Exceptions;
+using MeuCrudCsharp.Features.Videos.DTOs;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+
+namespace MeuCrudCsharp.Features.Courses.Presentation.Controllers
+{
+    [Authorize(Roles = "Admin")]
+    [Route("api/admin/courses")]
+    public class CoursesAdminController(ICourseService courseService) : ApiControllerBase
+    {
+        [HttpGet]
+        public async Task<IActionResult> GetCoursesPaginated(
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 10
+        )
+        {
+            try
+            {
+                var paginatedResult = await courseService.GetCoursesWithVideosPaginatedAsync(
+                    pageNumber,
+                    pageSize
+                );
+                return Ok(paginatedResult);
+            }
+            catch (Exception ex)
+            {
+                return HandleException(ex, "Erro ao buscar cursos.");
+            }
+        }
+
+        [HttpGet("{id:guid}")]
+        public async Task<IActionResult> GetCoursesByPublicId(Guid id)
+        {
+            if (id == Guid.Empty)
+            {
+                return BadRequest(new { message = "O ID não pode ser vazio." });
+            }
+
+            var course = await courseService.FindCourseByPublicIdOrFailAsync(id);
+
+            var courseDto = new CourseDto
+            {
+                PublicId = course.PublicId,
+                Name = course.Name,
+                Description = course.Description,
+                Videos =
+                    course
+                        .Videos?.Select(v => new VideoDto
+                        {
+                            Id = v.PublicId,
+                            Title = v.Title,
+                        })
+                        .ToList() ?? [],
+            };
+
+            return Ok(courseDto);
+        }
+
+        [HttpGet("search")]
+        public async Task<ActionResult<IEnumerable<CourseDto>>> SearchCoursesByNameAsync(
+            [FromQuery] string name
+        )
+        {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                return Ok(Enumerable.Empty<CourseDto>());
+            }
+
+            var courses = await courseService.SearchCoursesByNameAsync(name);
+            return Ok(courses);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateCourse([FromBody] CreateUpdateCourseDto createDto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            try
+            {
+                var newCourse = await courseService.CreateCourseAsync(createDto);
+                return CreatedAtAction(
+                    nameof(GetCoursesByPublicId),
+                    new { id = newCourse.PublicId },
+                    newCourse
+                );
+            }
+            catch (Exception ex)
+            {
+                return HandleException(ex, "Erro ao criar curso.");
+            }
+        }
+
+        [HttpPut("{id:guid}")]
+        public async Task<IActionResult> UpdateCourse(
+            Guid id,
+            [FromBody] CreateUpdateCourseDto updateDto
+        )
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            try
+            {
+                var updatedCourse = await courseService.UpdateCourseAsync(id, updateDto);
+                return Ok(updatedCourse);
+            }
+            catch (Exception ex)
+            {
+                return HandleException(ex, "Erro ao atualizar curso.");
+            }
+        }
+
+        [HttpDelete("{id:guid}")]
+        public async Task<IActionResult> DeleteCourse(Guid id)
+        {
+            try
+            {
+                await courseService.DeleteCourseAsync(id);
+                return NoContent();
+            }
+            catch (ResourceNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (AppServiceException ex)
+            {
+                return Conflict(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return HandleException(ex, "Erro ao deletar curso.");
+            }
+        }
+    }
+}

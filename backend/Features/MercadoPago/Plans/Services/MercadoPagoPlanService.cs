@@ -1,7 +1,7 @@
 using System.Text;
 using System.Text.Json;
 using MeuCrudCsharp.Data;
-using MeuCrudCsharp.Features.Caching.Interfaces;
+using MeuCrudCsharp.Features.Caching.Application.Interfaces;
 using MeuCrudCsharp.Features.Exceptions;
 using MeuCrudCsharp.Features.MercadoPago.Base;
 using MeuCrudCsharp.Features.MercadoPago.Plans.DTOs;

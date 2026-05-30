@@ -1,5 +1,5 @@
-ï»¿using MeuCrudCsharp.Features.Base;
-using MeuCrudCsharp.Features.Caching.Interfaces;
+using MeuCrudCsharp.Features.Base;
+using MeuCrudCsharp.Features.Caching.Application.Interfaces;
 using MeuCrudCsharp.Features.MercadoPago.Payments.Dtos;
 using MeuCrudCsharp.Features.MercadoPago.Payments.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -28,7 +28,7 @@ namespace MeuCrudCsharp.Features.MercadoPago.Payments.Controllers
 
             if (!Request.Headers.TryGetValue("X-Idempotency-Key", out var idempotencyKey))
             {
-                return BadRequest(new { message = "O header 'X-Idempotency-Key' Ã© obrigatÃ³rio." });
+                return BadRequest(new { message = "O header 'X-Idempotency-Key' é obrigatório." });
             }
 
             var response = await _creditCardPaymentService.CreatePaymentOrSubscriptionAsync(

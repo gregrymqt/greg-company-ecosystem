@@ -1,4 +1,5 @@
-using MeuCrudCsharp.Features.Auth.Interfaces;
+using MeuCrudCsharp.Features.Auth.Domain.Interfaces;
+using MeuCrudCsharp.Features.Auth.Application.Interfaces;
 using MeuCrudCsharp.Features.MercadoPago.Claims.Interfaces;
 using MeuCrudCsharp.Models;
 using static MeuCrudCsharp.Features.MercadoPago.Claims.ViewModels.MercadoPagoClaimsViewModels;

@@ -86,7 +86,7 @@ obj/Debug/net8.0/
  Tests.GlobalUsings.g.cs
 
 [metadataReferences]
-../system-app/backend/obj/Debug/net8.0/ref/MeuCrudCsharp.dll
+../backend/obj/Debug/net8.0/ref/MeuCrudCsharp.dll
 <DOTNET>/packs/Microsoft.AspNetCore.App.Ref/8.0.25/ref/net8.0/
  Microsoft.AspNetCore.Antiforgery.dll
  Microsoft.AspNetCore.Authentication.Abstractions.dll

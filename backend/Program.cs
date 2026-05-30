@@ -1,5 +1,6 @@
 using DotNetEnv;
 using MeuCrudCsharp.Extensions;
+using MeuCrudCsharp.Extensions.Mcp; // Adicionado para expor o MCP
 using Serilog;
 
 Log.Logger = new LoggerConfiguration()
@@ -25,6 +26,9 @@ try
     builder.Host.UseSerilog();
 
     builder.AddCoreServices().AddApplicationServices().AddPersistence().AddWebServices().AddAuth();
+
+    // REGISTRO OBRIGATÓRIO DO MCP NO CONTAINER DE INJEÇÃO
+    builder.Services.AddMcpContextServer(builder.Configuration);
 
     var app = builder.Build();
 

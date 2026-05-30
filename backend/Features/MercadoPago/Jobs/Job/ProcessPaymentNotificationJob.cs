@@ -1,5 +1,5 @@
-Ôªøusing Hangfire;
-using MeuCrudCsharp.Features.Caching.Interfaces;
+using Hangfire;
+using MeuCrudCsharp.Features.Caching.Application.Interfaces;
 using MeuCrudCsharp.Features.MercadoPago.Jobs.Interfaces;
 using MeuCrudCsharp.Features.MercadoPago.Notification.Interfaces;
 using MeuCrudCsharp.Features.MercadoPago.Webhooks.DTOs;
@@ -18,7 +18,7 @@ public class ProcessPaymentNotificationJob(
         if (resource == null || string.IsNullOrEmpty(resource.Id))
         {
             logger.LogError(
-                "Job de notifica√ß√£o de pagamento recebido com um PaymentId nulo ou vazio. O job ser√° descartado."
+                "Job de notificaÁ„o de pagamento recebido com um PaymentId nulo ou vazio. O job ser· descartado."
             );
             return;
         }
@@ -33,7 +33,7 @@ public class ProcessPaymentNotificationJob(
             await notificationPayment.VerifyAndProcessNotificationAsync(resource.Id);
 
             logger.LogInformation(
-                "Processamento do Payment ID: {PaymentId} conclu√≠do com sucesso.",
+                "Processamento do Payment ID: {PaymentId} concluÌdo com sucesso.",
                 resource.Id
             );
 
@@ -45,7 +45,7 @@ public class ProcessPaymentNotificationJob(
         {
             logger.LogError(
                 ex,
-                "Erro ao processar notifica√ß√£o para o Payment ID: {PaymentId}.",
+                "Erro ao processar notificaÁ„o para o Payment ID: {PaymentId}.",
                 resource.Id
             );
             throw;

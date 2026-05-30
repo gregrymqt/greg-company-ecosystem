@@ -1,5 +1,5 @@
 using System.Net;
-using MeuCrudCsharp.Features.Caching.Interfaces;
+using MeuCrudCsharp.Features.Caching.Application.Interfaces;
 
 namespace MeuCrudCsharp.Features.Auth.Middlewares
 {

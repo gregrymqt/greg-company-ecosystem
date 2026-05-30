@@ -1,4 +1,4 @@
-Ôªøusing MeuCrudCsharp.Features.Caching.Interfaces;
+using MeuCrudCsharp.Features.Caching.Application.Interfaces;
 using MeuCrudCsharp.Features.Exceptions;
 using MeuCrudCsharp.Features.Profiles.Admin.Dtos;
 using MeuCrudCsharp.Features.Profiles.Admin.Interfaces;
@@ -74,7 +74,7 @@ namespace MeuCrudCsharp.Features.Profiles.Admin.Services
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError(ex, "Falha ao buscar os alunos no reposit√≥rio.");
+                        _logger.LogError(ex, "Falha ao buscar os alunos no repositÛrio.");
                         throw new AppServiceException(
                             "An error occurred while querying student data.",
                             ex
@@ -95,8 +95,8 @@ namespace MeuCrudCsharp.Features.Profiles.Admin.Services
 
                 if (user == null)
                 {
-                    _logger.LogWarning("Tentativa de buscar aluno com ID {Guid} n√£o encontrado.", id);
-                    throw new KeyNotFoundException($"Aluno com ID {id} n√£o encontrado.");
+                    _logger.LogWarning("Tentativa de buscar aluno com ID {Guid} n„o encontrado.", id);
+                    throw new KeyNotFoundException($"Aluno com ID {id} n„o encontrado.");
                 }
 
                 var studentDto = new StudentDto(
@@ -113,7 +113,7 @@ namespace MeuCrudCsharp.Features.Profiles.Admin.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Falha ao buscar o aluno no reposit√≥rio.");
+                _logger.LogError(ex, "Falha ao buscar o aluno no repositÛrio.");
                 throw new AppServiceException("An error occurred while querying student data.", ex);
             }
         }

@@ -1,4 +1,4 @@
-using MeuCrudCsharp.Features.Caching.Record;
+using MeuCrudCsharp.Features.Caching.Application.DTOs;
 using MeuCrudCsharp.Features.MercadoPago.Payments.Dtos;
 
 namespace MeuCrudCsharp.Features.MercadoPago.Payments.Interfaces;

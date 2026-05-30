@@ -1,4 +1,5 @@
-Ôªøusing MeuCrudCsharp.Features.Auth.Interfaces;
+using MeuCrudCsharp.Features.Auth.Domain.Interfaces;
+using MeuCrudCsharp.Features.Auth.Application.Interfaces;
 using MeuCrudCsharp.Features.Files.Interfaces;
 using MeuCrudCsharp.Features.Profiles.UserAccount.DTOs;
 using MeuCrudCsharp.Features.Profiles.UserAccount.Interfaces;
@@ -35,11 +36,11 @@ public class UserAccountService : IUserAccountService
     {
         var userId = _userContext.GetCurrentUserId().ToString();
         if (string.IsNullOrEmpty(userId))
-            throw new UnauthorizedAccessException("Usu√°rio n√£o identificado.");
+            throw new UnauthorizedAccessException("Usu·rio n„o identificado.");
 
         var user = await _repository.GetUserByIdAsync(userId);
         if (user == null)
-            throw new Exception("Usu√°rio n√£o encontrado.");
+            throw new Exception("Usu·rio n„o encontrado.");
 
         string urlFinal;
         int novoIdArquivo;
@@ -64,7 +65,7 @@ public class UserAccountService : IUserAccountService
 
         await _unitOfWork.CommitAsync();
 
-        _logger.LogInformation("Avatar atualizado para o usu√°rio {UserId}", userId);
+        _logger.LogInformation("Avatar atualizado para o usu·rio {UserId}", userId);
 
         return new AvatarUpdateResponse
         {

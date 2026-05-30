@@ -1,5 +1,6 @@
-Ôªøusing MeuCrudCsharp.Features.Auth.Interfaces;
-using MeuCrudCsharp.Features.Caching.Interfaces;
+using MeuCrudCsharp.Features.Auth.Domain.Interfaces;
+using MeuCrudCsharp.Features.Auth.Application.Interfaces;
+using MeuCrudCsharp.Features.Caching.Application.Interfaces;
 using MeuCrudCsharp.Features.Exceptions;
 using MeuCrudCsharp.Features.MercadoPago.Clients.DTOs;
 using MeuCrudCsharp.Features.MercadoPago.Clients.Interfaces;
@@ -23,7 +24,7 @@ public class ClientService(
     {
         var user = await userRepository.GetByIdAsync(userId);
         if (user == null)
-            throw new ResourceNotFoundException("Usu√°rio n√£o encontrado.");
+            throw new ResourceNotFoundException("Usu·rio n„o encontrado.");
 
         if (string.IsNullOrEmpty(user.CustomerId))
             return [];
@@ -49,18 +50,18 @@ public class ClientService(
     public async Task<WalletCardDto> AddCardToWalletAsync(string userId, string cardToken)
     {
         if (string.IsNullOrWhiteSpace(cardToken))
-            throw new ArgumentException("Token do cart√£o n√£o pode ser vazio.", nameof(cardToken));
+            throw new ArgumentException("Token do cart„o n„o pode ser vazio.", nameof(cardToken));
 
         var user = await userRepository.GetByIdAsync(userId);
         if (user == null)
-            throw new ResourceNotFoundException("Usu√°rio n√£o encontrado.");
+            throw new ResourceNotFoundException("Usu·rio n„o encontrado.");
 
         try
         {
             CardInCustomerResponseDto resultCard;
             if (string.IsNullOrEmpty(user.CustomerId))
             {
-                logger.LogInformation("Usu√°rio {UserId} n√£o tem CustomerId. Criando Customer no MP.", userId);
+                logger.LogInformation("Usu·rio {UserId} n„o tem CustomerId. Criando Customer no MP.", userId);
 
                 var newCustomer = await mpService.CreateCustomerAsync(user.Email!, user.Name!);
 
@@ -71,14 +72,14 @@ public class ClientService(
 
                 await unitOfWork.CommitAsync();
 
-                logger.LogInformation("Customer {CustomerId} criado e cart√£o adicionado para usu√°rio {UserId}.", 
+                logger.LogInformation("Customer {CustomerId} criado e cart„o adicionado para usu·rio {UserId}.", 
                     newCustomer.Id, userId);
             }
             else
             {
                 resultCard = await AddCardToCustomerAsync(user.CustomerId, cardToken);
                 
-                logger.LogInformation("Cart√£o adicionado ao Customer {CustomerId}.", user.CustomerId);
+                logger.LogInformation("Cart„o adicionado ao Customer {CustomerId}.", user.CustomerId);
             }
 
             return new WalletCardDto
@@ -93,7 +94,7 @@ public class ClientService(
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Erro ao adicionar cart√£o para usu√°rio {UserId}", userId);
+            logger.LogError(ex, "Erro ao adicionar cart„o para usu·rio {UserId}", userId);
             throw;
         }
     }
@@ -123,19 +124,19 @@ public class ClientService(
     {
         var user = await userRepository.GetByIdAsync(userId);
         if (user == null || string.IsNullOrEmpty(user.CustomerId))
-            throw new ResourceNotFoundException("Carteira n√£o encontrada.");
+            throw new ResourceNotFoundException("Carteira n„o encontrada.");
 
         var activeSubscription = await subscriptionRepository.GetActiveSubscriptionByUserIdAsync(userId);
         if (activeSubscription != null && activeSubscription.CardTokenId == cardId)
         {
             throw new InvalidOperationException(
-                "Este cart√£o est√° vinculado √† sua assinatura ativa e n√£o pode ser removido."
+                "Este cart„o est· vinculado ‡ sua assinatura ativa e n„o pode ser removido."
             );
         }
 
         await DeleteCardFromCustomerAsync(user.CustomerId, cardId);
         
-        logger.LogInformation("Cart√£o {CardId} removido da carteira do usu√°rio {UserId}.", cardId, userId);
+        logger.LogInformation("Cart„o {CardId} removido da carteira do usu·rio {UserId}.", cardId, userId);
     }
 
     public async Task<CardInCustomerResponseDto> AddCardToCustomerAsync(
