@@ -1,6 +1,7 @@
 using MeuCrudCsharp.Features.Emails.Application.Interfaces;
 using MeuCrudCsharp.Features.Emails.Application.ViewModels;
-using MeuCrudCsharp.Features.MercadoPago.Chargebacks.Interfaces;
+using MeuCrudCsharp.Features.MercadoPago.Chargebacks.Application.Interfaces;
+using MeuCrudCsharp.Features.MercadoPago.Chargebacks.Domain.Interfaces;
 using MeuCrudCsharp.Features.MercadoPago.Notification.Interfaces;
 using MeuCrudCsharp.Features.MercadoPago.Payments.Interfaces;
 using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Interfaces;
