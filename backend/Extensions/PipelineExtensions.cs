@@ -5,6 +5,7 @@ using MeuCrudCsharp.Documents.Attributes;
 using MeuCrudCsharp.Documents.Interfaces;
 using MeuCrudCsharp.Features.Hubs.Presentation.Hubs;
 using MeuCrudCsharp.Models;
+using MeuCrudCsharp.Features.Auth.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using MongoDB.Bson;

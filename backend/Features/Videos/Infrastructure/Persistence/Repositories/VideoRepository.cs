@@ -1,7 +1,8 @@
-using MeuCrudCsharp.Features.Videos.Domain.Interfaces;
+﻿using MeuCrudCsharp.Features.Videos.Domain.Interfaces;
 using MeuCrudCsharp.Data;
 using MeuCrudCsharp.Features.Videos.Application.Interfaces;
 using MeuCrudCsharp.Models;
+using MeuCrudCsharp.Features.Videos.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace MeuCrudCsharp.Features.Videos.Infrastructure.Persistence.Repositories
@@ -18,7 +19,7 @@ namespace MeuCrudCsharp.Features.Videos.Infrastructure.Persistence.Repositories
         public async Task<Video> GetByIdAsync(int id)
         {
             return await _context.Videos.Include(v => v.File).FirstOrDefaultAsync(v => v.Id == id) ??
-                   throw new InvalidOperationException("Vídeo não encontrado.");
+                   throw new InvalidOperationException("VÃ­deo nÃ£o encontrado.");
         }
 
         public async Task<Video> GetByStorageIdentifierAsync(string storageId)
@@ -26,7 +27,7 @@ namespace MeuCrudCsharp.Features.Videos.Infrastructure.Persistence.Repositories
             return await _context
                 .Videos.Include(v => v.File)
                 .FirstOrDefaultAsync(v => v.StorageIdentifier == storageId) ?? 
-                throw new InvalidOperationException("Vídeo não encontrado.");
+                throw new InvalidOperationException("VÃ­deo nÃ£o encontrado.");
         }
 
         public async Task AddAsync(Video video)
@@ -73,7 +74,7 @@ namespace MeuCrudCsharp.Features.Videos.Infrastructure.Persistence.Repositories
             return await _context
                 .Videos.Include(v => v.File)
                 .FirstOrDefaultAsync(v => v.PublicId == publicId) ?? 
-                throw new InvalidOperationException("Vídeo não encontrado.");
+                throw new InvalidOperationException("VÃ­deo nÃ£o encontrado.");
         }
 
         public async Task DeleteAsync(Video video)

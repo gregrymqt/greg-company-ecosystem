@@ -8,6 +8,7 @@ using MeuCrudCsharp.Features.Emails.Application.Interfaces;
 using MeuCrudCsharp.Features.MercadoPago.Notification.Application.Interfaces;
 using MeuCrudCsharp.Features.Emails.Application.ViewModels;
 using MeuCrudCsharp.Models;
+using MeuCrudCsharp.Features.Auth.Domain.Entities;
 using MeuCrudCsharp.Models.Enums;
 using MeuCrudCsharp.Features.Shared.Domain.Interfaces;
 using MeuCrudCsharp.Features.Shared.Infrastructure.Persistence;

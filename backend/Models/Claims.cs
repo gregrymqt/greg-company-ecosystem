@@ -1,6 +1,6 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using MeuCrudCsharp.Models.Enums; // Certifique-se de usar o namespace onde criou os Enums acima
+using MeuCrudCsharp.Models.Enums; using MeuCrudCsharp.Features.Auth.Domain.Entities; // Certifique-se de usar o namespace onde criou os Enums acima
 
 namespace MeuCrudCsharp.Models
 {
@@ -10,7 +10,7 @@ namespace MeuCrudCsharp.Models
         [Display(Name = "Novo")]
         Novo,
 
-        [Display(Name = "Em Análise")]
+        [Display(Name = "Em AnÃ¡lise")]
         EmAnalise,
 
         [Display(Name = "Respondido pelo Vendedor")]
@@ -28,12 +28,12 @@ namespace MeuCrudCsharp.Models
         [Key]
         public int Id { get; set; } // ID Interno do Banco [cite: 19]
 
-        // Este é o ID real que o MP usa (ex: 5012391221)
+        // Este Ã© o ID real que o MP usa (ex: 5012391221)
         [Required]
-        public long MpClaimId { get; set; } // Mudei para long pois geralmente é numérico, mas string também funciona [cite: 20]
+        public long MpClaimId { get; set; } // Mudei para long pois geralmente Ã© numÃ©rico, mas string tambÃ©m funciona [cite: 20]
 
         // ID do pagamento vinculado (Resource ID)
-        // CORREÇÃO: De 'ResorceId' para 'ResourceId'
+        // CORREÃ‡ÃƒO: De 'ResorceId' para 'ResourceId'
         public string? ResourceId { get; set; }
 
         // Agora usando o Enum forte em vez de string

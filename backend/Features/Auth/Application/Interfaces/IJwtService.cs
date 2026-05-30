@@ -1,7 +1,7 @@
-namespace MeuCrudCsharp.Features.Auth.Application.Interfaces;
+﻿namespace MeuCrudCsharp.Features.Auth.Application.Interfaces;
 
 using System.Threading.Tasks;
-using MeuCrudCsharp.Models; // Substitua pelo seu namespace de Models
+using MeuCrudCsharp.Models; using MeuCrudCsharp.Features.Auth.Domain.Entities; // Substitua pelo seu namespace de Models
 
 public interface IJwtService
 {

@@ -2,6 +2,7 @@ using MeuCrudCsharp.Features.Profiles.Admin.Domain.Interfaces;
 using MeuCrudCsharp.Data;
 using MeuCrudCsharp.Features.Profiles.Admin.Application.Interfaces;
 using MeuCrudCsharp.Models;
+using MeuCrudCsharp.Features.Auth.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace MeuCrudCsharp.Features.Profiles.Admin.Infrastructure.Persistence.Repositories

@@ -1,4 +1,10 @@
-﻿using MeuCrudCsharp.Models;
+using MeuCrudCsharp.Models;
+using MeuCrudCsharp.Features.About.Domain.Entities;
+using MeuCrudCsharp.Features.Auth.Domain.Entities;
+using MeuCrudCsharp.Features.Courses.Domain.Entities;
+using MeuCrudCsharp.Features.Files.Domain.Entities;
+using MeuCrudCsharp.Features.Home.Domain.Entities;
+using MeuCrudCsharp.Features.Videos.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -27,6 +33,8 @@ namespace MeuCrudCsharp.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+            
+            modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApiDbContext).Assembly);
 
             modelBuilder
                 .Entity<Payments>()

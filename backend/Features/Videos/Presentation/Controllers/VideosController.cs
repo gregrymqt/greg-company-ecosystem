@@ -1,6 +1,7 @@
-using MeuCrudCsharp.Data;
+Ôªøusing MeuCrudCsharp.Data;
 using MeuCrudCsharp.Features.Base;
 using MeuCrudCsharp.Models;
+using MeuCrudCsharp.Features.Videos.Domain.Entities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -53,8 +54,8 @@ namespace MeuCrudCsharp.Features.Videos.Presentation.Controllers
 
             if (!System.IO.File.Exists(manifestPath))
             {
-                _logger.LogError($"Manifest n„o encontrado em: {manifestPath}");
-                return StatusCode(500, "Erro de processamento: Manifest n„o encontrado.");
+                _logger.LogError($"Manifest n√£o encontrado em: {manifestPath}");
+                return StatusCode(500, "Erro de processamento: Manifest n√£o encontrado.");
             }
 
             return PhysicalFile(manifestPath, "application/vnd.apple.mpegurl");

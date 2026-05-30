@@ -2,6 +2,7 @@ using Hangfire;
 using Hangfire.Redis.StackExchange;
 using MeuCrudCsharp.Data;
 using MeuCrudCsharp.Models;
+using MeuCrudCsharp.Features.Auth.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using MongoDB.Driver;

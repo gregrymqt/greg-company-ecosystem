@@ -11,6 +11,7 @@ using MeuCrudCsharp.Features.MercadoPago.Webhooks.Application.DTOs;
 using MeuCrudCsharp.Features.Shared.Domain.Interfaces;
 using MeuCrudCsharp.Features.Shared.Infrastructure.Persistence;
 using MeuCrudCsharp.Models;
+using MeuCrudCsharp.Features.Auth.Domain.Entities;
 using Microsoft.Extensions.Options;
 
 namespace MeuCrudCsharp.Features.MercadoPago.Notification.Application.Services;

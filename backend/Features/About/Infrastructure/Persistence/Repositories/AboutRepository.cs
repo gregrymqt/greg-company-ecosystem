@@ -1,7 +1,7 @@
 using System;
 using MeuCrudCsharp.Data;
 using MeuCrudCsharp.Features.About.Domain.Interfaces;
-using MeuCrudCsharp.Models;
+using MeuCrudCsharp.Features.About.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace MeuCrudCsharp.Features.About.Infrastructure.Persistence.Repositories;

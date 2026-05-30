@@ -1,6 +1,7 @@
 using MeuCrudCsharp.Data;
 using MeuCrudCsharp.Features.Courses.Domain.Interfaces;
 using MeuCrudCsharp.Models;
+using MeuCrudCsharp.Features.Courses.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace MeuCrudCsharp.Features.Courses.Infrastructure.Persistence.Repositories

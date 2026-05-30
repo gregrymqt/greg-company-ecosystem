@@ -1,8 +1,9 @@
-using System;
+﻿using System;
 using System.Threading.Tasks;
 using MeuCrudCsharp.Features.Exceptions;
 using MeuCrudCsharp.Features.Videos.Application.DTOs;
 using MeuCrudCsharp.Models;
+using MeuCrudCsharp.Features.Videos.Domain.Entities;
 
 namespace MeuCrudCsharp.Features.Videos.Application.Interfaces
 {

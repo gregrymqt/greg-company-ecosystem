@@ -1,6 +1,7 @@
 namespace MeuCrudCsharp.Features.Auth.Infrastructure.Persistence.Repositories;
 
 using Data;
+using MeuCrudCsharp.Features.Auth.Domain.Entities;
 using MeuCrudCsharp.Features.Auth.Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Models;

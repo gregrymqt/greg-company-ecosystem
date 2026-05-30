@@ -1,4 +1,5 @@
 using MeuCrudCsharp.Models;
+using MeuCrudCsharp.Features.Courses.Domain.Entities;
 
 namespace MeuCrudCsharp.Features.Courses.Domain.Interfaces
 {

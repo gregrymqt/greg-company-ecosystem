@@ -2,6 +2,7 @@ using MeuCrudCsharp.Features.Profiles.UserAccount.Domain.Interfaces;
 using MeuCrudCsharp.Data;
 using MeuCrudCsharp.Features.Profiles.UserAccount.Application.Interfaces;
 using MeuCrudCsharp.Models;
+using MeuCrudCsharp.Features.Auth.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace MeuCrudCsharp.Features.Profiles.UserAccount.Infrastructure.Persistence.Repositories;

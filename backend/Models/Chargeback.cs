@@ -1,5 +1,5 @@
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema; using MeuCrudCsharp.Features.Auth.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace MeuCrudCsharp.Models;
@@ -10,13 +10,13 @@ namespace MeuCrudCsharp.Models;
 public enum ChargebackStatus
 {
     [Display(Name = "Novo")]
-    Novo, // O chargeback acabou de ser registrado e aguarda análise inicial.
+    Novo, // O chargeback acabou de ser registrado e aguarda anÃ¡lise inicial.
 
-    [Display(Name = "Aguardando Evidências")]
-    AguardandoEvidencias, // A equipe precisa coletar e enviar as evidências para a disputa.
+    [Display(Name = "Aguardando EvidÃªncias")]
+    AguardandoEvidencias, // A equipe precisa coletar e enviar as evidÃªncias para a disputa.
 
-    [Display(Name = "Evidências Enviadas")]
-    EvidenciasEnviadas, // As evidências foram enviadas e aguardamos a resolução.
+    [Display(Name = "EvidÃªncias Enviadas")]
+    EvidenciasEnviadas, // As evidÃªncias foram enviadas e aguardamos a resoluÃ§Ã£o.
 
     [Display(Name = "Ganhamos")]
     Ganhamos, // A disputa foi resolvida a nosso favor.
@@ -26,7 +26,7 @@ public enum ChargebackStatus
 }
 
 /// <summary>
-/// Representa uma notificação de chargeback recebida do Mercado Pago.
+/// Representa uma notificaÃ§Ã£o de chargeback recebida do Mercado Pago.
 /// </summary>
 [Index(nameof(ChargebackId), IsUnique = true)]
 [Index(nameof(PaymentId))]
@@ -49,7 +49,7 @@ public class Chargeback
     public long PaymentId { get; set; }
 
     /// <summary>
-    /// FK para o usuário que realizou o pagamento original.
+    /// FK para o usuÃ¡rio que realizou o pagamento original.
     /// </summary>
     public string? UserId { get; set; }
 
@@ -63,7 +63,7 @@ public class Chargeback
     public ChargebackStatus Status { get; set; } = ChargebackStatus.Novo;
 
     /// <summary>
-    /// Valor do chargeback. Este campo precisará ser preenchido consultando a API do MP.
+    /// Valor do chargeback. Este campo precisarÃ¡ ser preenchido consultando a API do MP.
     /// </summary>
     [Column(TypeName = "decimal(10, 2)")]
     public decimal Amount { get; set; }

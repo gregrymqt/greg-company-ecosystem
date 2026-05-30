@@ -4,6 +4,7 @@ using MeuCrudCsharp.Features.Courses.Application.DTOs;
 using MeuCrudCsharp.Features.Exceptions;
 using MeuCrudCsharp.Features.Videos.Application.DTOs;
 using MeuCrudCsharp.Models;
+using MeuCrudCsharp.Features.Courses.Domain.Entities;
 
 namespace MeuCrudCsharp.Features.Courses.Application.Interfaces
 {

@@ -3,6 +3,7 @@ using MeuCrudCsharp.Features.Exceptions;
 using MeuCrudCsharp.Features.Files.Application.Interfaces;
 using MeuCrudCsharp.Features.Home.Application.DTOs;
 using MeuCrudCsharp.Features.Home.Application.Interfaces;
+using MeuCrudCsharp.Features.Home.Domain.Entities;
 using MeuCrudCsharp.Features.Home.Domain.Interfaces;
 using MeuCrudCsharp.Features.Shared.Domain.Interfaces;
 using MeuCrudCsharp.Features.Shared.Infrastructure.Persistence;
@@ -94,7 +95,7 @@ public class HomeService(
         }
 
 
-        var entity = new Models.HomeHero
+        var entity = new HomeHero
         {
             Title = dto.Title,
             Subtitle = dto.Subtitle,
@@ -123,7 +124,7 @@ public class HomeService(
     {
         var entity = await repository.GetHeroByIdAsync(id);
         if (entity == null)
-            throw new ResourceNotFoundException($"Hero com ID {id} não encontrado.");
+            throw new ResourceNotFoundException($"Hero com ID {id} nÃ£o encontrado.");
 
         if (dto is { IsChunk: true, File: not null })
         {
@@ -199,7 +200,7 @@ public class HomeService(
     {
         var entity = await repository.GetHeroByIdAsync(id);
         if (entity == null)
-            throw new ResourceNotFoundException($"Hero com ID {id} não encontrado.");
+            throw new ResourceNotFoundException($"Hero com ID {id} nÃ£o encontrado.");
 
         if (entity.FileId.HasValue)
         {
@@ -213,7 +214,7 @@ public class HomeService(
 
     public async Task<ServiceDto> CreateServiceAsync(CreateUpdateServiceDto dto)
     {
-        var entity = new Models.HomeService
+        var entity = new Domain.Entities.HomeService
         {
             Title = dto.Title,
             Description = dto.Description,
@@ -241,7 +242,7 @@ public class HomeService(
     {
         var entity = await repository.GetServiceByIdAsync(id);
         if (entity == null)
-            throw new ResourceNotFoundException($"Serviço com ID {id} não encontrado.");
+            throw new ResourceNotFoundException($"ServiÃ§o com ID {id} nÃ£o encontrado.");
 
         entity.Title = dto.Title;
         entity.Description = dto.Description;
@@ -258,7 +259,7 @@ public class HomeService(
     {
         var entity = await repository.GetServiceByIdAsync(id);
         if (entity == null)
-            throw new ResourceNotFoundException($"Serviço com ID {id} não encontrado.");
+            throw new ResourceNotFoundException($"ServiÃ§o com ID {id} nÃ£o encontrado.");
 
         await repository.DeleteServiceAsync(entity);
         await unitOfWork.CommitAsync();

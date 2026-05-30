@@ -1,5 +1,6 @@
-using System;
+﻿using System;
 using MeuCrudCsharp.Models;
+using MeuCrudCsharp.Features.Files.Domain.Entities;
 
 namespace MeuCrudCsharp.Features.Files.Domain.Interfaces;
 

@@ -1,6 +1,7 @@
-using MeuCrudCsharp.Data;
+﻿using MeuCrudCsharp.Data;
 using MeuCrudCsharp.Features.Files.Domain.Interfaces;
 using MeuCrudCsharp.Models;
+using MeuCrudCsharp.Features.Files.Domain.Entities;
 
 namespace MeuCrudCsharp.Features.Files.Infrastructure.Persistence.Repositories;
 

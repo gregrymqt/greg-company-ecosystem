@@ -1,5 +1,6 @@
 using MeuCrudCsharp.Features.Profiles.Admin.Domain.Interfaces;
 using MeuCrudCsharp.Models;
+using MeuCrudCsharp.Features.Auth.Domain.Entities;
 
 namespace MeuCrudCsharp.Features.Profiles.Admin.Domain.Interfaces
 {

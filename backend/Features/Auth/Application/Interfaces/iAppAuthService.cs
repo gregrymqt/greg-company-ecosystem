@@ -1,6 +1,6 @@
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using MeuCrudCsharp.Features.Auth.Application.DTOs;
-using MeuCrudCsharp.Models; // Substitua pelo seu namespace
+using MeuCrudCsharp.Models; using MeuCrudCsharp.Features.Auth.Domain.Entities; // Substitua pelo seu namespace
 
 namespace MeuCrudCsharp.Features.Auth.Application.Interfaces;
 

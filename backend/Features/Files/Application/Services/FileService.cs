@@ -1,9 +1,10 @@
-using MeuCrudCsharp.Features.Exceptions;
+﻿using MeuCrudCsharp.Features.Exceptions;
 using MeuCrudCsharp.Features.Files.Application.Interfaces;
 using MeuCrudCsharp.Features.Files.Domain.Interfaces;
 using MeuCrudCsharp.Features.Shared.Domain.Interfaces;
 using MeuCrudCsharp.Features.Shared.Infrastructure.Persistence;
 using MeuCrudCsharp.Models;
+using MeuCrudCsharp.Features.Files.Domain.Entities;
 using Microsoft.AspNetCore.StaticFiles;
 
 namespace MeuCrudCsharp.Features.Files.Application.Services;
@@ -90,7 +91,7 @@ public class FileService(
         try
         {
             if (!File.Exists(tempPath))
-                throw new FileNotFoundException("Arquivo temporário não encontrado.", tempPath);
+                throw new FileNotFoundException("Arquivo temporÃ¡rio nÃ£o encontrado.", tempPath);
 
             var novoNome = $"{Guid.NewGuid()}_{nomeOriginal}";
             caminhoFinalFisico = GerarCaminhoFisico(categoria, novoNome);
@@ -146,7 +147,7 @@ public class FileService(
         {
             var arquivoBanco = await repository.GetByIdAsync(fileId);
             if (arquivoBanco == null)
-                throw new ResourceNotFoundException($"Arquivo ID {fileId} não encontrado.");
+                throw new ResourceNotFoundException($"Arquivo ID {fileId} nÃ£o encontrado.");
 
             caminhoAntigoFisico = Path.Combine(
                 environment.WebRootPath,
@@ -163,7 +164,7 @@ public class FileService(
 
             if (!File.Exists(tempPath))
             {
-                throw new FileNotFoundException("Arquivo temporário sumiu antes de mover.");
+                throw new FileNotFoundException("Arquivo temporÃ¡rio sumiu antes de mover.");
             }
 
             File.Move(tempPath, novoCaminhoFisico);
@@ -276,7 +277,7 @@ public class FileService(
         {
             var arquivoBanco = await repository.GetByIdAsync(idArquivoAntigo);
             if (arquivoBanco == null)
-                throw new ResourceNotFoundException("Arquivo antigo não encontrado.");
+                throw new ResourceNotFoundException("Arquivo antigo nÃ£o encontrado.");
 
             caminhoAntigo = Path.Combine(environment.WebRootPath, arquivoBanco.CaminhoRelativo);
             if (File.Exists(caminhoAntigo))

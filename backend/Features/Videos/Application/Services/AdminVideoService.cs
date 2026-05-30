@@ -1,4 +1,4 @@
-using MeuCrudCsharp.Features.Videos.Domain.Interfaces;
+﻿using MeuCrudCsharp.Features.Videos.Domain.Interfaces;
 using Hangfire;
 using MeuCrudCsharp.Features.Caching.Application.Interfaces;
 using MeuCrudCsharp.Features.Exceptions;
@@ -9,6 +9,7 @@ using MeuCrudCsharp.Features.Videos.Application.DTOs;
 using MeuCrudCsharp.Features.Videos.Application.Interfaces;
 using MeuCrudCsharp.Features.Videos.Application.Utils;
 using MeuCrudCsharp.Models;
+using MeuCrudCsharp.Features.Videos.Domain.Entities;
 
 namespace MeuCrudCsharp.Features.Videos.Application.Services;
 
@@ -87,7 +88,7 @@ public class AdminVideoService : IAdminVideoService
 
         var entity = new Video
         {
-            Title = dto.Title ?? "Sem T�tulo",
+            Title = dto.Title ?? "Sem Tï¿½tulo",
             Description = dto.Description ?? string.Empty,
             CourseId = dto.CourseId,
             StorageIdentifier = storageIdentifier,
@@ -103,7 +104,7 @@ public class AdminVideoService : IAdminVideoService
         await _unitOfWork.CommitAsync();
 
         _logger.LogInformation(
-            "V�deo {VideoId} criado com sucesso. StorageId: {StorageId}",
+            "Vï¿½deo {VideoId} criado com sucesso. StorageId: {StorageId}",
             entity.PublicId,
             entity.StorageIdentifier
         );
@@ -113,7 +114,7 @@ public class AdminVideoService : IAdminVideoService
         );
 
         _logger.LogInformation(
-            "Job de processamento HLS agendado para o v�deo {VideoId}",
+            "Job de processamento HLS agendado para o vï¿½deo {VideoId}",
             entity.PublicId
         );
 
@@ -141,7 +142,7 @@ public class AdminVideoService : IAdminVideoService
             cacheKey,
             async () =>
             {
-                _logger.LogInformation("Cache miss. Buscando v�deos p�gina {Page} no banco.", page);
+                _logger.LogInformation("Cache miss. Buscando vï¿½deos pï¿½gina {Page} no banco.", page);
 
                 var result = await _videoRepository.GetAllPaginatedAsync(page, pageSize);
 
@@ -169,7 +170,7 @@ public class AdminVideoService : IAdminVideoService
         var video = await _videoRepository.GetByPublicIdAsync(id);
 
         if (video == null)
-            throw new ResourceNotFoundException("V�deo n�o encontrado.");
+            throw new ResourceNotFoundException("Vï¿½deo nï¿½o encontrado.");
 
         if (dto.ThumbnailFile is { Length: > 0 })
         {
@@ -187,7 +188,7 @@ public class AdminVideoService : IAdminVideoService
         await _cacheService.InvalidateCacheByKeyAsync(VideosCacheVersionKey);
 
         _logger.LogInformation(
-            "V�deo {VideoId} atualizado com sucesso.",
+            "Vï¿½deo {VideoId} atualizado com sucesso.",
             video.PublicId
         );
 
@@ -198,7 +199,7 @@ public class AdminVideoService : IAdminVideoService
     {
         var video = await _videoRepository.GetByPublicIdAsync(id);
         if (video == null)
-            throw new ResourceNotFoundException("V�deo n�o encontrado.");
+            throw new ResourceNotFoundException("Vï¿½deo nï¿½o encontrado.");
 
         var fileId = video.FileId;
         var storageIdentifier = video.StorageIdentifier;
@@ -210,7 +211,7 @@ public class AdminVideoService : IAdminVideoService
             await _unitOfWork.CommitAsync();
 
             _logger.LogInformation(
-                "V�deo {VideoId} removido do banco com sucesso. Iniciando limpeza de arquivos...",
+                "Vï¿½deo {VideoId} removido do banco com sucesso. Iniciando limpeza de arquivos...",
                 video.PublicId
             );
 
@@ -224,7 +225,7 @@ public class AdminVideoService : IAdminVideoService
                 VideoDirectoryHelper.DeleteHlsFolder(_env.WebRootPath, storageIdentifier);
 
                 _logger.LogInformation(
-                    "Arquivos f�sicos do v�deo {VideoId} removidos com sucesso.",
+                    "Arquivos fï¿½sicos do vï¿½deo {VideoId} removidos com sucesso.",
                     video.PublicId
                 );
             }
@@ -232,7 +233,7 @@ public class AdminVideoService : IAdminVideoService
             {
                 _logger.LogError(
                     fileEx,
-                    "Erro ao deletar arquivos f�sicos do v�deo {VideoId}. Registro j� foi removido do banco.",
+                    "Erro ao deletar arquivos fï¿½sicos do vï¿½deo {VideoId}. Registro jï¿½ foi removido do banco.",
                     video.PublicId
                 );
             }
@@ -243,10 +244,10 @@ public class AdminVideoService : IAdminVideoService
         {
             _logger.LogError(
                 ex,
-                "Erro ao deletar v�deo {VideoId} do banco de dados.",
+                "Erro ao deletar vï¿½deo {VideoId} do banco de dados.",
                 video.PublicId
             );
-            throw new AppServiceException("Erro ao deletar v�deo.", ex);
+            throw new AppServiceException("Erro ao deletar vï¿½deo.", ex);
         }
     }
 }

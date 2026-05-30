@@ -1,6 +1,4 @@
-using System;
-
-namespace MeuCrudCsharp.Models;
+namespace MeuCrudCsharp.Features.Files.Domain.Entities;
 
 public class EntityFile
 {

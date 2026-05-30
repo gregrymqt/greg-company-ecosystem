@@ -1,6 +1,7 @@
-using MeuCrudCsharp.Features.Videos.Domain.Interfaces;
+﻿using MeuCrudCsharp.Features.Videos.Domain.Interfaces;
 using System;
 using MeuCrudCsharp.Models;
+using MeuCrudCsharp.Features.Videos.Domain.Entities;
 
 namespace MeuCrudCsharp.Features.Videos.Domain.Interfaces;
 

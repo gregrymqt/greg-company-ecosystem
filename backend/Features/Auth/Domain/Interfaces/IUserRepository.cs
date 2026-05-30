@@ -1,4 +1,4 @@
-using MeuCrudCsharp.Models;
+﻿using MeuCrudCsharp.Models; using MeuCrudCsharp.Features.Auth.Domain.Entities;
 
 namespace MeuCrudCsharp.Features.Auth.Domain.Interfaces;
 

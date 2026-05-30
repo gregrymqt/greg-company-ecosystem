@@ -1,4 +1,4 @@
-using MeuCrudCsharp.Features.Caching.Application.Interfaces;
+Ôªøusing MeuCrudCsharp.Features.Caching.Application.Interfaces;
 using MeuCrudCsharp.Features.Courses.Application.DTOs;
 using MeuCrudCsharp.Features.Courses.Application.Interfaces;
 using MeuCrudCsharp.Features.Courses.Domain.Interfaces;
@@ -7,7 +7,7 @@ using MeuCrudCsharp.Features.Exceptions;
 using MeuCrudCsharp.Features.Shared.Domain.Interfaces;
 using MeuCrudCsharp.Features.Shared.Infrastructure.Persistence;
 using MeuCrudCsharp.Features.Videos.Application.DTOs;
-using MeuCrudCsharp.Models;
+using MeuCrudCsharp.Models; using MeuCrudCsharp.Features.Courses.Domain.Entities;
 
 namespace MeuCrudCsharp.Features.Courses.Application.Services
 {
@@ -62,7 +62,7 @@ namespace MeuCrudCsharp.Features.Courses.Application.Services
         {
             if (await repository.ExistsByNameAsync(createDto.Name!))
             {
-                throw new AppServiceException("J· existe um curso com este nome.");
+                throw new AppServiceException("J√° existe um curso com este nome.");
             }
 
             var newCourse = new Course
@@ -105,13 +105,13 @@ namespace MeuCrudCsharp.Features.Courses.Application.Services
 
             if (course == null)
             {
-                throw new ResourceNotFoundException($"Curso com ID {publicId} n„o encontrado.");
+                throw new ResourceNotFoundException($"Curso com ID {publicId} n√£o encontrado.");
             }
 
             if (course.Videos.Count != 0)
             {
                 throw new AppServiceException(
-                    "N„o È possÌvel deletar um curso que possui vÌdeos associados."
+                    "N√£o √© poss√≠vel deletar um curso que possui v√≠deos associados."
                 );
             }
 
@@ -123,13 +123,13 @@ namespace MeuCrudCsharp.Features.Courses.Application.Services
             logger.LogInformation("Curso {CourseId} deletado.", publicId);
         }
 
-        public async Task<Models.Course> FindCourseByPublicIdOrFailAsync(Guid publicId)
+        public async Task<Course> FindCourseByPublicIdOrFailAsync(Guid publicId)
         {
             var course = await repository.GetByPublicIdAsync(publicId);
             if (course == null)
             {
                 throw new ResourceNotFoundException(
-                    $"Curso com o PublicId {publicId} n„o encontrado."
+                    $"Curso com o PublicId {publicId} n√£o encontrado."
                 );
             }
 

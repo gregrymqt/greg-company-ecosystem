@@ -1,4 +1,4 @@
-namespace MeuCrudCsharp.Models;
+namespace MeuCrudCsharp.Features.Auth.Domain.Entities;
 
 public static class AppRoles
 {

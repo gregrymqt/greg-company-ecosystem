@@ -7,7 +7,7 @@ using MeuCrudCsharp.Features.Exceptions;
 using MeuCrudCsharp.Features.Files.Application.Interfaces;
 using MeuCrudCsharp.Features.Shared.Domain.Interfaces;
 using MeuCrudCsharp.Features.Shared.Infrastructure.Persistence;
-using MeuCrudCsharp.Models;
+using MeuCrudCsharp.Features.About.Domain.Entities;
 
 namespace MeuCrudCsharp.Features.About.Application.Services;
 
