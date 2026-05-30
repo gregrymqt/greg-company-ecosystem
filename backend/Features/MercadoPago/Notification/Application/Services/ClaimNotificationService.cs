@@ -1,7 +1,7 @@
 using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Interfaces;
 using MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Interfaces;
 using Microsoft.Extensions.Options;
-using MeuCrudCsharp.Features.MercadoPago.Webhooks.DTOs;
+using MeuCrudCsharp.Features.MercadoPago.Webhooks.Application.DTOs;
 using MeuCrudCsharp.Features.MercadoPago.Claims.Application.Interfaces;
 using MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Interfaces;
 using MeuCrudCsharp.Features.Emails.Application.Interfaces;

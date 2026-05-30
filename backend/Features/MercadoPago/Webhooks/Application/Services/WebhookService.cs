@@ -2,11 +2,11 @@ using System.Security.Cryptography;
 using System.Text;
 using MeuCrudCsharp.Features.MercadoPago.Jobs.Application.Interfaces;
 using MeuCrudCsharp.Features.MercadoPago.Jobs.Application.Jobs;
-using MeuCrudCsharp.Features.MercadoPago.Webhooks.DTOs;
-using MeuCrudCsharp.Features.MercadoPago.Webhooks.Interfaces;
+using MeuCrudCsharp.Features.MercadoPago.Webhooks.Application.DTOs;
+using MeuCrudCsharp.Features.MercadoPago.Webhooks.Application.Interfaces;
 using Microsoft.Extensions.Options;
 
-namespace MeuCrudCsharp.Features.MercadoPago.Webhooks.Services
+namespace MeuCrudCsharp.Features.MercadoPago.Webhooks.Application.Services
 {
     public class WebhookService : IWebhookService
     {

@@ -52,7 +52,7 @@ public static class DependencyInjectionExtensions
                         "MeuCrudCsharp.Features.MercadoPago.Refunds.Infrastructure.Integration",
                         "MeuCrudCsharp.Features.MercadoPago.Refunds.Application.Notifications",
                         "MeuCrudCsharp.Features.MercadoPago.Jobs.Infrastructure.Services",
-                        "MeuCrudCsharp.Features.MercadoPago.WebHooks.Services",
+                        "MeuCrudCsharp.Features.MercadoPago.Webhooks.Application.Services",
                         "MeuCrudCsharp.Features.MercadoPago.Chargebacks.Application.Services",
                         "MeuCrudCsharp.Features.MercadoPago.Chargebacks.Infrastructure.Integration",
                         "MeuCrudCsharp.Features.MercadoPago.Chargebacks.Infrastructure.Persistence.Repositories",

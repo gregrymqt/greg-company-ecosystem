@@ -2,7 +2,7 @@ using Hangfire;
 using MeuCrudCsharp.Features.Caching.Application.Interfaces;
 using MeuCrudCsharp.Features.MercadoPago.Jobs.Application.Interfaces;
 using MeuCrudCsharp.Features.MercadoPago.Notification.Application.Interfaces;
-using MeuCrudCsharp.Features.MercadoPago.Webhooks.DTOs;
+using MeuCrudCsharp.Features.MercadoPago.Webhooks.Application.DTOs;
 
 namespace MeuCrudCsharp.Features.MercadoPago.Jobs.Application.Jobs;
 

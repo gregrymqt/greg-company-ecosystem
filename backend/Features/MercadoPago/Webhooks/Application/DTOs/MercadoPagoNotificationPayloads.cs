@@ -2,7 +2,7 @@ using System;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace MeuCrudCsharp.Features.MercadoPago.Webhooks.DTOs
+namespace MeuCrudCsharp.Features.MercadoPago.Webhooks.Application.DTOs
 {
     public class MercadoPagoWebhookNotification
     {

@@ -1,7 +1,7 @@
-using MeuCrudCsharp.Features.MercadoPago.Webhooks.DTOs;
+using MeuCrudCsharp.Features.MercadoPago.Webhooks.Application.DTOs;
 using MeuCrudCsharp.Models;
 
-namespace MeuCrudCsharp.Features.MercadoPago.Webhooks.Interfaces
+namespace MeuCrudCsharp.Features.MercadoPago.Webhooks.Application.Interfaces
 {
     public interface IWebhookService
     {

@@ -1,9 +1,9 @@
-﻿using MeuCrudCsharp.Features.Base;
-using MeuCrudCsharp.Features.MercadoPago.Webhooks.DTOs;
-using MeuCrudCsharp.Features.MercadoPago.Webhooks.Interfaces;
+using MeuCrudCsharp.Features.Base;
+using MeuCrudCsharp.Features.MercadoPago.Webhooks.Application.DTOs;
+using MeuCrudCsharp.Features.MercadoPago.Webhooks.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
-namespace MeuCrudCsharp.Features.MercadoPago.Webhooks.Controllers
+namespace MeuCrudCsharp.Features.MercadoPago.Webhooks.Presentation.Controllers
 {
     [ApiController]
     [Route("webhook")]
@@ -34,7 +34,7 @@ namespace MeuCrudCsharp.Features.MercadoPago.Webhooks.Controllers
             {
                 if (!_webhookService.IsSignatureValid(Request, notification))
                 {
-                    return BadRequest(new { error = "Assinatura inválida." });
+                    return BadRequest(new { error = "Assinatura inv�lida." });
                 }
 
                 await _webhookService.ProcessWebhookNotificationAsync(notification);

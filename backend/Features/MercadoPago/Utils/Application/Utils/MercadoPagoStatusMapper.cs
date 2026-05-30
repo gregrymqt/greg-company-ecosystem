@@ -1,4 +1,4 @@
-namespace MeuCrudCsharp.Features.MercadoPago.Utils
+namespace MeuCrudCsharp.Features.MercadoPago.Utils.Application.Utils
 {
     public static class PaymentStatusMapper
     {
