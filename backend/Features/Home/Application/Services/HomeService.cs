@@ -1,11 +1,12 @@
 using MeuCrudCsharp.Features.Caching.Application.Interfaces;
 using MeuCrudCsharp.Features.Exceptions;
 using MeuCrudCsharp.Features.Files.Application.Interfaces;
-using MeuCrudCsharp.Features.Home.DTOs;
-using MeuCrudCsharp.Features.Home.Interfaces;
+using MeuCrudCsharp.Features.Home.Application.DTOs;
+using MeuCrudCsharp.Features.Home.Application.Interfaces;
+using MeuCrudCsharp.Features.Home.Domain.Interfaces;
 using MeuCrudCsharp.Features.Shared.Work;
 
-namespace MeuCrudCsharp.Features.Home.Services;
+namespace MeuCrudCsharp.Features.Home.Application.Services;
 
 public class HomeService(
     IHomeRepository repository,

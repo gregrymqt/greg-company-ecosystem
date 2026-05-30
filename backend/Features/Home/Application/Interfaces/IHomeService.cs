@@ -1,6 +1,6 @@
-using MeuCrudCsharp.Features.Home.DTOs;
+using MeuCrudCsharp.Features.Home.Application.DTOs;
 
-namespace MeuCrudCsharp.Features.Home.Interfaces;
+namespace MeuCrudCsharp.Features.Home.Application.Interfaces;
 
 public interface IHomeService
 {

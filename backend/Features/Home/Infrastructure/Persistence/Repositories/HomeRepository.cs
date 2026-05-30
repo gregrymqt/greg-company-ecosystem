@@ -1,9 +1,9 @@
 using MeuCrudCsharp.Data;
-using MeuCrudCsharp.Features.Home.Interfaces;
+using MeuCrudCsharp.Features.Home.Domain.Interfaces;
 using MeuCrudCsharp.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace MeuCrudCsharp.Features.Home.Repostories;
+namespace MeuCrudCsharp.Features.Home.Infrastructure.Persistence.Repositories;
 
 public class HomeRepository : IHomeRepository
 {

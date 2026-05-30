@@ -1,7 +1,7 @@
 using System;
 using MeuCrudCsharp.Models;
 
-namespace MeuCrudCsharp.Features.Home.Interfaces;
+namespace MeuCrudCsharp.Features.Home.Domain.Interfaces;
 
 public interface IHomeRepository
 {

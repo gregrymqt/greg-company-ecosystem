@@ -1,12 +1,12 @@
 using MeuCrudCsharp.Features.Base;
 using MeuCrudCsharp.Features.Exceptions;
 using MeuCrudCsharp.Features.Files.Presentation.Attributes;
-using MeuCrudCsharp.Features.Home.DTOs;
-using MeuCrudCsharp.Features.Home.Interfaces;
+using MeuCrudCsharp.Features.Home.Application.DTOs;
+using MeuCrudCsharp.Features.Home.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace MeuCrudCsharp.Features.Home.Controllers;
+namespace MeuCrudCsharp.Features.Home.Presentation.Controllers;
 
 [Route("api/[controller]")]
 public class HomeController : ApiControllerBase
