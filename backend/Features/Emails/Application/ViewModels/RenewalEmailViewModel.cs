@@ -1,4 +1,4 @@
-namespace MeuCrudCsharp.Features.Emails.ViewModels
+namespace MeuCrudCsharp.Features.Emails.Application.ViewModels
 {
     public class RenewalEmailViewModel
     {

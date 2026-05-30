@@ -35,7 +35,7 @@ public static class DependencyInjectionExtensions
                         "MeuCrudCsharp.Features.Home.Services",
                         "MeuCrudCsharp.Features.Home.Repositories",
                         "MeuCrudCsharp.Features.Caching.Application.Services",
-                        "MeuCrudCsharp.Features.Emails.Services",
+                        "MeuCrudCsharp.Features.Emails.Infrastructure.Services",
                         "MeuCrudCsharp.Features.MercadoPago.Payments.Services",
                         "MeuCrudCsharp.Features.MercadoPago.Payments.Repositories",
                         "MeuCrudCsharp.Features.MercadoPago.Notification.Services",

@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace MeuCrudCsharp.Features.Emails.ViewModels;
+namespace MeuCrudCsharp.Features.Emails.Application.ViewModels;
 
 public record PlanUpdateAdminNotificationViewModel(
     string PlanName,

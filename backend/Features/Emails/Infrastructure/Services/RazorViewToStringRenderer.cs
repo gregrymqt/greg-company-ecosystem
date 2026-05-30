@@ -1,7 +1,7 @@
-Ôªøusing System;
+using System;
 using System.IO;
 using System.Threading.Tasks;
-using MeuCrudCsharp.Features.Emails.Interfaces;
+using MeuCrudCsharp.Features.Emails.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewEngines;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 
-namespace MeuCrudCsharp.Features.Emails.Services
+namespace MeuCrudCsharp.Features.Emails.Infrastructure.Services
 {
     public class RazorViewToStringRenderer : IRazorViewToStringRenderer
     {
@@ -32,7 +32,7 @@ namespace MeuCrudCsharp.Features.Emails.Services
         public async Task<string> RenderViewToStringAsync<TModel>(string viewName, TModel model)
         {
             if (string.IsNullOrWhiteSpace(viewName))
-                throw new ArgumentException("O nome da view n√£o pode ser vazio.", nameof(viewName));
+                throw new ArgumentException("O nome da view n„o pode ser vazio.", nameof(viewName));
 
             var actionContext = GetActionContext();
             var view = FindView(actionContext, viewName);
@@ -78,7 +78,7 @@ namespace MeuCrudCsharp.Features.Emails.Services
             }
 
             throw new InvalidOperationException(
-                $"N√£o foi poss√≠vel encontrar a view '{viewName}'. Os seguintes locais foram pesquisados: {string.Join(", ", findViewResult.SearchedLocations)}"
+                $"N„o foi possÌvel encontrar a view '{viewName}'. Os seguintes locais foram pesquisados: {string.Join(", ", findViewResult.SearchedLocations)}"
             );
         }
 

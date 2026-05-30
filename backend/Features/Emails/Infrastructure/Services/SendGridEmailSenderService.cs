@@ -1,10 +1,10 @@
-Ôªøusing MeuCrudCsharp.Features.Emails.Interfaces;
+using MeuCrudCsharp.Features.Emails.Application.Interfaces;
 using MeuCrudCsharp.Features.Exceptions;
 using Microsoft.Extensions.Options;
 using SendGrid;
 using SendGrid.Helpers.Mail;
 
-namespace MeuCrudCsharp.Features.Emails.Services
+namespace MeuCrudCsharp.Features.Emails.Infrastructure.Services
 {
     public class SendGridEmailSenderService : IEmailSenderService
     {
@@ -28,10 +28,10 @@ namespace MeuCrudCsharp.Features.Emails.Services
         )
         {
             if (string.IsNullOrWhiteSpace(to))
-                throw new ArgumentException("O endere√ßo de e-mail do destinat√°rio n√£o pode ser vazio.", nameof(to));
+                throw new ArgumentException("O endereÁo de e-mail do destinat·rio n„o pode ser vazio.", nameof(to));
 
             if (string.IsNullOrWhiteSpace(subject))
-                throw new ArgumentException("O assunto do e-mail n√£o pode ser vazio.", nameof(subject));
+                throw new ArgumentException("O assunto do e-mail n„o pode ser vazio.", nameof(subject));
 
             if (string.IsNullOrWhiteSpace(htmlBody) && string.IsNullOrWhiteSpace(plainTextBody))
                 throw new ArgumentException("O e-mail deve conter pelo menos um corpo (HTML ou texto simples).");
@@ -49,7 +49,7 @@ namespace MeuCrudCsharp.Features.Emails.Services
                 )
                 {
                     throw new InvalidOperationException(
-                        "As configura√ß√µes do SendGrid (ApiKey, FromEmail, FromName) n√£o foram definidas corretamente."
+                        "As configuraÁıes do SendGrid (ApiKey, FromEmail, FromName) n„o foram definidas corretamente."
                     );
                 }
 

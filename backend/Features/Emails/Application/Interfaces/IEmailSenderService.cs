@@ -1,6 +1,6 @@
-﻿using System.Threading.Tasks;
+using System.Threading.Tasks;
 
-namespace MeuCrudCsharp.Features.Emails.Interfaces
+namespace MeuCrudCsharp.Features.Emails.Application.Interfaces
 {
     public interface IEmailSenderService
     {

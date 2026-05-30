@@ -1,5 +1,5 @@
-using MeuCrudCsharp.Features.Emails.Interfaces;
-using MeuCrudCsharp.Features.Emails.ViewModels;
+using MeuCrudCsharp.Features.Emails.Application.Interfaces;
+using MeuCrudCsharp.Features.Emails.Application.ViewModels;
 using MeuCrudCsharp.Features.Exceptions;
 using MeuCrudCsharp.Features.MercadoPago.Clients.Interfaces;
 using MeuCrudCsharp.Features.MercadoPago.Notification.Interfaces;

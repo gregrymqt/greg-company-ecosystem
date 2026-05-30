@@ -1,9 +1,9 @@
 using Microsoft.Extensions.Options;
 using MeuCrudCsharp.Features.MercadoPago.Webhooks.DTOs;
 using MeuCrudCsharp.Features.MercadoPago.Claims.Interfaces;
-using MeuCrudCsharp.Features.Emails.Interfaces;
+using MeuCrudCsharp.Features.Emails.Application.Interfaces;
 using MeuCrudCsharp.Features.MercadoPago.Notification.Interfaces;
-using MeuCrudCsharp.Features.Emails.ViewModels;
+using MeuCrudCsharp.Features.Emails.Application.ViewModels;
 using MeuCrudCsharp.Models;
 using MeuCrudCsharp.Models.Enums;
 using MeuCrudCsharp.Features.Shared.Work;
