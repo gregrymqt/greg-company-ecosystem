@@ -1,3 +1,4 @@
+using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Interfaces;
 using MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Interfaces;
 using System.Security.Claims;
 using MeuCrudCsharp.Features.Auth.Application.DTOs;
@@ -5,7 +6,7 @@ using MeuCrudCsharp.Features.Auth.Domain.Interfaces;
 using MeuCrudCsharp.Features.Auth.Application.Interfaces;
 using MeuCrudCsharp.Features.Exceptions;
 using MeuCrudCsharp.Features.MercadoPago.Payments.Application.Interfaces;
-using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Interfaces;
+using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Application.Interfaces;
 using MeuCrudCsharp.Models;
 using Microsoft.AspNetCore.Identity;
 

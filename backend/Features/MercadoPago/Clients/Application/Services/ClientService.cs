@@ -1,10 +1,11 @@
+using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Interfaces;
 using MeuCrudCsharp.Features.Auth.Domain.Interfaces;
 using MeuCrudCsharp.Features.Auth.Application.Interfaces;
 using MeuCrudCsharp.Features.Caching.Application.Interfaces;
 using MeuCrudCsharp.Features.Exceptions;
 using MeuCrudCsharp.Features.MercadoPago.Clients.Application.DTOs;
 using MeuCrudCsharp.Features.MercadoPago.Clients.Application.Interfaces;
-using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Interfaces;
+using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Application.Interfaces;
 using MeuCrudCsharp.Features.Shared.Work;
 using Microsoft.Extensions.Logging;
 

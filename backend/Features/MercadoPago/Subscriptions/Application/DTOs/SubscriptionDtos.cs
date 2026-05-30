@@ -1,4 +1,4 @@
-namespace MeuCrudCsharp.Features.MercadoPago.Subscriptions.DTOs;
+namespace MeuCrudCsharp.Features.MercadoPago.Subscriptions.Application.DTOs;
 
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;

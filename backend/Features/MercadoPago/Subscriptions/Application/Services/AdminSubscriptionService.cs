@@ -1,16 +1,17 @@
+using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Interfaces;
 using MeuCrudCsharp.Features.MercadoPago.Plans.Domain.Interfaces;
 using MeuCrudCsharp.Features.Caching.Application.Interfaces;
 using MeuCrudCsharp.Features.Exceptions;
 using MeuCrudCsharp.Features.MercadoPago.Plans.Application.Interfaces;
-using MeuCrudCsharp.Features.MercadoPago.Subscriptions.DTOs;
-using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Interfaces;
+using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Application.DTOs;
+using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Application.Interfaces;
 using MeuCrudCsharp.Features.Shared.Work;
 using MeuCrudCsharp.Models;
 using MeuCrudCsharp.Models.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
-namespace MeuCrudCsharp.Features.MercadoPago.Subscriptions.Services
+namespace MeuCrudCsharp.Features.MercadoPago.Subscriptions.Application.Services
 {
     public class SubscriptionService : ISubscriptionService
     {

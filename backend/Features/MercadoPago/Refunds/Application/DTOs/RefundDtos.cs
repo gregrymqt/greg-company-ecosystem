@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
-namespace MeuCrudCsharp.Features.MercadoPago.Refunds.DTOs;
+namespace MeuCrudCsharp.Features.MercadoPago.Refunds.Application.DTOs;
 
 public record RefundRequestDto(
     [property: JsonPropertyName("amount")]

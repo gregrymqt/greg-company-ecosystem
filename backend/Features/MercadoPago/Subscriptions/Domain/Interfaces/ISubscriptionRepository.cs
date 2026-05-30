@@ -1,6 +1,7 @@
+using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Interfaces;
 using MeuCrudCsharp.Models;
 
-namespace MeuCrudCsharp.Features.MercadoPago.Subscriptions.Interfaces;
+namespace MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Interfaces;
 
 public interface ISubscriptionRepository
 {

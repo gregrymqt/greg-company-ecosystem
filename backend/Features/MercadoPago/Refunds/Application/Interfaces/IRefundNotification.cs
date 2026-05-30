@@ -1,4 +1,4 @@
-﻿namespace MeuCrudCsharp.Features.MercadoPago.Refunds.Interfaces
+namespace MeuCrudCsharp.Features.MercadoPago.Refunds.Application.Interfaces
 {
     public interface IRefundNotification
     {

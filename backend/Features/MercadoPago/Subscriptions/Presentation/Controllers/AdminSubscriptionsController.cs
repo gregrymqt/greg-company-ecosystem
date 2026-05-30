@@ -1,10 +1,10 @@
-﻿using MeuCrudCsharp.Features.Base;
-using MeuCrudCsharp.Features.MercadoPago.Subscriptions.DTOs;
-using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Interfaces;
+using MeuCrudCsharp.Features.Base;
+using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Application.DTOs;
+using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace MeuCrudCsharp.Features.MercadoPago.Subscriptions.Controllers
+namespace MeuCrudCsharp.Features.MercadoPago.Subscriptions.Presentation.Controllers
 {
     [Authorize(Roles = "Admin")]
     [Route("api/admin/subscriptions")]

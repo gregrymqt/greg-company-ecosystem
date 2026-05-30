@@ -1,8 +1,8 @@
 using MeuCrudCsharp.Features.Base;
-using MeuCrudCsharp.Features.MercadoPago.Refunds.Interfaces;
+using MeuCrudCsharp.Features.MercadoPago.Refunds.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
-namespace MeuCrudCsharp.Features.MercadoPago.Refunds.Controllers
+namespace MeuCrudCsharp.Features.MercadoPago.Refunds.Presentation.Controllers
 {
     [Route("api/[controller]")]
     public class RefundsController : MercadoPagoApiControllerBase

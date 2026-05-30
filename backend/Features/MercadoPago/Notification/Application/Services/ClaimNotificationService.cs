@@ -1,3 +1,4 @@
+using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Interfaces;
 using MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Interfaces;
 using Microsoft.Extensions.Options;
 using MeuCrudCsharp.Features.MercadoPago.Webhooks.DTOs;
@@ -10,7 +11,7 @@ using MeuCrudCsharp.Models;
 using MeuCrudCsharp.Models.Enums;
 using MeuCrudCsharp.Features.Shared.Work;
 using MeuCrudCsharp.Features.MercadoPago.Payments.Application.Interfaces;
-using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Interfaces;
+using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Application.Interfaces;
 
 namespace MeuCrudCsharp.Features.MercadoPago.Notification.Application.Services;
 

@@ -1,9 +1,10 @@
+using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Interfaces;
 using MeuCrudCsharp.Data;
-using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Interfaces;
+using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Application.Interfaces;
 using MeuCrudCsharp.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace MeuCrudCsharp.Features.MercadoPago.Subscriptions.Repositories;
+namespace MeuCrudCsharp.Features.MercadoPago.Subscriptions.Infrastructure.Persistence.Repositories;
 
 public class SubscriptionRepository(ApiDbContext context) : ISubscriptionRepository
 {

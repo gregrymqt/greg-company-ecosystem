@@ -1,10 +1,10 @@
 using System.Linq;
 using MeuCrudCsharp.Features.Hubs.Presentation.Hubs;
 using MeuCrudCsharp.Features.Hubs.Infrastructure.State;
-using MeuCrudCsharp.Features.MercadoPago.Refunds.Interfaces;
+using MeuCrudCsharp.Features.MercadoPago.Refunds.Application.Interfaces;
 using Microsoft.AspNetCore.SignalR;
 
-namespace MeuCrudCsharp.Features.MercadoPago.Refunds.Notifications
+namespace MeuCrudCsharp.Features.MercadoPago.Refunds.Application.Notifications
 {
     public class RefundNotification(
         IHubContext<RefundProcessingHub> hubContext,

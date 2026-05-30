@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
-using MeuCrudCsharp.Features.MercadoPago.Subscriptions.DTOs;
+using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Application.DTOs;
 using MeuCrudCsharp.Features.Profiles.UserAccount.DTOs;
 
 namespace MeuCrudCsharp.Features.Profiles.UserAccount.ViewModels

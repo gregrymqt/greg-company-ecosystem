@@ -1,6 +1,6 @@
-using MeuCrudCsharp.Features.MercadoPago.Subscriptions.DTOs;
+using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Application.DTOs;
 
-namespace MeuCrudCsharp.Features.MercadoPago.Subscriptions.Interfaces;
+namespace MeuCrudCsharp.Features.MercadoPago.Subscriptions.Application.Interfaces;
 
 public interface IMercadoPagoSubscriptionService
 {

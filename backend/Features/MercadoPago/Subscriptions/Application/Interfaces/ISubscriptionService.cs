@@ -2,10 +2,10 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using MeuCrudCsharp.Features.Exceptions;
 using MeuCrudCsharp.Features.MercadoPago.Clients.Application.DTOs;
-using MeuCrudCsharp.Features.MercadoPago.Subscriptions.DTOs;
+using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Application.DTOs;
 using MeuCrudCsharp.Models;
 
-namespace MeuCrudCsharp.Features.MercadoPago.Subscriptions.Interfaces
+namespace MeuCrudCsharp.Features.MercadoPago.Subscriptions.Application.Interfaces
 {
     public interface ISubscriptionService
     {

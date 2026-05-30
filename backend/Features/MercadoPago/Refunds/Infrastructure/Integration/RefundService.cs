@@ -1,16 +1,17 @@
+using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Interfaces;
 using MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Interfaces;
 using MeuCrudCsharp.Data;
 using MeuCrudCsharp.Features.Base;
 using MeuCrudCsharp.Features.Exceptions;
 using MeuCrudCsharp.Features.MercadoPago.Base;
 using MeuCrudCsharp.Features.MercadoPago.Payments.Application.Interfaces;
-using MeuCrudCsharp.Features.MercadoPago.Refunds.Interfaces;
-using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Interfaces;
+using MeuCrudCsharp.Features.MercadoPago.Refunds.Application.Interfaces;
+using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Application.Interfaces;
 using MeuCrudCsharp.Features.Shared.Work;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace MeuCrudCsharp.Features.MercadoPago.Refunds.Services
+namespace MeuCrudCsharp.Features.MercadoPago.Refunds.Infrastructure.Integration
 {
     public class RefundService(
         IPaymentRepository paymentRepository,

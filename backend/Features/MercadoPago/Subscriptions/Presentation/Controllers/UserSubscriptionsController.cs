@@ -1,10 +1,10 @@
 using MeuCrudCsharp.Features.Base;
-using MeuCrudCsharp.Features.MercadoPago.Subscriptions.DTOs;
-using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Interfaces;
+using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Application.DTOs;
+using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Application.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace MeuCrudCsharp.Features.MercadoPago.Subscriptions.Controllers
+namespace MeuCrudCsharp.Features.MercadoPago.Subscriptions.Presentation.Controllers
 {
     [Route("api/subscriptions")]
     public class SubscriptionsController : MercadoPagoApiControllerBase
