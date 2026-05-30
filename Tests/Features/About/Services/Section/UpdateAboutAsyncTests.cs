@@ -1,12 +1,5 @@
-using MeuCrudCsharp.Features.About.DTOs;
-using MeuCrudCsharp.Features.About.Interfaces;
-using MeuCrudCsharp.Features.About.Services;
-using MeuCrudCsharp.Features.Caching.Interfaces;
 using MeuCrudCsharp.Features.Exceptions;
-using MeuCrudCsharp.Features.Files.Interfaces;
-using MeuCrudCsharp.Features.Shared.Work;
 using MeuCrudCsharp.Models;
-using MeuCrudCsharp.Tests.Features.About;
 using Microsoft.AspNetCore.Http;
 using Moq;
 
@@ -16,14 +9,13 @@ public class UpdateAboutAsyncTests : AboutServiceTestBase
 {
     // --- TESTES ---
 
-    [Theory]
-    [InlineData(true)] // Scenario 1: Updating with a chunked file (simulating an upload in progress)
-    [InlineData(false)] // Scenario 2: Updating with a complete file (simulating a regular update)
-    public async Task UpdateSection_WhenFileExists_ShouldUpdateSuccessfully(bool isChunk)
+    [Fact]
+    public async Task UpdateSection_WhenFileIsChunk_ShouldCallProcessChunkAndSubstituirDoTemp()
     {
         // Arrange
         var entity = AboutTestFakes.CreateFakeSectionEntity(fileId: 10);
-        var dto = AboutTestFakes.CreateFakeAboutSectionDto(isChunk);
+        var dto = AboutTestFakes.CreateFakeAboutSectionDto(isChunk: true);
+        const string tempPath = "temp/path";
 
         _repository.Setup(r => r.GetSectionByIdAsync(It.IsAny<int>())).ReturnsAsync(entity);
 
@@ -36,7 +28,7 @@ public class UpdateAboutAsyncTests : AboutServiceTestBase
                     It.IsAny<int>()
                 )
             )
-            .ReturnsAsync("temp/path");
+            .ReturnsAsync(tempPath);
 
         _fileService
             .Setup(f =>
@@ -48,6 +40,32 @@ public class UpdateAboutAsyncTests : AboutServiceTestBase
             )
             .ReturnsAsync(AboutTestFakes.CreateFakeEntityFile());
 
+        // Act
+        var result = await _sut.UpdateSectionAsync(1, dto);
+
+        // Assert
+        Assert.True(result);
+        _fileService.Verify(
+            f => f.SubstituirArquivoDoTempAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>()),
+            Times.Once
+        );
+        _fileService.Verify(
+            f => f.SubstituirArquivoAsync(It.IsAny<int>(), It.IsAny<IFormFile>()),
+            Times.Never
+        );
+        _unitOfWork.Verify(u => u.CommitAsync(), Times.Once);
+        _cache.Verify(c => c.RemoveAsync(It.IsAny<string>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task UpdateSection_WhenFileIsComplete_ShouldCallSubstituirArquivoAsync()
+    {
+        // Arrange
+        var entity = AboutTestFakes.CreateFakeSectionEntity(fileId: 10);
+        var dto = AboutTestFakes.CreateFakeAboutSectionDto(isChunk: false);
+
+        _repository.Setup(r => r.GetSectionByIdAsync(It.IsAny<int>())).ReturnsAsync(entity);
+
         _fileService
             .Setup(f => f.SubstituirArquivoAsync(It.IsAny<int>(), It.IsAny<IFormFile>()))
             .ReturnsAsync(AboutTestFakes.CreateFakeEntityFile());
@@ -57,6 +75,14 @@ public class UpdateAboutAsyncTests : AboutServiceTestBase
 
         // Assert
         Assert.True(result);
+        _fileService.Verify(
+            f => f.SubstituirArquivoAsync(It.IsAny<int>(), It.IsAny<IFormFile>()),
+            Times.Once
+        );
+        _fileService.Verify(
+            f => f.ProcessChunkAsync(It.IsAny<IFormFile>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>()),
+            Times.Never
+        );
         _unitOfWork.Verify(u => u.CommitAsync(), Times.Once);
         _cache.Verify(c => c.RemoveAsync(It.IsAny<string>()), Times.Once);
     }

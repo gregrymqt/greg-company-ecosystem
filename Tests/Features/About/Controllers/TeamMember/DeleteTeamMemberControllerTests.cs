@@ -1,12 +1,8 @@
-using System;
-using System.Threading.Tasks;
 using MeuCrudCsharp.Features.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
-using Xunit;
 
 namespace Tests.Features.About.Controllers.TeamMember;
-
 public class DeleteTeamMemberControllerTests : AboutControllerTestBase
 {
     [Fact]
@@ -25,26 +21,42 @@ public class DeleteTeamMemberControllerTests : AboutControllerTestBase
         _serviceMock.Verify(s => s.DeleteTeamMemberAsync(id), Times.Once);
     }
 
-    [Theory]
-    [InlineData(typeof(ResourceNotFoundException), 404)]
-    [InlineData(typeof(Exception), 500)]
-    public async Task DeleteTeamMember_WhenExceptionOccurs_ShouldReturnHandledStatusCode(
-        Type exceptionType,
-        int expectedStatusCode
-    )
+    [Fact]
+    public async Task DeleteTeamMember_WhenResourceNotFoundExceptionOccurs_ShouldReturn404()
     {
         // Arrange
         int id = 1;
 
-        var exception = (Exception)Activator.CreateInstance(exceptionType, "Erro simulado")!;
+        _serviceMock
+            .Setup(s => s.DeleteTeamMemberAsync(id))
+            // Traduzido para inglês
+            .ThrowsAsync(new ResourceNotFoundException("Simulated error"));
 
-        _serviceMock.Setup(s => s.DeleteTeamMemberAsync(id)).ThrowsAsync(exception);
+        // Act
+        var result = await _controller.DeleteTeamMember(id);
+
+        // Assert
+        // Corrigido para NotFoundObjectResult
+        var objectResult = Assert.IsType<NotFoundObjectResult>(result);
+        Assert.Equal(404, objectResult.StatusCode);
+    }
+
+    [Fact]
+    public async Task DeleteTeamMember_WhenUnhandledExceptionOccurs_ShouldReturn500()
+    {
+        // Arrange
+        int id = 1;
+
+        _serviceMock
+            .Setup(s => s.DeleteTeamMemberAsync(id))
+            // Traduzido para inglês
+            .ThrowsAsync(new Exception("Simulated error"));
 
         // Act
         var result = await _controller.DeleteTeamMember(id);
 
         // Assert
         var objectResult = Assert.IsType<ObjectResult>(result);
-        Assert.Equal(expectedStatusCode, objectResult.StatusCode);
+        Assert.Equal(500, objectResult.StatusCode);
     }
 }

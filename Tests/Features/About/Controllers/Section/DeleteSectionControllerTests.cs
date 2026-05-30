@@ -1,9 +1,6 @@
-using System;
-using System.Threading.Tasks;
 using MeuCrudCsharp.Features.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
-using Xunit;
 
 namespace Tests.Features.About.Controllers.Section;
 
@@ -25,26 +22,42 @@ public class DeleteSectionControllerTests : AboutControllerTestBase
         _serviceMock.Verify(s => s.DeleteSectionAsync(sectionId), Times.Once);
     }
 
-    [Theory]
-    [InlineData(typeof(ResourceNotFoundException), 404)]
-    [InlineData(typeof(Exception), 500)]
-    public async Task DeleteSection_WhenExceptionOccurs_ShouldReturnHandledStatusCode(
-        Type exceptionType,
-        int expectedStatusCode
-    )
+    [Fact]
+    public async Task DeleteSection_WhenResourceNotFoundExceptionOccurs_ShouldReturn404()
     {
         // Arrange
         int sectionId = 1;
 
-        var exception = (Exception)Activator.CreateInstance(exceptionType, "Erro simulado")!;
+        _serviceMock
+            .Setup(s => s.DeleteSectionAsync(sectionId))
+            // Traduzido para inglês
+            .ThrowsAsync(new ResourceNotFoundException("Simulated error"));
 
-        _serviceMock.Setup(s => s.DeleteSectionAsync(sectionId)).ThrowsAsync(exception);
+        // Act
+        var result = await _controller.DeleteSection(sectionId);
+
+        // Assert
+        // Corrigido de ObjectResult para NotFoundObjectResult
+        var objectResult = Assert.IsType<NotFoundObjectResult>(result);
+        Assert.Equal(404, objectResult.StatusCode);
+    }
+
+    [Fact]
+    public async Task DeleteSection_WhenUnhandledExceptionOccurs_ShouldReturn500()
+    {
+        // Arrange
+        int sectionId = 1;
+
+        _serviceMock
+            .Setup(s => s.DeleteSectionAsync(sectionId))
+            // Traduzido para inglês
+            .ThrowsAsync(new Exception("Simulated error"));
 
         // Act
         var result = await _controller.DeleteSection(sectionId);
 
         // Assert
         var objectResult = Assert.IsType<ObjectResult>(result);
-        Assert.Equal(expectedStatusCode, objectResult.StatusCode);
+        Assert.Equal(500, objectResult.StatusCode);
     }
 }

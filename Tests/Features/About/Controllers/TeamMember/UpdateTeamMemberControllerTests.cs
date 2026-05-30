@@ -1,21 +1,16 @@
-using System;
-using System.Threading.Tasks;
-using MeuCrudCsharp.Features.About.DTOs;
 using MeuCrudCsharp.Features.Exceptions;
-using MeuCrudCsharp.Tests.Features.About;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
-using Xunit;
+using Tests.Features.About;
 
 namespace Tests.Features.About.Controllers.TeamMember;
-
 public class UpdateTeamMemberControllerTests : AboutControllerTestBase
 {
     [Fact]
-    public async Task UpdateTeamMember_QuandoUploadCompletoOuNormal_DeveRetornarNoContent()
+    public async Task UpdateTeamMember_WhenUploadIsCompleteOrNormal_ShouldReturnNoContent()
     {
         // Arrange
-        int id = 1;
+        const int id = 1;
         var dto = AboutTestFakes.CreateFakeTeamMemberDto(isChunk: false);
 
         _serviceMock.Setup(s => s.UpdateTeamMemberAsync(id, dto)).ReturnsAsync(true);
@@ -29,12 +24,12 @@ public class UpdateTeamMemberControllerTests : AboutControllerTestBase
     }
 
     [Fact]
-    public async Task UpdateTeamMember_QuandoUploadForChunk_DeveRetornarOkComMensagem()
+    public async Task UpdateTeamMember_WhenUploadIsChunk_ShouldReturnOkWithMessage()
     {
         // Arrange
-        int id = 1;
+        const int id = 1;
         var dto = AboutTestFakes.CreateFakeTeamMemberDto(isChunk: true);
-        dto.ChunkIndex = 2; 
+        dto.ChunkIndex = 2;
 
         _serviceMock.Setup(s => s.UpdateTeamMemberAsync(id, dto)).ReturnsAsync(false);
 
@@ -49,30 +44,45 @@ public class UpdateTeamMemberControllerTests : AboutControllerTestBase
         Assert.NotNull(messageProperty);
 
         var messageValue = messageProperty.GetValue(okResult.Value)?.ToString();
-        Assert.Equal($"Chunk {dto.ChunkIndex} atualizado.", messageValue);
+        Assert.Equal($"Chunk {dto.ChunkIndex} updated.", messageValue);
     }
 
-    [Theory]
-    [InlineData(typeof(ResourceNotFoundException), 404)]
-    [InlineData(typeof(Exception), 500)]
-    public async Task UpdateTeamMember_QuandoOcorrerExcecao_DeveRetornarStatusCodeTratado(
-        Type exceptionType,
-        int expectedStatusCode
-    )
+    [Fact]
+    public async Task UpdateTeamMember_WhenResourceNotFoundExceptionOccurs_ShouldReturn404()
     {
         // Arrange
-        int id = 1;
+        const int id = 1;
         var dto = AboutTestFakes.CreateFakeTeamMemberDto();
 
-        var exception = (Exception)Activator.CreateInstance(exceptionType, "Erro simulado")!;
+        _serviceMock
+            .Setup(s => s.UpdateTeamMemberAsync(id, dto))
+            .ThrowsAsync(new ResourceNotFoundException("Simulated error"));
 
-        _serviceMock.Setup(s => s.UpdateTeamMemberAsync(id, dto)).ThrowsAsync(exception);
+        // Act
+        var result = await _controller.UpdateTeamMember(id, dto);
+
+        // Assert
+        // Corrigido para NotFoundObjectResult
+        var objectResult = Assert.IsType<NotFoundObjectResult>(result);
+        Assert.Equal(404, objectResult.StatusCode);
+    }
+
+    [Fact]
+    public async Task UpdateTeamMember_WhenUnhandledExceptionOccurs_ShouldReturn500()
+    {
+        // Arrange
+        const int id = 1;
+        var dto = AboutTestFakes.CreateFakeTeamMemberDto();
+
+        _serviceMock
+            .Setup(s => s.UpdateTeamMemberAsync(id, dto))
+            .ThrowsAsync(new Exception("Simulated error"));
 
         // Act
         var result = await _controller.UpdateTeamMember(id, dto);
 
         // Assert
         var objectResult = Assert.IsType<ObjectResult>(result);
-        Assert.Equal(expectedStatusCode, objectResult.StatusCode);
+        Assert.Equal(500, objectResult.StatusCode);
     }
 }

@@ -1,11 +1,6 @@
-using System;
-using System.Threading.Tasks;
-using MeuCrudCsharp.Features.About.DTOs;
 using MeuCrudCsharp.Features.Exceptions;
-using MeuCrudCsharp.Tests.Features.About;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
-using Xunit;
 
 namespace Tests.Features.About.Controllers.Section;
 
@@ -34,7 +29,7 @@ public class UpdateSectionControllerTests : AboutControllerTestBase
         // Arrange
         int sectionId = 1;
         var dto = AboutTestFakes.CreateFakeAboutSectionDto(isChunk: true);
-        dto.ChunkIndex = 2; 
+        dto.ChunkIndex = 2;
 
         _serviceMock.Setup(s => s.UpdateSectionAsync(sectionId, dto)).ReturnsAsync(false);
 
@@ -49,30 +44,48 @@ public class UpdateSectionControllerTests : AboutControllerTestBase
         Assert.NotNull(messageProperty);
 
         var messageValue = messageProperty.GetValue(okResult.Value)?.ToString();
-        Assert.Equal($"Chunk {dto.ChunkIndex} atualizado.", messageValue);
+        // Traduzido para inglês ("updated" no lugar de "atualizado")
+        Assert.Equal($"Chunk {dto.ChunkIndex} updated.", messageValue);
     }
 
-    [Theory]
-    [InlineData(typeof(ResourceNotFoundException), 404)]
-    [InlineData(typeof(Exception), 500)]
-    public async Task UpdateSection_WhenExceptionOccurs_ShouldReturnHandledStatusCode(
-        Type exceptionType,
-        int expectedStatusCode
-    )
+    [Fact]
+    public async Task UpdateSection_WhenResourceNotFoundExceptionOccurs_ShouldReturn404()
     {
         // Arrange
         int sectionId = 1;
         var dto = AboutTestFakes.CreateFakeAboutSectionDto();
 
-        var exception = (Exception)Activator.CreateInstance(exceptionType, "Erro simulado")!;
+        _serviceMock
+            .Setup(s => s.UpdateSectionAsync(sectionId, dto))
+            // Traduzido para inglês
+            .ThrowsAsync(new ResourceNotFoundException("Simulated error"));
 
-        _serviceMock.Setup(s => s.UpdateSectionAsync(sectionId, dto)).ThrowsAsync(exception);
+        // Act
+        var result = await _controller.UpdateSection(sectionId, dto);
+
+        // Assert
+        // Corrigido de ObjectResult para NotFoundObjectResult
+        var objectResult = Assert.IsType<NotFoundObjectResult>(result);
+        Assert.Equal(404, objectResult.StatusCode);
+    }
+
+    [Fact]
+    public async Task UpdateSection_WhenUnhandledExceptionOccurs_ShouldReturn500()
+    {
+        // Arrange
+        int sectionId = 1;
+        var dto = AboutTestFakes.CreateFakeAboutSectionDto();
+
+        _serviceMock
+            .Setup(s => s.UpdateSectionAsync(sectionId, dto))
+            // Traduzido para inglês
+            .ThrowsAsync(new Exception("Simulated error"));
 
         // Act
         var result = await _controller.UpdateSection(sectionId, dto);
 
         // Assert
         var objectResult = Assert.IsType<ObjectResult>(result);
-        Assert.Equal(expectedStatusCode, objectResult.StatusCode);
+        Assert.Equal(500, objectResult.StatusCode);
     }
 }

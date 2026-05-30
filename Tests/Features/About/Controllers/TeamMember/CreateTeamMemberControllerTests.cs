@@ -1,14 +1,9 @@
-using System;
-using System.Threading.Tasks;
 using MeuCrudCsharp.Features.About.DTOs;
 using MeuCrudCsharp.Features.Exceptions;
-using MeuCrudCsharp.Tests.Features.About;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
-using Xunit;
 
 namespace Tests.Features.About.Controllers.TeamMember;
-
 public class CreateTeamMemberControllerTests : AboutControllerTestBase
 {
     [Fact]
@@ -17,7 +12,8 @@ public class CreateTeamMemberControllerTests : AboutControllerTestBase
         // Arrange
         var dto = AboutTestFakes.CreateFakeTeamMemberDto();
 
-        _controller.ModelState.AddModelError("Name", "O nome é obrigatório");
+        // Traduzido para inglês
+        _controller.ModelState.AddModelError("Name", "Name is required");
 
         // Act
         var result = await _controller.CreateTeamMember(dto);
@@ -50,7 +46,8 @@ public class CreateTeamMemberControllerTests : AboutControllerTestBase
         var messageProperty = okResult.Value.GetType().GetProperty("message");
         var messageValue = messageProperty?.GetValue(okResult.Value)?.ToString();
 
-        Assert.Equal($"Chunk {dto.ChunkIndex} recebido.", messageValue);
+        // Traduzido para inglês ("received" no lugar de "recebido")
+        Assert.Equal($"Chunk {dto.ChunkIndex} received.", messageValue);
     }
 
     [Fact]
@@ -71,25 +68,42 @@ public class CreateTeamMemberControllerTests : AboutControllerTestBase
         Assert.Equal(expectedDto, createdResultAction.Value);
     }
 
-    [Theory]
-    [InlineData(typeof(ResourceNotFoundException), 404)]
-    [InlineData(typeof(Exception), 500)]
-    public async Task CreateTeamMember_WhenExceptionOccurs_ShouldReturnHandledStatusCode(
-        Type exceptionType,
-        int expectedStatusCode
-    )
+    [Fact]
+    public async Task CreateTeamMember_WhenResourceNotFoundExceptionOccurs_ShouldReturn404()
     {
         // Arrange
         var dto = AboutTestFakes.CreateFakeTeamMemberDto();
-        var exception = (Exception)Activator.CreateInstance(exceptionType, "Erro simulado")!;
 
-        _serviceMock.Setup(s => s.CreateTeamMemberAsync(dto)).ThrowsAsync(exception);
+        _serviceMock
+            .Setup(s => s.CreateTeamMemberAsync(dto))
+            // Traduzido para inglês
+            .ThrowsAsync(new ResourceNotFoundException("Simulated error"));
+
+        // Act
+        var result = await _controller.CreateTeamMember(dto);
+
+        // Assert
+        // Corrigido para NotFoundObjectResult
+        var objectResult = Assert.IsType<NotFoundObjectResult>(result);
+        Assert.Equal(404, objectResult.StatusCode);
+    }
+
+    [Fact]
+    public async Task CreateTeamMember_WhenUnhandledExceptionOccurs_ShouldReturn500()
+    {
+        // Arrange
+        var dto = AboutTestFakes.CreateFakeTeamMemberDto();
+
+        _serviceMock
+            .Setup(s => s.CreateTeamMemberAsync(dto))
+            // Traduzido para inglês
+            .ThrowsAsync(new Exception("Simulated error"));
 
         // Act
         var result = await _controller.CreateTeamMember(dto);
 
         // Assert
         var objectResult = Assert.IsType<ObjectResult>(result);
-        Assert.Equal(expectedStatusCode, objectResult.StatusCode);
+        Assert.Equal(500, objectResult.StatusCode);
     }
 }

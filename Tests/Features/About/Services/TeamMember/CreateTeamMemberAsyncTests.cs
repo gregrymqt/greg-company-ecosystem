@@ -1,10 +1,3 @@
-using MeuCrudCsharp.Features.About.DTOs;
-using MeuCrudCsharp.Features.About.Interfaces;
-using MeuCrudCsharp.Features.About.Services;
-using MeuCrudCsharp.Features.Caching.Interfaces;
-using MeuCrudCsharp.Features.Files.Interfaces;
-using MeuCrudCsharp.Features.Shared.Work;
-using MeuCrudCsharp.Tests.Features.About;
 using Microsoft.AspNetCore.Http;
 using Moq;
 
@@ -12,41 +5,50 @@ namespace Tests.Features.About.Services.TeamMember;
 
 public class CreateTeamMemberAsyncTests : AboutServiceTestBase // Focado no método de criação de membros
 {
-    [Theory]
-    [InlineData(true)]
-    [InlineData(false)]
-    public async Task CreateTeamMemberAsync_WhenFileIsChunk_ShouldReturnDtoAndSaveCorrectly(
-        bool isChunk
-    )
+    [Fact]
+    public async Task CreateTeamMemberAsync_WhenFileIsChunk_ShouldProcessChunkAndSaveFromTemp()
     {
         // Arrange
-        var dto = AboutTestFakes.CreateFakeTeamMemberDto(isChunk);
+        var dto = AboutTestFakes.CreateFakeTeamMemberDto(isChunk: true);
 
-        if (isChunk)
-        {
-            _fileService
-                .Setup(s =>
-                    s.ProcessChunkAsync(
-                        It.IsAny<IFormFile>(),
-                        It.IsAny<string>(),
-                        It.IsAny<int>(),
-                        It.IsAny<int>()
-                    )
+        _fileService
+            .Setup(s =>
+                s.ProcessChunkAsync(
+                    It.IsAny<IFormFile>(),
+                    It.IsAny<string>(),
+                    It.IsAny<int>(),
+                    It.IsAny<int>()
                 )
-                .ReturnsAsync("temp/caminho/foto.jpg");
+            )
+            .ReturnsAsync("temp/caminho/foto.jpg");
 
-            _fileService
-                .Setup(s =>
-                    s.SalvarArquivoDoTempAsync("temp/caminho/foto.jpg", "foto.jpg", "AboutTeam")
-                )
-                .ReturnsAsync(AboutTestFakes.CreateFakeEntityFile());
-        }
-        else
-        {
-            _fileService
-                .Setup(s => s.SalvarArquivoAsync(It.IsAny<IFormFile>(), It.IsAny<string>()))
-                .ReturnsAsync(AboutTestFakes.CreateFakeEntityFile());
-        }
+        _fileService
+            .Setup(s =>
+                s.SalvarArquivoDoTempAsync("temp/caminho/foto.jpg", "foto.jpg", "AboutTeam")
+            )
+            .ReturnsAsync(AboutTestFakes.CreateFakeEntityFile());
+
+        // Act
+        var result = await _sut.CreateTeamMemberAsync(dto);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal("Lucas Vicente", result.Name);
+        Assert.Equal("uploads/foto.jpg", result.PhotoUrl);
+
+        _unitOfWork.Verify(u => u.CommitAsync(), Times.Once);
+        _cache.Verify(c => c.RemoveAsync(It.IsAny<string>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task CreateTeamMemberAsync_WhenFileIsNotChunk_ShouldCallSalvarArquivoAsync()
+    {
+        // Arrange
+        var dto = AboutTestFakes.CreateFakeTeamMemberDto(isChunk: false);
+
+        _fileService
+            .Setup(s => s.SalvarArquivoAsync(It.IsAny<IFormFile>(), It.IsAny<string>()))
+            .ReturnsAsync(AboutTestFakes.CreateFakeEntityFile());
 
         // Act
         var result = await _sut.CreateTeamMemberAsync(dto);
@@ -64,17 +66,11 @@ public class CreateTeamMemberAsyncTests : AboutServiceTestBase // Focado no mét
     public async Task CreateTeamMemberAsync_WhenFileServiceFails_ShouldThrowExceptionAndNotCommit()
     {
         // Arrange
-        var dto = AboutTestFakes.CreateFakeTeamMemberDto(false);
+        var dto = AboutTestFakes.CreateFakeTeamMemberDto(isChunk: false); // Fluxo normal
 
+        // Mudamos o Setup para o método correto que será chamado
         _fileService
-            .Setup(s =>
-                s.ProcessChunkAsync(
-                    It.IsAny<IFormFile>(),
-                    It.IsAny<string>(),
-                    It.IsAny<int>(),
-                    It.IsAny<int>()
-                )
-            )
+            .Setup(s => s.SalvarArquivoAsync(It.IsAny<IFormFile>(), It.IsAny<string>()))
             .ThrowsAsync(new Exception("Erro simulado no upload do arquivo"));
 
         // Act & Assert

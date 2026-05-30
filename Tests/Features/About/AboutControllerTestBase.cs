@@ -1,9 +1,8 @@
 using MeuCrudCsharp.Features.About.Controllers;
 using MeuCrudCsharp.Features.About.Interfaces;
-using Microsoft.AspNetCore.Mvc;
 using Moq;
 
-namespace Tests.Features.About.Controllers;
+namespace Tests.Features.About;
 
 public abstract class AboutControllerTestBase
 {

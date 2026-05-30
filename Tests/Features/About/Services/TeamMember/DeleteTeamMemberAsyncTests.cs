@@ -1,21 +1,16 @@
-using System;
 using MeuCrudCsharp.Features.Exceptions;
-using MeuCrudCsharp.Tests.Features.About;
 using Moq;
 
 namespace Tests.Features.About.Services.TeamMember;
 
 public class DeleteTeamMemberAsyncTests : AboutServiceTestBase
 {
-    [Theory]
-    [InlineData(10)] // Scenario 1: Member has an associated file (FileId = 10)
-    [InlineData(null)] // Scenario 2: Member has no associated file (FileId = null)
-    public async Task DeleteTeamMember_WhenSuccessful_ShouldDeleteMemberAndFileIfExists(int? fileId)
+    [Fact]
+    public async Task DeleteTeamMember_WhenMemberHasFile_ShouldDeleteMemberAndFile()
     {
         // Arrange
-        int idMembro = 1;
-
-        // Criamos a entidade falsa repassando o fileId (que pode ser 10 ou null, dependendo do InlineData)
+        const int idMembro = 1;
+        const int fileId = 10;
         var entity = AboutTestFakes.CreateFakeTeamMemberEntity(fileId: fileId);
 
         _repository.Setup(r => r.GetTeamMemberByIdAsync(idMembro)).ReturnsAsync(entity);
@@ -24,15 +19,26 @@ public class DeleteTeamMemberAsyncTests : AboutServiceTestBase
         await _sut.DeleteTeamMemberAsync(idMembro);
 
         // Assert
-        if (fileId.HasValue)
-        {
-            _fileService.Verify(f => f.DeletarArquivoAsync(fileId.Value), Times.Once);
-        }
-        else
-        {
-            _fileService.Verify(f => f.DeletarArquivoAsync(It.IsAny<int>()), Times.Never);
-        }
+        _fileService.Verify(f => f.DeletarArquivoAsync(fileId), Times.Once);
+        _repository.Verify(r => r.DeleteTeamMemberAsync(entity), Times.Once);
+        _unitOfWork.Verify(u => u.CommitAsync(), Times.Once);
+        _cache.Verify(c => c.RemoveAsync(It.IsAny<string>()), Times.Once);
+    }
 
+    [Fact]
+    public async Task DeleteTeamMember_WhenMemberHasNoFile_ShouldDeleteMemberWithoutCallingFileService()
+    {
+        // Arrange
+        const int idMembro = 1;
+        var entity = AboutTestFakes.CreateFakeTeamMemberEntity(fileId: null);
+
+        _repository.Setup(r => r.GetTeamMemberByIdAsync(idMembro)).ReturnsAsync(entity);
+
+        // Act
+        await _sut.DeleteTeamMemberAsync(idMembro);
+
+        // Assert
+        _fileService.Verify(f => f.DeletarArquivoAsync(It.IsAny<int>()), Times.Never);
         _repository.Verify(r => r.DeleteTeamMemberAsync(entity), Times.Once);
         _unitOfWork.Verify(u => u.CommitAsync(), Times.Once);
         _cache.Verify(c => c.RemoveAsync(It.IsAny<string>()), Times.Once);
@@ -42,18 +48,18 @@ public class DeleteTeamMemberAsyncTests : AboutServiceTestBase
     public async Task DeleteTeamMember_WhenMemberNotFound_ShouldThrowAndAbort()
     {
         // Arrange
-        int idInexistente = 999;
+        const int nonExistentId = 999;
 
         _repository
-            .Setup(r => r.GetTeamMemberByIdAsync(idInexistente))
+            .Setup(r => r.GetTeamMemberByIdAsync(nonExistentId))
             .ReturnsAsync((MeuCrudCsharp.Models.TeamMember)null!);
 
         // Act & Assert
-        var excecao = await Assert.ThrowsAsync<ResourceNotFoundException>(() =>
-            _sut.DeleteTeamMemberAsync(idInexistente)
+        var exception = await Assert.ThrowsAsync<ResourceNotFoundException>(() =>
+            _sut.DeleteTeamMemberAsync(nonExistentId)
         );
 
-        Assert.Equal($"Membro {idInexistente} não encontrado.", excecao.Message);
+        Assert.Equal($"Membro {nonExistentId} não encontrado.", exception.Message);
 
         _fileService.Verify(f => f.DeletarArquivoAsync(It.IsAny<int>()), Times.Never);
         _repository.Verify(

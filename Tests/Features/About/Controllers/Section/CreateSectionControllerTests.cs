@@ -1,12 +1,6 @@
-using System;
-using System.Threading.Tasks;
 using MeuCrudCsharp.Features.About.DTOs;
-using MeuCrudCsharp.Models;
-using MeuCrudCsharp.Tests.Features.About;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
-using Tests.Features.About.Services;
-using Xunit;
 
 namespace Tests.Features.About.Controllers.Section;
 
@@ -49,7 +43,8 @@ public class CreateSectionControllerTests : AboutControllerTestBase
         Assert.Equal(200, okResult.StatusCode);
 
         var responseValue = okResult.Value?.ToString();
-        Assert.Contains("Chunk 2 recebido.", responseValue);
+        // Traduzido para inglês ("received" no lugar de "recebido")
+        Assert.Contains("Chunk 2 received.", responseValue);
     }
 
     [Fact]
@@ -58,7 +53,8 @@ public class CreateSectionControllerTests : AboutControllerTestBase
         // Arrange
         var dto = new CreateUpdateAboutSectionDto();
 
-        _controller.ModelState.AddModelError("Title", "O título é obrigatório");
+        // Traduzido para inglês
+        _controller.ModelState.AddModelError("Title", "Title is required");
 
         // Act
         var result = await _controller.CreateSection(dto);
@@ -81,7 +77,8 @@ public class CreateSectionControllerTests : AboutControllerTestBase
 
         _serviceMock
             .Setup(s => s.CreateSectionAsync(dto))
-            .ThrowsAsync(new Exception("Erro simulado no disco"));
+            // Traduzido para inglês
+            .ThrowsAsync(new Exception("Simulated disk error"));
 
         // Act
         var result = await _controller.CreateSection(dto);
@@ -91,6 +88,7 @@ public class CreateSectionControllerTests : AboutControllerTestBase
         Assert.Equal(500, serverErrorResult.StatusCode);
 
         var responseValue = serverErrorResult.Value?.ToString();
-        Assert.Contains("Erro ao criar a seção.", responseValue);
+        // Traduzido para inglês
+        Assert.Contains("Error creating section.", responseValue);
     }
 }

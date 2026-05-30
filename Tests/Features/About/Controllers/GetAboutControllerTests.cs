@@ -1,10 +1,6 @@
-using System;
-using System.Threading.Tasks;
 using MeuCrudCsharp.Features.About.DTOs;
-using MeuCrudCsharp.Features.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
-using Xunit;
 
 namespace Tests.Features.About.Controllers;
 

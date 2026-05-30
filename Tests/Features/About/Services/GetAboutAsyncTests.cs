@@ -1,15 +1,4 @@
-using System;
-using Humanizer;
 using MeuCrudCsharp.Features.About.DTOs;
-using MeuCrudCsharp.Features.About.Interfaces;
-using MeuCrudCsharp.Features.About.Services;
-using MeuCrudCsharp.Features.Caching.Interfaces;
-using MeuCrudCsharp.Features.Files.Interfaces;
-using MeuCrudCsharp.Features.Files.Services;
-using MeuCrudCsharp.Features.Shared.Work;
-using MeuCrudCsharp.Models;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Moq;
 
 namespace Tests.Features.About.Services;
@@ -47,14 +36,35 @@ public class GetAboutAsyncTests : AboutServiceTestBase
             },
         };
 
-    [Theory]
-    [InlineData(true)] // Scenario 1: Cache has data (Hit)
-    [InlineData(false)] // Scenario 2: Cache is empty (Miss)
-    public async Task GetAboutPageContent_ShouldHandleCacheFlow(bool isCacheHit)
+    [Fact]
+    public async Task GetAboutPageContent_WhenCacheHit_ShouldReturnCachedDataWithoutCallingRepository()
     {
-        // ARRANGE
-        var cachedDto = isCacheHit ? CreateFakeAboutPageContentDto() : null;
+        // Arrange
+        var cachedDto = CreateFakeAboutPageContentDto();
 
+        _cache
+            .Setup(c =>
+                c.GetOrCreateAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<Func<Task<AboutPageContentDto>>>(),
+                    It.IsAny<TimeSpan?>()
+                )
+            )
+            .ReturnsAsync(cachedDto);
+
+        // Act
+        var result = await _sut.GetAboutPageContentAsync();
+
+        // Assert
+        Assert.NotNull(result);
+        _repository.Verify(r => r.GetAllSectionsAsync(), Times.Never);
+        _repository.Verify(r => r.GetAllTeamMembersAsync(), Times.Never);
+    }
+
+    [Fact]
+    public async Task GetAboutPageContent_WhenCacheMiss_ShouldCallRepositoryAndReturnData()
+    {
+        // Arrange
         _cache
             .Setup(c =>
                 c.GetOrCreateAsync(
@@ -65,22 +75,19 @@ public class GetAboutAsyncTests : AboutServiceTestBase
             )
             .Returns(
                 async (string key, Func<Task<AboutPageContentDto>> factory, TimeSpan? expiry) =>
-                    isCacheHit ? cachedDto : await factory()
+                    await factory()
             );
 
         _repository.Setup(r => r.GetAllSectionsAsync()).ReturnsAsync([]);
         _repository.Setup(r => r.GetAllTeamMembersAsync()).ReturnsAsync([]);
 
-        // ACT
+        // Act
         var result = await _sut.GetAboutPageContentAsync();
 
-        // ASSERT
+        // Assert
         Assert.NotNull(result);
-
-        // If isCacheHit is true, the repo should be called ZERO times (Never).
-        // If false, it should be called exactly ONE time (Once).
-        var expectedCalls = isCacheHit ? Times.Never() : Times.Once();
-        _repository.Verify(r => r.GetAllSectionsAsync(), expectedCalls);
+        _repository.Verify(r => r.GetAllSectionsAsync(), Times.Once);
+        _repository.Verify(r => r.GetAllTeamMembersAsync(), Times.Once);
     }
 
     [Fact]
