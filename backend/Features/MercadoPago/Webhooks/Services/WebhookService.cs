@@ -1,7 +1,7 @@
 using System.Security.Cryptography;
 using System.Text;
-using MeuCrudCsharp.Features.MercadoPago.Jobs.Interfaces;
-using MeuCrudCsharp.Features.MercadoPago.Jobs.Job;
+using MeuCrudCsharp.Features.MercadoPago.Jobs.Application.Interfaces;
+using MeuCrudCsharp.Features.MercadoPago.Jobs.Application.Jobs;
 using MeuCrudCsharp.Features.MercadoPago.Webhooks.DTOs;
 using MeuCrudCsharp.Features.MercadoPago.Webhooks.Interfaces;
 using Microsoft.Extensions.Options;

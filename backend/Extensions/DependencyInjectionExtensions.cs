@@ -1,8 +1,8 @@
 using MeuCrudCsharp.Features.Hubs.Infrastructure.State;
 using MeuCrudCsharp.Features.Hubs.Presentation.Hubs;
 using MeuCrudCsharp.Features.MercadoPago.Jobs;
-using MeuCrudCsharp.Features.MercadoPago.Jobs.Job;
-using MeuCrudCsharp.Features.MercadoPago.Jobs.Services;
+using MeuCrudCsharp.Features.MercadoPago.Jobs.Application.Jobs;
+using MeuCrudCsharp.Features.MercadoPago.Jobs.Infrastructure.Services;
 
 namespace MeuCrudCsharp.Extensions;
 
@@ -39,15 +39,16 @@ public static class DependencyInjectionExtensions
                         "MeuCrudCsharp.Features.Emails.Infrastructure.Services",
                         "MeuCrudCsharp.Features.MercadoPago.Payments.Services",
                         "MeuCrudCsharp.Features.MercadoPago.Payments.Repositories",
-                        "MeuCrudCsharp.Features.MercadoPago.Notification.Services",
+                        "MeuCrudCsharp.Features.MercadoPago.Notification.Application.Services",
                         "MeuCrudCsharp.Features.MercadoPago.Plans.Services",
                         "MeuCrudCsharp.Features.MercadoPago.Plans.Repositories",
-                        "MeuCrudCsharp.Features.MercadoPago.Clients.Services",
+                        "MeuCrudCsharp.Features.MercadoPago.Clients.Application.Services",
+                        "MeuCrudCsharp.Features.MercadoPago.Clients.Infrastructure.Integration",
                         "MeuCrudCsharp.Features.MercadoPago.Subscriptions.Services",
                         "MeuCrudCsharp.Features.MercadoPago.Subscriptions.Repositories",
                         "MeuCrudCsharp.Features.MercadoPago.Refunds.Services",
                         "MeuCrudCsharp.Features.MercadoPago.Refunds.Notifications",
-                        "MeuCrudCsharp.Features.MercadoPago.Jobs.Services",
+                        "MeuCrudCsharp.Features.MercadoPago.Jobs.Infrastructure.Services",
                         "MeuCrudCsharp.Features.MercadoPago.WebHooks.Services",
                         "MeuCrudCsharp.Features.MercadoPago.Chargebacks.Application.Services",
                         "MeuCrudCsharp.Features.MercadoPago.Chargebacks.Infrastructure.Integration",
@@ -55,7 +56,8 @@ public static class DependencyInjectionExtensions
                         "MeuCrudCsharp.Features.MercadoPago.Claims.Application.Services",
                         "MeuCrudCsharp.Features.MercadoPago.Claims.Infrastructure.Integration",
                         "MeuCrudCsharp.Features.MercadoPago.Claims.Infrastructure.Persistence.Repositories",
-                        "MeuCrudCsharp.Features.MercadoPago.Hub",
+                        "MeuCrudCsharp.Features.MercadoPago.Hub.Application.Interfaces",
+                        "MeuCrudCsharp.Features.MercadoPago.Hub.Infrastructure.Services",
                         "MeuCrudCsharp.AppSettings",
                         "MeuCrudCsharp.Features.Shared.Work"
                     )
