@@ -1,3 +1,4 @@
+using MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Interfaces;
 using MercadoPago.Client;
 using MercadoPago.Client.Common;
 using MercadoPago.Client.Payment;
@@ -10,13 +11,13 @@ using MeuCrudCsharp.Features.Caching.Application.DTOs;
 using MeuCrudCsharp.Features.Exceptions;
 using MeuCrudCsharp.Features.MercadoPago.Hub.Application.Interfaces;
 using MeuCrudCsharp.Features.MercadoPago.Notification.Application.DTOs;
-using MeuCrudCsharp.Features.MercadoPago.Payments.Dtos;
-using MeuCrudCsharp.Features.MercadoPago.Payments.Interfaces;
+using MeuCrudCsharp.Features.MercadoPago.Payments.Application.DTOs;
+using MeuCrudCsharp.Features.MercadoPago.Payments.Application.Interfaces;
 using MeuCrudCsharp.Features.MercadoPago.Utils;
 using MeuCrudCsharp.Features.Shared.Work;
 using Microsoft.Extensions.Options;
 
-namespace MeuCrudCsharp.Features.MercadoPago.Payments.Services;
+namespace MeuCrudCsharp.Features.MercadoPago.Payments.Application.Services;
 
 public class PixPaymentService(
     ILogger<PixPaymentService> logger,

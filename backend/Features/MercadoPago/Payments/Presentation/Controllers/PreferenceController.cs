@@ -1,17 +1,17 @@
-﻿using System;
+using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using MercadoPago.Resource.User;
 using MeuCrudCsharp.Features.Base;
 using MeuCrudCsharp.Features.Exceptions;
-using MeuCrudCsharp.Features.MercadoPago.Payments.Dtos;
-using MeuCrudCsharp.Features.MercadoPago.Payments.Interfaces;
+using MeuCrudCsharp.Features.MercadoPago.Payments.Application.DTOs;
+using MeuCrudCsharp.Features.MercadoPago.Payments.Application.Interfaces;
 using MeuCrudCsharp.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace MeuCrudCsharp.Features.MercadoPago.Payments.Controllers;
+namespace MeuCrudCsharp.Features.MercadoPago.Payments.Presentation.Controllers;
 
 [Route("api/preferences")]
 public class PreferenceController : MercadoPagoApiControllerBase
@@ -34,7 +34,7 @@ public class PreferenceController : MercadoPagoApiControllerBase
         }
         catch (Exception ex)
         {
-            return HandleException(ex, "Erro ao criar preferência de pagamento.");
+            return HandleException(ex, "Erro ao criar prefer�ncia de pagamento.");
         }
     }
 }

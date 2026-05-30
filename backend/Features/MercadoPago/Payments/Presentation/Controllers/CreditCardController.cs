@@ -1,10 +1,10 @@
 using MeuCrudCsharp.Features.Base;
 using MeuCrudCsharp.Features.Caching.Application.Interfaces;
-using MeuCrudCsharp.Features.MercadoPago.Payments.Dtos;
-using MeuCrudCsharp.Features.MercadoPago.Payments.Interfaces;
+using MeuCrudCsharp.Features.MercadoPago.Payments.Application.DTOs;
+using MeuCrudCsharp.Features.MercadoPago.Payments.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
-namespace MeuCrudCsharp.Features.MercadoPago.Payments.Controllers
+namespace MeuCrudCsharp.Features.MercadoPago.Payments.Presentation.Controllers
 {
     [Route("/api/credit/card")]
     public class CreditCardController : MercadoPagoApiControllerBase

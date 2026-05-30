@@ -1,7 +1,7 @@
 using MeuCrudCsharp.Features.Auth.Domain.Interfaces;
 using MeuCrudCsharp.Features.Auth.Application.Interfaces;
 using MeuCrudCsharp.Features.Base;
-using MeuCrudCsharp.Features.MercadoPago.Payments.Interfaces;
+using MeuCrudCsharp.Features.MercadoPago.Payments.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

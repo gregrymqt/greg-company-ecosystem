@@ -1,15 +1,16 @@
+using MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Interfaces;
 using MercadoPago.Client;
 using MercadoPago.Client.Preference;
 using Microsoft.Extensions.Options;
 using MeuCrudCsharp.Features.Auth.Domain.Interfaces;
 using MeuCrudCsharp.Features.Auth.Application.Interfaces;
 using MeuCrudCsharp.Features.Exceptions;
-using MeuCrudCsharp.Features.MercadoPago.Payments.Dtos;
-using MeuCrudCsharp.Features.MercadoPago.Payments.Interfaces;
+using MeuCrudCsharp.Features.MercadoPago.Payments.Application.DTOs;
+using MeuCrudCsharp.Features.MercadoPago.Payments.Application.Interfaces;
 using MeuCrudCsharp.Features.Shared.Work;
 using MeuCrudCsharp.Models;
 
-namespace MeuCrudCsharp.Features.MercadoPago.Payments.Services;
+namespace MeuCrudCsharp.Features.MercadoPago.Payments.Application.Services;
 
 public class PreferencePaymentService(
     ILogger<PreferencePaymentService> logger,

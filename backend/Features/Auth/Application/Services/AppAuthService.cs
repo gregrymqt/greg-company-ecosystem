@@ -1,9 +1,10 @@
-﻿using System.Security.Claims;
+using MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Interfaces;
+using System.Security.Claims;
 using MeuCrudCsharp.Features.Auth.Application.DTOs;
 using MeuCrudCsharp.Features.Auth.Domain.Interfaces;
 using MeuCrudCsharp.Features.Auth.Application.Interfaces;
 using MeuCrudCsharp.Features.Exceptions;
-using MeuCrudCsharp.Features.MercadoPago.Payments.Interfaces;
+using MeuCrudCsharp.Features.MercadoPago.Payments.Application.Interfaces;
 using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Interfaces;
 using MeuCrudCsharp.Models;
 using Microsoft.AspNetCore.Identity;
@@ -49,7 +50,7 @@ namespace MeuCrudCsharp.Features.Auth.Application.Services
             if (string.IsNullOrEmpty(googleId) || string.IsNullOrEmpty(email))
             {
                 throw new InvalidOperationException(
-                    "N�o foi poss�vel obter os dados do provedor externo."
+                    "N?o foi poss?vel obter os dados do provedor externo."
                 );
             }
             var user = await _userRepository.FindByGoogleIdAsync(googleId);
@@ -59,7 +60,7 @@ namespace MeuCrudCsharp.Features.Auth.Application.Services
                 if (user == null)
                 {
                     _logger.LogInformation(
-                        "Nenhum usu�rio encontrado para {Email}. Criando uma nova conta.",
+                        "Nenhum usu?rio encontrado para {Email}. Criando uma nova conta.",
                         email
                     );
                     string? name = googleUserPrincipal.FindFirstValue(ClaimTypes.Name);
@@ -69,7 +70,7 @@ namespace MeuCrudCsharp.Features.Auth.Application.Services
                     if (!result.Succeeded)
                     {
                         throw new InvalidOperationException(
-                            $"N�o foi poss�vel criar o usu�rio: {string.Join(", ", result.Errors.Select(e => e.Description))}"
+                            $"N?o foi poss?vel criar o usu?rio: {string.Join(", ", result.Errors.Select(e => e.Description))}"
                         );
                     }
                     await addRolesToUser(user);
@@ -91,7 +92,7 @@ namespace MeuCrudCsharp.Features.Auth.Application.Services
                     SameSite = SameSiteMode.Lax,
                 }
             );
-            _logger.LogInformation("Usu�rio {UserId} logado com sucesso via Google.", user.Id);
+            _logger.LogInformation("Usu?rio {UserId} logado com sucesso via Google.", user.Id);
             return user;
         }
 
@@ -100,7 +101,7 @@ namespace MeuCrudCsharp.Features.Auth.Application.Services
             var user = await _userRepository.GetByIdAsync(userId);
 
             if (user == null)
-                throw new ResourceNotFoundException("Usu�rio n�o encontrado.");
+                throw new ResourceNotFoundException("Usu?rio n?o encontrado.");
 
             var paymentTask = _paymentRepository.HasAnyPaymentByUserIdAsync(userId);
             var subTask = _subscriptionRepository.HasActiveSubscriptionByUserIdAsync(userId);
@@ -111,7 +112,7 @@ namespace MeuCrudCsharp.Features.Auth.Application.Services
             return new UserSessionDto
             {
                 PublicId = user.PublicId,
-                Name = user.Name ?? "Usu�rio",
+                Name = user.Name ?? "Usu?rio",
                 Email = user.Email ?? string.Empty,
                 AvatarUrl = user.AvatarUrl,
                 HasPaymentHistory = paymentTask.Result,
@@ -138,7 +139,7 @@ namespace MeuCrudCsharp.Features.Auth.Application.Services
             if (
                 user.Email != null
                 && user.Email.Equals(
-                    "emailGen�ricoAdmin@gmail.com",
+                    "emailGen?ricoAdmin@gmail.com",
                     StringComparison.OrdinalIgnoreCase
                 )
             )
@@ -157,20 +158,20 @@ namespace MeuCrudCsharp.Features.Auth.Application.Services
             if (user == null)
             {
                 _logger.LogWarning(
-                    "Tentativa de login com email n�o encontrado: {Email}",
+                    "Tentativa de login com email n?o encontrado: {Email}",
                     request.Email
                 );
-                throw new UnauthorizedAccessException("Email ou senha inv�lidos.");
+                throw new UnauthorizedAccessException("Email ou senha inv?lidos.");
             }
 
             var isPasswordValid = await _userManager.CheckPasswordAsync(user, request.Password);
             if (!isPasswordValid)
             {
                 _logger.LogWarning(
-                    "Tentativa de login com senha incorreta para o usu�rio: {UserId}",
+                    "Tentativa de login com senha incorreta para o usu?rio: {UserId}",
                     user.Id
                 );
-                throw new UnauthorizedAccessException("Email ou senha inv�lidos.");
+                throw new UnauthorizedAccessException("Email ou senha inv?lidos.");
             }
 
             var (token, expiration) = await _jwtService.GenerateJwtTokenWithExpirationAsync(user);
@@ -179,7 +180,7 @@ namespace MeuCrudCsharp.Features.Auth.Application.Services
 
             var userSession = await GetAuthenticatedUserDataAsync(user.Id);
 
-            _logger.LogInformation("Login bem-sucedido para o usu�rio: {UserId}", user.Id);
+            _logger.LogInformation("Login bem-sucedido para o usu?rio: {UserId}", user.Id);
 
             return new LoginResponseDto
             {
@@ -194,13 +195,13 @@ namespace MeuCrudCsharp.Features.Auth.Application.Services
         {
             if (request.Password != request.ConfirmPassword)
             {
-                throw new InvalidOperationException("As senhas n�o coincidem.");
+                throw new InvalidOperationException("As senhas n?o coincidem.");
             }
 
             var existingUser = await _userManager.FindByEmailAsync(request.Email);
             if (existingUser != null)
             {
-                throw new InvalidOperationException("Email j� cadastrado.");
+                throw new InvalidOperationException("Email j? cadastrado.");
             }
 
             var user = new Users
@@ -217,8 +218,8 @@ namespace MeuCrudCsharp.Features.Auth.Application.Services
             if (!result.Succeeded)
             {
                 var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-                _logger.LogError("Erro ao criar usu�rio: {Errors}", errors);
-                throw new InvalidOperationException($"N�o foi poss�vel criar o usu�rio: {errors}");
+                _logger.LogError("Erro ao criar usu?rio: {Errors}", errors);
+                throw new InvalidOperationException($"N?o foi poss?vel criar o usu?rio: {errors}");
             }
 
             await addRolesToUser(user);
@@ -229,7 +230,7 @@ namespace MeuCrudCsharp.Features.Auth.Application.Services
 
             var userSession = await GetAuthenticatedUserDataAsync(user.Id);
 
-            _logger.LogInformation("Novo usu�rio registrado com sucesso: {UserId}", user.Id);
+            _logger.LogInformation("Novo usu?rio registrado com sucesso: {UserId}", user.Id);
 
             return new LoginResponseDto
             {

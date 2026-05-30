@@ -1,9 +1,10 @@
+using MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Interfaces;
 using System;
 using MeuCrudCsharp.Features.MercadoPago.Base;
-using MeuCrudCsharp.Features.MercadoPago.Payments.Dtos;
-using MeuCrudCsharp.Features.MercadoPago.Payments.Interfaces;
+using MeuCrudCsharp.Features.MercadoPago.Payments.Application.DTOs;
+using MeuCrudCsharp.Features.MercadoPago.Payments.Application.Interfaces;
 
-namespace MeuCrudCsharp.Features.MercadoPago.Payments.Services;
+namespace MeuCrudCsharp.Features.MercadoPago.Payments.Application.Services;
 
 public class PaymentService(
     IPaymentRepository paymentRepository,

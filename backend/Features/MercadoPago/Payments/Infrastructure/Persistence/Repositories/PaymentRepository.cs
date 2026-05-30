@@ -1,8 +1,9 @@
+using MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Interfaces;
 using MeuCrudCsharp.Data;
-using MeuCrudCsharp.Features.MercadoPago.Payments.Interfaces;
+using MeuCrudCsharp.Features.MercadoPago.Payments.Application.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
-namespace MeuCrudCsharp.Features.MercadoPago.Payments.Repositories;
+namespace MeuCrudCsharp.Features.MercadoPago.Payments.Infrastructure.Persistence.Repositories;
 
 public class PaymentRepository(ApiDbContext context) : IPaymentRepository
 {

@@ -1,10 +1,10 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using MeuCrudCsharp.Features.MercadoPago.Base;
-using MeuCrudCsharp.Features.MercadoPago.Payments.Dtos;
-using MeuCrudCsharp.Features.MercadoPago.Payments.Interfaces;
+using MeuCrudCsharp.Features.MercadoPago.Payments.Application.DTOs;
+using MeuCrudCsharp.Features.MercadoPago.Payments.Application.Interfaces;
 using Microsoft.Extensions.Logging;
 
-namespace MeuCrudCsharp.Features.MercadoPago.Payments.Services
+namespace MeuCrudCsharp.Features.MercadoPago.Payments.Infrastructure.Integration
 {
     public class MercadoPagoPaymentService(
         IHttpClientFactory httpClient,

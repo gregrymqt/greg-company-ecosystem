@@ -1,10 +1,11 @@
+using MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Interfaces;
 using System.Text.Json;
 using MeuCrudCsharp.Features.Emails.Application.Interfaces;
 using MeuCrudCsharp.Features.Emails.Application.ViewModels;
 using MeuCrudCsharp.Features.Exceptions;
 using MeuCrudCsharp.Features.MercadoPago.Notification.Application.Interfaces;
 using MeuCrudCsharp.Features.MercadoPago.Notification.Application.DTOs;
-using MeuCrudCsharp.Features.MercadoPago.Payments.Interfaces;
+using MeuCrudCsharp.Features.MercadoPago.Payments.Application.Interfaces;
 using MeuCrudCsharp.Features.MercadoPago.Refunds.Interfaces;
 using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Interfaces;
 using MeuCrudCsharp.Features.Shared.Work;

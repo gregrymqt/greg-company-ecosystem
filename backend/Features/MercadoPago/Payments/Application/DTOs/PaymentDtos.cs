@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
-namespace MeuCrudCsharp.Features.MercadoPago.Payments.Dtos;
+namespace MeuCrudCsharp.Features.MercadoPago.Payments.Application.DTOs;
 
 public record CreatePixPaymentRequest(
     string? Description,

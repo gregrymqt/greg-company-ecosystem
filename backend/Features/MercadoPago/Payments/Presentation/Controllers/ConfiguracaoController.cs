@@ -2,7 +2,7 @@ using MeuCrudCsharp.Features.Base;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
-namespace MeuCrudCsharp.Features.MercadoPago.Payments.Controllers;
+namespace MeuCrudCsharp.Features.MercadoPago.Payments.Presentation.Controllers;
 
 [Route("api/[controller]")]
 public class ConfiguracaoController : ApiControllerBase

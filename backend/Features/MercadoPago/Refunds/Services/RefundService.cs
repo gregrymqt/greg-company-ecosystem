@@ -1,8 +1,9 @@
-﻿﻿using MeuCrudCsharp.Data;
+using MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Interfaces;
+using MeuCrudCsharp.Data;
 using MeuCrudCsharp.Features.Base;
 using MeuCrudCsharp.Features.Exceptions;
 using MeuCrudCsharp.Features.MercadoPago.Base;
-using MeuCrudCsharp.Features.MercadoPago.Payments.Interfaces;
+using MeuCrudCsharp.Features.MercadoPago.Payments.Application.Interfaces;
 using MeuCrudCsharp.Features.MercadoPago.Refunds.Interfaces;
 using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Interfaces;
 using MeuCrudCsharp.Features.Shared.Work;
@@ -30,7 +31,7 @@ namespace MeuCrudCsharp.Features.MercadoPago.Refunds.Services
             if (payment == null)
             {
                 throw new ResourceNotFoundException(
-                    $"Pagamento {paymentId} não encontrado no sistema."
+                    $"Pagamento {paymentId} n�o encontrado no sistema."
                 );
             }
 
@@ -44,7 +45,7 @@ namespace MeuCrudCsharp.Features.MercadoPago.Refunds.Services
             if (payment.CreatedAt < DateTime.UtcNow.AddDays(-7))
             {
                 throw new AppServiceException(
-                    "O prazo de 7 dias para solicitação de reembolso expirou."
+                    "O prazo de 7 dias para solicita��o de reembolso expirou."
                 );
             }
 
