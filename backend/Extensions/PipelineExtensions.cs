@@ -56,6 +56,8 @@ public static class PipelineExtensions
 
         app.MapControllerRoute(name: "default", pattern: "{controller=Home}/{action=Index}/{id?}");
 
+        app.UseMcpEndpoints();
+
         return app;
     }
 
