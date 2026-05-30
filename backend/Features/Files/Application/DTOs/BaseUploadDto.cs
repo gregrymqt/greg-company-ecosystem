@@ -1,6 +1,6 @@
 using System;
 
-namespace MeuCrudCsharp.Features.Files.DTOs;
+namespace MeuCrudCsharp.Features.Files.Application.DTOs;
 
 public class BaseUploadDto
 {

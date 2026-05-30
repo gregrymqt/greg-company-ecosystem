@@ -1,7 +1,8 @@
-﻿﻿using System.Globalization;
+using System.Globalization;
 using System.Text.RegularExpressions;
 using MeuCrudCsharp.Features.Exceptions;
-using MeuCrudCsharp.Features.Files.Interfaces;
+using MeuCrudCsharp.Features.Files.Application.Interfaces;
+using MeuCrudCsharp.Features.Files.Domain.Interfaces;
 using MeuCrudCsharp.Features.Shared.Work;
 using MeuCrudCsharp.Features.Videos.Interfaces;
 using MeuCrudCsharp.Models;
@@ -58,7 +59,7 @@ public class VideoProcessingService : IVideoProcessingService
 
             if (video == null || originalFile == null)
                 throw new ResourceNotFoundException(
-                    "Vídeo ou Arquivo original não encontrados no banco."
+                    "V�deo ou Arquivo original n�o encontrados no banco."
                 );
 
             groupName = video.StorageIdentifier;
@@ -79,12 +80,12 @@ public class VideoProcessingService : IVideoProcessingService
 
             if (!File.Exists(inputFilePath))
                 throw new FileNotFoundException(
-                    $"Arquivo físico não encontrado em: {inputFilePath}"
+                    $"Arquivo f�sico n�o encontrado em: {inputFilePath}"
                 );
 
             await _videoNotificationService.SendProgressUpdate(
                 groupName,
-                "Iniciando análise...",
+                "Iniciando an�lise...",
                 0
             );
 
@@ -95,7 +96,7 @@ public class VideoProcessingService : IVideoProcessingService
             await _unitOfWork.CommitAsync();
             
             _logger.LogInformation(
-                "Duração do vídeo {VideoId} detectada: {Duration}",
+                "Dura��o do v�deo {VideoId} detectada: {Duration}",
                 videoId,
                 duration
             );
@@ -116,7 +117,7 @@ public class VideoProcessingService : IVideoProcessingService
 
             await _videoNotificationService.SendProgressUpdate(
                 groupName,
-                "Convertendo vídeo...",
+                "Convertendo v�deo...",
                 5
             );
 
@@ -132,20 +133,20 @@ public class VideoProcessingService : IVideoProcessingService
 
             await _videoNotificationService.SendProgressUpdate(
                 groupName,
-                "Processamento concluído!",
+                "Processamento conclu�do!",
                 100,
                 isComplete: true
             );
 
             _logger.LogInformation(
-                "Vídeo {Id} ({StorageIdentifier}) processado com sucesso e disponível para reprodução.",
+                "V�deo {Id} ({StorageIdentifier}) processado com sucesso e dispon�vel para reprodu��o.",
                 videoId,
                 video.StorageIdentifier
             );
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Erro no processamento do vídeo ID {VideoId}", videoId);
+            _logger.LogError(ex, "Erro no processamento do v�deo ID {VideoId}", videoId);
 
             if (video == null) throw;
             
@@ -187,7 +188,7 @@ public class VideoProcessingService : IVideoProcessingService
         }
 
         _logger.LogWarning(
-            "Falha ao ler duração. Saída: {Output} Erro: {Error}",
+            "Falha ao ler dura��o. Sa�da: {Output} Erro: {Error}",
             result.StandardOutput,
             result.StandardError
         );

@@ -1,7 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
-using MeuCrudCsharp.Features.Files.DTOs;
+using MeuCrudCsharp.Features.Files.Application.DTOs;
 
 namespace MeuCrudCsharp.Features.About.Application.DTOs;
 

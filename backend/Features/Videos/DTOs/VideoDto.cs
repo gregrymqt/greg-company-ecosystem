@@ -1,6 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations;
-using MeuCrudCsharp.Features.Files.DTOs;
+using MeuCrudCsharp.Features.Files.Application.DTOs;
 
 namespace MeuCrudCsharp.Features.Videos.DTOs
 {

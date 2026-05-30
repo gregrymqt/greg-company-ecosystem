@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
-namespace MeuCrudCsharp.Features.Files.Attributes;
+namespace MeuCrudCsharp.Features.Files.Presentation.Attributes;
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
 public class AllowLargeFileAttribute : RequestFormLimitsAttribute, IResourceFilter

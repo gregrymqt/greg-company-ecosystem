@@ -4,7 +4,7 @@ using MeuCrudCsharp.Features.About.Application.Interfaces;
 using MeuCrudCsharp.Features.About.Domain.Interfaces;
 using MeuCrudCsharp.Features.Caching.Application.Interfaces;
 using MeuCrudCsharp.Features.Exceptions;
-using MeuCrudCsharp.Features.Files.Interfaces;
+using MeuCrudCsharp.Features.Files.Application.Interfaces;
 using MeuCrudCsharp.Features.Shared.Work;
 using MeuCrudCsharp.Models;
 

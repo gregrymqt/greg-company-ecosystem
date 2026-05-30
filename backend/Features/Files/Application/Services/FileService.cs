@@ -1,10 +1,11 @@
 using MeuCrudCsharp.Features.Exceptions;
-using MeuCrudCsharp.Features.Files.Interfaces;
+using MeuCrudCsharp.Features.Files.Application.Interfaces;
+using MeuCrudCsharp.Features.Files.Domain.Interfaces;
 using MeuCrudCsharp.Features.Shared.Work;
 using MeuCrudCsharp.Models;
 using Microsoft.AspNetCore.StaticFiles;
 
-namespace MeuCrudCsharp.Features.Files.Services;
+namespace MeuCrudCsharp.Features.Files.Application.Services;
 
 public class FileService(
     IFileRepository repository,

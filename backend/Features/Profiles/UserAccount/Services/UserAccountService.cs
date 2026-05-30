@@ -1,6 +1,6 @@
 using MeuCrudCsharp.Features.Auth.Domain.Interfaces;
 using MeuCrudCsharp.Features.Auth.Application.Interfaces;
-using MeuCrudCsharp.Features.Files.Interfaces;
+using MeuCrudCsharp.Features.Files.Application.Interfaces;
 using MeuCrudCsharp.Features.Profiles.UserAccount.DTOs;
 using MeuCrudCsharp.Features.Profiles.UserAccount.Interfaces;
 using MeuCrudCsharp.Features.Shared.Work;

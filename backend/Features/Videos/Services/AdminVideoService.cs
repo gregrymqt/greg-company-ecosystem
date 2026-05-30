@@ -1,7 +1,7 @@
 using Hangfire;
 using MeuCrudCsharp.Features.Caching.Application.Interfaces;
 using MeuCrudCsharp.Features.Exceptions;
-using MeuCrudCsharp.Features.Files.Interfaces;
+using MeuCrudCsharp.Features.Files.Application.Interfaces;
 using MeuCrudCsharp.Features.Shared.Work;
 using MeuCrudCsharp.Features.Videos.DTOs;
 using MeuCrudCsharp.Features.Videos.Interfaces;

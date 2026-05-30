@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
-using MeuCrudCsharp.Features.Files.DTOs;
+using MeuCrudCsharp.Features.Files.Application.DTOs;
 using Microsoft.AspNetCore.Http;
 
 namespace MeuCrudCsharp.Features.Home.DTOs;

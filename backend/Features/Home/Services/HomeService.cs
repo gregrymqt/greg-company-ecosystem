@@ -1,6 +1,6 @@
 using MeuCrudCsharp.Features.Caching.Application.Interfaces;
 using MeuCrudCsharp.Features.Exceptions;
-using MeuCrudCsharp.Features.Files.Interfaces;
+using MeuCrudCsharp.Features.Files.Application.Interfaces;
 using MeuCrudCsharp.Features.Home.DTOs;
 using MeuCrudCsharp.Features.Home.Interfaces;
 using MeuCrudCsharp.Features.Shared.Work;

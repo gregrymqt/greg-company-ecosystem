@@ -1,7 +1,7 @@
 using System;
 using MeuCrudCsharp.Models;
 
-namespace MeuCrudCsharp.Features.Files.Interfaces;
+namespace MeuCrudCsharp.Features.Files.Domain.Interfaces;
 
 public interface IFileRepository
 {

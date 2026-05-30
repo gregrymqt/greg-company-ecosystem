@@ -1,6 +1,6 @@
 using Hangfire;
 using MeuCrudCsharp.Features.Base;
-using MeuCrudCsharp.Features.Files.Attributes;
+using MeuCrudCsharp.Features.Files.Presentation.Attributes;
 using MeuCrudCsharp.Features.Videos.DTOs;
 using MeuCrudCsharp.Features.Videos.Interfaces;
 using Microsoft.AspNetCore.Authorization;

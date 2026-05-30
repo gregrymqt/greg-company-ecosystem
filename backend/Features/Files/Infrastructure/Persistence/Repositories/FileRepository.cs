@@ -1,8 +1,8 @@
 using MeuCrudCsharp.Data;
-using MeuCrudCsharp.Features.Files.Interfaces;
+using MeuCrudCsharp.Features.Files.Domain.Interfaces;
 using MeuCrudCsharp.Models;
 
-namespace MeuCrudCsharp.Features.Files.Repositories;
+namespace MeuCrudCsharp.Features.Files.Infrastructure.Persistence.Repositories;
 
 public class FileRepository(ApiDbContext context) : IFileRepository
 {

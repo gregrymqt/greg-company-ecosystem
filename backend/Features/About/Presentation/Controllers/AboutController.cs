@@ -2,7 +2,7 @@ using MeuCrudCsharp.Features.About.Application.DTOs;
 using MeuCrudCsharp.Features.About.Application.Interfaces;
 using MeuCrudCsharp.Features.Base;
 using MeuCrudCsharp.Features.Exceptions;
-using MeuCrudCsharp.Features.Files.Attributes;
+using MeuCrudCsharp.Features.Files.Presentation.Attributes;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
