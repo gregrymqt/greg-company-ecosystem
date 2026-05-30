@@ -82,6 +82,7 @@
   </ItemGroup>
   <ItemGroup>
     <!-- Itens removidos permanecem iguais -->
+    <PackageReference Include="Microsoft.Build" Version="17.8.43" />
     <_ContentIncludedByDefault Remove="wwwroot\js\token\getTokens.js" />
     <_ContentIncludedByDefault Remove="Pages\Payment\Method\SelectPaymentMethod.cshtml" />
   </ItemGroup>

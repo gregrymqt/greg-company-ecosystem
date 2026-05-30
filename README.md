@@ -1,4 +1,4 @@
-﻿# 💼 Greg Company - Plataforma de Cursos Online
+# 💼 Greg Company - Plataforma de Cursos Online
 
 Ecossistema completo para gestão de cursos online com sistema integrado de pagamentos, assinaturas e inteligência de negócios. Plataforma Full-stack desenvolvida por Lucas Vicente De Souza, estudante de Desenvolvimento de Software Multiplataforma na FATEC.
 
