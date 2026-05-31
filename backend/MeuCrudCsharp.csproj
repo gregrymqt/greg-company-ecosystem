@@ -7,6 +7,18 @@
     <UserSecretsId>44cf1388-7117-4d5a-ac6d-b60ad7b73c25</UserSecretsId>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="Features\Auth\Controllers\**" />
+    <Compile Remove="Features\Auth\Dtos\**" />
+    <Content Remove="Features\Auth\Controllers\**" />
+    <Content Remove="Features\Auth\Dtos\**" />
+    <EmbeddedResource Remove="Features\Auth\Controllers\**" />
+    <EmbeddedResource Remove="Features\Auth\Dtos\**" />
+    <None Remove="Features\Auth\Controllers\**" />
+    <None Remove="Features\Auth\Dtos\**" />
+    <TypeScriptCompile Remove="Features\Auth\Controllers\**" />
+    <TypeScriptCompile Remove="Features\Auth\Dtos\**" />
+  </ItemGroup>
+  <ItemGroup>
     <!-- Pacotes de terceiros (Hangfire, DotNetEnv, etc.) geralmente não precisam de alteração -->
     <PackageReference Include="DotNetEnv" Version="3.1.1" />
     <PackageReference Include="Hangfire.AspNetCore" Version="1.8.20" />
@@ -55,8 +67,6 @@
     <Folder Include="Features/About/Interfaces/" />
     <Folder Include="Features/About/Repositories/" />
     <Folder Include="Features/About/Services/" />
-    <Folder Include="Features/Auth/Controllers/" />
-    <Folder Include="Features/Auth/Dtos/" />
     <Folder Include="Features/Auth/Middlewares/" />
     <Folder Include="Features/Home/Controllers/" />
     <Folder Include="Features/Home/Repositories/" />

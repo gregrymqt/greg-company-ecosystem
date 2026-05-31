@@ -1,4 +1,4 @@
-using MeuCrudCsharp.Features.About.DTOs;
+using MeuCrudCsharp.Features.About.Application.DTOs;
 using MeuCrudCsharp.Features.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using Moq;

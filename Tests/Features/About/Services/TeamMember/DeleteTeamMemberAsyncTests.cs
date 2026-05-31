@@ -52,7 +52,7 @@ public class DeleteTeamMemberAsyncTests : AboutServiceTestBase
 
         _repository
             .Setup(r => r.GetTeamMemberByIdAsync(nonExistentId))
-            .ReturnsAsync((MeuCrudCsharp.Models.TeamMember)null!);
+            .ReturnsAsync((MeuCrudCsharp.Features.About.Domain.Entities.TeamMember)null!);
 
         // Act & Assert
         var exception = await Assert.ThrowsAsync<ResourceNotFoundException>(() =>
@@ -63,7 +63,7 @@ public class DeleteTeamMemberAsyncTests : AboutServiceTestBase
 
         _fileService.Verify(f => f.DeletarArquivoAsync(It.IsAny<int>()), Times.Never);
         _repository.Verify(
-            r => r.DeleteTeamMemberAsync(It.IsAny<MeuCrudCsharp.Models.TeamMember>()),
+            r => r.DeleteTeamMemberAsync(It.IsAny<MeuCrudCsharp.Features.About.Domain.Entities.TeamMember>()),
             Times.Never
         );
         _unitOfWork.Verify(u => u.CommitAsync(), Times.Never);

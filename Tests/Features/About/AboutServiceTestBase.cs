@@ -1,8 +1,10 @@
-using MeuCrudCsharp.Features.About.Interfaces;
-using MeuCrudCsharp.Features.About.Services;
-using MeuCrudCsharp.Features.Caching.Interfaces;
-using MeuCrudCsharp.Features.Files.Interfaces;
-using MeuCrudCsharp.Features.Shared.Work;
+using MeuCrudCsharp.Features.About.Domain.Interfaces;
+using MeuCrudCsharp.Features.About.Application.Interfaces;
+using MeuCrudCsharp.Features.About.Application.Services;
+using MeuCrudCsharp.Features.Caching.Application.Interfaces;
+using MeuCrudCsharp.Features.Files.Application.Interfaces;
+using MeuCrudCsharp.Features.Shared.Domain.Interfaces;
+using MeuCrudCsharp.Features.Shared.Domain.Interfaces;
 using Moq;
 
 namespace Tests.Features.About;

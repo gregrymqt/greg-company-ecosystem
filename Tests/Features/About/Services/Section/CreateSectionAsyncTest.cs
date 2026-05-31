@@ -1,4 +1,5 @@
-using MeuCrudCsharp.Models;
+using MeuCrudCsharp.Features.About.Domain.Entities;
+using MeuCrudCsharp.Features.Files.Domain.Entities;
 using Microsoft.AspNetCore.Http;
 using Moq;
 

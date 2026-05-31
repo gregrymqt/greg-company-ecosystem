@@ -1,5 +1,6 @@
 using MeuCrudCsharp.Features.Exceptions;
-using MeuCrudCsharp.Models;
+using MeuCrudCsharp.Features.About.Domain.Entities;
+using MeuCrudCsharp.Features.Files.Domain.Entities;
 using Moq;
 
 namespace Tests.Features.About.Services.Section;

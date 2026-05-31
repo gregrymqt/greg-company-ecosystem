@@ -1,5 +1,5 @@
-using MeuCrudCsharp.Features.About.Controllers;
-using MeuCrudCsharp.Features.About.Interfaces;
+using MeuCrudCsharp.Features.About.Presentation.Controllers;
+using MeuCrudCsharp.Features.About.Application.Interfaces;
 using Moq;
 
 namespace Tests.Features.About;

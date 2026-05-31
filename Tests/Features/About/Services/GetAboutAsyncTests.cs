@@ -1,4 +1,4 @@
-using MeuCrudCsharp.Features.About.DTOs;
+using MeuCrudCsharp.Features.About.Application.DTOs;
 using Moq;
 
 namespace Tests.Features.About.Services;

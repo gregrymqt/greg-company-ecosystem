@@ -112,7 +112,7 @@ public class UpdateTeamMemberAsyncTests : AboutServiceTestBase
 
         _repository
             .Setup(r => r.GetTeamMemberByIdAsync(idInexistente))
-            .ReturnsAsync((MeuCrudCsharp.Models.TeamMember)null!);
+            .ReturnsAsync((MeuCrudCsharp.Features.About.Domain.Entities.TeamMember)null!);
 
         // Act & Assert
         await Assert.ThrowsAsync<ResourceNotFoundException>(() =>
@@ -128,7 +128,7 @@ public class UpdateTeamMemberAsyncTests : AboutServiceTestBase
             Times.Never
         );
         _repository.Verify(
-            r => r.UpdateTeamMemberAsync(It.IsAny<MeuCrudCsharp.Models.TeamMember>()),
+            r => r.UpdateTeamMemberAsync(It.IsAny<MeuCrudCsharp.Features.About.Domain.Entities.TeamMember>()),
             Times.Never
         );
         _unitOfWork.Verify(u => u.CommitAsync(), Times.Never);
@@ -152,7 +152,7 @@ public class UpdateTeamMemberAsyncTests : AboutServiceTestBase
         await Assert.ThrowsAsync<Exception>(() => _sut.UpdateTeamMemberAsync(id, dto));
 
         _repository.Verify(
-            r => r.UpdateTeamMemberAsync(It.IsAny<MeuCrudCsharp.Models.TeamMember>()),
+            r => r.UpdateTeamMemberAsync(It.IsAny<MeuCrudCsharp.Features.About.Domain.Entities.TeamMember>()),
             Times.Never
         );
         _unitOfWork.Verify(u => u.CommitAsync(), Times.Never);
@@ -176,7 +176,7 @@ public class UpdateTeamMemberAsyncTests : AboutServiceTestBase
         await Assert.ThrowsAsync<Exception>(() => _sut.UpdateTeamMemberAsync(id, dto));
 
         _repository.Verify(
-            r => r.UpdateTeamMemberAsync(It.IsAny<MeuCrudCsharp.Models.TeamMember>()),
+            r => r.UpdateTeamMemberAsync(It.IsAny<MeuCrudCsharp.Features.About.Domain.Entities.TeamMember>()),
             Times.Never
         );
         _unitOfWork.Verify(u => u.CommitAsync(), Times.Never);

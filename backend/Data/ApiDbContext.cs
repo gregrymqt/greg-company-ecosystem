@@ -16,18 +16,18 @@ namespace MeuCrudCsharp.Data
         public ApiDbContext(DbContextOptions<ApiDbContext> options)
             : base(options) { }
 
-        public DbSet<Payments> Payments { get; set; }
-        public DbSet<Video> Videos { get; set; }
-        public DbSet<Course> Courses { get; set; }
-        public DbSet<Subscription> Subscriptions { get; set; }
-        public DbSet<Plan> Plans { get; set; }
-        public DbSet<Claims> Claims { get; set; }
-        public DbSet<Chargeback> Chargebacks { get; set; }
-        public DbSet<EntityFile> Files { get; set; }
-        public DbSet<HomeHero> HomeHeroes { get; set; }
-        public DbSet<HomeService> HomeServices { get; set; }
-        public DbSet<AboutSection> AboutSections { get; set; }
-        public DbSet<TeamMember> TeamMembers { get; set; }
+        public DbSet<Payments> Payments { get; set; } = null!;
+        public DbSet<Video> Videos { get; set; } = null!;
+        public DbSet<Course> Courses { get; set; } = null!;
+        public DbSet<Subscription> Subscriptions { get; set; } = null!;
+        public DbSet<Plan> Plans { get; set; } = null!;
+        public DbSet<Claims> Claims { get; set; } = null!;
+        public DbSet<Chargeback> Chargebacks { get; set; } = null!;
+        public DbSet<EntityFile> Files { get; set; } = null!;
+        public DbSet<HomeHero> HomeHeroes { get; set; } = null!;
+        public DbSet<HomeService> HomeServices { get; set; } = null!;
+        public DbSet<AboutSection> AboutSections { get; set; } = null!;
+        public DbSet<TeamMember> TeamMembers { get; set; } = null!;
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
