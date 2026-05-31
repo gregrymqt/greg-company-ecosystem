@@ -15,8 +15,9 @@ public class ConfiguracaoController : ApiControllerBase
     }
 
     [HttpGet("public-key")]
-    public async Task<IActionResult> GetPublicKey()
+    public Task<IActionResult> GetPublicKey()
     {
-        return Ok(new { publicKey = _mercadoPagoSettings.PublicKey });
+        return Task.FromResult((IActionResult)Ok(new { publicKey = _mercadoPagoSettings.PublicKey }));
     }
 }
+    

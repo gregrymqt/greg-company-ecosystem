@@ -50,7 +50,7 @@ public class CreateSectionAsyncTest : AboutServiceTestBase
         var fakeFile = AboutTestFakes.CreateFakeEntityFile();
 
         _fileService
-            .Setup(f => f.SalvarArquivoAsync(dto.File, It.IsAny<string>()))
+            .Setup(f => f.SalvarArquivoAsync(dto.File!, It.IsAny<string>()))
             .ReturnsAsync(fakeFile);
 
         // Act
@@ -63,7 +63,7 @@ public class CreateSectionAsyncTest : AboutServiceTestBase
         _repository.Verify(r => r.AddSectionAsync(It.IsAny<AboutSection>()), Times.Once);
         _unitOfWork.Verify(u => u.CommitAsync(), Times.Once);
         _cache.Verify(c => c.RemoveAsync(It.IsAny<string>()), Times.Once);
-        _fileService.Verify(f => f.SalvarArquivoAsync(dto.File, It.IsAny<string>()), Times.Once);
+        _fileService.Verify(f => f.SalvarArquivoAsync(dto.File!, It.IsAny<string>()), Times.Once);
         _fileService.Verify(
             f =>
                 f.SalvarArquivoDoTempAsync(
@@ -85,12 +85,12 @@ public class CreateSectionAsyncTest : AboutServiceTestBase
 
         _fileService
             .Setup(f =>
-                f.ProcessChunkAsync(dto.File, dto.FileName, It.IsAny<int>(), It.IsAny<int>())
+                f.ProcessChunkAsync(dto.File!, dto.FileName!, It.IsAny<int>(), It.IsAny<int>())
             )
             .ReturnsAsync(tempPath);
 
         _fileService
-            .Setup(f => f.SalvarArquivoDoTempAsync(tempPath, dto.FileName, It.IsAny<string>()))
+            .Setup(f => f.SalvarArquivoDoTempAsync(tempPath, dto.FileName!, It.IsAny<string>()))
             .ReturnsAsync(fakeFile);
 
         // Act
@@ -104,11 +104,11 @@ public class CreateSectionAsyncTest : AboutServiceTestBase
         _unitOfWork.Verify(u => u.CommitAsync(), Times.Once);
         _cache.Verify(c => c.RemoveAsync(It.IsAny<string>()), Times.Once);
         _fileService.Verify(
-            f => f.ProcessChunkAsync(dto.File, dto.FileName, It.IsAny<int>(), It.IsAny<int>()),
+            f => f.ProcessChunkAsync(dto.File!, dto.FileName!, It.IsAny<int>(), It.IsAny<int>()),
             Times.Once
         );
         _fileService.Verify(
-            f => f.SalvarArquivoDoTempAsync(tempPath, dto.FileName, It.IsAny<string>()),
+            f => f.SalvarArquivoDoTempAsync(tempPath, dto.FileName!, It.IsAny<string>()),
             Times.Once
         );
         _fileService.Verify(
@@ -125,7 +125,7 @@ public class CreateSectionAsyncTest : AboutServiceTestBase
 
         _fileService
             .Setup(f =>
-                f.ProcessChunkAsync(dto.File, dto.FileName, It.IsAny<int>(), It.IsAny<int>())
+                f.ProcessChunkAsync(dto.File!, dto.FileName!, It.IsAny<int>(), It.IsAny<int>())
             )
             .ReturnsAsync((string)null!);
 

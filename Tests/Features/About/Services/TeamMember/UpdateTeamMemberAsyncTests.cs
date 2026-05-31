@@ -48,7 +48,7 @@ public class UpdateTeamMemberAsyncTests : AboutServiceTestBase
 
         _repository.Setup(r => r.GetTeamMemberByIdAsync(id)).ReturnsAsync(entity);
         _fileService
-            .Setup(f => f.SalvarArquivoAsync(dto.File, It.IsAny<string>()))
+            .Setup(f => f.SalvarArquivoAsync(dto.File!, It.IsAny<string>()))
             .ReturnsAsync(fakeFile);
 
         // Act
@@ -59,7 +59,7 @@ public class UpdateTeamMemberAsyncTests : AboutServiceTestBase
         Assert.Equal(fakeFile.Id, entity.FileId);
         Assert.Equal(fakeFile.CaminhoRelativo, entity.PhotoUrl);
 
-        _fileService.Verify(f => f.SalvarArquivoAsync(dto.File, It.IsAny<string>()), Times.Once);
+        _fileService.Verify(f => f.SalvarArquivoAsync(dto.File!, It.IsAny<string>()), Times.Once);
         _fileService.Verify(
             f => f.SubstituirArquivoAsync(It.IsAny<int>(), It.IsAny<IFormFile>()),
             Times.Never
@@ -82,7 +82,7 @@ public class UpdateTeamMemberAsyncTests : AboutServiceTestBase
 
         _repository.Setup(r => r.GetTeamMemberByIdAsync(id)).ReturnsAsync(entity);
         _fileService
-            .Setup(f => f.SubstituirArquivoAsync(existingFileId, dto.File))
+            .Setup(f => f.SubstituirArquivoAsync(existingFileId, dto.File!))
             .ReturnsAsync(newFakeFile);
 
         // Act
@@ -93,7 +93,7 @@ public class UpdateTeamMemberAsyncTests : AboutServiceTestBase
         Assert.Equal(newFakeFile.Id, entity.FileId);
         Assert.Equal(newFakeFile.CaminhoRelativo, entity.PhotoUrl);
 
-        _fileService.Verify(f => f.SubstituirArquivoAsync(existingFileId, dto.File), Times.Once);
+        _fileService.Verify(f => f.SubstituirArquivoAsync(existingFileId, dto.File!), Times.Once);
         _fileService.Verify(
             f => f.SalvarArquivoAsync(It.IsAny<IFormFile>(), It.IsAny<string>()),
             Times.Never
@@ -145,7 +145,7 @@ public class UpdateTeamMemberAsyncTests : AboutServiceTestBase
 
         _repository.Setup(r => r.GetTeamMemberByIdAsync(id)).ReturnsAsync(entity);
         _fileService
-            .Setup(f => f.SubstituirArquivoAsync(entity.FileId!.Value, dto.File))
+            .Setup(f => f.SubstituirArquivoAsync(entity.FileId!.Value, dto.File!))
             .ThrowsAsync(new Exception("Simulated replacement failure"));
 
         // Act & Assert
@@ -169,7 +169,7 @@ public class UpdateTeamMemberAsyncTests : AboutServiceTestBase
 
         _repository.Setup(r => r.GetTeamMemberByIdAsync(id)).ReturnsAsync(entity);
         _fileService
-            .Setup(f => f.SalvarArquivoAsync(dto.File, It.IsAny<string>()))
+            .Setup(f => f.SalvarArquivoAsync(dto.File!, It.IsAny<string>()))
             .ThrowsAsync(new Exception("Simulated new save failure"));
 
         // Act & Assert

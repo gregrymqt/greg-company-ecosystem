@@ -4,7 +4,6 @@ using MeuCrudCsharp.Features.About.Application.Services;
 using MeuCrudCsharp.Features.Caching.Application.Interfaces;
 using MeuCrudCsharp.Features.Files.Application.Interfaces;
 using MeuCrudCsharp.Features.Shared.Domain.Interfaces;
-using MeuCrudCsharp.Features.Shared.Domain.Interfaces;
 using Moq;
 
 namespace Tests.Features.About;
