@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import styles from "./ChargebackManager.module.scss";
-import { ChargebackList } from "@/features/Chargeback/Admin";
-import { Sidebar } from "@/components/SideBar/components/Sidebar";
+import { ChargebackList } from "@/features/Chargeback";
 import type { SidebarItem } from "@/components/SideBar/types/sidebar.types";
+import { Sidebar } from "@/components/SideBar/Sidebar";
 
 // Definindo as abas disponíveis
 const NAV_ITEMS: SidebarItem[] = [

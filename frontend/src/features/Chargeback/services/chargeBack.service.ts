@@ -1,5 +1,5 @@
 import { ApiService } from "@/shared/services/api.service";
-import type { ChargebackPaginatedResponse, ChargebackDetail } from '../../shared';
+import type { ChargebackPaginatedResponse, ChargebackDetail } from '../types/chargeback.types';
 
 const ENDPOINT_BASE = '/admin/chargebacks';
 

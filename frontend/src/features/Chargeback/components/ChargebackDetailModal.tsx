@@ -1,5 +1,5 @@
 import { Modal } from '@/components/Modal/Modal';
-import type { ChargebackDetail } from '../../shared';
+import type { ChargebackDetail } from '../types/chargeback.types';
 import styles from '../styles/ChargebackDetailModal.module.scss';
 
 interface Props {

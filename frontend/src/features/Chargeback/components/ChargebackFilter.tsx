@@ -1,10 +1,6 @@
 import { type FormField, GenericForm } from '@/components/Form/GenericForm';
 import styles from '../styles/ChargebackFilter.module.scss';
-
-export interface FilterFormData {
-  searchTerm: string;
-  status: string;
-}
+import type { FilterFormData } from '../types/chargeback.dtos';
 
 interface Props {
   onFilter: (data: FilterFormData) => void;

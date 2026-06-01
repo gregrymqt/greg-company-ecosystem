@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { ChargebackService } from '../services/chargeBack.service';
-import type { ChargebackPaginatedResponse } from '../../shared';
+import type { ChargebackPaginatedResponse } from '../types/chargeback.types';
 import { ApiError } from "@/shared/services/api.service";
 
 // Estado inicial dos filtros
