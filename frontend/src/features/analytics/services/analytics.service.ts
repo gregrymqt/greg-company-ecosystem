@@ -9,11 +9,13 @@ import type {
   AnalyticsApiResponse, 
   AnalyticsDashboard, 
   ProductMetric,
-  AnalyticsFilters,
+  AnalyticsFilters
+} from "@/features/analytics/types/analytics.types";
+import type {
   StorageStats,
   StorageGrowthTrend,
   FileDetail
-} from "@/features/analytics/types/analytics.types";
+} from "@/features/analytics/types/storage.types";
 
 // Base URL do FastAPI (diferente do backend principal)
 const ANALYTICS_BASE_URL = 'http://localhost:8888';

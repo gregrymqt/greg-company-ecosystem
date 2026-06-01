@@ -1,53 +1,9 @@
-import { useForm } from 'react-hook-form';
 import { Form } from '@/components/Form/Form';
-import { authService } from '@/features/auth/services/auth.service';
-import { useAuth } from '@/features/auth/hooks/useAuth';
+import { useRegisterForm } from '@/features/auth/hooks/useRegisterForm';
 import styles from '../styles/RegisterForm.module.scss';
 
-interface RegisterFormData {
-  name: string;
-  email: string;
-  password: string;
-  confirmPassword: string;
-}
-
 export const RegisterForm = () => {
-  const formMethods = useForm<RegisterFormData>({
-    defaultValues: {
-      name: '',
-      email: '',
-      password: '',
-      confirmPassword: ''
-    }
-  });
-  const { setSession } = useAuth();
-
-  const onSubmit = async (data: RegisterFormData) => {
-    try {
-      const response = await authService.register(data);
-      
-      // Salva a sessão do usuário
-      setSession({
-        ...response.user,
-        token: response.token,
-        refreshToken: response.refreshToken,
-        expiration: response.expiration
-      });
-
-      // Redireciona para a home ou dashboard
-      window.location.href = '/';
-    } catch (error) {
-      console.error('Erro ao fazer registro:', error);
-      formMethods.setError('root', {
-        type: 'manual',
-        message: 'Erro ao criar conta. Verifique os dados e tente novamente.'
-      });
-    }
-  };
-
-  const handleGoogleLogin = () => {
-    authService.loginGoogle();
-  };
+  const { formMethods, onSubmit, handleGoogleLogin } = useRegisterForm();
 
   return (
     <div className={styles.registerForm}>

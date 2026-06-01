@@ -1,31 +1,19 @@
 import { ApiService } from '@/shared/services/api.service';
 import type { UserSessionDto } from '@/features/auth/types/auth.types';
-import type { LoginResponse } from '@/features/auth/types/auth.dtos';
-
-interface LoginCredentials {
-  email: string;
-  password: string;
-}
-
-interface RegisterData {
-  name: string;
-  email: string;
-  password: string;
-  confirmPassword: string;
-}
+import type { LoginResponse, LoginFormData, RegisterFormData } from '@/features/auth/types/auth.dtos';
 
 export const authService = {
   /**
    * Login com Email e Senha
    */
-  loginWithEmail: async (credentials: LoginCredentials): Promise<LoginResponse> => {
+  loginWithEmail: async (credentials: LoginFormData): Promise<LoginResponse> => {
     return await ApiService.post<LoginResponse>('/auth/login', credentials);
   },
 
   /**
    * Registro de novo usuário
    */
-  register: async (data: RegisterData): Promise<LoginResponse> => {
+  register: async (data: RegisterFormData): Promise<LoginResponse> => {
     return await ApiService.post<LoginResponse>('/auth/register', data);
   },
 
