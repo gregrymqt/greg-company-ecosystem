@@ -1,5 +1,5 @@
 import { ApiService } from "@/shared/services/api.service";
-import type { ClaimSummary, ClaimDetail } from '../../shared';
+import type { ClaimSummary, ClaimDetail } from '../types/claims.types';
 
 /**
  * User Claim Service - Consume UserClaimsController

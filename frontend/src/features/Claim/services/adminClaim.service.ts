@@ -3,7 +3,7 @@ import type {
   ClaimSummary,
   ClaimDetail,
   ReplyClaimPayload,
-} from '../../shared';
+} from '../types/claims.types';
 
 /**
  * Admin Claim Service - Consume AdminClaimsController

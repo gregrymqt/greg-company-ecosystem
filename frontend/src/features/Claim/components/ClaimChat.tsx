@@ -1,6 +1,5 @@
 import React, { useRef, useEffect } from "react";
 import styles from '../styles/ClaimChat.module.scss';
-import type { FieldValues } from "react-hook-form";
 import { type FormField, GenericForm } from "@/components/Form/GenericForm";
 import { useClaimChatLogic } from '../hooks/useClaimChatLogic';
 
@@ -9,11 +8,7 @@ interface Props {
   role: "admin" | "user";
 }
 
-// Definindo o formulário de resposta usando a interface do GenericForm
-interface ReplyFormData extends FieldValues {
-  message: string;
-  attachments: FileList;
-}
+import type { ReplyFormData } from "../types/claim.dtos";
 
 export const ClaimChat: React.FC<Props> = ({ claimId, role }) => {
   const { messages, handleSendResponse, isLoading } = useClaimChatLogic({

@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback } from "react";
 import styles from "./styles/ClaimsLayout.module.scss";
-import { ClaimChat, ClaimsList } from "@/features/Claim/Public";
-import { UserClaimService } from "@/features/Claim/Public/services/userClaim.service";
-import type { ClaimSummary } from "@/features/Claim/shared";
+import { ClaimChat, ClaimsList } from "@/features/Claim";
+import { UserClaimService } from "@/features/Claim";
+import type { ClaimSummary } from "@/features/Claim/types/claims.types";
 import { Modal } from "@/components/Modal/Modal";
 import type { SidebarItem } from "@/components/SideBar/types/sidebar.types";
 import { Sidebar } from "@/components/SideBar";

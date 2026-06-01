@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { ClaimStatusBadge } from './ClaimStatusBadge';
-import { type ClaimSummary } from '../../shared';
+import { type ClaimSummary } from '../types/claims.types';
 import styles from '../styles/ClaimsList.module.scss';
 import type { ClaimStatus } from '@/types/models';
 import { type TableColumn, Table } from '@/components/Table/Table';

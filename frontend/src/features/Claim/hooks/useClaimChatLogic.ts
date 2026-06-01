@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { UserClaimService } from '../services/userClaim.service';
-import { AdminClaimService } from '../../Admin/services/adminClaim.service';
-import type { ChatMessage, ReplyFormData } from '../../shared';
+import { AdminClaimService } from '../services/adminClaim.service';
+import type { ChatMessage } from '../types/claims.types';
+import type { ReplyFormData } from '../types/claim.dtos';
 import { AlertService } from "@/shared/services/alert.service";
 import { ApiError } from "@/shared/services/api.service";
 
