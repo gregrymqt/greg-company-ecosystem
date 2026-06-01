@@ -3,7 +3,7 @@ import type {
   CreatePixDTO,
   PixResponse,
   IdentificationType,
-} from "../../shared";
+} from "../types";
 
 export const PixService = {
   createPix: async (data: CreatePixDTO): Promise<PixResponse> => {

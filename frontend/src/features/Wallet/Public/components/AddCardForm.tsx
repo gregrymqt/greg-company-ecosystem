@@ -4,8 +4,8 @@ import styles from '../styles/AddCardForm.module.scss';
 
 
 import { useWallet } from '../hooks/useWallet';
-import { usePreference, MercadoPagoBrick } from '@/features/Payment/Public';
-import type { BrickPaymentData } from '@/features/Payment/shared';
+import { usePreference, MercadoPagoBrick } from '@/features/Payment';
+import type { BrickPaymentData } from '@/features/Payment';
 
 interface AddCardFormProps {
   onSuccess?: () => void; // Callback para fechar modal ou feedback extra

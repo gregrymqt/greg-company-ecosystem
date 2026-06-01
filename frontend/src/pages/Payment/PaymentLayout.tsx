@@ -4,16 +4,16 @@ import styles from "./PaymentLayout.module.scss";
 
 // Components
 
-import { Sidebar } from "@/components/SideBar/components/Sidebar";
 
 // Hooks & Types
 
 import type { SidebarItem } from "@/components/SideBar/types/sidebar.types";
-import { CreditCardPayment, PixPayment, usePreference } from "@/features/Payment/Public";
+import { CreditCardPayment, PixPayment, usePreference } from "@/features/Payment";
 import type {
   PaymentLayoutProps,
   PaymentMethodId,
-} from "@/features/Payment/shared";
+} from "@/features/Payment";
+import { Sidebar } from "@/components/SideBar/Sidebar";
 
 export const PaymentLayout: React.FC<PaymentLayoutProps> = ({
   plan,

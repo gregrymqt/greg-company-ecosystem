@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import { PixService } from "../services/pix.service";
 import { AlertService } from "@/shared/services/alert.service";
 import { socketService } from "@/shared/services/socket.service";
-import { AppHubs } from "@/shared/enums/hub.enums";
 import { useSocketListener } from "@/shared/hooks/useSocket";
 import { ApiError } from "@/shared/services/api.service";
 
@@ -13,7 +12,8 @@ import type {
   PixStep,
   PixDocType,
   PaymentSocketMessage
-} from "../../shared";
+} from "../types";
+import { AppHubsCSharp } from "@/shared/enums/hub";
 
 interface UsePixPaymentProps {
   planId: string;
@@ -34,9 +34,9 @@ export const usePixPayment = ({
 
   // 1. Conexão WebSocket (SignalR)
   useEffect(() => {
-    socketService.connect(AppHubs.Payment);
+    socketService.connect(AppHubsCSharp.Payment);
     return () => {
-      socketService.disconnect(AppHubs.Payment);
+      socketService.disconnect(AppHubsCSharp.Payment);
     };
   }, []);
 
@@ -55,7 +55,7 @@ export const usePixPayment = ({
 
   // 3. Ouvinte de Mensagens do Backend (Processing, Approved, Failed)
   useSocketListener<PaymentSocketMessage>(
-    AppHubs.Payment,
+    AppHubsCSharp.Payment,
     "UpdatePaymentStatus",
     (data) => {
       console.log("🔔 PIX Socket Update:", data);

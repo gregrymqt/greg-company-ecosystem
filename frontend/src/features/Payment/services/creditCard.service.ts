@@ -1,6 +1,6 @@
 // src/pages/Payment/services/credit-card.service.ts
 import { ApiService } from "@/shared/services/api.service";
-import type { CreditCardPaymentRequestDto, PaymentResponse } from "../../shared";
+import type { CreditCardPaymentRequestDto, PaymentResponse } from "../types";
 
 export const CreditCardService = {
   processPayment: async (data: CreditCardPaymentRequestDto): Promise<PaymentResponse> => {

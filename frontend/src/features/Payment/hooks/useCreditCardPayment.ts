@@ -9,10 +9,10 @@ import type {
   CreditCardPaymentRequestDto, 
   CreditCardMode,
   PaymentSocketMessage
-} from "../../shared";
-import  { AppHubs } from "@/shared/enums/hub.enums";
+} from "../types";
 import { useSocketListener } from "@/shared/hooks/useSocket";
 import { ApiError } from "@/shared/services/api.service";
+import { AppHubsCSharp } from "@/shared/enums/hub";
 
 interface UseCreditCardProps {
   planId: string;   // Guid do plano
@@ -35,13 +35,13 @@ export const useCreditCardPayment = ({
 
   // 1. Conexão WebSocket (SignalR)
   useEffect(() => {
-    socketService.connect(AppHubs.Payment);
+    socketService.connect(AppHubsCSharp.Payment);
     // return () => socketService.disconnect(AppHubs.Payment); // Opcional
   }, []);
 
   // 2. Ouvinte de Mensagens do Backend (Processing, Approved, Failed)
   useSocketListener<PaymentSocketMessage>(
-    AppHubs.Payment,
+    AppHubsCSharp.Payment,
     'UpdatePaymentStatus',
     (data) => {
       console.log('💳 Socket Update:', data);

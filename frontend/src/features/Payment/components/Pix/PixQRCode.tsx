@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import styles from './PixPayment.module.scss';
-import type { PixResponse } from '../../../shared';
+import styles from '../../styles/PixPayment.module.scss';
+import type { PixResponse } from '../../types';
 
 interface PixQRCodeProps {
   data: PixResponse;

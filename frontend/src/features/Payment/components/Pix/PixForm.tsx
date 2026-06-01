@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { type FormField, GenericForm } from '@/components/Form/GenericForm';
-import type { PixDocType } from '../../../shared';
+import type { PixDocType } from '../../types';
 
 interface PixFormData {
   firstName: string;
