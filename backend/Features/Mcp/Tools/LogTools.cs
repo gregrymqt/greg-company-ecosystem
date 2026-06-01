@@ -1,11 +1,11 @@
-using Microsoft.Extensions.AI;
-using ModelContextProtocol;
-using ModelContextProtocol.Protocol;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
+using Microsoft.Extensions.AI;
+using ModelContextProtocol;
+using ModelContextProtocol.Protocol;
 
 namespace MeuCrudCsharp.Features.Mcp.Tools;
 
@@ -23,7 +23,13 @@ public class LogTools
             return new CallToolResult
             {
                 IsError = true,
-                Content = [new TextContentBlock { Text = "Nenhum arquivo de log do Serilog foi encontrado no servidor." }]
+                Content =
+                [
+                    new TextContentBlock
+                    {
+                        Text = "Nenhum arquivo de log do Serilog foi encontrado no servidor.",
+                    },
+                ],
             };
         }
 
@@ -33,7 +39,7 @@ public class LogTools
 
         return new CallToolResult
         {
-            Content = [new TextContentBlock { Text = string.Join("\n", lastLines) }]
+            Content = [new TextContentBlock { Text = string.Join("\n", lastLines) }],
         };
     }
 
@@ -77,8 +83,8 @@ public class LogTools
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
                     UseShellExecute = false,
-                    CreateNoWindow = true
-                }
+                    CreateNoWindow = true,
+                },
             };
 
             process.Start();
@@ -94,13 +100,19 @@ public class LogTools
             {
                 return new CallToolResult
                 {
-                    Content = [new TextContentBlock { Text = $"Container '{containerName}' está rodando mas não emitiu logs." }]
+                    Content =
+                    [
+                        new TextContentBlock
+                        {
+                            Text = $"Container '{containerName}' está rodando mas não emitiu logs.",
+                        },
+                    ],
                 };
             }
 
             return new CallToolResult
             {
-                Content = [new TextContentBlock { Text = combinedLogs.Trim() }]
+                Content = [new TextContentBlock { Text = combinedLogs.Trim() }],
             };
         }
         catch (Exception ex)
@@ -108,7 +120,13 @@ public class LogTools
             return new CallToolResult
             {
                 IsError = true,
-                Content = [new TextContentBlock { Text = $"Erro ao capturar logs do container {containerName}: {ex.Message}" }]
+                Content =
+                [
+                    new TextContentBlock
+                    {
+                        Text = $"Erro ao capturar logs do container {containerName}: {ex.Message}",
+                    },
+                ],
             };
         }
     }

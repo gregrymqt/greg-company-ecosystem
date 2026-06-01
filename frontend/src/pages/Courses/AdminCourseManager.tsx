@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { Sidebar } from '@/components/SideBar/components/Sidebar';
 import type { SidebarItem } from '@/components/SideBar/types/sidebar.types';
-import type { CourseDto } from '@/features/course/shared/types/course.types';
+import type { CourseDto } from '@/features/course/types/course.types';
 
 // Sub-components, Estilos e Types
-import { CourseList } from '@/features/course/Admin/components/CourseList';
-import { CourseForm } from '@/features/course/Admin/components/CourseForm';
+import { CourseList } from '@/features/course/components/CourseList';
+import { CourseForm } from '@/features/course/components/CourseForm';
 import styles from './styles/AdminCourseManager.module.scss';
-import type { CourseFormData, AdminTab } from '@/features/course/Admin/types/admin-course.types';
+import type { CourseFormData, AdminTab } from '@/features/course/types/admin-course.types';
 
 // Hook refatorado
-import { useAdminCourses } from '@/features/course/Admin/hooks/useAdminCourses';
+import { useAdminCourses } from '@/features/course/hooks/useAdminCourses';
 
 export const AdminCourseManager: React.FC = () => {
   // Hook gerencia o estado dos cursos e loading

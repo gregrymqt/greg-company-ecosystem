@@ -9,7 +9,7 @@ import type {
   PaginatedResponse, 
   CourseRowUI, 
   VideoCardUI 
-} from '@/features/course/shared/types/course.types';
+} from '@/features/course/types/course.types';
 
 const BASE_ENDPOINT = '/public/courses';
 

@@ -1,11 +1,11 @@
 // src/features/admin/courses/hooks/useCourses.ts
 
 import { useState, useCallback } from 'react';
-import { CourseService } from '@/features/course/Admin/services/course.service';
+import { CourseService } from '@/features/course/services/adminCourse.service';
 import { AlertService } from '@/shared/services/alert.service';
 import { ApiError } from '@/shared/services/api.service';
 import type { Course } from '@/types/models';
-import type { PaginatedResponse, CreateCourseData, UpdateCourseData } from '@/features/course/Admin/types/course-manager.types';
+import type { PaginatedResponse, CreateCourseData, UpdateCourseData } from '@/features/course/types/course-manager.types';
 
 export const useCourses = () => {
     const [loading, setLoading] = useState(false);

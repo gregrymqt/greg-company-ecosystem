@@ -1,7 +1,7 @@
 import React from 'react';
-import type { CourseDto } from '@/features/course/shared/types/course.types';
+import type { CourseDto } from '@/features/course/types/course.types';
 import styles from '../styles/CourseList.module.scss';
-import type { CourseListProps } from '@/features/course/Admin/types/admin-course.types';
+import type { CourseListProps } from '@/features/course/types/admin-course.types';
 import { ActionMenu } from '@/components/ActionMenu/ActionMenu';
 import { type TableColumn, Table } from '@/components/Table/Table';
 

@@ -3,7 +3,7 @@
  * Estende os tipos compartilhados com interfaces específicas de UI do Admin
  */
 
-import type { CourseDto, CreateCourseData, UpdateCourseData } from '@/features/course/shared/types/course.types';
+import type { CourseDto, CreateCourseData } from '@/features/course/types/course.types';
 
 // Define as abas de navegação da Sidebar interna
 export type AdminTab = 'list' | 'form';

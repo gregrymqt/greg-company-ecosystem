@@ -4,8 +4,8 @@
  */
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { publicCourseService } from '@/features/course/Public/services/course.service';
-import type { CourseRowUI } from '@/features/course/shared/types/course.types';
+import { publicCourseService } from '@/features/course/services/publicCourse.service';
+import type { CourseRowUI } from '@/features/course/types/course.types';
 import { ApiError } from '@/shared/services/api.service';
 
 export const usePublicCourses = (pageSize: number = 5) => {

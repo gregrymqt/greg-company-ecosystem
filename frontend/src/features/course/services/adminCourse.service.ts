@@ -10,7 +10,7 @@ import type {
   PaginatedResponse, 
   CreateCourseData, 
   UpdateCourseData 
-} from '@/features/course/shared/types/course.types';
+} from '@/features/course/types/course.types';
 
 const BASE_ENDPOINT = '/admin/courses';
 

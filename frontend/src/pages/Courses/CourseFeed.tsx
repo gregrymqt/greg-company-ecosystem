@@ -1,10 +1,10 @@
 import React, { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './styles/CourseFeed.module.scss';
-import { CourseRow } from '@/features/course/Public/components/CourseRow';
-import { CourseSkeleton } from '@/features/course/Public/components/CourseSkeleton';
-import { usePublicCourses } from '@/features/course/Public/hooks/usePublicCourses';
-import type { VideoCardUI } from '@/features/course/shared/types/course.types';
+import { CourseRow } from '@/features/course/components/CourseRow';
+import { CourseSkeleton } from '@/features/course/components/CourseSkeleton';
+import { usePublicCourses } from '@/features/course/hooks/usePublicCourses';
+import type { VideoCardUI } from '@/features/course/types/course.types';
 
 
 

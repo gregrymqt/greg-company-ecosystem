@@ -4,7 +4,7 @@
  */
 
 import { useState, useCallback } from 'react';
-import { adminCourseService } from '@/features/course/Admin/services/course.service';
+import { adminCourseService } from '@/features/course/services/adminCourse.service';
 import { AlertService } from '@/shared/services/alert.service';
 import { ApiError } from '@/shared/services/api.service';
 import type { 
@@ -12,7 +12,7 @@ import type {
   PaginatedResponse, 
   CreateCourseData, 
   UpdateCourseData 
-} from '@/features/course/shared/types/course.types';
+} from '@/features/course/types/course.types';
 
 export const useAdminCourses = () => {
   const [loading, setLoading] = useState(false);
