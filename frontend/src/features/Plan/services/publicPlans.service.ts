@@ -4,7 +4,7 @@ import { ApiService } from "@/shared/services/api.service";
 import type { 
   PagedResult, 
   PlanPublic
-} from "../../shared";
+} from "../types";
 
 const PUBLIC_ENDPOINT = '/public/plans';
 

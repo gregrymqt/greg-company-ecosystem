@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Check, Star } from 'lucide-react';
 import styles from './styles/PublicPlansList.module.scss';
-import { usePublicPlans } from '@/features/Plan/Public';
+import { usePublicPlans } from '@/features/Plan';
 import { Card } from '@/components/Card/Card';
 
 export const PlanFeed = () => {
@@ -66,7 +66,7 @@ export const PlanFeed = () => {
                 <div className={styles.divider} />
 
                 <ul className={styles.featuresList}>
-                  {plan.features.map((feature, idx) => (
+                  {plan.features.map((feature: string, idx: number) => (
                     <li key={idx}>
                       <Check size={16} className={styles.checkIcon} />
                       {feature}

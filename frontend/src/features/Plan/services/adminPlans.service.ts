@@ -7,7 +7,7 @@ import type {
   PlanAdminSummary,
   CreatePlanRequest, 
   UpdatePlanRequest 
-} from "../../shared";
+} from "../types";
 
 const ADMIN_ENDPOINT = '/admin/plans';
 

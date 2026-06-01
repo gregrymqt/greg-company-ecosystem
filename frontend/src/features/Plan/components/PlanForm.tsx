@@ -4,7 +4,7 @@ import { type SubmitHandler } from 'react-hook-form';
 import styles from '../styles/PlanForm.module.scss';
 import { type FormField, GenericForm } from '@/components/Form/GenericForm';
 import { useAdminPlans } from '../hooks/useAdminPlans';
-import type {  UpdatePlanRequest, CreatePlanRequest, PlanAdminDetail } from '../../shared';
+import type { PlanAdminDetail, UpdatePlanRequest, CreatePlanRequest } from '../types';
 
 // Interface "Plana" para controlar o formulário visualmente
 interface PlanFormSchema {

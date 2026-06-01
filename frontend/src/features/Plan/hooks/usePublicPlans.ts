@@ -1,7 +1,7 @@
 // src/features/Plan/Public/hooks/usePublicPlans.ts
 import { useState, useCallback } from 'react';
 import { PublicPlansService } from '../services/publicPlans.service';
-import type { PlanPublic } from '../../shared';
+import type { PlanPublic } from '../types';
 import { ApiError } from '@/shared/services/api.service';
 
 export const usePublicPlans = () => {

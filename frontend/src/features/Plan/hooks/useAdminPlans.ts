@@ -8,7 +8,7 @@ import type {
   PagedResult, 
   CreatePlanRequest, 
   UpdatePlanRequest 
-} from '../../shared';
+} from '../types';
 import { ApiError } from '@/shared/services/api.service';
 
 export const useAdminPlans = () => {
