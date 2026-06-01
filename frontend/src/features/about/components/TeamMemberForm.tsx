@@ -1,7 +1,7 @@
 import React from 'react';
 // CORREÇÃO 1: Importação correta (GenericForm como valor)
 
-import styles from '../../styles/AboutForm.module.scss';
+import styles from '../styles/AboutForm.module.scss';
 import { type FormField, GenericForm } from '@/components/Form/GenericForm';
 import type { TeamMember, TeamMemberFormValues } from '@/features/about/types/about.types';
 
