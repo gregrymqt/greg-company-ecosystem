@@ -12,7 +12,7 @@ import type {
   SupportApiResponse,
   PaginatedSupportResult,
   SupportFilters
-} from '../../shared';
+} from '../types/support.types';
 
 class AdminSupportService {
   private readonly BASE_PATH = '/support';

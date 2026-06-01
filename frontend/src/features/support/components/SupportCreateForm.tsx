@@ -4,7 +4,7 @@
 
 import React, { useMemo } from 'react';
 import { useUserSupport } from '../hooks/useUserSupport';
-import type { CreateSupportTicketDto } from '../../shared';
+import type { CreateSupportTicketDto } from '../types/support.types';
 import { type FormField, GenericForm } from '@/components/Form/GenericForm';
 import styles from '../styles/SupportCreateForm.module.scss';
 

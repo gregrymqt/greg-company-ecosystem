@@ -6,7 +6,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { userSupportService } from '../services/support-user.service';
-import type { CreateSupportTicketDto } from '../../shared';
+import type { CreateSupportTicketDto } from '../types/support.types';
 import { AlertService } from '@/shared/services/alert.service';
 
 export const useUserSupport = () => {

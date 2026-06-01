@@ -5,7 +5,7 @@
 
 import React, { useEffect, useMemo, useRef } from 'react';
 import { useAdminSupport } from '../hooks/useAdminSupport';
-import type { SupportTicketDto, SupportTicketStatus } from '../../shared';
+import type { SupportTicketDto, SupportTicketStatus } from '../types/support.types';
 import { ActionMenu } from '@/components/ActionMenu/ActionMenu';
 import { type TableColumn, Table } from '@/components/Table/Table';
 import styles from '../styles/SupportTicketList.module.scss';

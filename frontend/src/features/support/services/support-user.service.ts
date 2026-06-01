@@ -8,7 +8,7 @@ import { ApiService } from '@/shared/services/api.service';
 import type {
   CreateSupportTicketDto,
   SupportApiResponse
-} from '../../shared';
+} from '../types/support.types';
 
 class UserSupportService {
   private readonly BASE_PATH = '/support';

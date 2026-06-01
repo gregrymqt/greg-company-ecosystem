@@ -3,10 +3,8 @@
   border-radius: 8px;
   box-shadow: 0 4px 12px $shadow;
   padding: 1.5rem;
-  
-  // Mobile first
   width: 100%;
-  overflow: hidden; 
+  overflow: hidden;
 
   @include desktop {
     padding: 2rem;
@@ -40,14 +38,18 @@
     align-items: center;
     gap: 8px;
 
-    &:hover {
+    &:hover:not(:disabled) {
       background: $primary-color;
       color: #fff;
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
     }
   }
 }
 
-// --- Badges de Status ---
 .badge {
   padding: 4px 12px;
   border-radius: 12px;
@@ -55,26 +57,24 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  
+
   &.open {
-    background-color: rgba(0, 123, 255, 0.15); // Azul claro
+    background-color: rgba(0, 123, 255, 0.15);
     color: #007bff;
   }
 
   &.inProgress {
-    background-color: rgba(255, 193, 7, 0.2); // Amarelo claro
+    background-color: rgba(255, 193, 7, 0.2);
     color: #b98c0a;
   }
 
   &.closed {
-    background-color: rgba(40, 167, 69, 0.15); // Verde claro
+    background-color: rgba(40, 167, 69, 0.15);
     color: #28a745;
   }
 }
 
-// Custom Action Items dentro do Menu
 .actionItem {
-  // Reutiliza estilos básicos se possível, ou define novos
   width: 100%;
   text-align: left;
   background: none;
@@ -89,7 +89,7 @@
   transition: background 0.2s;
 
   &:hover {
-    background-color: rgba(0,0,0,0.05);
+    background-color: rgba(0, 0, 0, 0.05);
   }
 
   i {
@@ -97,6 +97,18 @@
     text-align: center;
   }
 
-  &.success { color: #28a745; }
-  &.warning { color: #d39e00; }
+  &.success {
+    color: #28a745;
+  }
+
+  &.warning {
+    color: #ffc107;
+  }
+}
+
+.loadMoreTrigger {
+  text-align: center;
+  padding: 1rem;
+  color: $secondary-color;
+  font-size: 0.875rem;
 }

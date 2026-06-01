@@ -9,7 +9,7 @@ import type {
   SupportTicketDto,
   SupportTicketStatus,
   SupportFilters
-} from '../../shared';
+} from '../types/support.types';
 import { AlertService } from '@/shared/services/alert.service';
 
 const DEFAULT_FILTERS: SupportFilters = {

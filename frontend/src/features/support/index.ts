@@ -12,18 +12,14 @@ export type {
   SupportApiResponse,
   PaginatedSupportResult,
   SupportFilters
-} from './shared';
+} from './types/support.types';
 
 // Public (User Support)
-export {
-  userSupportService,
-  useUserSupport,
-  SupportCreateForm
-} from './Public';
+export { userSupportService } from './services/support-user.service';
+export { useUserSupport } from './hooks/useUserSupport';
+export { SupportCreateForm } from './components/SupportCreateForm';
 
 // Admin (Support Management)
-export {
-  adminSupportService,
-  useAdminSupport,
-  SupportTicketList
-} from './Admin';
+export { adminSupportService } from './services/support-admin.service';
+export { useAdminSupport } from './hooks/useAdminSupport';
+export { SupportTicketList } from './components/SupportTicketList';
