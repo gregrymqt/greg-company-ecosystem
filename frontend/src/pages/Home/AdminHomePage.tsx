@@ -1,19 +1,18 @@
 import React, { useState } from "react";
 import styles from "./styles/AdminHomePage.module.scss"; // Vamos criar/reutilizar este estilo
 
-import { Sidebar } from "@/components/SideBar/components/Sidebar";
+import { Sidebar } from "@/components/SideBar";
 import type { SidebarItem } from "@/components/SideBar/types/sidebar.types";
-import { HeroForm } from "@/features/home/components/Hero/HeroForm";
-import { HeroList } from "@/features/home/components/Hero/HeroList";
-import { ServiceForm } from "@/features/home/components/Service/ServiceForm";
-import { ServiceList } from "@/features/home/components/Service/ServiceList";
-import { useHomeData } from "@/features/home/hooks/useHomeData";
-import { useHomeHero } from "@/features/home/hooks/useHomeHero";
-import { useHomeServices } from "@/features/home/hooks/useHomeServices";
-import type {
-  HeroSlideData,
-  ServiceData,
-} from "@/features/home/types/home.types";
+import {
+  HeroForm,
+  HeroList,
+  ServiceForm,
+  ServiceList,
+  useAdminHomeData,
+  useAdminHero,
+  useAdminServices
+} from "@/features/home";
+import type { HeroSlideDto, ServiceDto, HeroFormValues, ServiceFormValues } from "@/features/home/types/home.types";
 
 // --- CONFIGURAÇÃO DA SIDEBAR ---
 const sidebarItems: SidebarItem[] = [
@@ -35,13 +34,13 @@ export const AdminHomePage: React.FC = () => {
     services,
     isLoading: isFetching,
     refreshData,
-  } = useHomeData();
+  } = useAdminHomeData();
 
   // --- ESTADOS DE EDIÇÃO ---
-  const [editingHero, setEditingHero] = useState<HeroSlideData | undefined>(
+  const [editingHero, setEditingHero] = useState<HeroSlideDto | undefined>(
     undefined
   );
-  const [editingService, setEditingService] = useState<ServiceData | undefined>(
+  const [editingService, setEditingService] = useState<ServiceDto | undefined>(
     undefined
   );
 
@@ -51,23 +50,23 @@ export const AdminHomePage: React.FC = () => {
     updateHero,
     deleteHero,
     isLoading: loadingHero,
-  } = useHomeHero();
+  } = useAdminHero();
 
   const {
     createService,
     updateService,
     deleteService,
     isLoading: loadingService,
-  } = useHomeServices();
+  } = useAdminServices();
 
   // --- HANDLERS DE EDIÇÃO (Vindos da Lista) ---
-  const handleEditHero = (item: HeroSlideData) => {
+  const handleEditHero = (item: HeroSlideDto) => {
     setEditingHero(item);
     setActiveTab("hero");
     setActiveSidebarId("forms"); // Joga para a aba de formulário
   };
 
-  const handleEditService = (item: ServiceData) => {
+  const handleEditService = (item: ServiceDto) => {
     setEditingService(item);
     setActiveTab("services");
     setActiveSidebarId("forms");
@@ -91,7 +90,7 @@ export const AdminHomePage: React.FC = () => {
         return (
           <HeroForm
             initialData={editingHero}
-            onSubmit={(data) => {
+            onSubmit={(data: HeroFormValues) => {
               if (editingHero) {
                 updateHero(editingHero.id, data, handleSuccess);
               } else {
@@ -105,7 +104,7 @@ export const AdminHomePage: React.FC = () => {
         return (
           <ServiceForm
             initialData={editingService}
-            onSubmit={(data) => {
+            onSubmit={(data: ServiceFormValues) => {
               if (editingService) {
                 updateService(editingService.id, data, handleSuccess);
               } else {
@@ -126,7 +125,7 @@ export const AdminHomePage: React.FC = () => {
             data={heroSlides}
             isLoading={isFetching}
             onEdit={handleEditHero}
-            onDelete={(id) => deleteHero(id, refreshData)}
+            onDelete={(id: number) => deleteHero(id, refreshData)}
           />
         );
       } else {
@@ -135,7 +134,7 @@ export const AdminHomePage: React.FC = () => {
             data={services}
             isLoading={isFetching}
             onEdit={handleEditService}
-            onDelete={(id) => deleteService(id, refreshData)}
+            onDelete={(id: number) => deleteService(id, refreshData)}
           />
         );
       }
@@ -148,7 +147,7 @@ export const AdminHomePage: React.FC = () => {
       <Sidebar
         items={sidebarItems}
         activeItemId={activeSidebarId}
-        onItemClick={(item) => {
+        onItemClick={(item: SidebarItem) => {
           setActiveSidebarId(item.id);
           // Ao trocar de menu principal, limpamos a edição para evitar confusão
           if (item.id === "list") {

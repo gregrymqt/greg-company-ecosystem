@@ -4,8 +4,8 @@
  */
 
 import { useState, useCallback, useEffect } from 'react';
-import { publicHomeService } from '@/features/home/Public/services/home.service';
-import type { HeroSlideDto, ServiceDto } from '@/features/home/shared/types/home.types';
+import { publicHomeService } from '@/features/home/services/publicHome.service';
+import type { HeroSlideDto, ServiceDto } from '@/features/home/types/home.types';
 import { ApiError } from '@/shared/services/api.service';
 
 export const usePublicHomeData = () => {

@@ -1,16 +1,11 @@
 import React from 'react';
 import styles from './styles/Home.module.scss'; // Ajuste o caminho conforme sua estrutura
 
-// Componentes
-import { Services } from '@/features/home/components/Service/Services';
-import { Hero } from '@/features/home/components/Hero/Hero';
-
-// Hook
-import { useHomeData } from '@/features/home/hooks/useHomeData';
+import { Services, Hero, usePublicHomeData } from '@/features/home';
 
 export const Home: React.FC = () => {
   // CORREÇÃO: O hook retorna heroSlides, services e isLoading (não 'data' e 'loading')
-  const { heroSlides, services, isLoading, error, refreshData } = useHomeData();
+  const { heroSlides, services, isLoading, error, refreshData } = usePublicHomeData();
 
   // Loading State
   if (isLoading) {

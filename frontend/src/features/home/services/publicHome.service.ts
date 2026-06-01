@@ -4,7 +4,7 @@
  */
 
 import { ApiService } from '@/shared/services/api.service';
-import type { HomeContentDto } from '@/features/home/shared/types/home.types';
+import type { HomeContentDto } from '@/features/home/types/home.types';
 
 const BASE_ENDPOINT = '/Home';
 

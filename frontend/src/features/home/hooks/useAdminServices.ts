@@ -4,8 +4,8 @@
  */
 
 import { useState, useCallback } from 'react';
-import { adminHomeService } from '@/features/home/Admin/services/home.service';
-import type { ServiceFormValues } from '@/features/home/shared/types/home.types';
+import { adminHomeService } from '@/features/home/services/adminHome.service';
+import type { ServiceFormValues } from '@/features/home/types/home.types';
 import { AlertService } from '@/shared/services/alert.service';
 
 export const useAdminServices = () => {

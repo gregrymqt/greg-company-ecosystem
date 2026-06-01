@@ -9,7 +9,7 @@ import type {
   ServiceDto,
   HeroFormValues,
   ServiceFormValues
-} from '@/features/home/shared/types/home.types';
+} from '@/features/home/types/home.types';
 
 const BASE_ENDPOINT = '/Home';
 
