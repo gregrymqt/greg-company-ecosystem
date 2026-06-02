@@ -5,7 +5,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { adminStudentsService } from '../services/admin-students.service';
-import type { StudentDto, PaginatedResult, StudentFilters } from '../../shared';
+import type { StudentDto, PaginatedResult, StudentFilters } from '../types';
 import { AlertService } from '@/shared/services/alert.service';
 
 const DEFAULT_FILTERS: StudentFilters = {

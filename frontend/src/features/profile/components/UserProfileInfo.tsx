@@ -1,12 +1,12 @@
 import React, { useState } from "react";
-import styles from '../styles/ProfileInfo.module.scss';
+import styles from '../styles/AdminProfileInfo.module.scss';
 import { AvatarUploadForm } from "./AvatarUploadForm"; 
 import { Card } from "@/components/Card/Card";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 
 type TabOption = "details" | "avatar";
 
-export const ProfileInfo: React.FC = () => {
+export const UserProfileInfo: React.FC = () => {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<TabOption>("details");
 

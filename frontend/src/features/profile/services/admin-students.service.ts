@@ -5,7 +5,7 @@
  */
 
 import { ApiService } from '@/shared/services/api.service';
-import type { StudentDto, PaginatedResult, StudentFilters } from '../../shared';
+import type { StudentDto, PaginatedResult, StudentFilters } from '../types';
 
 class AdminStudentsService {
   private readonly BASE_PATH = '/admin/students';

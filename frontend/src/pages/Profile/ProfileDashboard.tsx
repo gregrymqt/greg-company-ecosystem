@@ -5,7 +5,7 @@ import styles from "./ProfileDashboard.module.scss";
 import { Sidebar } from "@/components/SideBar/components/Sidebar";
 import type { SidebarItem } from "@/components/SideBar/types/sidebar.types";
 import { useAuth } from "@/features/auth/hooks/useAuth";
-import { ProfileInfo } from "@/features/profile/User/components/ProfileInfo";
+import { UserProfileInfo } from "@/features/profile";
 import { getProfileSidebarItems } from "@/features/profile/User/config/sidebarConfig";
 
 export const ProfileDashboard: React.FC = () => {
@@ -58,7 +58,7 @@ export const ProfileDashboard: React.FC = () => {
 
           {/* Agora só renderizamos o ProfileInfo. 
               As outras telas são rotas externas. */}
-          <ProfileInfo />
+          <UserProfileInfo />
         </div>
       </main>
     </div>

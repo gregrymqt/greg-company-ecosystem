@@ -5,7 +5,7 @@
  */
 
 import { ApiService } from '@/shared/services/api.service';
-import type { UserProfileDto, AvatarUpdateResponse } from '../../shared';
+import type { UserProfileDto, AvatarUpdateResponse } from '../types';
 
 class UserAccountService {
   private readonly BASE_PATH = '/user-account';

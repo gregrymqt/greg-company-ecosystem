@@ -5,7 +5,7 @@
 
 import { useState } from 'react';
 import { userAccountService } from '../services/user-account.service';
-import type { AvatarUpdateResponse } from '../../shared';
+import type { AvatarUpdateResponse } from '../types';
 import { AlertService } from '@/shared/services/alert.service';
 
 export const useAvatarUpdate = () => {
