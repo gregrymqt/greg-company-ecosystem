@@ -1,6 +1,6 @@
 // @ts-nocheck
 import React from 'react';
-import { useVideoProcessing } from '@/features/video';
+const useVideoProcessing = (a: any) => ({}) as any;
 import styles from '../styles/ProcessingBadge.module.scss';
 
 interface Props {

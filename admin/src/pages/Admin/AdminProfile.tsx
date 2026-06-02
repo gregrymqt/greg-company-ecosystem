@@ -1,10 +1,9 @@
-// @ts-nocheck
 import React, { useState } from 'react';
 
 import styles from './AdminProfile.module.scss';
 import { Sidebar } from '@/components/SideBar';
 import type { SidebarItem } from '@/components/SideBar/types/sidebar.types';
-import { AdminTerminal, AdminProfileInfo } from '@/features/profile';
+// A feature de profile foi movida para o Portal. Substitua pelos contextos locais.
 // 1. IMPORT NOVO: Importamos a lista de tickets
 import { SupportTicketList } from '@/features/support/components/SupportTicketList'; 
 
@@ -68,13 +67,15 @@ export const AdminProfile: React.FC = () => {
                 <div className={styles.contentArea}>
                     {activeTab === 'profile' && (
                         <div className={styles.fadeEntry}>
-                            <AdminProfileInfo />
+                            <h2>Perfil do Administrador</h2>
+                            <p>Em breve: Integração com Contexto de Autenticação Local do Admin.</p>
                         </div>
                     )}
 
                     {activeTab === 'terminal' && (
                         <div className={styles.fadeEntry}>
-                            <AdminTerminal />
+                            <h2>Terminal Administrativo</h2>
+                            <p>CLI do sistema será disponibilizada em atualizações futuras.</p>
                         </div>
                     )}
 

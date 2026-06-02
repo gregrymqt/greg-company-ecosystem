@@ -3,14 +3,14 @@ import React, { useState, useEffect, useMemo } from "react";
 
 // Styles
 import styles from "./AdminVideoManager.module.scss";
-import { Sidebar } from "@/components/SideBar/components/Sidebar";
+import { Sidebar } from "@/components/SideBar";
 import type { SidebarItem } from "@/components/SideBar/types/sidebar.types";
 import { VideoForm } from "@/features/video/Admin/components/VideoForm";
 import { VideoList } from "@/features/video/Admin/components/VideoList";
 import { VideoPlayer } from "@/features/video/Admin/components/VideoPlayer";
-import { useAdminVideos } from "@/features/Videos/hooks/useAdminVideos";
-import type { VideoTab, VideoFormData } from "@/features/Videos/types/video-manager.types";
-import { useCourses } from "@/features/course/Allow/hooks/useCourses";
+import { useAdminVideos } from "@/features/video";
+import type { VideoTab, VideoFormData } from "@/features/video";
+import { useCourses } from "@/features/course";
 import { AlertService } from "@/shared/services/alert.service";
 import type { Video, Course } from "@/types/models";
 

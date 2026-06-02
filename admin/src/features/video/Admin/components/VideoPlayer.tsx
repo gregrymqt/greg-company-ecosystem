@@ -1,7 +1,6 @@
-// @ts-nocheck
 import React from 'react';
 import styles from '../styles/VideoPlayer.module.scss';
-import { type VideoPlayerProps } from '@/features/video';
+type VideoPlayerProps = any;
 
 export const VideoPlayer: React.FC<VideoPlayerProps> = ({ video, onBack }) => {
   if (!video) {

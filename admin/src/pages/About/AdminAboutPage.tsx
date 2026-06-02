@@ -1,13 +1,14 @@
-// @ts-nocheck
 import React, { useState } from "react";
 import styles from "./styles/AdminAboutPage.module.scss";
 
-import { Sidebar } from "@/components/SideBar/components/Sidebar";
+import { Sidebar } from "@/components/SideBar";
 import type { SidebarItem } from "@/components/SideBar/types/sidebar.types";
-import { TeamMemberForm } from "@/features/about/components/Members/TeamMemberForm";
-import { TeamMemberList } from "@/features/about/components/Members/TeamMemberList";
-import { AboutSectionForm } from "@/features/about/components/Section/AboutSectionForm";
-import { AboutSectionList } from "@/features/about/components/Section/AboutSectionList";
+import { 
+  TeamMemberForm, 
+  TeamMemberList, 
+  AboutSectionForm, 
+  AboutSectionList 
+} from "@/features/about";
 
 // Importamos o NOVO hook de leitura
 import { useAboutData } from "@/features/about/hooks/useAboutData";

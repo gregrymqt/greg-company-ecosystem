@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Barrel exports para Analytics Feature
  */
@@ -11,8 +10,7 @@ export * from './types/financial.types';
 export * from './types/subscriptions.types';
 export * from './types/support.types';
 export * from './types/users.types';
-export * from './types/storage.types';
-
+// export * from './types/storage.types'; // StorageStats is exported from analytics.types
 // Services
 export * from './services/analytics.service';
 export * from './services/claims.service';

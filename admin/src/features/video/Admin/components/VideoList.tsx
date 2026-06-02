@@ -1,8 +1,15 @@
-// @ts-nocheck
 import React from "react";
 import { type Video, VideoStatus } from "@/types/models";
-import { type VideoListProps } from "@/features/Videos/types/video-manager.types";
-import styles from '../features/Videos/styles/VideoList.module.scss';
+export interface VideoListProps {
+  videos: Video[];
+  isLoading: boolean;
+  onEdit: (video: Video) => void;
+  onDelete: (id: string) => void;
+  onWatch: (video: Video) => void;
+  onNewClick: () => void;
+  onRefresh?: () => void;
+}
+import styles from '../styles/VideoList.module.scss';
 import { ActionMenu } from "@/components/ActionMenu/ActionMenu";
 import { type TableColumn, Table } from "@/components/Table/Table";
 import { ProcessingBadge } from "./ProcessingBadge"; //
@@ -72,7 +79,7 @@ export const VideoList: React.FC<VideoListProps> = ({
             <ProcessingBadge
               storageIdentifier={video.storageIdentifier}
               status={video.status}
-              onProcessComplete={onRefresh} //
+              onProcessComplete={onRefresh || (() => {})} //
             />
           );
         }

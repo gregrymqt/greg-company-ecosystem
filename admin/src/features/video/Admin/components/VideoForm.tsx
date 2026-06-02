@@ -1,10 +1,17 @@
-// @ts-nocheck
 import React from 'react';
-import type { VideoFormData, VideoFormProps } from '@/features/video';
+import type { VideoFormData, VideoDto } from '@/features/video';
 // Reutiliza estilo do container de form se quiser, ou cria um novo. 
 // Usaremos um module específico aqui para manter o padrão.
 import styles from '../styles/VideoForm.module.scss'; 
 import { type FormField, GenericForm } from '@/components/Form/GenericForm';
+
+export interface VideoFormProps {
+  initialData?: VideoDto;
+  courses: { name: string; publicId: string }[];
+  isLoading: boolean;
+  onSubmit: (data: VideoFormData) => void;
+  onCancel: () => void;
+}
 
 export const VideoForm: React.FC<VideoFormProps> = ({
   initialData,
@@ -32,18 +39,11 @@ export const VideoForm: React.FC<VideoFormProps> = ({
       colSpan: 6
     },
     {
-      name: 'duration',
-      label: 'Duração (mm:ss)',
-      type: 'text',
-      placeholder: '00:00',
-      colSpan: 6
-    },
-    {
-      name: 'videoUrl',
-      label: 'URL do Vídeo (Youtube/Vimeo/Storage)',
-      type: 'text',
-      placeholder: 'https://...',
-      validation: { required: 'A URL do vídeo é obrigatória' },
+      name: 'videoFile',
+      label: 'Arquivo de Vídeo',
+      type: 'file',
+      accept: 'video/*',
+      validation: { required: 'O arquivo de vídeo é obrigatório' },
       colSpan: 12
     },
     {
@@ -54,7 +54,7 @@ export const VideoForm: React.FC<VideoFormProps> = ({
     },
     // Exemplo de campo File caso queira thumbnail
     {
-      name: 'thumbnail',
+      name: 'thumbnailFile',
       label: 'Capa do Vídeo (Opcional)',
       type: 'file',
       accept: 'image/*',
@@ -64,10 +64,8 @@ export const VideoForm: React.FC<VideoFormProps> = ({
 
   const defaultValues = initialData ? {
     title: initialData.title,
-    description: initialData.description,
-    duration: initialData.duration,
-    courseId: String(initialData.courseId), // Converter number para string
-    videoUrl: initialData.storageIdentifier // Supondo que a URL venha aqui
+    description: initialData.description || '',
+    courseId: initialData.courseName ? String(initialData.courseName) : '', // Convert or map appropriately
   } : {};
 
   return (

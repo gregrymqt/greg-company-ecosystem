@@ -1,9 +1,9 @@
 // @ts-nocheck
 import React, { useState, useEffect, useCallback } from "react";
 import styles from "./styles/ClaimsLayout.module.scss";
-import { ClaimChat, ClaimsList } from "@/features/Claim/Public";
-import { AdminClaimService } from "@/features/Claim/Admin";
-import type { ClaimSummary } from "@/features/Claim/shared";
+import { ClaimChat, ClaimsList } from "@/features/Claim";
+import { AdminClaimService } from "@/features/Claim";
+import type { ClaimSummary } from "@/features/Claim";
 import { Modal } from "@/components/Modal/Modal";
 import type { SidebarItem } from "@/components/SideBar/types/sidebar.types";
 import { Sidebar } from "@/components/SideBar";
@@ -69,7 +69,7 @@ export const AdminClaimsPage: React.FC = () => {
           isLoading={isLoading}
           userRole="user"
           // CORREÇÃO: Usa internalId
-          onViewDetails={(claim) => setSelectedClaimId(claim.internalId)}
+          onViewDetails={(claim: any) => setSelectedClaimId(claim.internalId)}
         />
       </main>
 

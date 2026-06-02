@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Analytics Feature - useAnalytics Hook
  * Gerencia estado e lógica de fetch dos dados de analytics
@@ -8,8 +7,6 @@ import { useState, useEffect, useCallback } from 'react';
 import { AnalyticsService } from '@/features/analytics/services/analytics.service';
 import type { 
   UseAnalyticsState,
-  AnalyticsDashboard,
-  ProductMetric,
   AnalyticsFilters,
   StorageStats
 } from '@/features/analytics/types/analytics.types';
@@ -137,7 +134,7 @@ export const useAnalytics = () => {
   const loadStorageStats = useCallback(async () => {
     try {
       const stats = await AnalyticsService.getStorageOverview();
-      setStorageStats(stats);
+      setStorageStats(stats as any);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Erro ao carregar dados de armazenamento';
       console.error(errorMessage);

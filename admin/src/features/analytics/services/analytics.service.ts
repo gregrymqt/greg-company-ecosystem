@@ -8,7 +8,7 @@
 import { ApiService, BiApiService } from "@/shared/services/api.service";
 import type { 
   AnalyticsApiResponse, 
-  AnalyticsDashboard, 
+   
   ProductMetric,
   AnalyticsFilters
 } from "@/features/analytics/types/analytics.types";
