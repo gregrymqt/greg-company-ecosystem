@@ -1,0 +1,5 @@
+// Admin - Claim Feature (Admin only)
+export { ClaimChat } from './components/ClaimChat';
+export { ClaimsList } from './components/ClaimsList';
+export { ClaimStatusBadge } from './components/ClaimStatusBadge';
+export { AdminClaimService } from './services/adminClaim.service';

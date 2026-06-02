@@ -101,15 +101,30 @@ services:
       - ./uploads:/app/wwwroot/uploads
       - ./logs:/app/logs    
 
-  frontend:
-    container_name: frontend-app
+  frontend-portal:
+    container_name: frontend-portal
     build:
-      context: ./system-app/frontend
+      context: ./portal
       dockerfile: Dockerfile
       args:
-        - VITE_GENERAL_BASEURL=${GENERAL_BASEURL} 
+        - VITE_GENERAL_BASEURL=${GENERAL_BASEURL}
     ports:
-      - "5173:80" # Porta do Site (Exposta para Web)
+      - "5173:80" # Porta do Portal (End-users)
+    depends_on:
+      - backend
+    networks:
+      - greg-network
+
+  frontend-admin:
+    container_name: frontend-admin
+    build:
+      context: ./admin
+      dockerfile: Dockerfile
+      args:
+        - VITE_GENERAL_BASEURL=${GENERAL_BASEURL}
+        - VITE_BI_API_URL=${BI_API_URL}
+    ports:
+      - "5174:80" # Porta do Admin (Backoffice)
     depends_on:
       - backend
     networks:
