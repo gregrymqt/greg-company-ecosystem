@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -14,7 +15,8 @@ public class LogTools
     // ====================================================================
     // 1. LOGS DA APLICAÇÃO (SERILOG)
     // ====================================================================
-    public async Task<CallToolResult> ReadLogsAsync(int linesCount = 50)
+    [Description("Lê as últimas linhas do arquivo de log físico do Serilog (backend) para depurar exceções.")]
+    public async Task<CallToolResult> ReadLogsAsync([Description("Quantidade de linhas para ler do log")] int linesCount = 50)
     {
         var logPath = "log/log-.txt";
 
@@ -46,7 +48,8 @@ public class LogTools
     // ====================================================================
     // 2. LOGS DO SQL SERVER (DOCKER)
     // ====================================================================
-    public async Task<CallToolResult> ReadSqlServerLogsAsync(int tailCount = 100)
+    [Description("Analisa os logs do container docker do SQL Server para investigar locks, timeouts ou erros de conexão.")]
+    public async Task<CallToolResult> ReadSqlServerLogsAsync([Description("Quantidade de linhas para ler")] int tailCount = 100)
     {
         return await GetDockerLogsAsync("mssql-db", tailCount);
     }
@@ -54,7 +57,8 @@ public class LogTools
     // ====================================================================
     // 3. LOGS DO MONGODB (DOCKER)
     // ====================================================================
-    public async Task<CallToolResult> ReadMongoDbLogsAsync(int tailCount = 100)
+    [Description("Analisa os logs do container docker do MongoDB para investigar queries lentas ou falhas de disco.")]
+    public async Task<CallToolResult> ReadMongoDbLogsAsync([Description("Quantidade de linhas para ler")] int tailCount = 100)
     {
         return await GetDockerLogsAsync("mongodb-store", tailCount);
     }
@@ -62,7 +66,8 @@ public class LogTools
     // ====================================================================
     // 4. LOGS DO REDIS (DOCKER)
     // ====================================================================
-    public async Task<CallToolResult> ReadRedisLogsAsync(int tailCount = 100)
+    [Description("Analisa os logs do container docker do Redis para investigar falhas de persistência ou despejo de memória.")]
+    public async Task<CallToolResult> ReadRedisLogsAsync([Description("Quantidade de linhas para ler")] int tailCount = 100)
     {
         return await GetDockerLogsAsync("redis-cache", tailCount);
     }

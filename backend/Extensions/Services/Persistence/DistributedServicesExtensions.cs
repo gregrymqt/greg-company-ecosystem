@@ -1,45 +1,12 @@
 using Hangfire;
 using Hangfire.Redis.StackExchange;
-using MeuCrudCsharp.Data;
-using MeuCrudCsharp.Models;
-using MeuCrudCsharp.Features.Auth.Domain.Entities;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using MongoDB.Driver;
 
-namespace MeuCrudCsharp.Extensions;
+namespace MeuCrudCsharp.Extensions.Services.Persistence;
 
-public static class PersistenceExtensions
+public static class DistributedServicesExtensions
 {
-    public static WebApplicationBuilder AddPersistence(this WebApplicationBuilder builder)
+    public static WebApplicationBuilder AddDistributedServices(this WebApplicationBuilder builder)
     {
-        builder.Services.AddDbContextFactory<ApiDbContext>(options =>
-            options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
-        );
-
-        builder
-            .Services.AddIdentity<Users, Roles>(options =>
-            {
-                options.SignIn.RequireConfirmedAccount = true;
-
-                options.Password.RequireDigit = false;
-                options.Password.RequiredLength = 6;
-            })
-            .AddEntityFrameworkStores<ApiDbContext>()
-            .AddDefaultTokenProviders();
-
-        builder.Services.AddSingleton<IMongoClient>(_ =>
-        {
-            var mongoConnString = builder.Configuration.GetConnectionString("MongoConnection");
-            return new MongoClient(mongoConnString);
-        });
-
-        builder.Services.AddScoped<IMongoDatabase>(sp =>
-        {
-            var client = sp.GetRequiredService<IMongoClient>();
-            return client.GetDatabase("MeuCrudSupportDb");
-        });
-
         var useRedis = builder.Configuration.GetValue<bool>("USE_REDIS");
         var redisConnectionString = builder.Configuration.GetConnectionString("Redis");
 
@@ -61,10 +28,7 @@ public static class PersistenceExtensions
         return builder;
     }
 
-    private static void AddRedisPersistence(
-        this WebApplicationBuilder builder,
-        string redisConnectionString
-    )
+    private static void AddRedisPersistence(this WebApplicationBuilder builder, string redisConnectionString)
     {
         builder.Services.AddStackExchangeRedisCache(options =>
         {

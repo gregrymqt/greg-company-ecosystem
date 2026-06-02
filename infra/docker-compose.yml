@@ -1,10 +1,8 @@
 # ==========================================================
-# GREG COMPANY - INFRASTRUCTURE ORCHESTRATION (V2.0)
-# Stack: .NET Core | React | SQL Server | MongoDB | Redis
+# GREG COMPANY - INFRASTRUCTURE ORCHESTRATION (V2.1)
+# Stack: .NET Core | React | SQL Server | MongoDB | Redis | Nginx
 # Modo: Hybrid (Secure by default / Dev ready)
 # ==========================================================
-
-version: '3.8'
 
 services:
 
@@ -16,13 +14,7 @@ services:
     environment:
       - ACCEPT_EULA=Y
       - SA_USERNAME=sa
-      # DICA: Em produção, use um arquivo .env para esta senha!
       - MSSQL_SA_PASSWORD=${DB_PASSWORD}
-    # --- SEGURANÇA ---
-    # Manter COMENTADO na VPS (Nuvem) para evitar ataques.
-    # Descomentar no Desktop se precisar usar SSMS / DBeaver.
-    # ports:
-    #   - "1433:1433"
     volumes:
       - sql-server-data:/var/opt/mssql
     networks:
@@ -37,10 +29,6 @@ services:
   mongodb:
     image: mongo:latest
     container_name: mongodb-store
-    # --- SEGURANÇA ---
-    # Manter COMENTADO na VPS. Descomentar localmente para usar MongoDB Compass.
-    # ports:
-    #   - "27017:27017"
     volumes:
       - mongo-data:/data/db
     networks:
@@ -48,15 +36,28 @@ services:
     restart: always
 
   redis:
-    image: "redis:alpine"
+    image: "redis:latest"
     container_name: redis-cache
     command: redis-server --appendonly yes
-    # --- SEGURANÇA ---
-    # Manter COMENTADO na VPS. O Redis não tem senha por padrão aqui!
-    # ports:
-    #   - "6379:6379"
     volumes:
       - redis-data:/data
+    networks:
+      - greg-network
+    restart: always
+
+  # --- [ GATEWAY PROXY LAYER ] ---
+
+  proxy-gateway:
+    image: nginx:alpine
+    container_name: proxy-gateway
+    ports:
+      - "80:80" # Única porta pública de entrada do ecossistema inteiro!
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro # Injeta as regras do porteiro
+    depends_on:
+      - frontend-portal
+      - frontend-admin
+      - backend
     networks:
       - greg-network
     restart: always
@@ -68,10 +69,10 @@ services:
     build: 
       context: ../backend
       dockerfile: Dockerfile
-    ports:
-      - "5045:8080" # Porta Web API (Exposta para Web/Frontend)
+    expose:
+      - "8080" # Fechado para fora, acessível apenas pelo Nginx internamente
     env_file:
-      - .env
+      - ../.env
     environment:
       - ASPNETCORE_URLS=http://+:8080
       - ConnectionStrings__DefaultConnection=${ConnectionStrings__DefaultConnection}
@@ -86,11 +87,11 @@ services:
       - SendGrid__ApiKey=${SendGrid__ApiKey}
       - SendGrid__FromEmail=${SendGrid__FromEmail}
       - SendGrid__FromName=${SendGrid__FromName}
-      - General__BaseUrl=${GENERAL_BASEURL}
+      - General__BaseUrl=${VITE_GENERAL__BASEURL}
       - USE_REDIS=${USE_REDIS}
     depends_on:
       sql-server:
-        condition: service_healthy # Só inicia quando o SQL estiver 100% pronto
+        condition: service_healthy
       redis:
         condition: service_started
       mongodb:
@@ -107,9 +108,9 @@ services:
       context: ../portal
       dockerfile: Dockerfile
       args:
-        - VITE_GENERAL_BASEURL=${GENERAL_BASEURL}
-    ports:
-      - "5173:80" # Porta do Portal (End-users)
+        - VITE_GENERAL_BASEURL=${VITE_GENERAL__BASEURL}
+    expose:
+      - "80" # Fechado para fora, acessível apenas pelo Nginx internamente
     depends_on:
       - backend
     networks:
@@ -121,9 +122,9 @@ services:
       context: ../admin
       dockerfile: Dockerfile
       args:
-        - VITE_GENERAL_BASEURL=${GENERAL_BASEURL}
-    ports:
-      - "5174:80" # Porta do Admin (Backoffice)
+        - VITE_GENERAL_BASEURL=${VITE_GENERAL__BASEURL}
+    expose:
+      - "80" # Fechado para fora, acessível apenas pelo Nginx internamente
     depends_on:
       - backend
     networks:

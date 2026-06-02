@@ -1,6 +1,6 @@
 using DotNetEnv;
-using MeuCrudCsharp.Extensions;
-using MeuCrudCsharp.Extensions.Mcp; // Adicionado para expor o MCP
+using MeuCrudCsharp.Extensions.Services;
+using MeuCrudCsharp.Extensions.App;
 using Serilog;
 
 Log.Logger = new LoggerConfiguration()
@@ -19,26 +19,25 @@ Log.Logger = new LoggerConfiguration()
 
 try
 {
-    Log.Information("Iniciando a aplicação...");
+    Log.Information("Iniciando o ecossistema Greg Company...");
     Env.Load();
 
     var builder = WebApplication.CreateBuilder(args);
     builder.Host.UseSerilog();
 
-    builder.AddCoreServices().AddApplicationServices().AddPersistence().AddWebServices().AddAuth();
-
-    // REGISTRO OBRIGATÓRIO DO MCP NO CONTAINER DE INJEÇÃO
-    builder.Services.AddMcpContextServer(builder.Configuration);
+    // 1. Centralização da Injeção de Dependências (Services)
+    builder.ConfigureAllServices();
 
     var app = builder.Build();
 
-    await app.UseAppPipeline();
+    // 2. Centralização do Fluxo de Middlewares (App Pipeline)
+    await app.ConfigureAppPipeline();
 
     app.Run();
 }
 catch (Exception ex)
 {
-    Log.Fatal(ex, "A aplicação falhou ao iniciar: {ExceptionMessage}", ex.Message);
+    Log.Fatal(ex, "A aplicação falhou criticamente ao iniciar: {ExceptionMessage}", ex.Message);
     Console.WriteLine($"FATAL EXCEPTION: {ex}");
     Console.WriteLine($"STACK TRACE: {ex.StackTrace}");
 }
