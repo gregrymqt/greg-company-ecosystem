@@ -4,8 +4,7 @@ import React, { useEffect } from "react";
 import styles from "./styles/AboutPage.module.scss";
 
 // Componentes
-import { AboutHeroSection } from "@/features/about/components/Section/AboutHeroSection";
-import { AboutTeamSection } from "@/features/about/components/Members/TeamMemberSection";
+import { AboutHeroSection, AboutTeamSection } from "@/features/about";
 
 // Hook (CORREÇÃO: Usar o hook de leitura criado anteriormente)
 import { useAboutData } from "@/features/about/hooks/useAboutData";

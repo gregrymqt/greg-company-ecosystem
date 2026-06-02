@@ -2,7 +2,7 @@ import React, { useMemo } from "react";
 import { useNavigate } from "react-router-dom"; // Importante para navegação
 
 import styles from "./ProfileDashboard.module.scss";
-import { Sidebar } from "@/components/SideBar/components/Sidebar";
+import { Sidebar } from "@/components/SideBar";
 import type { SidebarItem } from "@/components/SideBar/types/sidebar.types";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { UserProfileInfo } from "@/features/profile";

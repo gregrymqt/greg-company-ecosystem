@@ -3,6 +3,8 @@
  * Estilização mobile-first para a página de analytics
  */
 
+@use "sass:color";
+
 
 .analyticsPage {
   min-height: 100vh;
@@ -145,7 +147,7 @@
     color: $text-light;
     
     &:hover:not(:disabled) {
-      background-color: darken($secondary-color, 10%);
+      background-color: color.adjust($secondary-color, $lightness: -10%);
     }
   }
   
@@ -154,7 +156,7 @@
     color: $text-light;
     
     &:hover:not(:disabled) {
-      background-color: darken($success-color, 10%);
+      background-color: color.adjust($success-color, $lightness: -10%);
     }
   }
 }
