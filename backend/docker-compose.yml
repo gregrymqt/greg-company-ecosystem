@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  backend:
+    container_name: backend-api-local
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5045:8080"
+    env_file:
+      - ../.env
+    environment:
+      - ASPNETCORE_URLS=http://+:8080
+      - General__BaseUrl=http://localhost:5173
+    depends_on:
+      - sql-server
+      - redis
+      - mongodb
+
+  sql-server:
+    image: "mcr.microsoft.com/mssql/server:2022-latest"
+    ports:
+      - "1433:1433"
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_USERNAME=sa
+      - MSSQL_SA_PASSWORD=TestPassword123!
+
+  mongodb:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+
+  redis:
+    image: "redis:alpine"
+    ports:
+      - "6379:6379"

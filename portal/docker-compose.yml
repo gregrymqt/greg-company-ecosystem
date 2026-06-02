@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  frontend-portal:
+    container_name: frontend-portal-local
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - VITE_GENERAL_BASEURL=http://localhost:5045
+    ports:
+      - "5173:80"

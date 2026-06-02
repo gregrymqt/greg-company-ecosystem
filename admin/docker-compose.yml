@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  frontend-admin:
+    container_name: frontend-admin-local
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - VITE_GENERAL_BASEURL=http://localhost:5045
+    ports:
+      - "5174:80"

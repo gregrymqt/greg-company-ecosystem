@@ -2,233 +2,81 @@
 
 ## Project Architecture
 
-This is a **multi-service business suite** with three core components:
+This is a **monorepo multi-service business suite** following a decoupled micro-frontend architecture.
 
-1. **System App** (.NET 8 + React): Primary transactional platform for course management, payments, and user interactions
-2. **BI Dashboard** (Python): ETL engine for extracting product metrics and syncing to Rows.com/Notion dashboards
-3. **MCP Servers**: Model Context Protocol servers for providing project context to AI agents
+1. **Backend (.NET 8):** Primary transactional API, background job processing (Hangfire), and Business Intelligence metrics calculation.
+2. **Portal Frontend (React):** Facing application for end-users, students, and course consumers.
+3. **Admin Frontend (React):** Backoffice management, analytics dashboards, and refund workflows.
+4. **Infra:** Centralized infrastructure orchestration directory.
 
 ## Backend (C# / .NET 8)
 
 ### Architecture Pattern: Clean Architecture with Vertical Slice
-- **Features-first organization**: All features live under `Features/` directory (Auth, Authorization, Courses, MercadoPago, Support, Videos, etc.)
-- Each feature contains its own: Controllers, Services, Repositories, DTOs, Interfaces, Mappers
-- **Extension-based startup**: `Program.cs` uses extension methods from `Extensions/` for clean dependency registration
-  - `AddApplicationServices()` - Registers services/repos using Scrutor scanning
-  - `AddPersistence()` - Configures EF Core, Identity, Redis, Hangfire
-  - `AddAuth()` - Sets up JWT + Google OAuth
-  - `UseAppPipeline()` - Configures middleware chain
+- **Features-first organization:** All features live under `backend/Features/` directory (Auth, Courses, Analytics, Support, etc.)
+- Each feature contains its own: Controllers, Services, Repositories, DTOs, Interfaces, Mappers.
+- **Extension-based startup:** `Program.cs` uses extension methods from `Extensions/` for clean dependency registration.
 
 ### Dependency Injection Convention
-Services and repositories are **auto-registered via Scrutor** by namespace scanning:
-```csharp
-// DependencyInjectionExtensions.cs scans namespaces like:
-"MeuCrudCsharp.Features.Courses.Services"
-"MeuCrudCsharp.Features.Courses.Repositories"
-```
-When adding new features: create `Services/` and `Repositories/` folders following this pattern, and they will be auto-discovered.
+Services and repositories are **auto-registered via Scrutor** by namespace scanning. When adding new features, create `Services/` and `Repositories/` folders strictly following the standard namespace pattern so they will be automatically discovered.
 
-### Database & ORM
-- **Primary DB**: SQL Server via Entity Framework Core
-- **DbContext**: `ApiDbContext` extends `IdentityDbContext<Users, Roles, string>`
-- **Migrations**: Located in `Migrations/` - run `dotnet ef migrations add <Name>` from backend directory
-- **Cache**: Redis for performance (toggled via `USE_REDIS` env var)
-- **NoSQL**: MongoDB for flexible document storage (connection string in `appsettings.json`)
+### Database & Background Jobs
+- **Primary DB:** SQL Server via EF Core. Migrations are managed from the `backend/` directory.
+- **Cache:** Redis for performance (`USE_REDIS` env var toggles it).
+- **NoSQL:** MongoDB for flexible document storage (e.g., Support tickets).
+- **Hangfire:** Handles all async processing (subscription renewals, MercadoPago webhooks).
 
-### Background Jobs & Webhooks
-- **Hangfire** handles all async processing (subscription renewals, payment confirmations)
-- **MercadoPago integration**: Webhook processing queues jobs via `IQueueService.EnqueueJobAsync<TJob>()`
-- Jobs defined under `Features/MercadoPago/Jobs/`
+## Frontends (React + TypeScript + Vite)
 
-### Logging
-- **Serilog** configured in `Program.cs` with dual output:
-  - Console
-  - File (`log/log-.txt` with daily rolling interval) with shared file access for MCP server reads
+### Micro-frontend Separation
+The application UI is split into two completely independent React projects to avoid coupling and cross-environment bleeding:
+1. **`portal/`**: For end-users. Runs on port `5173`.
+2. **`admin/`**: For administrators. Runs on port `5174`.
 
-## Frontend (React + TypeScript + Vite)
-
-### Stack & Key Libraries
-- **Build**: Vite for fast development
-- **Routing**: React Router v7
-- **Forms**: React Hook Form
-- **Real-time**: SignalR for live notifications/updates
-- **Payments**: MercadoPago SDK React (`@mercadopago/sdk-react`)
-- **Styling**: Sass modules
-- **UI Components**: Lucide React (icons), SweetAlert2 (modals/alerts), Swiper (carousels)
-- **Video Streaming**: HLS.js for adaptive video playback
-
-### Project Structure
+### Project Structure (Inside portal/ or admin/)
 ```
 src/
   features/    - Feature-based components (mirrors backend features)
-  components/  - Shared/reusable UI components
+  components/  - Shared/reusable UI components (Sidebar, Layouts)
   pages/       - Route-level page components
   routes/      - Routing configuration
   shared/      - Shared utilities, types, constants
-  utils/       - Helper functions
 ```
+*Note: Features in these folders are flattened. Do not use generic `Public/` or `Admin/` subfolders inside a feature. Place the code directly in the relevant micro-frontend's feature folder.*
 
-### Development Workflow
-- Start dev server: `npm run dev` (runs on port 5173)
-- Build: `npm run build` (outputs to `dist/`)
-- Docker build uses `nginx.conf` for production serving
-
-## BI Dashboard (Python)
-
-### Architecture Pattern: Vertical Slice Architecture (alinhada com backend C#)
-FastAPI + WebSocket para analytics em tempo real
-
-**Estrutura:**
-```
-src/
-├── core/                          # Shared infrastructure
-│   ├── infrastructure/
-│   │   ├── database.py           # SQL Server (SQLAlchemy)
-│   │   ├── mongo_client.py       # MongoDB connection
-│   │   ├── redis_client.py       # Redis connection (cache)
-│   │   ├── rows_client.py        # Rows.com API client
-│   │   └── websocket.py          # WebSocket Manager (Hub pattern)
-│   ├── enums/
-│   │   └── hub_enums.py          # AppHubs enum
-│   └── websocket_server.py       # WebSocket routes setup
-│
-├── features/                      # Vertical Slices (domain-based)
-│   ├── claims/                   # Claims analytics
-│   │   ├── repository.py         # Data access
-│   │   ├── service.py            # Business logic + factory
-│   │   ├── schemas.py            # DTOs (Pydantic)
-│   │   ├── enums.py              # Domain enums
-│   │   ├── handlers.py           # WebSocket event handlers
-│   │   └── routes.py             # REST endpoints (FastAPI router)
-│   ├── financial/                # Financial analytics
-│   ├── subscriptions/            # MRR, churn rate
-│   ├── support/                  # Support tickets (MongoDB)
-│   ├── content/                  # Course metrics
-│   ├── users/                    # User analytics
-│   ├── rows/                     # Rows.com sync and integration
-│   └── storage/                  # Storage analytics
-│
-└── api/                          # FastAPI application
-    └── main.py                   # App + CORS + background tasks + router registration
-```
-
-### Key Features
-- **REST API**: On-demand queries for analytics data
-- **WebSocket Hubs**: Real-time push notifications (SignalR-like pattern)
-- **Background Tasks**: Periodic KPI broadcasting every 30s
-- **Factory Pattern**: `create_*_service()` functions for dependency injection
-- **Clean Separation**: Repository → Service → API layers
-
-### Running BI Dashboard
-```bash
-cd bi-dashboard
-pip install -r requirements.txt
-python run_api.py  # Starts FastAPI + WebSocket server on port 8000
-```
-
-Access:
-- REST API: `http://localhost:8000`
-- WebSocket: `ws://localhost:8000/hubs/[hub-name]`
-- Swagger docs: `http://localhost:8000/docs`
+### UI & Real-time Context
+- **WebSockets:** Uses SignalR (`@microsoft/signalr`) for live payment confirmations and analytics updates.
+- Components use `AppHubsCSharp` to connect to appropriate backend hubs.
 
 ## Docker Orchestration
 
-### Services (docker-compose.yml)
-- **sql-server**: SQL Server 2022 (port 1433, credentials in env vars)
-- **mongodb**: Mongo latest (port 27017)
-- **redis**: Redis Alpine (port 6379, AOF persistence)
-- **backend**: .NET API (port 5045 → container 8080)
-- **frontend**: React app via nginx (port 5173 → container 80)
-- **bi-engine**: Python BI dashboard (defined but check config)
+### Infrastructure Layout
+- **Global Stack:** Production orchestration lives in `infra/docker-compose.yml` (It orchestrates Backend, DBs, and the Frontends built on Nginx).
+- **Local Stacks:** Local dev configs reside inside each project folder (e.g., `backend/docker-compose.yml`).
+- **Testing Stack:** The automated tests orchestration is located at `backend/docker-compose.test.yml`.
 
-### Environment Configuration
-- Root `.env` file contains all secrets (MercadoPago keys, DB connection strings, JWT secrets)
-- Backend reads from `.env` via `DotNetEnv.Env.Load()` in `Program.cs`
-- Connection strings use service names: `mongodb://mongo-db:27017`
-
-### Development Commands
-```bash
-# Start entire stack
-docker-compose up -d
-
-# View logs
-docker-compose logs -f backend
-
-# Rebuild specific service
-docker-compose up -d --build backend
-```
-
-## MCP Servers (Model Context Protocol)
-
-Located in `mcp-servers/`:
-- **greg_context_mcp.py**: Provides architecture patterns and project structure to AI agents
-- **greg_network_mcp.py**: Provides network topology and connectivity context to AI agents
-- **log_mcp_server.py**: Exposes application logs to AI assistants
-
-These enable AI tools to understand project conventions, inspect network config, and debug issues via log analysis.
-
-## Critical Conventions
-
-### Backend Naming
-- Namespace follows folder structure: `MeuCrudCsharp.Features.{FeatureName}.{Layer}`
-- DTOs suffix: `*ViewModel`, `*Request`, `*Response`
-- Interfaces prefix: `I{Name}` (e.g., `IWebhookService`)
-
-### Error Handling
-- Validation errors return structured responses
-- Serilog captures exceptions to both console and file logs (check `log/` directory)
-
-### Testing & Debugging
-- Backend: Run `dotnet run` from `system-app/backend/`
-- Swagger UI available at `/swagger` endpoint
-- Frontend: Check browser console and network tab for API errors
-- BI: Terminal output shows real-time processing status
-
-### Common Pitfalls
-- **Circular dependencies**: Use interfaces in constructors, not concrete types
-- **Migration errors**: Always run from backend directory with `dotnet ef`
-- **Docker networking**: Services communicate via service names, not localhost
-- **Environment variables**: Missing `.env` values cause runtime failures - check logs first
+## CI/CD Pipelines (GitHub Actions)
+The pipelines are fully decoupled and trigger based on path filters (`.github/workflows/`):
+- `ci-cd-backend.yml` (monitors `backend/**` and `Tests/**`)
+- `ci-cd-portal.yml` (monitors `portal/**`)
+- `ci-cd-admin.yml` (monitors `admin/**`)
+Images are published to GHCR using both `latest` and `${{ github.sha }}` tagging strategies.
 
 ## Adding New Features
 
 ### Backend Feature
-1. Create folder under `Features/{FeatureName}/`
-2. Add subfolders: `Controllers/`, `Services/`, `Repositories/`, `DTOs/`, `Interfaces/`, `Mappers/`
-3. Services/Repos auto-register if namespace matches pattern in `DependencyInjectionExtensions.cs`
-4. Add DbSet to `ApiDbContext.cs` if feature has database entity
-5. Create migration: `dotnet ef migrations add {FeatureName}Initial`
+1. Create folder under `backend/Features/{FeatureName}/`
+2. Add subfolders: `Controllers/`, `Services/`, `Repositories/`, `DTOs/`, `Interfaces/`.
+3. Add DbSet to `backend/Data/ApiDbContext.cs` if it introduces a new entity.
+4. Create migration by running EF core CLI from the `backend/` directory.
 
 ### Frontend Feature
-1. Create folder under `src/features/{featurename}/`
-2. **MANDATORY STRUCTURE**:
-   - `shared/`: Types (DTOs), constants, and context-agnostic utils.
-   - `Admin/`: Components, hooks, services for Backoffice/Management (mirrors `Admin{Feature}Controller`).
-   - `Public/` (or `Account`): Components, hooks, services for End-Users (mirrors `Public{Feature}Controller`).
-3. Wire up routes in `src/routes/`
-4. Use shared API client utilities from `src/utils/`
-
-
-### Python BI Feature (Vertical Slice)
-1. Create folder under `src/features/{feature_name}/`
-2. Add files:
-   - `repository.py` - Data access layer (SQL/MongoDB queries)
-   - `service.py` - Business logic + `create_{feature}_service()` factory
-   - `schemas.py` - Pydantic models (DTOs)
-   - `handlers.py` - WebSocket event handlers (optional)
-   - `routes.py` - REST endpoints (FastAPI `APIRouter`)
-   - `enums.py` - Domain-specific enums (if needed)
-3. Register routes in `src/api/main.py`: `app.include_router({feature}_routes.router)`
-4. Setup WebSocket handlers in the `lifespan` function in `main.py` if real-time needed
-5. Feature is now fully isolated and self-contained!
+1. Determine if the feature belongs to `portal/`, `admin/`, or both (e.g., `Payment` goes to both).
+2. Create folder under `src/features/{featurename}/` in the target application(s).
+3. Do not cross-import. Ensure features use their isolated routing and contexts.
 
 ## Key Files Reference
-- Backend entry: [system-app/backend/Program.cs](system-app/backend/Program.cs)
-- DI config: [system-app/backend/Extensions/DependencyInjectionExtensions.cs](system-app/backend/Extensions/DependencyInjectionExtensions.cs)
-- DB context: [system-app/backend/Data/ApiDbContext.cs](system-app/backend/Data/ApiDbContext.cs)
-- Frontend entry: [system-app/frontend/src/main.tsx](system-app/frontend/src/main.tsx)
-- BI entry: [bi-dashboard/run_api.py](bi-dashboard/run_api.py)
-- BI FastAPI app: [bi-dashboard/src/api/main.py](bi-dashboard/src/api/main.py)
-- BI WebSocket Manager: [bi-dashboard/src/core/infrastructure/websocket.py](bi-dashboard/src/core/infrastructure/websocket.py)
-- BI Claims feature: [bi-dashboard/src/features/claims/](bi-dashboard/src/features/claims/)
-- Docker config: [docker-compose.yml](docker-compose.yml)
+- Backend entry: [backend/Program.cs](backend/Program.cs)
+- DB context: [backend/Data/ApiDbContext.cs](backend/Data/ApiDbContext.cs)
+- Portal entry: [portal/src/main.tsx](portal/src/main.tsx)
+- Admin entry: [admin/src/main.tsx](admin/src/main.tsx)
+- Infra config: [infra/docker-compose.yml](infra/docker-compose.yml)

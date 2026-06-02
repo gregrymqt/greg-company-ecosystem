@@ -6,126 +6,31 @@ Ecossistema completo para gestão de cursos online com sistema integrado de paga
 - 🎓 Gestão completa de cursos e vídeos
 - 💳 Sistema de pagamentos com MercadoPago (PIX, Cartão, Assinaturas)
 - 👥 Autenticação e perfis de usuário
-- 📊 Dashboard de BI para métricas de negócio
+- 📊 Inteligência de Negócios (BI) processada de forma unificada
 - 🔔 Suporte e sistema de reclamações
 - 💰 Gestão de carteira digital e transações
 
-<!-- Sugestão: Adicionar screenshots ou um GIF da aplicação em funcionamento torna o projeto muito mais atrativo. -->
-<!-- 
-## 📸 Screenshots
-
-*(coloque aqui um screenshot da área de cursos)*
-*(coloque aqui um screenshot do dashboard de assinaturas)*
-*(coloque aqui um screenshot do dashboard de BI)*
--->
-
 ## 🚀 Tecnologias e Integrações
 
-*   **Sistema Transacional (Backend):** ASP.NET 8 (C#) para APIs RESTful.
-*   **Sistema Transacional (Frontend):** React com TypeScript.
-*   **Banco de Dados:** SQL Server para persistência de dados.
-*    **MongoDB:** Armazenamento NoSQL para dados flexíveis e documentos.
+*   **Backend (API & BI):** ASP.NET 8 (C#) para APIs RESTful e processamento de métricas e lógica de BI.
+*   **Frontends (Micro-frontends):** React com TypeScript e Vite. Dividido em dois projetos isolados: `portal` (vitrine) e `admin` (gestão).
+*   **Banco de Dados:** SQL Server para persistência de dados estruturados.
+*   **MongoDB:** Armazenamento NoSQL para dados flexíveis e documentos de suporte.
 *   **Cache:** Redis para caching de alta performance.
 *   **Pagamentos:** Integração completa com MercadoPago (Checkout Pro, Webhooks, PIX e Assinaturas).
 *   **Jobs em Background:** Hangfire para processamento de tarefas assíncronas (ex: renovação de assinaturas).
-*   **Business Intelligence (BI):** Motor de ETL desenvolvido em Python.
-*   **Visualização de Dados:** Integração com APIs da Rows e Notion para dashboards executivos.
-*   **Containerização:** Docker e Docker Compose para orquestração do ambiente de desenvolvimento.
+*   **Containerização:** Docker e Docker Compose para orquestração da infraestrutura local e em nuvem.
 
 ## 🏗️ Arquitetura
 
-### Sistema Principal (C# & React)
-A aplicação principal foca na escalabilidade, manutenibilidade e experiência do usuário:
+O ecossistema adota uma arquitetura de **Monorepo**, separado em três aplicações primárias:
 
-*   **Backend (C#):** Clean Architecture com Vertical Slices - cada feature (Auth, Courses, MercadoPago, Support, Videos) possui sua própria estrutura completa (Controllers, Services, Repositories, DTOs, Interfaces, Mappers). Auto-registro de dependências via Scrutor. Implementa princípios SOLID para regras de negócio complexas, autenticação JWT + OAuth, e integrações financeiras seguras.
+1. **Backend (C#):** Clean Architecture com Vertical Slices - cada feature (Auth, Courses, MercadoPago, Analytics, etc.) possui sua própria estrutura completa. Auto-registro de dependências via Scrutor. As regras de negócio e integrações de BI acontecem 100% neste serviço.
+2. **Portal Frontend (React):** Aplicação voltada para o usuário final. Contém a vitrine de cursos, player de vídeos e área do aluno.
+3. **Admin Frontend (React):** Painel de backoffice para gestão da plataforma, aprovação de reembolsos e dashboards de Analytics.
 
-*   **Frontend (React + TypeScript):** Arquitetura features-based espelhando estritamente os Controllers do Backend.
-    *   **Padrão Vertical Slice:** Cada feature em `src/features/` é subdividida internamente em contextos:
-        *   `Admin/`: Área de gestão e backoffice.
-        *   `Public/`: Área do usuário final/vitrine.
-        *   `shared/`: DTOs e utilitários agnósticos.
-    *   **Clean Architecture:** Garante separação de concerns, onde componentes puramente visuais ficam em `components/` e regras de negócio isoladas em `hooks/` e `services/` dentro de cada contexto.
-
-*   **Features Implementadas:**
-    - `auth/` - Autenticação (JWT, Google OAuth)
-    - `course/` - Gestão de cursos (Admin + Allow)
-    - `video/` - Player e gerenciamento de vídeos
-    - `Payment/` - Checkout (PIX, Cartão, Preferências)
-    - `Subscription/` - Gestão de assinaturas
-    - `Plan/` - Gerenciamento de planos
-    - `Wallet/` - Carteira digital
-    - `Transactions/` - Histórico de pagamentos
-    - `Chargeback/` - Gestão de estornos
-    - `Claim/` - Sistema de reclamações
-    - `analytics/` - Métricas e relatórios
-    - `profile/`, `support/`, `home/`, `about/`
-
-*   **Infraestrutura:** Docker Compose orquestrando SQL Server, MongoDB, Redis e aplicação. Hangfire para jobs assíncronos (renovação de assinaturas, webhooks).
-
-### Módulo de BI (Python)
-Plataforma de inteligência de negócios com **FastAPI + WebSocket** para análise de métricas em tempo real da plataforma de cursos, seguindo **Vertical Slice Architecture** alinhada com o backend C#.
-
----
-
-### 🐍 Arquitetura do BI-Dashboard (Python)
-
-**Vertical Slice Architecture** - Organização por domínio (features):
-
-**Core Infrastructure** (`src/core/`):
-- **infrastructure/**: Componentes compartilhados
-  - `database.py` - SQL Server connection (SQLAlchemy)
-  - `mongo_client.py` - MongoDB connection
-  - `redis_client.py` - Redis connection (cache)
-  - `rows_client.py` - Rows.com API client
-  - `websocket.py` - WebSocket Manager (Hub pattern similar ao SignalR)
-- **enums/**: `hub_enums.py` - AppHubs enum (Claims, Financial, Subscriptions, Support, Users, Content, Storage)
-- **websocket_server.py**: Configuração de rotas WebSocket
-
-**Feature Slices** (`src/features/`) - Cada feature auto-contida com `repository.py`, `service.py`, `schemas.py`, `handlers.py` e `routes.py`:
-- **claims/**: Analytics de disputas e reclamações
-- **financial/**: Métricas financeiras e receitas
-- **subscriptions/**: Análise de MRR, churn rate, renovações
-- **support/**: Tickets de suporte (MongoDB)
-- **content/**: Métricas de cursos e vídeos
-- **users/**: Análise de usuários
-- **rows/**: Integração e sync com Rows.com
-- **storage/**: Analytics de armazenamento de arquivos
-
-**API Layer** (`src/api/`):
-- **main.py**: FastAPI application com REST + WebSocket
-- As rotas REST ficam dentro de cada feature (`src/features/{feature}/routes.py`), não em uma pasta `routes/` centralizada.
-
-**Métricas Processadas:**
-- 💰 Receita total e MRR (Monthly Recurring Revenue)
-- 📈 Taxa de conversão e churn rate
-- ⚠️ Claims ativas e faturamento em risco
-- 💳 Análise de chargebacks e fraudes
-- 👥 Engajamento de alunos por curso
-- 📊 Status de assinaturas (Ativas, Canceladas, Inadimplentes)
-
----
-
-### 📊 Fluxo de Dados (API + WebSocket Real-time)
-
-**REST API** (Consulta sob demanda):
-1. **Extração**: Features consomem dados do SQL Server/MongoDB via repositories
-2. **Transformação**: Services processam:
-   - Cálculo de MRR e churn rate
-   - Agregação de receitas por plano
-   - Identificação de claims críticas (>30 dias)
-   - Análise de padrões de consumo de cursos
-3. **Resposta**: Endpoints REST retornam JSON para clientes
-
-**WebSocket Hubs** (Push em tempo real):
-- **Claims Hub** (`/hubs/claims`): KPIs de disputas, alertas de claims críticas
-- **Financial Hub** (`/hubs/financial`): Updates de receita, novos pagamentos
-- **Subscriptions Hub**: Renovações, cancelamentos em tempo real
-- **Support Hub**: Status de tickets de suporte
-
-**Background Tasks**:
-- Broadcast automático de KPIs a cada 30 segundos
-- Notificações push de eventos críticos
-- Sincronização periódica com Rows.com/Notion
+### Padrão Vertical Slice
+Cada feature (ex: `Course`, `Payment`) é tratada de forma autônoma. O Backend possui tudo o que a feature precisa para funcionar, e os Frontends implementam apenas as views e integrações correspondentes à sua responsabilidade.
 
 ---
 
@@ -134,7 +39,6 @@ Plataforma de inteligência de negócios com **FastAPI + WebSocket** para análi
 ### Pré-requisitos
 *   [.NET 8 SDK](https://dotnet.microsoft.com/download)
 *   [Node.js v20.x](https://nodejs.org/) (com npm ou yarn)
-*   [Python 3.10+](https://www.python.org/downloads/)
 *   [Docker Desktop](https://www.docker.com/products/docker-desktop/)
 
 ### 1. Configuração do Ambiente
@@ -144,95 +48,73 @@ Clone o repositório e crie o arquivo de variáveis de ambiente.
 git clone https://github.com/seu-usuario/greg-company-ecosystem.git
 cd greg-company-ecosystem
 
-# Crie um arquivo .env na raiz e adicione as chaves necessárias.
-# Você pode usar o .env.example como base (recomendo criar um).
+# Crie um arquivo .env na raiz (baseie-se no .env.example)
 cp .env.example .env 
 ```
 
-Preencha o `.env` com suas chaves de API (Rows, MercadoPago, etc.) e a string de conexão do banco.
-
-### 2. Suba a Infraestrutura
-Inicie os containers do SQL Server e Redis.
+### 2. Suba a Infraestrutura (Bancos e Cache)
+Os arquivos centrais de orquestração estão no diretório `infra/`. Você também possui composes locais isolados em cada aplicação.
+Para subir a stack completa:
 
 ```bash
-docker-compose up -d
+cd infra
+docker compose up -d
 ```
 
 ### 3. Execute o Backend (API)
 ```bash
-cd system-app/backend
+cd backend
 dotnet run
 ```
-A API estará disponível em `https://localhost:7035` (verifique o `launchSettings.json`). A documentação Swagger estará em `/swagger`.
+A API estará disponível em `http://localhost:8080` ou porta equivalente configurada. A documentação Swagger estará em `/swagger`.
 
-### 4. Execute o Frontend (React App)
+### 4. Execute os Frontends (Portal e Admin)
+Em terminais separados:
+
+**Portal (Usuários):**
 ```bash
-cd system-app/frontend
+cd portal
 npm install
-npm run dev  # Vite dev server na porta 5173
+npm run dev  # Acessível na porta 5173
 ```
-A aplicação estará rodando em `http://localhost:5173`.
 
-### 5. Execute o Módulo de BI (FastAPI Server)
+**Admin (Gestores):**
 ```bash
-cd ../../bi-dashboard # a partir da pasta frontend
-pip install -r requirements.txt
-python run_api.py  # FastAPI server com WebSocket
+cd admin
+npm install
+npm run dev  # Acessível na porta 5174
 ```
-
-A API de BI estará disponível em:
-- **REST API**: `http://localhost:8000`
-- **WebSocket**: `ws://localhost:8000/hubs/[hub-name]`
-- **Documentação**: `http://localhost:8000/docs`
-- **Status Hubs**: `http://localhost:8000/ws/status`
 
 ---
 
 ## 📂 Estrutura do Projeto
 
-```
+```text
 greg-company-ecosystem/
-├── system-app/
-│   ├── backend/                    # .NET 8 API
-│   │   ├── Features/              # Vertical Slices (Auth, Courses, MercadoPago, etc.)
-│   │   ├── Extensions/            # DI, Auth, Persistence config
-│   │   ├── Data/                  # DbContext, Migrations
-│   │   └── Program.cs             # Entry point
-│   │
-│   └── frontend/                  # React + TypeScript + Vite
-│       └── src/
-│           ├── features/          # Features-based (auth, course, Payment, etc.)
-│           ├── components/        # UI components puros
-│           ├── pages/             # Route-level pages
-│           ├── shared/            # Shared utilities
-│           └── routes/            # Routing config
+├── backend/                   # .NET 8 API & BI Processing
+│   ├── Features/              # Vertical Slices (Auth, Courses, MercadoPago, Analytics, etc.)
+│   ├── Extensions/            # DI, Auth, Persistence config
+│   ├── Data/                  # DbContext, Migrations
+│   ├── Program.cs             # Entry point
+│   ├── docker-compose.yml     # Orquestração local do backend
+│   └── docker-compose.test.yml# Orquestração para a suíte de testes
 │
-├── bi-dashboard/                  # Python BI Engine (FastAPI + WebSocket)
-│   └── src/
-│       ├── core/                  # Shared infrastructure
-│       │   ├── infrastructure/    # Database, MongoDB, WebSocket Manager
-│       │   ├── enums/             # AppHubs enum
-│       │   └── websocket_server.py # WebSocket routes setup
-│       ├── features/              # Vertical Slices (domain-based)
-│       │   ├── claims/           # repository, service, schemas, handlers, routes
-│       │   ├── financial/        # repository, service, schemas, handlers, routes
-│       │   ├── subscriptions/    # repository, service, schemas, handlers, routes
-│       │   ├── support/          # repository, service, schemas, handlers, routes
-│       │   ├── content/          # repository, service, schemas, handlers, routes
-│       │   ├── users/            # repository, service, schemas, handlers, routes
-│       │   ├── rows/             # repository, service, schemas (Rows.com sync)
-│       │   └── storage/          # repository, service, schemas, handlers, routes
-│       └── api/                   # FastAPI application
-│           └── main.py            # App + CORS + background tasks + router registration
-│   └── run_api.py                 # Script to run FastAPI server
+├── portal/                    # React Micro-frontend (Usuários)
+│   ├── src/features/          # Features exclusivas da visão do cliente
+│   ├── docker-compose.yml     # Orquestração local do portal
+│   └── package.json
 │
-├── mcp-servers/                   # Model Context Protocol servers
-│   ├── greg_context_mcp.py       # Architecture context and project structure for AI
-│   ├── greg_network_mcp.py       # Network and connectivity context for AI
-│   └── log_mcp_server.py         # Log analysis for AI
+├── admin/                     # React Micro-frontend (Gestão)
+│   ├── src/features/          # Features exclusivas de dashboards e backoffice
+│   ├── docker-compose.yml     # Orquestração local do admin
+│   └── package.json
 │
-├── docker-compose.yml             # Infrastructure orchestration
-└── .env                           # Environment variables
+├── infra/                     # Infraestrutura Central
+│   └── docker-compose.yml     # Stack de deploy (Backend + Bancos)
+│
+├── Tests/                     # Suíte de Testes do Backend (xUnit)
+├── .github/workflows/         # Pipelines de CI/CD Isoladas
+└── .env                       # Variáveis de ambiente globais
 ```
 
 ---
@@ -260,66 +142,14 @@ REDIS_CONNECTION=localhost:6379
 
 # MongoDB
 MONGODB_CONNECTION=mongodb://localhost:27017
-
-# BI APIs
-ROWS_API_KEY=your_rows_api_key
-NOTION_API_KEY=your_notion_api_key
 ```
-
----
-
-## 🎯 Endpoints Principais da API
-
-### Sistema Transacional (.NET - Porta 7035)
-- **Auth**: `/api/auth/login`, `/api/auth/register`, `/api/auth/google`
-- **Courses**: `/api/courses`, `/api/courses/{id}/videos`
-- **Plans**: `/api/plans`, `/api/plans/{id}`
-- **Subscriptions**: `/api/subscriptions/my`, `/api/subscriptions/cancel`
-- **Payments**: `/api/payment/preference`, `/api/payment/webhook`
-- **Wallet**: `/api/wallet/cards`, `/api/wallet/add-card`
-- **Transactions**: `/api/transactions/history`
-- **Chargebacks**: `/api/chargebacks`
-- **Claims**: `/api/claims`, `/api/claims/{id}/messages`
-
-### BI Dashboard API (Python - Porta 8000)
-**REST Endpoints:**
-- **Claims**: `GET /api/claims/kpis`, `GET /api/claims/active`, `GET /api/claims/critical`
-- **Financial**: `GET /api/financial/summary`, `GET /api/financial/revenue`
-- **Status**: `GET /ws/status` - Status dos WebSocket hubs
-
-**WebSocket Hubs:**
-- **Claims**: `ws://localhost:8000/hubs/claims`
-- **Financial**: `ws://localhost:8000/hubs/financial`
-- **Subscriptions**: `ws://localhost:8000/hubs/subscriptions`
-- **Support**: `ws://localhost:8000/hubs/support`
-
-Documentação completa disponível em:
-- Backend .NET: `/swagger` 
-- BI Dashboard: `http://localhost:8000/docs`
 
 ---
 
 ## 🧪 Testes Unitários
 
 O projeto possui uma suíte de testes unitários focada no backend (C#), utilizando **xUnit** e **Moq**.
-
-### Estrutura dos Testes
-Os testes seguem a mesma arquitetura de *Vertical Slices* do backend, espelhando a organização das features. Eles estão localizados na pasta `Tests/`.
-
-Exemplo de estrutura:
-```text
-Tests/
-└── Features/
-    └── About/
-        └── Services/
-            ├── CreateAboutAsyncTests.cs
-            └── GetAboutAsyncTests.cs
-```
-
-### Padrões Utilizados
-- **AAA (Arrange, Act, Assert):** Todos os testes são estruturados dividindo a preparação dos dados (Arrange), a execução do método (Act) e a validação dos resultados (Assert).
-- **Mocking:** Utilização da biblioteca `Moq` para simular dependências externas (como Repositórios, Serviços de Cache e File System), garantindo que os testes sejam isolados e testem apenas a regra de negócio do *System Under Test* (SUT).
-- **Nomenclatura:** Os métodos de teste seguem o padrão `NomeDoMetodo_Condicao_ResultadoEsperado` (ex: `CreateTeamMemberAsync_WhenFileIsChunk_ShouldReturnDtoAndSaveCorrectly`).
+Eles estão localizados na pasta `Tests/` e seguem a mesma arquitetura de *Vertical Slices* do backend.
 
 ### Como Executar
 
@@ -327,55 +157,30 @@ Tests/
 # Executar testes localmente (a partir da raiz do repositório)
 dotnet test Tests/Tests.csproj
 
-# Ou via solução completa
-dotnet test GregCompany.sln
-
 # Ou via Docker (utilizado no CI)
-docker-compose -f docker-compose.test.yml up --build
+cd backend
+docker compose -f docker-compose.test.yml up --build
 ```
 
 ---
 
 ## 🔄 CI/CD (Integração e Entrega Contínuas)
 
-O projeto utiliza **GitHub Actions** para automatizar o pipeline de CI/CD, garantindo a qualidade do código e a estabilidade dos deploys. O workflow está definido em `.github/workflows/ci-cd.yml`.
+O projeto utiliza **GitHub Actions** para automatizar deploys. Os pipelines foram desacoplados em fluxos de trabalho independentes por serviço:
 
-### Pipeline de CI/CD
-O pipeline é acionado automaticamente em `push` ou `pull_request` nas branches `main` e `develop`, ou manualmente via `workflow_dispatch`.
+- `.github/workflows/ci-cd-backend.yml`: Monitora `backend/` e `Tests/`. Roda os testes, compila a API e publica a imagem Docker no GHCR.
+- `.github/workflows/ci-cd-portal.yml`: Monitora `portal/`. Executa a compilação do TypeScript/Vite e publica a imagem.
+- `.github/workflows/ci-cd-admin.yml`: Monitora `admin/`. Segue o mesmo padrão do portal.
 
-Ele é composto por dois jobs principais:
-
-1. **Build & Unit Tests (`test`):**
-   - Cria um ambiente isolado utilizando o `docker-compose.test.yml`.
-   - Sobe instâncias efêmeras do SQL Server e Redis.
-   - Executa toda a suíte de testes unitários do backend.
-   - Se algum teste falhar, o pipeline é interrompido, impedindo o deploy de código quebrado.
-
-2. **Build & Deploy Stack Completa (`deploy`):**
-   - Executado apenas se o job de testes passar com sucesso.
-   - Realiza o build de todos os serviços (Backend, Frontend, BI Dashboard) utilizando o `docker-compose.yml` principal.
-   - Sobe a stack completa em ambiente de produção/staging.
+*As imagens são publicadas com `latest` e o SHA exato do commit garantindo rastreabilidade rigorosa.*
 
 ---
 
 ## 📝 Licença
-
 Este projeto foi desenvolvido como trabalho acadêmico na FATEC - Faculdade de Tecnologia de São Paulo.
 
 ---
 
 ## 👨‍💻 Autor
-
 **Lucas Vicente De Souza**  
 Estudante de Desenvolvimento de Software Multiplataforma - FATEC
-
----
-
-## 🚀 Próximas Features
-
-- [ ] Sistema de avaliações de cursos
-- [ ] Certificados digitais automáticos
-- [ ] Relatórios de progresso do aluno
-- [ ] Integração com outras plataformas de pagamento
-- [ ] App mobile (React Native)
-- [ ] Gamificação (badges, rankings)

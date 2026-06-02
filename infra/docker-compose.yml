@@ -66,7 +66,7 @@ services:
   backend:
     container_name: backend-api
     build: 
-      context: ./system-app/backend
+      context: ../backend
       dockerfile: Dockerfile
     ports:
       - "5045:8080" # Porta Web API (Exposta para Web/Frontend)
@@ -98,13 +98,13 @@ services:
     networks:
       - greg-network
     volumes:
-      - ./uploads:/app/wwwroot/uploads
-      - ./logs:/app/logs    
+      - ../uploads:/app/wwwroot/uploads
+      - ../logs:/app/logs    
 
   frontend-portal:
     container_name: frontend-portal
     build:
-      context: ./portal
+      context: ../portal
       dockerfile: Dockerfile
       args:
         - VITE_GENERAL_BASEURL=${GENERAL_BASEURL}
@@ -118,39 +118,16 @@ services:
   frontend-admin:
     container_name: frontend-admin
     build:
-      context: ./admin
+      context: ../admin
       dockerfile: Dockerfile
       args:
         - VITE_GENERAL_BASEURL=${GENERAL_BASEURL}
-        - VITE_BI_API_URL=${BI_API_URL}
     ports:
       - "5174:80" # Porta do Admin (Backoffice)
     depends_on:
       - backend
     networks:
       - greg-network
-
-  bi-engine:
-    container_name: greg_company_bi
-    build:
-      context: .
-      dockerfile: bi-dashboard/Dockerfile
-    env_file: .env
-    environment:
-      - PYTHONDONTWRITEBYTECODE=1
-      - PYTHONUNBUFFERED=1
-      # No Python, as variáveis de conexão devem ser:
-      - DB_SERVER=${DB_SERVER} 
-      - DB_PORT=${DB_PORT} 
-      - DB_NAME=${DB_NAME} 
-      - DB_USER=${DB_USERNAME} 
-      - DB_PASSWORD=${DB_PASSWORD} 
-    depends_on:
-      - backend
-      - sql-server
-    networks:
-      - greg-network
-    restart: on-failure   
 
 # --- [ NETWORKING & PERSISTENCE ] ---
 
