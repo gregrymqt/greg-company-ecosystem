@@ -26,6 +26,7 @@ public static class McpFeatureExtensions
                     Version = "1.0.0",
                 };
             })
+            .WithHttpTransport() // 💡 AQUI ESTÁ A CORREÇÃO CRÍTICA!
             .WithTools<LogTools>();
 
         return services;

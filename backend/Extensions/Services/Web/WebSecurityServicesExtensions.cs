@@ -11,31 +11,39 @@ public static class WebSecurityServicesExtensions
         builder.Services.AddCors(options =>
         {
             // Certifique-se de importar o namespace do GeneralSettings
-            var generalSettings = builder.Configuration.GetSection("General").Get<GeneralSettings>();
+            var generalSettings = builder
+                .Configuration.GetSection("General")
+                .Get<GeneralSettings>();
 
             if (generalSettings is null || string.IsNullOrEmpty(generalSettings.BaseUrl))
             {
-                throw new InvalidOperationException("Configurações do General não encontradas ou o BaseUrl está vazio.");
+                throw new InvalidOperationException(
+                    "Configurações do General não encontradas ou o BaseUrl está vazio."
+                );
             }
 
-            options.AddPolicy(name: CorsPolicyName, policy =>
-            {
-                policy
-                    .WithOrigins(
-                        generalSettings.BaseUrl,
-                        "http://localhost:5045", 
-                        "http://localhost:5173"
-                    )
-                    .AllowAnyHeader()
-                    .AllowAnyMethod()
-                    .AllowCredentials();
-            });
+            options.AddPolicy(
+                name: CorsPolicyName,
+                policy =>
+                {
+                    policy
+                        .WithOrigins(
+                            generalSettings.BaseUrl,
+                            "http://localhost:5045",
+                            "http://localhost:5173"
+                        )
+                        .AllowAnyHeader()
+                        .AllowAnyMethod()
+                        .AllowCredentials();
+                }
+            );
         });
 
         // Configuração de Proxy para garantir leitura correta de IPs atrás do Nginx
         builder.Services.Configure<ForwardedHeadersOptions>(options =>
         {
-            options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+            options.ForwardedHeaders =
+                ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
         });
 
         return builder;

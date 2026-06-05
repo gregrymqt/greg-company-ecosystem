@@ -15,7 +15,11 @@ public static class MongoServicesExtensions
         builder.Services.AddScoped<IMongoDatabase>(sp =>
         {
             var client = sp.GetRequiredService<IMongoClient>();
-            return client.GetDatabase("MeuCrudSupportDb");
+
+            // 💡 BÔNUS: Aproveite para puxar o nome do banco dinamicamente do seu .env também!
+            var dbName = builder.Configuration["MONGO_DATABASE_NAME"] ?? "MeuCrudSupportDb";
+
+            return client.GetDatabase(dbName);
         });
 
         return builder;

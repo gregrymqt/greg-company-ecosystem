@@ -26,14 +26,17 @@ public static class CentralAppExtensions
         {
             app.UseExceptionHandler("/Error");
             app.UseHsts();
+            // 💡 MOVIDO PARA CÁ: Só força HTTPS se estiver em Produção/Staging
+            app.UseHttpsRedirection();
         }
 
         app.UseForwardedHeaders();
-        app.UseHttpsRedirection();
+        // app.UseHttpsRedirection(); <-- Remova ou comente esta linha solta aqui!
         app.UseStaticFiles();
         app.UseCookiePolicy();
 
         app.UseRouting();
+        
         app.UseCors(WebSecurityServicesExtensions.CorsPolicyName); // Certifique-se de importar o namespace correto para isso
 
         app.UseGregNetworkMonitoring();
