@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: greg-company
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-service
+  namespace: greg-company # Organiza dentro do bloco do seu projeto
+spec:
+  ports:
+  - port: 6379 # Porta que o cluster vai usar para falar com o Redis
+    targetPort: 6379 # Porta interna do container
+  selector:
+    app: redis-cache # Diz pro Service: "Redirecione o tráfego para quem tiver essa etiqueta"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-deployment
+  namespace: greg-company
+spec:
+  replicas: 1 # Começamos com 1 apartamento (Pod) do Redis
+  selector:
+    matchLabels:
+      app: redis-cache # ID para o Deployment controlar seu Pod
+  template:
+    metadata:
+      labels:
+        app: redis-cache # Etiqueta (Label) que o Service vai procurar
+    spec:
+      containers:
+      - name: redis
+        image: redis:latest
+        command: ["redis-server", "--appendonly", "yes"] # O comando exato do seu Compose!
+        ports:
+        - containerPort: 6379

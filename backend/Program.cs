@@ -20,7 +20,22 @@ Log.Logger = new LoggerConfiguration()
 try
 {
     Log.Information("Iniciando o ecossistema Greg Company...");
-    Env.Load();
+
+    // 💡 Procura o .env localmente ou sobe um nível (Monorepo-friendly)
+    if (File.Exists(".env"))
+    {
+        Env.Load(".env");
+        Log.Information("--> .env carregado a partir da raiz de execução.");
+    }
+    else if (File.Exists("../.env"))
+    {
+        Env.Load("../.env");
+        Log.Information("--> .env carregado a partir do diretório superior (..).");
+    }
+    else
+    {
+        Log.Warning("--> [Aviso] Nenhum arquivo .env foi encontrado. Usando variáveis de ambiente nativas.");
+    }
 
     var builder = WebApplication.CreateBuilder(args);
     builder.Host.UseSerilog();

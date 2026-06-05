@@ -1,10 +1,10 @@
 using System;
-using System.ComponentModel;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
-using Microsoft.Extensions.AI;
+using Microsoft.Extensions.Configuration;
 using ModelContextProtocol;
 using ModelContextProtocol.Protocol;
 
@@ -12,11 +12,23 @@ namespace MeuCrudCsharp.Features.Mcp.Tools;
 
 public class LogTools
 {
+    private readonly bool _useKubernetes;
+
+    // Injetamos a configuração para ler a flag do .env
+    public LogTools(IConfiguration configuration)
+    {
+        _useKubernetes = configuration.GetValue<bool>("USE_KUBERNETES_LOGS");
+    }
+
     // ====================================================================
     // 1. LOGS DA APLICAÇÃO (SERILOG)
     // ====================================================================
-    [Description("Lê as últimas linhas do arquivo de log físico do Serilog (backend) para depurar exceções.")]
-    public async Task<CallToolResult> ReadLogsAsync([Description("Quantidade de linhas para ler do log")] int linesCount = 50)
+    [Description(
+        "Lê as últimas linhas do arquivo de log físico do Serilog (backend) para depurar exceções."
+    )]
+    public async Task<CallToolResult> ReadLogsAsync(
+        [Description("Quantidade de linhas para ler do log")] int linesCount = 50
+    )
     {
         var logPath = "log/log-.txt";
 
@@ -46,45 +58,68 @@ public class LogTools
     }
 
     // ====================================================================
-    // 2. LOGS DO SQL SERVER (DOCKER)
+    // 2. LOGS DO SQL SERVER
     // ====================================================================
-    [Description("Analisa os logs do container docker do SQL Server para investigar locks, timeouts ou erros de conexão.")]
-    public async Task<CallToolResult> ReadSqlServerLogsAsync([Description("Quantidade de linhas para ler")] int tailCount = 100)
+    [Description(
+        "Analisa os logs do SQL Server para investigar locks, timeouts ou erros de conexão."
+    )]
+    public async Task<CallToolResult> ReadSqlServerLogsAsync(
+        [Description("Quantidade de linhas para ler")] int tailCount = 100
+    )
     {
-        return await GetDockerLogsAsync("mssql-db", tailCount);
+        // O identificador "mssql-db" serve tanto para o container Docker quanto para a Label do Kubernetes!
+        return await GetInfrastructureLogsAsync("mssql-db", tailCount);
     }
 
     // ====================================================================
-    // 3. LOGS DO MONGODB (DOCKER)
+    // 3. LOGS DO MONGODB
     // ====================================================================
-    [Description("Analisa os logs do container docker do MongoDB para investigar queries lentas ou falhas de disco.")]
-    public async Task<CallToolResult> ReadMongoDbLogsAsync([Description("Quantidade de linhas para ler")] int tailCount = 100)
+    [Description("Analisa os logs do MongoDB para investigar queries lentas ou falhas de disco.")]
+    public async Task<CallToolResult> ReadMongoDbLogsAsync(
+        [Description("Quantidade de linhas para ler")] int tailCount = 100
+    )
     {
-        return await GetDockerLogsAsync("mongodb-store", tailCount);
+        return await GetInfrastructureLogsAsync("mongodb-store", tailCount);
     }
 
     // ====================================================================
-    // 4. LOGS DO REDIS (DOCKER)
+    // 4. LOGS DO REDIS
     // ====================================================================
-    [Description("Analisa os logs do container docker do Redis para investigar falhas de persistência ou despejo de memória.")]
-    public async Task<CallToolResult> ReadRedisLogsAsync([Description("Quantidade de linhas para ler")] int tailCount = 100)
+    [Description(
+        "Analisa os logs do Redis para investigar falhas de persistência ou despejo de memória."
+    )]
+    public async Task<CallToolResult> ReadRedisLogsAsync(
+        [Description("Quantidade de linhas para ler")] int tailCount = 100
+    )
     {
-        return await GetDockerLogsAsync("redis-cache", tailCount);
+        return await GetInfrastructureLogsAsync("redis-cache", tailCount);
     }
 
     // ====================================================================
-    // MÉTODO AUXILIAR PRIVADO
+    // MÉTODO AUXILIAR PRIVADO (O CÉREBRO DA INTEGRAÇÃO)
     // ====================================================================
-    private async Task<CallToolResult> GetDockerLogsAsync(string containerName, int tailCount)
+    private async Task<CallToolResult> GetInfrastructureLogsAsync(
+        string appIdentifier,
+        int tailCount
+    )
     {
         try
         {
+            // A Mágica do Booleano acontece aqui:
+            string commandFileName = _useKubernetes ? "kubectl" : "docker";
+
+            // Se for K8s, usamos o seletor de label (-l app=...) no namespace greg-company
+            // Se for Docker, usamos o comando padrão de container
+            string commandArguments = _useKubernetes
+                ? $"logs -l app={appIdentifier} -n greg-company --tail {tailCount}"
+                : $"logs --tail {tailCount} {appIdentifier}";
+
             var process = new Process
             {
                 StartInfo = new ProcessStartInfo
                 {
-                    FileName = "docker",
-                    Arguments = $"logs --tail {tailCount} {containerName}",
+                    FileName = commandFileName,
+                    Arguments = commandArguments,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
                     UseShellExecute = false,
@@ -109,7 +144,8 @@ public class LogTools
                     [
                         new TextContentBlock
                         {
-                            Text = $"Container '{containerName}' está rodando mas não emitiu logs.",
+                            Text =
+                                $"A infraestrutura '{appIdentifier}' está rodando mas não emitiu logs.",
                         },
                     ],
                 };
@@ -122,6 +158,7 @@ public class LogTools
         }
         catch (Exception ex)
         {
+            string envName = _useKubernetes ? "Kubernetes" : "Docker";
             return new CallToolResult
             {
                 IsError = true,
@@ -129,7 +166,8 @@ public class LogTools
                 [
                     new TextContentBlock
                     {
-                        Text = $"Erro ao capturar logs do container {containerName}: {ex.Message}",
+                        Text =
+                            $"Erro ao capturar logs do {envName} para {appIdentifier}: {ex.Message}",
                     },
                 ],
             };

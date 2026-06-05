@@ -1,27 +1,32 @@
+using MeuCrudCsharp.Features.Mcp.Tools;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using ModelContextProtocol;
-using ModelContextProtocol.Protocol;
 using ModelContextProtocol.AspNetCore;
-using MeuCrudCsharp.Features.Mcp.Tools;
+using ModelContextProtocol.Protocol;
 
-namespace MeuCrudCsharp.Extensions.Services.McpServices;
+namespace MeuCrudCsharp.Extensions.Services.Mcp;
 
 public static class McpFeatureExtensions
 {
-    public static IServiceCollection AddMcpContextServer(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddMcpContextServer(
+        this IServiceCollection services,
+        IConfiguration configuration
+    )
     {
-        services.AddMcpServer(options =>
-        {
-            // O tipo correto de metadados do protocolo se chama Implementation
-            options.ServerInfo = new Implementation
+        services
+            .AddMcpServer(options =>
             {
-                Name = "greg-company-mcp-bridge",
-                Version = "1.0.0"
-            };
-        }).WithTools<LogTools>();
+                // O tipo correto de metadados do protocolo se chama Implementation
+                options.ServerInfo = new Implementation
+                {
+                    Name = "greg-company-mcp-bridge",
+                    Version = "1.0.0",
+                };
+            })
+            .WithTools<LogTools>();
 
         return services;
     }

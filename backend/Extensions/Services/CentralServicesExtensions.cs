@@ -1,5 +1,5 @@
 using MeuCrudCsharp.Extensions.Services.Integration; // Novo
-using MeuCrudCsharp.Extensions.Services.McpServices;
+using MeuCrudCsharp.Extensions.Services.Mcp;
 using MeuCrudCsharp.Extensions.Services.Persistence;
 using MeuCrudCsharp.Extensions.Services.Presentation;
 using MeuCrudCsharp.Extensions.Services.Web; // Novo

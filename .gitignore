@@ -52,3 +52,4 @@ yarn-error.log*
 logError.md
 
 Ajuda_Referente_URL
+backend/log/*
