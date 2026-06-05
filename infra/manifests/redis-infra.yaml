@@ -7,13 +7,15 @@ apiVersion: v1
 kind: Service
 metadata:
   name: redis-service
-  namespace: greg-company # Organiza dentro do bloco do seu projeto
+  namespace: greg-company
 spec:
+  type: NodePort # <--- Adicionado
   ports:
-  - port: 6379 # Porta que o cluster vai usar para falar com o Redis
-    targetPort: 6379 # Porta interna do container
+  - port: 6379
+    targetPort: 6379
+    nodePort: 32379 # <--- Bate com a containerPort do kind-config
   selector:
-    app: redis-cache # Diz pro Service: "Redirecione o tráfego para quem tiver essa etiqueta"
+    app: redis-cache
 ---
 apiVersion: apps/v1
 kind: Deployment

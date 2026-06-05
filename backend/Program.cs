@@ -50,6 +50,10 @@ try
 
     app.Run();
 }
+catch (HostAbortedException)
+{
+    // Ignore: Normal behavior when running Entity Framework CLI tools (dotnet ef)
+}
 catch (Exception ex)
 {
     Log.Fatal(ex, "A aplicação falhou criticamente ao iniciar: {ExceptionMessage}", ex.Message);

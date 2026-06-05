@@ -5,7 +5,7 @@ public static class FeatureDiscoveryExtensions
     public static WebApplicationBuilder AddFeatureDiscovery(this WebApplicationBuilder builder)
     {
         builder.Services.Scan(scan =>
-            scan.FromEntryAssembly()
+            scan.FromAssemblies(typeof(FeatureDiscoveryExtensions).Assembly)
                 .AddClasses(classes =>
                     classes
                         // Filtra apenas classes que residem dentro do ecossistema de Features ou Shared
@@ -22,7 +22,9 @@ public static class FeatureDiscoveryExtensions
                             || type.Name.EndsWith("Repository")
                             || type.Name.EndsWith("Integration")
                             || type.Name.EndsWith("Notification")
-                            || type.Namespace.EndsWith("Work")
+                            || type.Name.EndsWith("UnitOfWork")
+                            || type.Name.EndsWith("Renderer")
+                            || type.Name.EndsWith("Hub")
                         )
                 )
                 .AsImplementedInterfaces()
