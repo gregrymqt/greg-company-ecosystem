@@ -25,7 +25,7 @@ namespace MeuCrudCsharp.Data
         public DbSet<Chargeback> Chargebacks { get; set; } = null!;
         public DbSet<EntityFile> Files { get; set; } = null!;
         public DbSet<HomeHero> HomeHeroes { get; set; } = null!;
-        public DbSet<HomeService> HomeServices { get; set; } = null!;
+        public DbSet<HomeServiceEntry> HomeServices { get; set; } = null!;
         public DbSet<AboutSection> AboutSections { get; set; } = null!;
         public DbSet<TeamMember> TeamMembers { get; set; } = null!;
 

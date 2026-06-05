@@ -2,8 +2,8 @@ using Hangfire;
 using MeuCrudCsharp.Extensions.App.Endpoints;
 using MeuCrudCsharp.Extensions.App.Initialization;
 using MeuCrudCsharp.Extensions.App.Middlewares;
-using MeuCrudCsharp.Extensions.Services.McpServices;
 using MeuCrudCsharp.Extensions.Services.Web;
+using MeuCrudCsharp.Extensions.Services.Mcp;
 
 namespace MeuCrudCsharp.Extensions.App;
 

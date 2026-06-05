@@ -1,8 +1,7 @@
-using MeuCrudCsharp.Features.Auth.Domain.Interfaces;
 using MeuCrudCsharp.Features.Auth.Application.Interfaces;
 using MeuCrudCsharp.Features.Base;
 using MeuCrudCsharp.Features.MercadoPago.Clients.Application.DTOs;
-using MeuCrudCsharp.Features.MercadoPago.Clients.Application.Services;
+using MeuCrudCsharp.Features.MercadoPago.Clients.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,10 +10,10 @@ namespace MeuCrudCsharp.Features.MercadoPago.Clients.Presentation.Controllers;
 [Route("api/v1/wallet")]
 public class UserWalletController : MercadoPagoApiControllerBase
 {
-    private readonly ClientService _clientService;
+    private readonly IClientService _clientService;
     private readonly IUserContext _userContext;
 
-    public UserWalletController(ClientService clientService, IUserContext userContext)
+    public UserWalletController(IClientService clientService, IUserContext userContext)
     {
         _clientService = clientService;
         _userContext = userContext;

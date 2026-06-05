@@ -1,5 +1,3 @@
-
-
 namespace MeuCrudCsharp.Extensions.Services;
 
 public static class AppSettingsServicesExtensions
@@ -22,9 +20,7 @@ public static class AppSettingsServicesExtensions
             builder.Configuration.GetSection(GoogleSettings.SectionName)
         );
 
-        builder.Services.Configure<JwtSettings>(
-            builder.Configuration.GetSection("Jwt")
-        );
+        builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"));
 
         builder.Services.Configure<FFmpegSettings>(
             builder.Configuration.GetSection("FFmpegSettings")

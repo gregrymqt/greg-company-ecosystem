@@ -28,7 +28,10 @@ public static class DistributedServicesExtensions
         return builder;
     }
 
-    private static void AddRedisPersistence(this WebApplicationBuilder builder, string redisConnectionString)
+    private static void AddRedisPersistence(
+        this WebApplicationBuilder builder,
+        string redisConnectionString
+    )
     {
         builder.Services.AddStackExchangeRedisCache(options =>
         {

@@ -13,27 +13,37 @@ public static class MongoInitializationExtensions
         using var scope = app.Services.CreateScope();
         var database = scope.ServiceProvider.GetService<IMongoDatabase>();
 
-        if (database == null) return;
+        if (database == null)
+            return;
 
         var documentTypes = typeof(IMongoDocument)
             .Assembly.GetTypes()
-            .Where(p => typeof(IMongoDocument).IsAssignableFrom(p) && p is { IsInterface: false, IsAbstract: false });
+            .Where(p =>
+                typeof(IMongoDocument).IsAssignableFrom(p)
+                && p is { IsInterface: false, IsAbstract: false }
+            );
 
         foreach (var docType in documentTypes)
         {
-            var collectionNameProperty = docType.GetProperty("CollectionName", BindingFlags.Public | BindingFlags.Static);
+            var collectionNameProperty = docType.GetProperty(
+                "CollectionName",
+                BindingFlags.Public | BindingFlags.Static
+            );
             var collectionName = collectionNameProperty?.GetValue(null) as string;
 
-            if (string.IsNullOrEmpty(collectionName)) continue;
+            if (string.IsNullOrEmpty(collectionName))
+                continue;
 
             var collection = database.GetCollection<BsonDocument>(collectionName);
-            var propertiesToIndex = docType.GetProperties()
+            var propertiesToIndex = docType
+                .GetProperties()
                 .Where(prop => Attribute.IsDefined(prop, typeof(MongoIndexAttribute)));
 
             foreach (var prop in propertiesToIndex)
             {
                 var attribute = prop.GetCustomAttribute<MongoIndexAttribute>();
-                var bsonElement = prop.GetCustomAttribute<MongoDB.Bson.Serialization.Attributes.BsonElementAttribute>();
+                var bsonElement =
+                    prop.GetCustomAttribute<MongoDB.Bson.Serialization.Attributes.BsonElementAttribute>();
                 var fieldName = bsonElement?.ElementName ?? prop.Name;
 
                 try
@@ -46,11 +56,15 @@ public static class MongoInitializationExtensions
                     var indexModel = new CreateIndexModel<BsonDocument>(indexKeys, indexOptions);
 
                     await collection.Indexes.CreateOneAsync(indexModel);
-                    Console.WriteLine($"--> [Mongo] Index garantido em '{collectionName}': {fieldName}");
+                    Console.WriteLine(
+                        $"--> [Mongo] Index garantido em '{collectionName}': {fieldName}"
+                    );
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"--> [Mongo] Erro no index '{collectionName}': {ex.Message}");
+                    Console.WriteLine(
+                        $"--> [Mongo] Erro no index '{collectionName}': {ex.Message}"
+                    );
                 }
             }
         }

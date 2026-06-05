@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using MeuCrudCsharp.Models;
 using MeuCrudCsharp.Features.Home.Domain.Entities;
 
@@ -12,9 +12,9 @@ public interface IHomeRepository
     Task UpdateHeroAsync(HomeHero hero);
     Task DeleteHeroAsync(HomeHero hero);
 
-    Task<List<HomeService>> GetAllServicesAsync();
-    Task<HomeService?> GetServiceByIdAsync(int id);
-    Task AddServiceAsync(HomeService service);
-    Task UpdateServiceAsync(HomeService service);
-    Task DeleteServiceAsync(HomeService service);
+    Task<List<HomeServiceEntry>> GetAllServicesAsync();
+    Task<HomeServiceEntry?> GetServiceByIdAsync(int id);
+    Task AddServiceAsync(HomeServiceEntry service);
+    Task UpdateServiceAsync(HomeServiceEntry service);
+    Task DeleteServiceAsync(HomeServiceEntry service);
 }

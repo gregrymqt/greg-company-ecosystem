@@ -1,4 +1,4 @@
-﻿using MeuCrudCsharp.Data;
+using MeuCrudCsharp.Data;
 using MeuCrudCsharp.Features.Home.Domain.Interfaces;
 using MeuCrudCsharp.Models;
 using MeuCrudCsharp.Features.Home.Domain.Entities;
@@ -42,28 +42,28 @@ public class HomeRepository : IHomeRepository
         return Task.CompletedTask;
     }
 
-    public async Task<List<HomeService>> GetAllServicesAsync()
+    public async Task<List<HomeServiceEntry>> GetAllServicesAsync()
     {
         return await _context.HomeServices.AsNoTracking().ToListAsync();
     }
 
-    public async Task<HomeService?> GetServiceByIdAsync(int id)
+    public async Task<HomeServiceEntry?> GetServiceByIdAsync(int id)
     {
         return await _context.HomeServices.FindAsync(id);
     }
 
-    public async Task AddServiceAsync(HomeService service)
+    public async Task AddServiceAsync(HomeServiceEntry service)
     {
         await _context.HomeServices.AddAsync(service);
     }
 
-    public Task UpdateServiceAsync(HomeService service)
+    public Task UpdateServiceAsync(HomeServiceEntry service)
     {
         _context.HomeServices.Update(service);
         return Task.CompletedTask;
     }
 
-    public Task DeleteServiceAsync(HomeService service)
+    public Task DeleteServiceAsync(HomeServiceEntry service)
     {
         _context.HomeServices.Remove(service);
         return Task.CompletedTask;

@@ -214,7 +214,7 @@ public class HomeService(
 
     public async Task<ServiceDto> CreateServiceAsync(CreateUpdateServiceDto dto)
     {
-        var entity = new Domain.Entities.HomeService
+        var entity = new Domain.Entities.HomeServiceEntry
         {
             Title = dto.Title,
             Description = dto.Description,

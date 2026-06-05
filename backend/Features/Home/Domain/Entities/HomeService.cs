@@ -1,6 +1,6 @@
 namespace MeuCrudCsharp.Features.Home.Domain.Entities;
 
-public class HomeService
+public class HomeServiceEntry
 {
     public int Id { get; set; }
 

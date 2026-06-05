@@ -8,14 +8,15 @@ public static class IdentityServicesExtensions
 {
     public static WebApplicationBuilder AddIdentityPersistence(this WebApplicationBuilder builder)
     {
-        builder.Services.AddIdentity<Users, Roles>(options =>
-        {
-            options.SignIn.RequireConfirmedAccount = true;
-            options.Password.RequireDigit = false;
-            options.Password.RequiredLength = 6;
-        })
-        .AddEntityFrameworkStores<ApiDbContext>()
-        .AddDefaultTokenProviders();
+        builder
+            .Services.AddIdentity<Users, Roles>(options =>
+            {
+                options.SignIn.RequireConfirmedAccount = true;
+                options.Password.RequireDigit = false;
+                options.Password.RequiredLength = 6;
+            })
+            .AddEntityFrameworkStores<ApiDbContext>()
+            .AddDefaultTokenProviders();
 
         return builder;
     }

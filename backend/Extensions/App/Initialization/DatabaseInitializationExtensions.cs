@@ -1,6 +1,6 @@
 using MeuCrudCsharp.Data;
-using MeuCrudCsharp.Models;
 using MeuCrudCsharp.Features.Auth.Domain.Entities;
+using MeuCrudCsharp.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,7 +11,7 @@ public static class DatabaseInitializationExtensions
     public static async Task InitializeSqlDatabaseAsync(this WebApplication app)
     {
         using var scope = app.Services.CreateScope();
-        
+
         await ApplyMigrationsAsync(scope.ServiceProvider);
         await SeedInitialRolesAsync(scope.ServiceProvider);
     }

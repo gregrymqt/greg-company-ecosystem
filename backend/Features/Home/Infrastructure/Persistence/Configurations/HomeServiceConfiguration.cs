@@ -4,9 +4,9 @@ using MeuCrudCsharp.Features.Home.Domain.Entities;
 
 namespace MeuCrudCsharp.Features.Home.Infrastructure.Persistence.Configurations;
 
-public class HomeServiceConfiguration : IEntityTypeConfiguration<HomeService>
+public class HomeServiceConfiguration : IEntityTypeConfiguration<HomeServiceEntry>
 {
-    public void Configure(EntityTypeBuilder<HomeService> builder)
+    public void Configure(EntityTypeBuilder<HomeServiceEntry> builder)
     {
         builder.ToTable("HomeServices");
 
