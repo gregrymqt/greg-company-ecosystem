@@ -2,23 +2,20 @@ using System.Linq;
 using MeuCrudCsharp.Features.Hubs.Presentation.Hubs;
 using MeuCrudCsharp.Features.Hubs.Infrastructure.State;
 using MeuCrudCsharp.Features.Videos.Application.Interfaces;
+
 using Microsoft.AspNetCore.SignalR;
 
 namespace MeuCrudCsharp.Features.Videos.Application.Notification
 {
     public class VideoNotificationService : IVideoNotificationService
     {
-        private readonly IHubContext<VideoProcessingHub> _hubContext;
-
-        private readonly ConnectionMapping<string> _mapping;
+        private readonly IHubContext<GlobalRealtimeHub> _hubContext;
 
         public VideoNotificationService(
-            IHubContext<VideoProcessingHub> hubContext,
-            ConnectionMapping<string> mapping
+            IHubContext<GlobalRealtimeHub> hubContext
         )
         {
             _hubContext = hubContext;
-            _mapping = mapping;
         }
 
         public async Task SendProgressUpdate(
@@ -29,23 +26,17 @@ namespace MeuCrudCsharp.Features.Videos.Application.Notification
             bool isError = false
         )
         {
-            var connectionIds = _mapping.GetConnections(storageIdentifier).ToList();
-
-            if (connectionIds.Any())
-            {
-                await _hubContext
-                    .Clients.Clients(connectionIds)
-                    .SendAsync(
-                        "ProgressUpdate",
-                        new
-                        {
-                            Message = message,
-                            Progress = progress,
-                            IsComplete = isComplete,
-                            IsError = isError,
-                        }
-                    );
-            }
+            await _hubContext.Clients.Group($"processing-{storageIdentifier}")
+                .SendAsync(
+                    "ReceiveVideoProgress",
+                    new
+                    {
+                        Message = message,
+                        Progress = progress,
+                        IsComplete = isComplete,
+                        IsError = isError,
+                    }
+                );
         }
     }
 }

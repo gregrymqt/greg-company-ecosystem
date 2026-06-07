@@ -33,15 +33,11 @@ export const useCreditCardPayment = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // 1. Conexão WebSocket (SignalR)
-  useEffect(() => {
-    socketService.connect(AppHubsCSharp.Payment);
-    // return () => socketService.disconnect(AppHubs.Payment); // Opcional
-  }, []);
+
 
   // 2. Ouvinte de Mensagens do Backend (Processing, Approved, Failed)
   useSocketListener<PaymentSocketMessage>(
-    AppHubsCSharp.Payment,
+    AppHubsCSharp.GlobalRealtime,
     'UpdatePaymentStatus',
     (data) => {
       console.log('💳 Socket Update:', data);

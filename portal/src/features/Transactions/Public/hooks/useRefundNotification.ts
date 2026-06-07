@@ -9,20 +9,11 @@ import type { RefundStatusData } from '../../shared';
 export const useRefundNotification = (onSuccess?: () => void) => {
     const [refundStatus, setRefundStatus] = useState<'idle' | 'processing' | 'completed'>('idle');
 
-    // 1. Garante a conexão com o Hub de Reembolso ao montar
-    useEffect(() => {
-        const connectToHub = async () => {
-            await socketService.connect(AppHubsCSharp.Refund);
-        };
-        connectToHub();
 
-        // Desconectar ao desmontar
-        return () => socketService.disconnect(AppHubsCSharp.Refund);
-    }, []);
 
     // 2. Ouve o evento "ReceiveRefundStatus"
     useSocketListener<RefundStatusData>(
-        AppHubsCSharp.Refund,
+        AppHubsCSharp.GlobalRealtime,
         'ReceiveRefundStatus',
         (data) => {
             console.log("Socket Refund:", data);

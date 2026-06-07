@@ -1,7 +1,5 @@
 export const AppHubsCSharp = {
-  Payment: "/PaymentProcessingHub",
-  Refund: "/RefundProcessingHub",
-  Video: "/videoProcessingHub",
+  GlobalRealtime: "/ws/realtime",
 } as const;
 
 export const AppHubsBIFastAPI = {

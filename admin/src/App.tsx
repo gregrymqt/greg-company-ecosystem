@@ -11,8 +11,7 @@ function App() {
 
   // Inicialização de Sockets para o Admin
   const initGlobalSockets = async () => {
-    await socketService.connect(AppHubsCSharp.Payment);
-    await socketService.connect(AppHubsCSharp.Refund);
+    await socketService.connect(AppHubsCSharp.GlobalRealtime);
   };
 
   useEffect(() => {

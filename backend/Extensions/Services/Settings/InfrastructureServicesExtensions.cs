@@ -2,7 +2,6 @@ using MeuCrudCsharp.Features.Auth.Application.Interfaces;
 using MeuCrudCsharp.Features.Auth.Utils;
 using MeuCrudCsharp.Features.Caching.Application.Interfaces;
 using MeuCrudCsharp.Features.Caching.Application.Services;
-using MeuCrudCsharp.Features.Hubs.Infrastructure.State;
 using MeuCrudCsharp.Features.MercadoPago.Jobs.Application.Jobs;
 using MeuCrudCsharp.Features.MercadoPago.Notification.Application.Interfaces;
 using MeuCrudCsharp.Features.MercadoPago.Notification.Application.Services;
@@ -28,9 +27,6 @@ public static class InfrastructureServicesExtensions
         builder.Services.AddScoped<ProcessCreateSubscriptionJob>();
         builder.Services.AddScoped<ProcessPlanSubscriptionJob>();
         builder.Services.AddScoped<ProcessRenewalSubscriptionJob>();
-
-        // SignalR Stateful Mappings — Singleton pois é um mapa de conexões em memória.
-        builder.Services.AddSingleton<ConnectionMapping<string>>();
 
         return builder;
     }

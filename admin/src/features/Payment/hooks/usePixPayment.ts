@@ -32,13 +32,7 @@ export const usePixPayment = ({
   const [docTypes, setDocTypes] = useState<PixDocType[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  // 1. Conexão WebSocket (SignalR)
-  useEffect(() => {
-    socketService.connect(AppHubsCSharp.Payment);
-    return () => {
-      socketService.disconnect(AppHubsCSharp.Payment);
-    };
-  }, []);
+
 
   // 2. Carrega os tipos de documento (CPF, CNPJ, etc.)
   useEffect(() => {
@@ -55,7 +49,7 @@ export const usePixPayment = ({
 
   // 3. Ouvinte de Mensagens do Backend (Processing, Approved, Failed)
   useSocketListener<PaymentSocketMessage>(
-    AppHubsCSharp.Payment,
+    AppHubsCSharp.GlobalRealtime,
     "UpdatePaymentStatus",
     (data) => {
       console.log("🔔 PIX Socket Update:", data);
