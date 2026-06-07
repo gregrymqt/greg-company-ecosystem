@@ -37,7 +37,8 @@ class PublicVideoService {
       thumbnailUrl: video.thumbnailUrl,
       durationFormatted: this.formatDuration(video.duration),
       courseTitle: video.courseName,
-      storageIdentifier: video.storageIdentifier
+      storageIdentifier: video.storageIdentifier,
+      status: video.status
     };
   }
 

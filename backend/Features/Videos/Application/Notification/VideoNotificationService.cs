@@ -1,6 +1,5 @@
 using System.Linq;
 using MeuCrudCsharp.Features.Hubs.Presentation.Hubs;
-using MeuCrudCsharp.Features.Hubs.Infrastructure.State;
 using MeuCrudCsharp.Features.Videos.Application.Interfaces;
 
 using Microsoft.AspNetCore.SignalR;

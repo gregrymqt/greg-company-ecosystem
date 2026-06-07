@@ -16,7 +16,8 @@ export const PlayerScreen: React.FC = () => {
     error, 
     isPlaying, 
     handleStart, 
-    videoRef 
+    videoRef,
+    refreshVideo
   } = useVideoPlayer(id);
 
   // 3. Tratamento de Estados de Carga e Erro
@@ -50,7 +51,8 @@ export const PlayerScreen: React.FC = () => {
           video={video} 
           isPlaying={isPlaying} 
           onStart={handleStart} 
-          videoRef={videoRef} 
+          videoRef={videoRef}
+          onRefresh={refreshVideo}
         />
       </section>
 

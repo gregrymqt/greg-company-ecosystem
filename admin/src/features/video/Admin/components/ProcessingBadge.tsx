@@ -1,6 +1,5 @@
-// @ts-nocheck
-import React from 'react';
-const useVideoProcessing = (a: any) => ({}) as any;
+import React, { useEffect } from 'react';
+import { useVideoProgress } from '../hooks/useVideoProgress';
 import styles from '../styles/ProcessingBadge.module.scss';
 
 interface Props {
@@ -10,22 +9,26 @@ interface Props {
 }
 
 export const ProcessingBadge: React.FC<Props> = ({ storageIdentifier, status, onProcessComplete }) => {
-  const { progress, statusMessage, isProcessing } = useVideoProcessing(
-    storageIdentifier, 
-    status, 
-    onProcessComplete
-  );
+  const { progress, status: wsStatus, error } = useVideoProgress(storageIdentifier);
 
-  if (!isProcessing) {
-    // Se terminou, retorna null para que a tabela renderize o status novo (Available/Error)
-    // ou renderiza um estado estático temporário
+  useEffect(() => {
+    if (wsStatus === "SUCCESS") {
+      onProcessComplete();
+    }
+  }, [wsStatus, onProcessComplete]);
+
+  if (wsStatus === "IDLE" || wsStatus === "SUCCESS") {
+    // Retorna null quando o processamento terminou ou antes de conectar
+    // para que a listagem controle a renderização com o status final.
     return null; 
   }
 
   return (
     <div className={styles.badgeContainer}>
       <div className={styles.statusRow}>
-        <span>{statusMessage || 'Processando...'}</span>
+        <span style={{ color: wsStatus === "FAILED" ? "red" : "inherit" }}>
+          {wsStatus === "FAILED" ? (error || 'Erro no processamento') : 'Processando...'}
+        </span>
         <strong>{progress}%</strong>
       </div>
       
@@ -33,7 +36,10 @@ export const ProcessingBadge: React.FC<Props> = ({ storageIdentifier, status, on
       <div className={styles.progressTrack}>
         <div 
           className={styles.progressBar}
-          style={{ width: `${progress}%` }} 
+          style={{ 
+            width: `${progress}%`,
+            backgroundColor: wsStatus === "FAILED" ? "red" : undefined
+          }} 
         />
       </div>
     </div>

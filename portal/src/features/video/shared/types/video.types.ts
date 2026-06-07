@@ -105,6 +105,7 @@ export interface PlayerVideoDto {
   durationFormatted: string; // Ex: "12:30"
   courseTitle?: string;
   storageIdentifier: string; // Para construir URL do manifest
+  status: VideoStatus; // Para acompanhar o processamento
 }
 
 /**

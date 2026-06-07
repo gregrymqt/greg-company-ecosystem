@@ -19,25 +19,24 @@ export const useVideoPlayer = (publicId: string | undefined) => {
   const hlsRef = useRef<Hls | null>(null);
 
   // Busca metadados do vídeo
-  useEffect(() => {
+  const refreshVideo = useCallback(async () => {
     if (!publicId) return;
-
-    const fetchVideoData = async () => {
-      setIsLoading(true);
-      try {
-        const data = await publicVideoService.getById(publicId);
-        setInternalData(data);
-        setVideo(publicVideoService.toPlayerDto(data));
-      } catch (err) {
-        setError('Erro ao carregar informações do vídeo.');
-        console.error(err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchVideoData();
+    setIsLoading(true);
+    try {
+      const data = await publicVideoService.getById(publicId);
+      setInternalData(data);
+      setVideo(publicVideoService.toPlayerDto(data));
+    } catch (err) {
+      setError('Erro ao carregar informações do vídeo.');
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
   }, [publicId]);
+
+  useEffect(() => {
+    refreshVideo();
+  }, [refreshVideo]);
 
   // Lógica de streaming HLS
   useEffect(() => {
@@ -108,6 +107,7 @@ export const useVideoPlayer = (publicId: string | undefined) => {
     videoRef,
     handleStart,
     handlePause,
-    handleResume
+    handleResume,
+    refreshVideo
   };
 };
