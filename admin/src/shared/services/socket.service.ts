@@ -1,6 +1,6 @@
 import { HubConnection, HubConnectionBuilder, LogLevel, HubConnectionState } from "@microsoft/signalr";
 import { StorageService, STORAGE_KEYS } from "./storage.service";
-import { AppHubsBIFastAPI, type AnyAppHub } from "@/shared/enums/hub/hub.enums";
+import { type AnyAppHub } from "@/shared/enums/hub/hub.enums";
 
 class WebSocketService {
   // Agora o mapa aceita qualquer um dos dois tipos de Hub
@@ -10,12 +10,6 @@ class WebSocketService {
    * Identifica qual a Base URL correta para o Hub solicitado
    */
   private getBaseUrlForHub(hubPath: string): string {
-    // Verifica se o hubPath pertence aos valores do enum de BI (Python)
-    const isPythonHub = Object.values(AppHubsBIFastAPI as Record<string, string>).includes(hubPath);
-    
-    if (isPythonHub) {
-      return import.meta.env.VITE_BI_API_URL || "http://localhost:8000"; // Porta do seu FastAPI
-    }
     return import.meta.env.VITE_GENERAL__BASEURL || "https://localhost:5045"; // Porta do seu C#
   }
 

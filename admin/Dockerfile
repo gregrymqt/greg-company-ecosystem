@@ -16,8 +16,6 @@ COPY . .
 ARG GENERAL_BASEURL
 ENV VITE_GENERAL_BASEURL=$GENERAL_BASEURL
 
-ARG VITE_BI_API_URL
-ENV VITE_BI_API_URL=$VITE_BI_API_URL
 
 # Gera a pasta 'dist' otimizada para produção
 RUN npm run build

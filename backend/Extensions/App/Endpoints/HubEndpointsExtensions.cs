@@ -6,9 +6,7 @@ public static class HubEndpointsExtensions
 {
     public static WebApplication MapApplicationHubs(this WebApplication app)
     {
-        app.MapHub<VideoProcessingHub>("/videoProcessingHub");
-        app.MapHub<RefundProcessingHub>("/RefundProcessingHub");
-        app.MapHub<PaymentProcessingHub>("/PaymentProcessingHub");
+        app.MapHub<GlobalRealtimeHub>("/ws/realtime");
 
         return app;
     }

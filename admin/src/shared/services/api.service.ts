@@ -61,7 +61,6 @@ const toFormData = <T extends Record<string, unknown>>(
 
 // --- 3. CONFIGURAÇÃO BASE ---
 const BASE_URL = "/api";
-const BI_API_URL = import.meta.env.VITE_BI_API_URL || "http://localhost:8000";
 
 const getHeaders = (isFormData = false): HeadersInit => {
   const headers: Record<string, string> = {
@@ -346,72 +345,4 @@ export const ApiService = {
   },
 };
 
-// --- 7. INSTÂNCIA PARA BI DASHBOARD PYTHON (PORTA 8000) ---
-/**
- * BiApiService
- * Instância especializada para comunicação com o BI Dashboard Python (FastAPI)
- * Usa uma base URL diferente mas mantém a mesma lógica de tratamento de erros
- */
-export const BiApiService = {
-  get: async <T>(endpoint: string, options?: RequestInit): Promise<T> => {
-    const headers = {
-      ...getHeaders(),
-      ...((options?.headers as Record<string, string>) || {}),
-    };
 
-    const response = await fetch(`${BI_API_URL}${endpoint}`, {
-      method: "GET",
-      headers: headers as HeadersInit,
-    });
-    return await handleResponse<T>(response, "GET");
-  },
-
-  post: async <TResponse, TBody = unknown>(
-    endpoint: string,
-    body: TBody,
-    options?: RequestInit
-  ): Promise<TResponse> => {
-    const headers = {
-      ...getHeaders(),
-      ...((options?.headers as Record<string, string>) || {}),
-    };
-
-    const response = await fetch(`${BI_API_URL}${endpoint}`, {
-      method: "POST",
-      headers: headers as HeadersInit,
-      body: JSON.stringify(body),
-    });
-    return await handleResponse<TResponse>(response, "POST");
-  },
-
-  put: async <TResponse, TBody = unknown>(
-    endpoint: string,
-    body: TBody,
-    options?: RequestInit
-  ): Promise<TResponse> => {
-    const headers = {
-      ...getHeaders(),
-      ...((options?.headers as Record<string, string>) || {}),
-    };
-
-    const response = await fetch(`${BI_API_URL}${endpoint}`, {
-      method: "PUT",
-      headers: headers as HeadersInit,
-      body: JSON.stringify(body),
-    });
-    return await handleResponse<TResponse>(response, "PUT");
-  },
-
-  delete: async <T>(endpoint: string, options?: RequestInit): Promise<T> => {
-    const headers = {
-      ...getHeaders(),
-      ...((options?.headers as Record<string, string>) || {}),
-    };
-
-    const response = await fetch(`${BI_API_URL}${endpoint}`, {
-      method: "DELETE",
-      headers: headers as HeadersInit,
-    });
-    return await handleResponse<T>(response, "DELETE");
-  },
-};

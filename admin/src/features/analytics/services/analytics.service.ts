@@ -5,7 +5,7 @@
  * Herda funcionalidades do ApiService base
  */
 
-import { ApiService, BiApiService } from "@/shared/services/api.service";
+import { ApiService } from "@/shared/services/api.service";
 import type { 
   AnalyticsApiResponse, 
    
@@ -174,7 +174,7 @@ export const AnalyticsService = {
    * @returns StorageStats com estatísticas totais e breakdown
    */
   getStorageOverview: async (): Promise<StorageStats> => {
-    return await BiApiService.get<StorageStats>('/api/storage/overview');
+    return await ApiService.get<StorageStats>('/api/storage/overview');
   },
 
   /**
@@ -183,7 +183,7 @@ export const AnalyticsService = {
    * @returns Lista de arquivos ordenada por tamanho
    */
   getLargestFiles: async (limit: number = 10): Promise<{ TotalResults: number; Files: FileDetail[] }> => {
-    return await BiApiService.get<{ TotalResults: number; Files: FileDetail[] }>(
+    return await ApiService.get<{ TotalResults: number; Files: FileDetail[] }>(
       `/api/storage/largest-files?limit=${limit}`
     );
   },
@@ -198,7 +198,7 @@ export const AnalyticsService = {
     categoria: string, 
     limit: number = 50
   ): Promise<{ Category: string; TotalResults: number; Files: FileDetail[] }> => {
-    return await BiApiService.get<{ Category: string; TotalResults: number; Files: FileDetail[] }>(
+    return await ApiService.get<{ Category: string; TotalResults: number; Files: FileDetail[] }>(
       `/api/storage/by-category/${encodeURIComponent(categoria)}?limit=${limit}`
     );
   },
@@ -209,6 +209,6 @@ export const AnalyticsService = {
    * @returns Dados de crescimento diário + resumo
    */
   getStorageGrowthTrend: async (days: number = 30): Promise<StorageGrowthTrend> => {
-    return await BiApiService.get<StorageGrowthTrend>(`/api/storage/growth-trend?days=${days}`);
+    return await ApiService.get<StorageGrowthTrend>(`/api/storage/growth-trend?days=${days}`);
   },
 };

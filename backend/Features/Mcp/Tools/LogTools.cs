@@ -7,14 +7,27 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using ModelContextProtocol;
 using ModelContextProtocol.Protocol;
+using ModelContextProtocol.Server;
 
 namespace MeuCrudCsharp.Features.Mcp.Tools;
+
+// 💡 1. Definição dos DTOs para blindar o payload do JSON-RPC
+public class LogLinesArgs
+{
+    [Description("Quantidade de linhas para ler do log")]
+    public int LinesCount { get; set; } = 50;
+}
+
+public class InfraLogArgs
+{
+    [Description("Quantidade de linhas para ler")]
+    public int TailCount { get; set; } = 100;
+}
 
 public class LogTools
 {
     private readonly bool _useKubernetes;
 
-    // Injetamos a configuração para ler a flag do .env
     public LogTools(IConfiguration configuration)
     {
         _useKubernetes = configuration.GetValue<bool>("USE_KUBERNETES_LOGS");
@@ -23,12 +36,9 @@ public class LogTools
     // ====================================================================
     // 1. LOGS DA APLICAÇÃO (SERILOG)
     // ====================================================================
-    [Description(
-        "Lê as últimas linhas do arquivo de log físico do Serilog (backend) para depurar exceções."
-    )]
-    public async Task<CallToolResult> ReadLogsAsync(
-        [Description("Quantidade de linhas para ler do log")] int linesCount = 50
-    )
+    [McpServerTool(Name = "ReadLogsAsync")]
+    [Description("Lê as últimas linhas do arquivo de log físico do Serilog (backend) para depurar exceções.")]
+    public async Task<CallToolResult> ReadLogsAsync(LogLinesArgs args) // 💡 Ajustado para o DTO
     {
         var logPath = "log/log-.txt";
 
@@ -37,18 +47,13 @@ public class LogTools
             return new CallToolResult
             {
                 IsError = true,
-                Content =
-                [
-                    new TextContentBlock
-                    {
-                        Text = "Nenhum arquivo de log do Serilog foi encontrado no servidor.",
-                    },
-                ],
+                Content = [new TextContentBlock { Text = "Nenhum arquivo de log do Serilog foi encontrado no servidor." }]
             };
         }
 
         var lines = await File.ReadAllLinesAsync(logPath);
-        var takeCount = Math.Min(lines.Length, linesCount);
+        int targetLines = args?.LinesCount ?? 50; // Fallback seguro
+        var takeCount = Math.Min(lines.Length, targetLines);
         var lastLines = lines[^takeCount..];
 
         return new CallToolResult
@@ -60,56 +65,44 @@ public class LogTools
     // ====================================================================
     // 2. LOGS DO SQL SERVER
     // ====================================================================
-    [Description(
-        "Analisa os logs do SQL Server para investigar locks, timeouts ou erros de conexão."
-    )]
-    public async Task<CallToolResult> ReadSqlServerLogsAsync(
-        [Description("Quantidade de linhas para ler")] int tailCount = 100
-    )
+    [McpServerTool(Name = "ReadSqlServerLogsAsync")]
+    [Description("Analisa os logs do SQL Server para investigar locks, timeouts ou erros de conexão.")]
+    public async Task<CallToolResult> ReadSqlServerLogsAsync(InfraLogArgs args) // 💡 Ajustado para o DTO
     {
-        // O identificador "mssql-db" serve tanto para o container Docker quanto para a Label do Kubernetes!
-        return await GetInfrastructureLogsAsync("mssql-db", tailCount);
+        int tail = args?.TailCount ?? 100;
+        return await GetInfrastructureLogsAsync("mssql-db", tail);
     }
 
     // ====================================================================
     // 3. LOGS DO MONGODB
     // ====================================================================
+    [McpServerTool(Name = "ReadMongoDbLogsAsync")]
     [Description("Analisa os logs do MongoDB para investigar queries lentas ou falhas de disco.")]
-    public async Task<CallToolResult> ReadMongoDbLogsAsync(
-        [Description("Quantidade de linhas para ler")] int tailCount = 100
-    )
+    public async Task<CallToolResult> ReadMongoDbLogsAsync(InfraLogArgs args) // 💡 Ajustado para o DTO
     {
-        return await GetInfrastructureLogsAsync("mongodb-store", tailCount);
+        int tail = args?.TailCount ?? 100;
+        return await GetInfrastructureLogsAsync("mongodb-store", tail);
     }
 
     // ====================================================================
     // 4. LOGS DO REDIS
     // ====================================================================
-    [Description(
-        "Analisa os logs do Redis para investigar falhas de persistência ou despejo de memória."
-    )]
-    public async Task<CallToolResult> ReadRedisLogsAsync(
-        [Description("Quantidade de linhas para ler")] int tailCount = 100
-    )
+    [McpServerTool(Name = "ReadRedisLogsAsync")]
+    [Description("Analisa os logs do Redis para investigar falhas de persistência ou despejo de memória.")]
+    public async Task<CallToolResult> ReadRedisLogsAsync(InfraLogArgs args) // 💡 Ajustado para o DTO
     {
-        return await GetInfrastructureLogsAsync("redis-cache", tailCount);
+        int tail = args?.TailCount ?? 100;
+        return await GetInfrastructureLogsAsync("redis-cache", tail);
     }
 
     // ====================================================================
-    // MÉTODO AUXILIAR PRIVADO (O CÉREBRO DA INTEGRAÇÃO)
+    // MÉTODO AUXILIAR PRIVADO
     // ====================================================================
-    private async Task<CallToolResult> GetInfrastructureLogsAsync(
-        string appIdentifier,
-        int tailCount
-    )
+    private async Task<CallToolResult> GetInfrastructureLogsAsync(string appIdentifier, int tailCount)
     {
         try
         {
-            // A Mágica do Booleano acontece aqui:
             string commandFileName = _useKubernetes ? "kubectl" : "docker";
-
-            // Se for K8s, usamos o seletor de label (-l app=...) no namespace greg-company
-            // Se for Docker, usamos o comando padrão de container
             string commandArguments = _useKubernetes
                 ? $"logs -l app={appIdentifier} -n greg-company --tail {tailCount}"
                 : $"logs --tail {tailCount} {appIdentifier}";
@@ -128,10 +121,8 @@ public class LogTools
             };
 
             process.Start();
-
             var output = await process.StandardOutput.ReadToEndAsync();
             var error = await process.StandardError.ReadToEndAsync();
-
             await process.WaitForExitAsync();
 
             var combinedLogs = output + "\n" + error;
@@ -140,20 +131,13 @@ public class LogTools
             {
                 return new CallToolResult
                 {
-                    Content =
-                    [
-                        new TextContentBlock
-                        {
-                            Text =
-                                $"A infraestrutura '{appIdentifier}' está rodando mas não emitiu logs.",
-                        },
-                    ],
+                    Content = [new TextContentBlock { Text = $"A infraestrutura '{appIdentifier}' está rodando mas não emitiu logs." }]
                 };
             }
 
             return new CallToolResult
             {
-                Content = [new TextContentBlock { Text = combinedLogs.Trim() }],
+                Content = [new TextContentBlock { Text = combinedLogs.Trim() }]
             };
         }
         catch (Exception ex)
@@ -162,14 +146,7 @@ public class LogTools
             return new CallToolResult
             {
                 IsError = true,
-                Content =
-                [
-                    new TextContentBlock
-                    {
-                        Text =
-                            $"Erro ao capturar logs do {envName} para {appIdentifier}: {ex.Message}",
-                    },
-                ],
+                Content = [new TextContentBlock { Text = $"Erro ao capturar logs do {envName} para {appIdentifier}: {ex.Message}" }]
             };
         }
     }
