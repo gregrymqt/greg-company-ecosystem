@@ -1,5 +1,4 @@
 using MeuCrudCsharp.Features.Hubs.Presentation.Hubs;
-using MeuCrudCsharp.Features.Hubs.Infrastructure.State;
 using MeuCrudCsharp.Features.MercadoPago.Notification.Application.DTOs;
 using Microsoft.AspNetCore.SignalR;
 using MeuCrudCsharp.Features.MercadoPago.Hub.Application.Interfaces;

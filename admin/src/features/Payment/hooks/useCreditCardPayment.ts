@@ -1,8 +1,7 @@
 // src/pages/Payment/hooks/useCreditCardPayment.ts
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { CreditCardService } from "../services/creditCard.service";
 import { AlertService } from "@/shared/services/alert.service";
-import { socketService } from "@/shared/services/socket.service";
 
 import type { 
   BrickPaymentData, 

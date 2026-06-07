@@ -1,9 +1,8 @@
 // src/features/Transactions/Public/hooks/useRefundNotification.ts
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { AppHubsCSharp } from '@/shared/enums/hub/hub.enums';
 import { useSocketListener } from '@/shared/hooks/useSocket';
 import { AlertService } from '@/shared/services/alert.service';
-import { socketService } from '@/shared/services/socket.service';
 import type { RefundStatusData } from '../../shared';
 
 export const useRefundNotification = (onSuccess?: () => void) => {

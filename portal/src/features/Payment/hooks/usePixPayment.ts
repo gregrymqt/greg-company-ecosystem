@@ -2,7 +2,6 @@
 import { useState, useEffect } from "react";
 import { PixService } from "../services/pix.service";
 import { AlertService } from "@/shared/services/alert.service";
-import { socketService } from "@/shared/services/socket.service";
 import { useSocketListener } from "@/shared/hooks/useSocket";
 import { ApiError } from "@/shared/services/api.service";
 

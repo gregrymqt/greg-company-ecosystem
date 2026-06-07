@@ -9,7 +9,7 @@ class WebSocketService {
   /**
    * Identifica qual a Base URL correta para o Hub solicitado
    */
-  private getBaseUrlForHub(hubPath: string): string {
+  private getBaseUrlForHub(_hubPath: string): string {
     return import.meta.env.VITE_GENERAL__BASEURL || "https://localhost:5045"; // Porta do seu C#
   }
 

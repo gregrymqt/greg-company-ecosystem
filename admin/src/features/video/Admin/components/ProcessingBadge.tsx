@@ -8,7 +8,7 @@ interface Props {
   onProcessComplete: () => void;
 }
 
-export const ProcessingBadge: React.FC<Props> = ({ storageIdentifier, status, onProcessComplete }) => {
+export const ProcessingBadge: React.FC<Props> = ({ storageIdentifier, onProcessComplete }) => {
   const { progress, status: wsStatus, error } = useVideoProgress(storageIdentifier);
 
   useEffect(() => {
