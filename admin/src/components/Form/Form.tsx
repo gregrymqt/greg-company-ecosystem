@@ -28,7 +28,7 @@ import  {
   type FieldError,
   type UseFormReturn 
 } from 'react-hook-form';
-import styles from './GenericForm.module.scss';
+import styles from './Form.module.scss';
 
 // ============ FORM WRAPPER (Provider) ============
 
@@ -281,19 +281,21 @@ interface FormSubmitProps {
   children: ReactNode;
   isLoading?: boolean;
   loadingText?: string;
+  className?: string;
 }
 
 export function FormSubmit({ 
   children, 
   isLoading = false, 
-  loadingText = "Processando..." 
+  loadingText = "Processando...",
+  className = ""
 }: FormSubmitProps) {
   const { formState } = useFormContext();
 
   return (
     <button 
       type="submit" 
-      className={styles.submitBtn} 
+      className={`${styles.submitBtn} ${className}`.trim()} 
       disabled={isLoading || formState.isSubmitting}
     >
       {isLoading || formState.isSubmitting ? (

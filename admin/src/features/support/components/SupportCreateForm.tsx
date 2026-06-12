@@ -2,45 +2,14 @@
  * Formulário para usuários criarem tickets de suporte
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { useUserSupport } from '../hooks/useUserSupport';
 import type { CreateSupportTicketDto } from '../types/support.types';
-import { type FormField, GenericForm } from '@/components/Form/GenericForm';
+import { Form } from '@/components/Form';
 import styles from '../styles/SupportCreateForm.module.scss';
 
 export const SupportCreateForm: React.FC = () => {
   const { createTicket, loading } = useUserSupport();
-
-  const fields = useMemo((): FormField<CreateSupportTicketDto>[] => [
-    {
-      name: 'context',
-      label: 'Assunto',
-      type: 'text',
-      placeholder: 'Ex: Problema no acesso ao curso',
-      colSpan: 12,
-      validation: {
-        required: 'O assunto é obrigatório',
-        minLength: {
-          value: 3,
-          message: 'O assunto deve ter no mínimo 3 caracteres'
-        }
-      }
-    },
-    {
-      name: 'explanation',
-      label: 'Descrição do Problema',
-      type: 'textarea',
-      placeholder: 'Descreva detalhadamente o problema que você está enfrentando...',
-      colSpan: 12,
-      validation: {
-        required: 'A descrição é obrigatória',
-        minLength: {
-          value: 10,
-          message: 'A descrição deve ter no mínimo 10 caracteres'
-        }
-      }
-    }
-  ], []);
 
   return (
     <div className={styles.container}>
@@ -51,12 +20,37 @@ export const SupportCreateForm: React.FC = () => {
         </p>
       </div>
 
-      <GenericForm<CreateSupportTicketDto>
-        fields={fields}
+      <Form<CreateSupportTicketDto>
         onSubmit={createTicket}
-        submitText="Enviar Ticket"
-        isLoading={loading}
-      />
+      >
+        <Form.Input 
+          name="context" 
+          label="Assunto" 
+          placeholder="Ex: Problema no acesso ao curso" 
+          validation={{ 
+            required: 'O assunto é obrigatório',
+            minLength: { value: 3, message: 'O assunto deve ter no mínimo 3 caracteres' }
+          }} 
+          colSpan={12} 
+        />
+
+        <Form.Textarea 
+          name="explanation" 
+          label="Descrição do Problema" 
+          placeholder="Descreva detalhadamente o problema que você está enfrentando..." 
+          validation={{ 
+            required: 'A descrição é obrigatória',
+            minLength: { value: 10, message: 'A descrição deve ter no mínimo 10 caracteres' }
+          }} 
+          colSpan={12} 
+        />
+
+        <Form.Actions>
+          <Form.Submit isLoading={loading}>
+            Enviar Ticket
+          </Form.Submit>
+        </Form.Actions>
+      </Form>
 
       <div className={styles.helpText}>
         <i className="fas fa-info-circle"></i>

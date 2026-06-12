@@ -1,16 +1,35 @@
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import * as yup from 'yup';
 import { authService } from '@/features/auth/services/auth.service';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import type { LoginFormData } from '@/features/auth/types/auth.dtos';
 
+const loginSchema = yup.object().shape({
+  email: yup.string().email('Email inválido').required('Email é obrigatório'),
+  password: yup.string().min(6, 'Senha deve ter no mínimo 6 caracteres').required('Senha é obrigatória'),
+});
+
 export const useLoginForm = () => {
+  const { setSession } = useAuth();
+  const [showPassword, setShowPassword] = useState(false);
+
+  const toggleShowPassword = () => setShowPassword((prev) => !prev);
+
+  const handleForgotPassword = (e: React.MouseEvent) => {
+    e.preventDefault();
+    // Navegação ou lógica de "esqueci minha senha" vai aqui
+    console.log('Forgot password clicked');
+  };
+  
   const formMethods = useForm<LoginFormData>({
+    resolver: yupResolver(loginSchema),
     defaultValues: {
       email: '',
       password: ''
     }
   });
-  const { setSession, loginGoogle } = useAuth();
 
   const onSubmit = async (data: LoginFormData) => {
     try {
@@ -35,13 +54,11 @@ export const useLoginForm = () => {
     }
   };
 
-  const handleGoogleLogin = () => {
-    loginGoogle();
-  };
-
   return {
     formMethods,
     onSubmit,
-    handleGoogleLogin
+    showPassword,
+    toggleShowPassword,
+    handleForgotPassword
   };
 };

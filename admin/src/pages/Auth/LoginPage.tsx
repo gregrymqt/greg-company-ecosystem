@@ -1,44 +1,8 @@
-import { useForm } from 'react-hook-form';
-import { Form } from '@/components/Form/Form';
 import { authService } from '@/features/auth/services/auth.service';
-import { useAuth } from '@/features/auth/hooks/useAuth';
+import { LoginForm } from '@/features/auth/components/LoginForm';
 import styles from './LoginPage.module.scss';
 
-interface LoginFormData {
-  email: string;
-  password: string;
-}
-
 export const LoginPage = () => {
-  const formMethods = useForm<LoginFormData>({
-    defaultValues: {
-      email: '',
-      password: ''
-    }
-  });
-  const { setSession } = useAuth();
-
-  const onSubmit = async (data: LoginFormData) => {
-    try {
-      const response = await authService.loginWithEmail(data);
-      
-      setSession({
-        ...response.user,
-        token: response.token,
-        refreshToken: response.refreshToken,
-        expiration: response.expiration
-      });
-
-      window.location.href = '/';
-    } catch (error) {
-      console.error('Erro ao fazer login:', error);
-      formMethods.setError('root', {
-        type: 'manual',
-        message: 'Email ou senha inválidos'
-      });
-    }
-  };
-
   const handleGoogleLogin = () => {
     authService.loginGoogle();
   };
@@ -46,49 +10,12 @@ export const LoginPage = () => {
   return (
     <div className={styles.loginPage}>
       <div className={styles.loginCard}>
-        <h2 className={styles.title}>Entrar</h2>
-        
-        <Form formMethods={formMethods} onSubmit={onSubmit}>
-          <Form.Input
-            name="email"
-            label="Email"
-            type="email"
-            placeholder="seu@email.com"
-            rules={{
-              required: 'Email é obrigatório',
-              pattern: {
-                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                message: 'Email inválido'
-              }
-            }}
-          />
+        <div className={styles.brandHeader}>
+          <img src="/src/assets/logo-admin.png" alt="Logo Admin" className={styles.logo} />
+          <p className={styles.subtitle}>Bem-vindo ao Painel Admin</p>
+        </div>
 
-          <Form.Input
-            name="password"
-            label="Senha"
-            type="password"
-            placeholder="••••••••"
-            rules={{
-              required: 'Senha é obrigatória',
-              minLength: {
-                value: 6,
-                message: 'Senha deve ter no mínimo 6 caracteres'
-              }
-            }}
-          />
-
-          {formMethods.formState.errors.root && (
-            <div className={styles.error}>
-              {formMethods.formState.errors.root.message}
-            </div>
-          )}
-
-          <Form.Actions>
-            <Form.Submit isLoading={formMethods.formState.isSubmitting}>
-              Entrar
-            </Form.Submit>
-          </Form.Actions>
-        </Form>
+        <LoginForm />
 
         <div className={styles.divider}>
           <span>ou</span>

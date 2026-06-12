@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { type FormField, GenericForm } from '@/components/Form/GenericForm';
+import { Form } from '@/components/Form';
 import type { PixDocType } from '../../types';
 
 interface PixFormData {
@@ -26,48 +26,6 @@ export const PixForm: React.FC<PixFormProps> = ({
   defaultName
 }) => {
   
-  const fields = useMemo<FormField<PixFormData>[]>(() => [
-    {
-      name: 'firstName',
-      label: 'Nome',
-      type: 'text',
-      colSpan: 6,
-      validation: { required: 'Nome é obrigatório' }
-    },
-    {
-      name: 'lastName',
-      label: 'Sobrenome',
-      type: 'text',
-      colSpan: 6,
-      validation: { required: 'Sobrenome é obrigatório' }
-    },
-    {
-      name: 'email',
-      label: 'E-mail',
-      type: 'email',
-      colSpan: 12,
-      validation: { 
-        required: 'E-mail é obrigatório',
-        pattern: { value: /^\S+@\S+$/i, message: 'E-mail inválido' }
-      }
-    },
-    {
-      name: 'identificationType',
-      label: 'Tipo de Documento',
-      type: 'select',
-      colSpan: 6,
-      options: docTypes.map(d => ({ label: d.name, value: d.id })),
-      validation: { required: 'Selecione o tipo' }
-    },
-    {
-      name: 'identificationNumber',
-      label: 'Número do Documento',
-      type: 'text',
-      colSpan: 6,
-      validation: { required: 'Documento é obrigatório' }
-    }
-  ], [docTypes]);
-
   const defaultValues = useMemo<Partial<PixFormData>>(() => {
     return {
       email: defaultEmail || '',
@@ -77,12 +35,50 @@ export const PixForm: React.FC<PixFormProps> = ({
   }, [defaultEmail, defaultName]);
 
   return (
-    <GenericForm<PixFormData>
-      fields={fields}
+    <Form<PixFormData>
       onSubmit={onSubmit}
-      isLoading={isLoading}
-      submitText="Gerar QR Code PIX"
       defaultValues={defaultValues}
-    />
+    >
+      <Form.Input 
+        name="firstName" 
+        label="Nome" 
+        validation={{ required: 'Nome é obrigatório' }} 
+        colSpan={6} 
+      />
+      <Form.Input 
+        name="lastName" 
+        label="Sobrenome" 
+        validation={{ required: 'Sobrenome é obrigatório' }} 
+        colSpan={6} 
+      />
+      <Form.Input 
+        name="email" 
+        label="E-mail" 
+        type="email" 
+        validation={{ 
+          required: 'E-mail é obrigatório',
+          pattern: { value: /^\S+@\S+$/i, message: 'E-mail inválido' }
+        }} 
+        colSpan={12} 
+      />
+      <Form.Select 
+        name="identificationType" 
+        label="Tipo de Documento" 
+        options={docTypes.map(d => ({ label: d.name, value: d.id }))} 
+        validation={{ required: 'Selecione o tipo' }} 
+        colSpan={6} 
+      />
+      <Form.Input 
+        name="identificationNumber" 
+        label="Número do Documento" 
+        validation={{ required: 'Documento é obrigatório' }} 
+        colSpan={6} 
+      />
+      <Form.Actions>
+        <Form.Submit isLoading={isLoading}>
+          Gerar QR Code PIX
+        </Form.Submit>
+      </Form.Actions>
+    </Form>
   );
 };

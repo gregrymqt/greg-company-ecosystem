@@ -1,6 +1,6 @@
 import React from 'react';
 import styles from '../styles/HomeForms.module.scss';
-import { type FormField, GenericForm } from '@/components/Form/GenericForm';
+import { Form } from '@/components/Form';
 import type { ServiceDto, ServiceFormValues } from '@/features/home/types/home.types';
 
 interface ServiceFormProps {
@@ -15,49 +15,6 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
   isLoading 
 }) => {
   const isEditing = !!initialData;
-
-  const fields: FormField<ServiceFormValues>[] = [
-    {
-      name: 'title',
-      label: 'Título',
-      type: 'text',
-      placeholder: 'Ex: Suporte Técnico',
-      validation: { required: 'O título é obrigatório' },
-      colSpan: 12
-    },
-    {
-      name: 'description',
-      label: 'Descrição',
-      type: 'textarea',
-      placeholder: 'Descreva o serviço...',
-      validation: { required: 'A descrição é obrigatória' },
-      colSpan: 12
-    },
-    {
-      name: 'iconClass',
-      label: 'Classe do Ícone (FontAwesome)',
-      type: 'text',
-      placeholder: 'Ex: fas fa-check',
-      validation: { required: 'A classe do ícone é obrigatória' },
-      colSpan: 12
-    },
-    {
-      name: 'actionText',
-      label: 'Texto do Botão',
-      type: 'text',
-      placeholder: 'Ex: Saber mais',
-      validation: { required: 'O texto do botão é obrigatório' },
-      colSpan: 6
-    },
-    {
-      name: 'actionUrl',
-      label: 'Link do Botão',
-      type: 'text',
-      placeholder: 'Ex: /servicos',
-      validation: { required: 'O link do botão é obrigatório' },
-      colSpan: 6
-    }
-  ];
 
   const defaultValues: Partial<ServiceFormValues> = initialData ? {
     title: initialData.title,
@@ -74,13 +31,56 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
         <p>Configure os detalhes do serviço a ser exibido na home.</p>
       </div>
 
-      <GenericForm<ServiceFormValues>
-        fields={fields}
+      <Form<ServiceFormValues>
         onSubmit={onSubmit}
         defaultValues={defaultValues}
-        isLoading={isLoading}
-        submitText={isEditing ? "Salvar Alterações" : "Criar Serviço"}
-      />
+      >
+        <Form.Input 
+          name="title" 
+          label="Título" 
+          placeholder="Ex: Suporte Técnico" 
+          validation={{ required: 'O título é obrigatório' }} 
+          colSpan={12} 
+        />
+
+        <Form.Textarea 
+          name="description" 
+          label="Descrição" 
+          placeholder="Descreva o serviço..." 
+          validation={{ required: 'A descrição é obrigatória' }} 
+          colSpan={12} 
+        />
+
+        <Form.Input 
+          name="iconClass" 
+          label="Classe do Ícone (FontAwesome)" 
+          placeholder="Ex: fas fa-check" 
+          validation={{ required: 'A classe do ícone é obrigatória' }} 
+          colSpan={12} 
+        />
+
+        <Form.Input 
+          name="actionText" 
+          label="Texto do Botão" 
+          placeholder="Ex: Saber mais" 
+          validation={{ required: 'O texto do botão é obrigatório' }} 
+          colSpan={6} 
+        />
+
+        <Form.Input 
+          name="actionUrl" 
+          label="Link do Botão" 
+          placeholder="Ex: /servicos" 
+          validation={{ required: 'O link do botão é obrigatório' }} 
+          colSpan={6} 
+        />
+
+        <Form.Actions>
+          <Form.Submit isLoading={isLoading}>
+            {isEditing ? "Salvar Alterações" : "Criar Serviço"}
+          </Form.Submit>
+        </Form.Actions>
+      </Form>
     </div>
   );
 };

@@ -1,6 +1,6 @@
 import React from 'react';
 import styles from '../styles/HomeForms.module.scss';
-import { type FormField, GenericForm } from '@/components/Form/GenericForm';
+import { Form } from '@/components/Form';
 import type { HeroSlideDto, HeroFormValues } from '@/features/home/types/home.types';
 
 interface HeroFormProps {
@@ -17,49 +17,6 @@ export const HeroForm: React.FC<HeroFormProps> = ({
 }) => {
   
   const isEditing = !!initialData;
-
-  const fields: FormField<HeroFormValues>[] = [
-    {
-      name: 'title',
-      label: 'Título Principal',
-      type: 'text',
-      placeholder: 'Ex: Bem-vindo à Inovação',
-      validation: { required: 'O título é obrigatório' },
-      colSpan: 6
-    },
-    {
-      name: 'subtitle',
-      label: 'Subtítulo',
-      type: 'text',
-      placeholder: 'Ex: Soluções completas para você',
-      validation: { required: 'O subtítulo é obrigatório' },
-      colSpan: 6
-    },
-    {
-      name: 'actionText',
-      label: 'Texto do Botão (CTA)',
-      type: 'text',
-      placeholder: 'Ex: Saiba Mais',
-      validation: { required: 'O texto do botão é obrigatório' },
-      colSpan: 6
-    },
-    {
-      name: 'actionUrl',
-      label: 'Link do Botão',
-      type: 'text',
-      placeholder: 'Ex: /servicos ou https://...',
-      validation: { required: 'O link é obrigatório' },
-      colSpan: 6
-    },
-    {
-      name: 'newImage',
-      label: isEditing ? 'Alterar Imagem (Deixe vazio para manter)' : 'Imagem do Banner',
-      type: 'file',
-      accept: 'image/png, image/jpeg, image/webp',
-      validation: { required: isEditing ? false : 'A imagem é obrigatória' },
-      colSpan: 12
-    }
-  ];
 
   // CORREÇÃO: Substituído 'any' por 'Partial<HeroFormValues>'
   const defaultValues: Partial<HeroFormValues> = initialData ? {
@@ -87,13 +44,57 @@ export const HeroForm: React.FC<HeroFormProps> = ({
         </div>
       )}
 
-      <GenericForm<HeroFormValues>
-        fields={fields}
+      <Form<HeroFormValues>
         onSubmit={onSubmit}
         defaultValues={defaultValues}
-        isLoading={isLoading}
-        submitText={isEditing ? "Salvar Alterações" : "Criar Slide"}
-      />
+      >
+        <Form.Input 
+          name="title" 
+          label="Título Principal" 
+          placeholder="Ex: Bem-vindo à Inovação" 
+          validation={{ required: 'O título é obrigatório' }} 
+          colSpan={6} 
+        />
+        
+        <Form.Input 
+          name="subtitle" 
+          label="Subtítulo" 
+          placeholder="Ex: Soluções completas para você" 
+          validation={{ required: 'O subtítulo é obrigatório' }} 
+          colSpan={6} 
+        />
+        
+        <Form.Input 
+          name="actionText" 
+          label="Texto do Botão (CTA)" 
+          placeholder="Ex: Saiba Mais" 
+          validation={{ required: 'O texto do botão é obrigatório' }} 
+          colSpan={6} 
+        />
+        
+        <Form.Input 
+          name="actionUrl" 
+          label="Link do Botão" 
+          placeholder="Ex: /servicos ou https://..." 
+          validation={{ required: 'O link é obrigatório' }} 
+          colSpan={6} 
+        />
+        
+        <Form.Input 
+          name="newImage" 
+          label={isEditing ? 'Alterar Imagem (Deixe vazio para manter)' : 'Imagem do Banner'} 
+          type="file" 
+          accept="image/png, image/jpeg, image/webp" 
+          validation={{ required: isEditing ? false : 'A imagem é obrigatória' }} 
+          colSpan={12} 
+        />
+
+        <Form.Actions>
+          <Form.Submit isLoading={isLoading}>
+            {isEditing ? "Salvar Alterações" : "Criar Slide"}
+          </Form.Submit>
+        </Form.Actions>
+      </Form>
     </div>
   );
 };

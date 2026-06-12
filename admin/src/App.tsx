@@ -1,5 +1,4 @@
 import { useEffect } from 'react';
-import { BrowserRouter } from 'react-router-dom';
 import { AppRoutes } from './routes/AppRoutes';
 import { useAuth } from './features/auth/hooks/useAuth';
 import { socketService } from './shared/services/socket.service';
@@ -23,11 +22,9 @@ function App() {
   }, [isAuthenticated]);
 
   return (
-    <BrowserRouter>
-      <div className="app-container">
-        <AppRoutes />
-      </div>
-    </BrowserRouter>
+    <div className="app-container">
+      <AppRoutes />
+    </div>
   );
 }
 

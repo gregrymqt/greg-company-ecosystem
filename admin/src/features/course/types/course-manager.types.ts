@@ -4,7 +4,6 @@ import { type Course, type Video } from '@/types/models';
 export type AdminTab = 'list' | 'form';
 
 // Interface específica para o Formulário (Omitindo ID pois é gerado no back ou na edição)
-// Extende Record<string, any> para satisfazer o GenericForm [cite: 12]
 export interface CourseFormData {
   name: string;
   description: string;

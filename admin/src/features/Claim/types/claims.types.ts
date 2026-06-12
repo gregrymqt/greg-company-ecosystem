@@ -39,10 +39,11 @@ export interface ChatMessage {
 
 // --- DTOs DE ENVIO (FORMULÁRIOS) ---
 
-// Interface para o GenericForm (Hook Form)
+// Interface para o Form (Hook Form)
 export interface ReplyFormData extends FieldValues {
   message: string;
-  attachments?: FileList; // GenericForm retorna FileList
+  attachments?: FileList; // Input type="file" retorna FileList
+
 }
 
 // Payload JSON esperado pelo Backend (Admin)
