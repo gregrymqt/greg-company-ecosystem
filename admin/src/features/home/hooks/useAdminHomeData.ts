@@ -4,8 +4,8 @@
  */
 
 import { useState, useCallback, useEffect } from 'react';
-import { publicHomeService } from '@/features/home/services/publicHome.service';
-import type { HeroSlideDto, ServiceDto } from '@/features/home/types/home.types';
+import { adminHomeService } from '../services/adminHome.service';
+import type { HeroSlideDto, ServiceDto } from '../types/home.types';
 import { ApiError } from '@/shared/services/api.service';
 
 export const useAdminHomeData = () => {
@@ -18,7 +18,7 @@ export const useAdminHomeData = () => {
     setIsLoading(true);
     setError(null);
     try {
-      const data = await publicHomeService.getHomeContent();
+      const data = await adminHomeService.getHomeContent();
       setHeroSlides(data.hero || []);
       setServices(data.services || []);
     } catch (err) {

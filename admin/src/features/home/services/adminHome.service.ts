@@ -19,6 +19,15 @@ export const adminHomeService = {
   // =================================================================
 
   /**
+   * Busca todo o conteúdo da Home (Slides e Serviços)
+   * GET: /api/Home
+   */
+  getHomeContent: async (): Promise<{ hero: HeroSlideDto[]; services: ServiceDto[] }> => {
+    // Usamos a rota pública ou a rota de listagem base para obter os dados
+    return await ApiService.get<{ hero: HeroSlideDto[]; services: ServiceDto[] }>(`${BASE_ENDPOINT}/public/data`);
+  },
+
+  /**
    * Cria novo Hero Slide com upload de imagem
    * POST: /api/Home/hero
    */

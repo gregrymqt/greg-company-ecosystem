@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { UserClaimService } from '../services/userClaim.service';
+
 import { AdminClaimService } from '../services/adminClaim.service';
 import type { ChatMessage } from '../types/claims.types';
 import type { ReplyFormData } from '../types/claim.dtos';
@@ -24,11 +24,7 @@ export const useClaimChatLogic = ({ claimId, role }: UseClaimChatProps) => {
       let data;
 
       // Decide qual service chamar baseado na role
-      if (role === "admin") {
-        data = await AdminClaimService.getDetails(claimId);
-      } else {
-        data = await UserClaimService.getMyDetails(claimId);
-      }
+      data = await AdminClaimService.getDetails(claimId);
 
       if (data && data.messages) {
         setMessages(data.messages);
@@ -50,9 +46,7 @@ export const useClaimChatLogic = ({ claimId, role }: UseClaimChatProps) => {
       const silentUpdate = async () => {
         try {
           const data =
-            role === "admin"
-              ? await AdminClaimService.getDetails(claimId)
-              : await UserClaimService.getMyDetails(claimId);
+            await AdminClaimService.getDetails(claimId);
           if (data?.messages) setMessages(data.messages);
         } catch (e) {
           console.error("Erro ao buscar mensagens", e);
@@ -71,11 +65,7 @@ export const useClaimChatLogic = ({ claimId, role }: UseClaimChatProps) => {
 
     setIsSending(true);
     try {
-      if (role === "admin") {
-        await AdminClaimService.reply(claimId, formData.message);
-      } else {
-        await UserClaimService.reply(claimId, formData.message);
-      }
+      await AdminClaimService.reply(claimId, formData.message);
 
       // Feedback visual e atualização
       AlertService.notify("Sucesso", "Mensagem enviada.", "success");
@@ -96,33 +86,10 @@ export const useClaimChatLogic = ({ claimId, role }: UseClaimChatProps) => {
   };
 
   // 4. Função Extra para User: Escalar Mediação
-  const handleRequestMediation = async () => {
-    if (role !== "user") return;
-
-    const { isConfirmed } = await AlertService.confirm(
-      "Tem certeza?",
-      "Isso envolverá o Mercado Pago para julgar o caso.",
-    );
-
-    if (isConfirmed) {
-      try {
-        await UserClaimService.requestMediation(claimId);
-        AlertService.success("Solicitada", "O Mercado Pago irá intervir.");
-        await fetchMessages(); // Atualiza status
-      } catch (error) {
-        if (error instanceof ApiError) {
-          AlertService.error("Erro", error.message);
-          return;
-        }
-        AlertService.error("Erro", "Falha ao solicitar mediação.");
-      }
-    }
-  };
-
   return {
     messages,
     handleSendResponse,
-    handleRequestMediation, // Exportado caso precise usar no botão
+    
     isLoading: isLoading && messages.length === 0, // Loading inicial
     isSending,
   };

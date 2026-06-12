@@ -1,9 +1,7 @@
 /**
- * Barrel exports para Video Feature (Admin)
- * Siga o padrão: import { useAdminVideos, VideoDto } from '@/features/video'
+ * Barrel exports para tipos compartilhados de Video
  */
 
-// Shared Types
 export type {
   VideoStatus,
   VideoDto,
@@ -13,12 +11,6 @@ export type {
   VideoFilters,
   VideoFormData,
   PlayerVideoDto
-} from './shared';
+} from './types/video.types.ts';
 
-export { getManifestUrl } from './shared';
-
-// Admin (Video Management)
-export {
-  adminVideoService,
-  useAdminVideos
-} from './Admin';
+export { getManifestUrl } from './types/video.types.ts';

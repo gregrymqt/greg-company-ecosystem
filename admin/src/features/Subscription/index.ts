@@ -1,7 +1,7 @@
 // Admin - Subscription Feature (Admin only)
-export { AdminSubscriptionList } from './Admin/components/AdminSubscriptionList';
-export { useAdminSubscription } from './Admin/hooks/useAdminSubscription';
-export { adminSubscriptionService } from './Admin/services/adminSubscription.service';
+export { AdminSubscriptionList } from './components/AdminSubscriptionList';
+export { useAdminSubscription } from './hooks/useAdminSubscription';
+export { adminSubscriptionService } from './services/adminSubscription.service';
 
 // Shared Types
-export * from './shared/types/subscriptions.types';
+export * from './types/subscriptions.types';
