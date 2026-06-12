@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { UserWalletService } from "../services/userWallet.service";
-import type { WalletCard } from "../../shared";
+import type { WalletCard } from "..";
 import { AlertService } from "@/shared/services/alert.service";
 import { ApiError } from "@/shared/services/api.service";
 

@@ -1,7 +1,9 @@
-// Portal - Transactions Feature (Public only)
-export * from './Public/components';
-export * from './Public/hooks';
-export * from './Public/services';
+// src/features/Transactions/Public/index.ts
+export * from './components';
+export * from './hooks';
+export * from './services';
 
-// Shared Types
-export * from './shared/types/transactions.types';
+// src/features/Transactions/shared/index.ts
+// Barrel Export: Single Source of Truth para Tipos de Transactions
+export * from './types/transactions.types';
+

@@ -4,7 +4,7 @@ import styles from '../styles/WalletList.module.scss';
 import { ActionMenu } from '@/components/ActionMenu/ActionMenu';
 import { type TableColumn, Table } from '@/components/Table/Table';
 import { useWallet } from '../hooks/useWallet';
-import type { WalletCard } from '../../shared';
+import type { WalletCard } from '..';
 
 export const WalletList: React.FC = () => {
   const { cards, loading, removeCard } = useWallet();

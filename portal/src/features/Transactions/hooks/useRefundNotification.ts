@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { AppHubsCSharp } from '@/shared/enums/hub/hub.enums';
 import { useSocketListener } from '@/shared/hooks/useSocket';
 import { AlertService } from '@/shared/services/alert.service';
-import type { RefundStatusData } from '../../shared';
+import type { RefundStatusData } from '..';
 
 export const useRefundNotification = (onSuccess?: () => void) => {
     const [refundStatus, setRefundStatus] = useState<'idle' | 'processing' | 'completed'>('idle');

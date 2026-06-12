@@ -1,5 +1,5 @@
 import  { ApiService } from "@/shared/services/api.service";
-import type { SubscriptionDetailsDto, SubscriptionResponseDto } from "../../shared/types/subscriptions.types";
+import type { SubscriptionDetailsDto, SubscriptionResponseDto } from "../types/subscriptions.types";
 
 export const userSubscriptionService = {
 

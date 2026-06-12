@@ -4,7 +4,7 @@ import styles from '../styles/PaymentHistory.module.scss';
 import { type TableColumn, Table } from '@/components/Table/Table';
 import { ActionMenu } from '@/components/ActionMenu/ActionMenu';
 import { usePaymentHistory, useRefund, useRefundNotification } from '../hooks';
-import type { PaymentItems } from '../../shared';
+import type { PaymentItems } from '..';
 
 export const PaymentHistory: React.FC = () => {
     const { payments, loading, error, refetch } = usePaymentHistory();

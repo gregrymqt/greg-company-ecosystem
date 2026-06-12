@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { userSubscriptionService } from '../services/userSubscription.service';
 import { AlertService } from '@/shared/services/alert.service';
 import { ApiError } from '@/shared/services/api.service';
-import type { SubscriptionDetailsDto } from '../../shared/types/subscriptions.types';
+import type { SubscriptionDetailsDto } from '../types/subscriptions.types';
 
 export const useUserSubscription = () => {
     const [subscription, setSubscription] = useState<SubscriptionDetailsDto | null>(null);
