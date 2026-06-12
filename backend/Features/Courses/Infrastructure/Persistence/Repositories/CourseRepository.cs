@@ -1,7 +1,7 @@
 using MeuCrudCsharp.Data;
+using MeuCrudCsharp.Features.Courses.Domain.Entities;
 using MeuCrudCsharp.Features.Courses.Domain.Interfaces;
 using MeuCrudCsharp.Models;
-using MeuCrudCsharp.Features.Courses.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace MeuCrudCsharp.Features.Courses.Infrastructure.Persistence.Repositories
@@ -37,9 +37,10 @@ namespace MeuCrudCsharp.Features.Courses.Infrastructure.Persistence.Repositories
 
         public async Task<bool> ExistsByNameAsync(string name)
         {
-            return await context.Courses.AnyAsync(c => 
-                EF.Functions.Collate(c.Name, "SQL_Latin1_General_CP1_CI_AS") == 
-                EF.Functions.Collate(name, "SQL_Latin1_General_CP1_CI_AS"));
+            return await context.Courses.AnyAsync(c =>
+                EF.Functions.Collate(c.Name, "SQL_Latin1_General_CP1_CI_AS")
+                == EF.Functions.Collate(name, "SQL_Latin1_General_CP1_CI_AS")
+            );
         }
 
         public async Task<(IEnumerable<Course> Items, int TotalCount)> GetPaginatedWithVideosAsync(

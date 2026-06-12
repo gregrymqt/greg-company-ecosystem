@@ -5,8 +5,8 @@ nodes:
 - role: control-plane
 - role: worker
   extraPortMappings:
-  - containerPort: 31433  # Porta customizada do Node (SQL Server)
-    hostPort: 1433        # Porta física do seu PC local
+  - containerPort: 31543  # Porta customizada do Node (PostgreSQL)
+    hostPort: 5432        # Porta física do seu PC local (Postgres)
     protocol: TCP
   - containerPort: 32379  # Porta customizada do Node (Redis)
     hostPort: 6379        # Porta física do seu PC local

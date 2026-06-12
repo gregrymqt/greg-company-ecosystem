@@ -34,7 +34,7 @@ namespace MeuCrudCsharp.Data
                 );
             }
 
-            optionsBuilder.UseSqlServer(connectionString);
+            optionsBuilder.UseNpgsql(connectionString);
 
             return new ApiDbContext(optionsBuilder.Options);
         }
