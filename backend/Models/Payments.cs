@@ -1,39 +1,33 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using System;
+using MeuCrudCsharp.Data.Configuration.Interfaces;
+using MeuCrudCsharp.Data.Configuration.Attributes;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace MeuCrudCsharp.Models
 {
          // A FK já é um Guid (string), então está ok.
-                public class Payments : TransactionBase
+    public class Payments : TransactionBase, IMongoDocument
     {
-        [Required]
-        [MaxLength(20)]
+        public static string CollectionName => "payments";
+
         public string? Method { get; set; }
 
-        [Required]
         public int Installments { get; set; }
 
         public DateTime? DateApproved { get; set; }
 
-        [Required]
         public string? LastFourDigits { get; set; }
 
-        [Required]
-        [MaxLength(15)]
+        [MongoIndex]
         public string? CustomerCpf { get; set; }
 
-        [Required]
-        [Column(TypeName = "decimal(10, 2)")]
         public decimal Amount { get; set; }
 
-        [Required]
         public string Description { get; set; } = null!;
 
-        [Required]
         public string SubscriptionId { get; set; } = null!;
 
-        [ForeignKey("SubscriptionId")]
+        [BsonIgnore]
         public virtual Subscription? Subscription { get; set; }
     }
 }

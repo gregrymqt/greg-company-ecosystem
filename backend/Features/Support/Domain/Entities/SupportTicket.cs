@@ -1,11 +1,15 @@
-﻿using MongoDB.Bson;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using System;
+using MeuCrudCsharp.Data.Configuration.Interfaces;
+using MeuCrudCsharp.Data.Configuration.Attributes;
 
 namespace MeuCrudCsharp.Features.Support.Domain.Entities
 {
-    public class SupportTicket
+    public class SupportTicket : IMongoDocument
     {
+        public static string CollectionName => "support_tickets";
+
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
         public string Id { get; set; } = null!;

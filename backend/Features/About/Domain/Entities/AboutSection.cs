@@ -1,10 +1,14 @@
-﻿using MongoDB.Bson;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
+using MeuCrudCsharp.Data.Configuration.Interfaces;
+using MeuCrudCsharp.Data.Configuration.Attributes;
 
 namespace MeuCrudCsharp.Features.About.Domain.Entities;
 
-public class AboutSection
+public class AboutSection : IMongoDocument
 {
+    public static string CollectionName => "about_sections";
+
     [BsonId]
     [BsonRepresentation(BsonType.ObjectId)]
     public string Id { get; set; } = null!;

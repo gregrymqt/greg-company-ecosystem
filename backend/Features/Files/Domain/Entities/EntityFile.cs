@@ -1,10 +1,14 @@
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
+using MeuCrudCsharp.Data.Configuration.Interfaces;
+using MeuCrudCsharp.Data.Configuration.Attributes;
 
 namespace MeuCrudCsharp.Features.Files.Domain.Entities;
 
-public class EntityFile
+public class EntityFile : IMongoDocument
 {
+    public static string CollectionName => "entity_files";
+
     [BsonId]
     [BsonRepresentation(BsonType.ObjectId)]
     public string Id { get; set; } = null!;

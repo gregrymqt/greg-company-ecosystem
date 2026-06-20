@@ -1,37 +1,33 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using MeuCrudCsharp.Data.Configuration.Interfaces;
+using MeuCrudCsharp.Data.Configuration.Attributes;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace MeuCrudCsharp.Models
 {
                          // <-- NOVO: Indexar a data de expiração é ótimo para performance
-    public class Subscription : TransactionBase
+    public class Subscription : TransactionBase, IMongoDocument
     {
+        public static string CollectionName => "subscriptions";
+
         // --- RELACIONAMENTO COM PLAN ---
-        [Required]
         public string PlanId { get; set; }
 
-        [ForeignKey("PlanId")]
+        [BsonIgnore]
         public virtual Plan? Plan { get; set; }
 
-        [NotMapped]
+        [BsonIgnore]
         public Guid PlanPublicId { get; set; }
 
-        [Required]
         public string? LastFourCardDigits { get; set; }
 
-        [Required]
         public string? PayerMpId { get; set; }
 
-        [Required]
         public int CurrentAmount { get; set; }
 
-        [Required]
         public DateTime CurrentPeriodStartDate { get; set; }
 
-        [Required]
         public DateTime CurrentPeriodEndDate { get; set; }
 
-        [Required]
         public string? PaymentMethodId { get; set; }
 
         public string? CardTokenId { get; set; }

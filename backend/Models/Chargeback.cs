@@ -1,7 +1,10 @@
-﻿using MongoDB.Bson;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
+using MeuCrudCsharp.Features.Auth.Domain.Entities;
+using MeuCrudCsharp.Data.Configuration.Interfaces;
+using MeuCrudCsharp.Data.Configuration.Attributes;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema; using MeuCrudCsharp.Features.Auth.Domain.Entities;
+using System;
 
 namespace MeuCrudCsharp.Models;
 
@@ -29,8 +32,10 @@ public enum ChargebackStatus
 /// <summary>
 /// Representa uma notificaÃ§Ã£o de chargeback recebida do Mercado Pago.
 /// </summary>
-public class Chargeback
+public class Chargeback : IMongoDocument
 {
+    public static string CollectionName => "chargebacks";
+
     [BsonId]
     [BsonRepresentation(BsonType.ObjectId)]
     public string Id { get; set; }
@@ -38,13 +43,11 @@ public class Chargeback
     /// <summary>
     /// ID do chargeback no Mercado Pago (vem de `data.id`).
     /// </summary>
-    [Required]
     public long ChargebackId { get; set; }
 
     /// <summary>
     /// ID do pagamento associado ao chargeback (vem de `data.payment_id`).
     /// </summary>
-    [Required]
     public long PaymentId { get; set; }
 
     /// <summary>
@@ -52,19 +55,17 @@ public class Chargeback
     /// </summary>
     public string? UserId { get; set; }
 
-    [ForeignKey("UserId")]
+    [BsonIgnore]
     public virtual Users? User { get; set; }
 
     /// <summary>
     /// Status interno para acompanhamento da equipe.
     /// </summary>
-    [Required]
     public ChargebackStatus Status { get; set; } = ChargebackStatus.Novo;
 
     /// <summary>
     /// Valor do chargeback. Este campo precisarÃ¡ ser preenchido consultando a API do MP.
     /// </summary>
-    [Column(TypeName = "decimal(10, 2)")]
     public decimal Amount { get; set; }
 
     /// <summary>
@@ -77,6 +78,3 @@ public class Chargeback
     /// </summary>
     public string? InternalNotes { get; set; }
 }
-
-
-
