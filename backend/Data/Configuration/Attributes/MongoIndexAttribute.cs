@@ -1,6 +1,6 @@
 using System;
 
-namespace MeuCrudCsharp.Documents.Attributes;
+namespace MeuCrudCsharp.Data.Configuration.Attributes;
 
 [AttributeUsage(AttributeTargets.Property, Inherited = false, AllowMultiple = false)]
 public sealed class MongoIndexAttribute : Attribute

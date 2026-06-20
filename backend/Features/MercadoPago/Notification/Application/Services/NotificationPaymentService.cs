@@ -11,7 +11,8 @@ using MeuCrudCsharp.Features.MercadoPago.Refunds.Application.Interfaces;
 using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Application.Interfaces;
 using MeuCrudCsharp.Features.Shared.Domain.Interfaces;
 using MeuCrudCsharp.Features.Shared.Infrastructure.Persistence;
-using MeuCrudCsharp.Models; using MeuCrudCsharp.Features.Auth.Domain.Entities;
+using MeuCrudCsharp.Models;
+using MeuCrudCsharp.Features.Auth.Domain.Entities;
 using Microsoft.Extensions.Options;
 
 namespace MeuCrudCsharp.Features.MercadoPago.Notification.Application.Services;
@@ -40,7 +41,7 @@ public class NotificationPaymentService(
         try
         {
             var localPayment = await paymentRepository.GetByIdWithUserAsync(internalPaymentId);
-            
+
             if (localPayment == null)
                 throw new ResourceNotFoundException(
                     $"Pagamento com ID {internalPaymentId} não foi encontrado."
@@ -70,7 +71,7 @@ public class NotificationPaymentService(
             }
 
             var externPayment = await mercadoPagoService.GetPaymentStatusAsync(localPayment.ExternalId);
-            
+
             if (externPayment == null)
             {
                 logger.LogWarning(
@@ -149,7 +150,7 @@ public class NotificationPaymentService(
             var metadata = JsonSerializer.Deserialize<PaymentMetadata>(
                 externPayment.ExternalReference
             );
-            
+
             if (metadata == null || metadata.PlanPublicId == Guid.Empty)
             {
                 throw new InvalidOperationException(

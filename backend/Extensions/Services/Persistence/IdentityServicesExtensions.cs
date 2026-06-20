@@ -1,6 +1,7 @@
 ﻿using MeuCrudCsharp.Features.Auth.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 using AspNetCore.Identity.Mongo;
+using MongoDB.Driver;
 
 namespace MeuCrudCsharp.Extensions.Services.Persistence;
 
@@ -11,7 +12,7 @@ public static class IdentityServicesExtensions
         var mongoConnString = builder.Configuration.GetConnectionString("MongoConnection");
         var dbName = builder.Configuration["MONGO_DATABASE_NAME"] ?? "GregCompanyMongo";
 
-        var mongoUrl = new MongoDB.Driver.MongoUrlBuilder(mongoConnString)
+        var mongoUrl = new MongoUrlBuilder(mongoConnString)
         {
             DatabaseName = dbName
         }.ToMongoUrl().ToString();
