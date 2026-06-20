@@ -1,10 +1,14 @@
 using MeuCrudCsharp.Features.Videos.Domain.Entities;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace MeuCrudCsharp.Features.Courses.Domain.Entities;
 
 public class Course
 {
-    public int Id { get; set; }
+    [BsonId]
+    [BsonRepresentation(BsonType.ObjectId)]
+    public string Id { get; set; } = null!;
 
     public Guid PublicId { get; set; } = Guid.NewGuid();
 

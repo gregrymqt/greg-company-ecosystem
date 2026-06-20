@@ -8,10 +8,10 @@ public interface IAboutService
     Task<AboutPageContentDto> GetAboutPageContentAsync();
 
     Task<AboutSectionDto?> CreateSectionAsync(CreateUpdateAboutSectionDto dto);
-    Task<bool> UpdateSectionAsync(int id, CreateUpdateAboutSectionDto dto);
-    Task DeleteSectionAsync(int id);
+    Task<bool> UpdateSectionAsync(string id, CreateUpdateAboutSectionDto dto);
+    Task DeleteSectionAsync(string id);
 
     Task<TeamMemberDto?> CreateTeamMemberAsync(CreateUpdateTeamMemberDto dto);
-    Task<bool> UpdateTeamMemberAsync(int id, CreateUpdateTeamMemberDto dto);
-    Task DeleteTeamMemberAsync(int id);
+    Task<bool> UpdateTeamMemberAsync(string id, CreateUpdateTeamMemberDto dto);
+    Task DeleteTeamMemberAsync(string id);
 }

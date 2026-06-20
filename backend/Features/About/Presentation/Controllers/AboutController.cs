@@ -61,7 +61,7 @@ public class AboutController : ApiControllerBase
     [HttpPut("sections/{id}")]
     [AllowLargeFile(2048)]
     public async Task<IActionResult> UpdateSection(
-        int id,
+        string id,
         [FromForm] CreateUpdateAboutSectionDto dto
     )
     {
@@ -83,7 +83,7 @@ public class AboutController : ApiControllerBase
     }
 
     [HttpDelete("sections/{id}")]
-    public async Task<IActionResult> DeleteSection(int id)
+    public async Task<IActionResult> DeleteSection(string id)
     {
         try
         {
@@ -123,7 +123,7 @@ public class AboutController : ApiControllerBase
     [HttpPut("team/{id}")]
     [AllowLargeFile(2048)]
     public async Task<IActionResult> UpdateTeamMember(
-        int id,
+        string id,
         [FromForm] CreateUpdateTeamMemberDto dto
     )
     {
@@ -144,7 +144,7 @@ public class AboutController : ApiControllerBase
     }
 
     [HttpDelete("team/{id}")]
-    public async Task<IActionResult> DeleteTeamMember(int id)
+    public async Task<IActionResult> DeleteTeamMember(string id)
     {
         try
         {
@@ -157,3 +157,4 @@ public class AboutController : ApiControllerBase
         }
     }
 }
+

@@ -1,29 +1,30 @@
 using MeuCrudCsharp.Data;
 using MeuCrudCsharp.Features.Auth.Domain.Interfaces;
 using MeuCrudCsharp.Features.Auth.Application.Interfaces;
-using Microsoft.EntityFrameworkCore;
+using MeuCrudCsharp.Features.Auth.Domain.Entities;
+using Microsoft.AspNetCore.Identity;
 
 namespace MeuCrudCsharp.Features.Auth.Infrastructure.Persistence.Repositories
 {
     public class UserRoleRepository : IUserRoleRepository
     {
-        // Use o tipo concreto do seu contexto para acessar as tabelas do Identity
-        private readonly ApiDbContext _context;
+        private readonly UserManager<Users> _userManager;
 
-        public UserRoleRepository(ApiDbContext context)
+        public UserRoleRepository(UserManager<Users> userManager)
         {
-            _context = context;
+            _userManager = userManager;
         }
 
         public async Task<List<string>> GetRolesByUserIdAsync(string userId)
         {
-            var query =
-                from userRole in _context.UserRoles
-                join role in _context.Roles on userRole.RoleId equals role.Id
-                where userRole.UserId == userId
-                select role.Name;
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return new List<string>();
+            }
 
-            return await query.AsNoTracking().ToListAsync();
+            var roles = await _userManager.GetRolesAsync(user);
+            return roles.ToList();
         }
     }
 }

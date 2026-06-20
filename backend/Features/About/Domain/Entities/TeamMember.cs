@@ -1,8 +1,13 @@
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
+
 namespace MeuCrudCsharp.Features.About.Domain.Entities;
 
 public class TeamMember
 {
-    public int Id { get; set; }
+    [BsonId]
+    [BsonRepresentation(BsonType.ObjectId)]
+    public string Id { get; set; } = null!;
 
     public string Name { get; set; } = string.Empty; // Ref: TeamMemberDto [cite: 30]
 
@@ -16,3 +21,4 @@ public class TeamMember
 
     public string? GithubUrl { get; set; } // Nullable [cite: 34]
 }
+

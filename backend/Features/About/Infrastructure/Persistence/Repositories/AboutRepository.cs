@@ -2,70 +2,70 @@ using System;
 using MeuCrudCsharp.Data;
 using MeuCrudCsharp.Features.About.Domain.Entities;
 using MeuCrudCsharp.Features.About.Domain.Interfaces;
-using Microsoft.EntityFrameworkCore;
+using MongoDB.Driver;
+using MongoDB.Driver.Linq;
 
 namespace MeuCrudCsharp.Features.About.Infrastructure.Persistence.Repositories;
 
 public class AboutRepository : IAboutRepository
 {
-    private readonly ApiDbContext _context;
+    private readonly IMongoCollection<AboutSection> _aboutSections;
+    private readonly IMongoCollection<TeamMember> _teamMembers;
 
-    public AboutRepository(ApiDbContext context)
+    public AboutRepository(IMongoDbContext context)
     {
-        _context = context;
+        _aboutSections = context.GetCollection<AboutSection>("about_sections");
+        _teamMembers = context.GetCollection<TeamMember>("team_members");
     }
 
     public async Task<List<AboutSection>> GetAllSectionsAsync()
     {
-        return await _context.AboutSections.OrderBy(s => s.OrderIndex).AsNoTracking().ToListAsync();
+        return await _aboutSections.Find(FilterDefinition<AboutSection>.Empty).SortBy(s => s.OrderIndex).ToListAsync();
     }
 
-    public async Task<AboutSection?> GetSectionByIdAsync(int id)
+    public async Task<AboutSection?> GetSectionByIdAsync(string id)
     {
-        return await _context.AboutSections.FindAsync(id);
+        return await _aboutSections.Find(s => s.Id == id).FirstOrDefaultAsync();
     }
 
     public async Task AddSectionAsync(AboutSection section)
     {
-        await _context.AboutSections.AddAsync(section);
+        await _aboutSections.InsertOneAsync(section);
     }
 
-    public Task UpdateSectionAsync(AboutSection section)
+    public async Task UpdateSectionAsync(AboutSection section)
     {
-        _context.AboutSections.Update(section);
-        return Task.CompletedTask;
+        await _aboutSections.ReplaceOneAsync(s => s.Id == section.Id, section);
     }
 
-    public Task DeleteSectionAsync(AboutSection section)
+    public async Task DeleteSectionAsync(AboutSection section)
     {
-        _context.AboutSections.Remove(section);
-        return Task.CompletedTask;
+        await _aboutSections.DeleteOneAsync(s => s.Id == section.Id);
     }
 
     public async Task<List<TeamMember>> GetAllTeamMembersAsync()
     {
-        return await _context.TeamMembers.AsNoTracking().ToListAsync();
+        return await _teamMembers.Find(FilterDefinition<TeamMember>.Empty).ToListAsync();
     }
 
-    public async Task<TeamMember?> GetTeamMemberByIdAsync(int id)
+    public async Task<TeamMember?> GetTeamMemberByIdAsync(string id)
     {
-        return await _context.TeamMembers.FindAsync(id);
+        return await _teamMembers.Find(m => m.Id == id).FirstOrDefaultAsync();
     }
 
     public async Task AddTeamMemberAsync(TeamMember member)
     {
-        await _context.TeamMembers.AddAsync(member);
+        await _teamMembers.InsertOneAsync(member);
     }
 
-    public Task UpdateTeamMemberAsync(TeamMember member)
+    public async Task UpdateTeamMemberAsync(TeamMember member)
     {
-        _context.TeamMembers.Update(member);
-        return Task.CompletedTask;
+        await _teamMembers.ReplaceOneAsync(m => m.Id == member.Id, member);
     }
 
-    public Task DeleteTeamMemberAsync(TeamMember member)
+    public async Task DeleteTeamMemberAsync(TeamMember member)
     {
-        _context.TeamMembers.Remove(member);
-        return Task.CompletedTask;
+        await _teamMembers.DeleteOneAsync(m => m.Id == member.Id);
     }
 }
+

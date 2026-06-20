@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace MeuCrudCsharp.Features.Authorization;
 
-public class ActiveSubscriptionHandler(IDbContextFactory<ApiDbContext> dbContextFactory)
+public class ActiveSubscriptionHandler(IDbContextFactory<MongoDbContext> dbContextFactory)
     : AuthorizationHandler<ActiveSubscriptionRequirement>
 {
     protected override async Task HandleRequirementAsync(

@@ -142,7 +142,7 @@ public class AboutService : IAboutService
         };
     }
 
-    public async Task<bool> UpdateSectionAsync(int id, CreateUpdateAboutSectionDto dto)
+    public async Task<bool> UpdateSectionAsync(string id, CreateUpdateAboutSectionDto dto)
     {
         var entity =
             await _repository.GetSectionByIdAsync(id)
@@ -211,7 +211,7 @@ public class AboutService : IAboutService
         return true;
     }
 
-    public async Task DeleteSectionAsync(int id)
+    public async Task DeleteSectionAsync(string id)
     {
         var entity =
             await _repository.GetSectionByIdAsync(id)
@@ -286,7 +286,7 @@ public class AboutService : IAboutService
         };
     }
 
-    public async Task<bool> UpdateTeamMemberAsync(int id, CreateUpdateTeamMemberDto dto)
+    public async Task<bool> UpdateTeamMemberAsync(string id, CreateUpdateTeamMemberDto dto)
     {
         var entity =
             await _repository.GetTeamMemberByIdAsync(id)
@@ -323,7 +323,7 @@ public class AboutService : IAboutService
         return true;
     }
 
-    public async Task DeleteTeamMemberAsync(int id)
+    public async Task DeleteTeamMemberAsync(string id)
     {
         var entity =
             await _repository.GetTeamMemberByIdAsync(id)
@@ -339,3 +339,4 @@ public class AboutService : IAboutService
         await _cache.RemoveAsync(ABOUT_CACHE_KEY);
     }
 }
+

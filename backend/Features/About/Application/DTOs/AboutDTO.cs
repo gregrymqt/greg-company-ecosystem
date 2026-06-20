@@ -22,7 +22,7 @@ public enum AboutContentTypeDto
 public class AboutSectionDto
 {
     [JsonPropertyName("id")]
-    public int Id { get; set; }
+    public string id { get; set; }
 
     // Converte o Enum para string (ex: "section1") na serialização se necessário,
     // ou você pode enviar como string direto.
@@ -49,7 +49,7 @@ public class AboutSectionDto
 public class AboutTeamSectionDto
 {
     [JsonPropertyName("id")]
-    public int Id { get; set; }
+    public string id { get; set; }
 
     [JsonPropertyName("contentType")]
     public string ContentType { get; set; } = "section2";
@@ -71,7 +71,7 @@ public class AboutTeamSectionDto
 public class TeamMemberDto
 {
     [JsonPropertyName("id")]
-    public int Id { get; set; }
+    public string id { get; set; }
 
     [JsonPropertyName("name")]
     public string Name { get; set; } = string.Empty;
@@ -123,3 +123,4 @@ public class AboutPageContentDto
     public List<AboutSectionDto> Sections { get; set; } = new();
     public AboutTeamSectionDto TeamSection { get; set; } = new();
 }
+

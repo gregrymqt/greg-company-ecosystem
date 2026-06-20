@@ -1,46 +1,44 @@
 using MeuCrudCsharp.Data;
 using MeuCrudCsharp.Features.Courses.Domain.Entities;
 using MeuCrudCsharp.Features.Courses.Domain.Interfaces;
-using MeuCrudCsharp.Models;
-using Microsoft.EntityFrameworkCore;
+using MongoDB.Driver;
+using MongoDB.Driver.Linq;
 
 namespace MeuCrudCsharp.Features.Courses.Infrastructure.Persistence.Repositories
 {
-    public class CourseRepository(ApiDbContext context) : ICourseRepository
+    public class CourseRepository : ICourseRepository
     {
+        private readonly IMongoCollection<Course> _courses;
+
+        public CourseRepository(IMongoDbContext context)
+        {
+            _courses = context.GetCollection<Course>("courses");
+        }
+
         public async Task<Course?> GetByPublicIdAsync(Guid publicId)
         {
-            return await context.Courses.FirstOrDefaultAsync(c => c.PublicId == publicId);
+            return await _courses.Find(c => c.PublicId == publicId).FirstOrDefaultAsync();
         }
 
         public async Task<Course?> GetByPublicIdWithVideosAsync(Guid publicId)
         {
-            return await context
-                .Courses.Include(c => c.Videos)
-                .FirstOrDefaultAsync(c => c.PublicId == publicId);
+            return await GetByPublicIdAsync(publicId);
         }
 
         public async Task<Course?> GetByNameAsync(string name)
         {
-            return await context.Courses.FirstOrDefaultAsync(c =>
-                c.Name.Equals(name, StringComparison.OrdinalIgnoreCase)
-            );
+            return await _courses.Find(c => c.Name.ToLower() == name.ToLower()).FirstOrDefaultAsync();
         }
 
         public async Task<IEnumerable<Course>> SearchByNameAsync(string name)
         {
-            return await context
-                .Courses.AsNoTracking()
-                .Where(c => c.Name.Contains(name, StringComparison.OrdinalIgnoreCase))
-                .ToListAsync();
+            return await _courses.Find(c => c.Name.ToLower().Contains(name.ToLower())).ToListAsync();
         }
 
         public async Task<bool> ExistsByNameAsync(string name)
         {
-            return await context.Courses.AnyAsync(c =>
-                EF.Functions.Collate(c.Name, "SQL_Latin1_General_CP1_CI_AS")
-                == EF.Functions.Collate(name, "SQL_Latin1_General_CP1_CI_AS")
-            );
+            var count = await _courses.CountDocumentsAsync(c => c.Name.ToLower() == name.ToLower());
+            return count > 0;
         }
 
         public async Task<(IEnumerable<Course> Items, int TotalCount)> GetPaginatedWithVideosAsync(
@@ -48,14 +46,12 @@ namespace MeuCrudCsharp.Features.Courses.Infrastructure.Persistence.Repositories
             int pageSize
         )
         {
-            var totalCount = await context.Courses.CountAsync();
+            var totalCount = (int)await _courses.CountDocumentsAsync(FilterDefinition<Course>.Empty);
 
-            var items = await context
-                .Courses.AsNoTracking()
-                .Include(c => c.Videos)
-                .OrderBy(c => c.Name)
+            var items = await _courses.Find(FilterDefinition<Course>.Empty)
+                .SortBy(c => c.Name)
                 .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
+                .Limit(pageSize)
                 .ToListAsync();
 
             return (items, totalCount);
@@ -63,17 +59,17 @@ namespace MeuCrudCsharp.Features.Courses.Infrastructure.Persistence.Repositories
 
         public async Task AddAsync(Course course)
         {
-            await context.Courses.AddAsync(course);
+            await _courses.InsertOneAsync(course);
         }
 
         public void Update(Course course)
         {
-            context.Courses.Update(course);
+            _courses.ReplaceOne(x => x.PublicId == course.PublicId, course);
         }
 
         public void Delete(Course course)
         {
-            context.Courses.Remove(course);
+            _courses.DeleteOne(x => x.PublicId == course.PublicId);
         }
     }
 }
