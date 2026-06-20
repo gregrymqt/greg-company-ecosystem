@@ -1,16 +1,18 @@
-using MeuCrudCsharp.Features.Support.Domain.Interfaces;
-using MeuCrudCsharp.Documents.Models;
+﻿using MeuCrudCsharp.Features.Support.Domain.Entities;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace MeuCrudCsharp.Features.Support.Domain.Interfaces
 {
     public interface ISupportRepository
     {
-        Task CreateAsync(SupportTicketDocument ticket);
-        Task<(IEnumerable<SupportTicketDocument> Data, long Total)> GetAllPaginatedAsync(
-            int page,
-            int pageSize
-        );
-        Task<SupportTicketDocument?> GetByIdAsync(string id);
-        Task UpdateStatusAsync(string id, string newStatus);
+        Task<SupportTicket?> GetByIdAsync(string id);
+        Task<IEnumerable<SupportTicket>> GetAllAsync();
+        Task<(IEnumerable<SupportTicket> Items, int TotalCount)> GetAllPaginatedAsync(int page, int pageSize);
+        Task CreateAsync(SupportTicket ticket);
+        Task UpdateAsync(string id, SupportTicket ticket);
+        Task DeleteAsync(string id);
+        Task<IEnumerable<SupportTicket>> GetByUserIdAsync(string userId);
     }
 }
+

@@ -1,6 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema; using MeuCrudCsharp.Features.Auth.Domain.Entities;
-using Microsoft.EntityFrameworkCore;
 
 namespace MeuCrudCsharp.Models;
 
@@ -28,13 +29,11 @@ public enum ChargebackStatus
 /// <summary>
 /// Representa uma notificaÃ§Ã£o de chargeback recebida do Mercado Pago.
 /// </summary>
-[Index(nameof(ChargebackId), IsUnique = true)]
-[Index(nameof(PaymentId))]
-[Index(nameof(UserId))]
 public class Chargeback
 {
-    [Key]
-    public int Id { get; set; }
+    [BsonId]
+    [BsonRepresentation(BsonType.ObjectId)]
+    public string Id { get; set; }
 
     /// <summary>
     /// ID do chargeback no Mercado Pago (vem de `data.id`).
@@ -78,3 +77,6 @@ public class Chargeback
     /// </summary>
     public string? InternalNotes { get; set; }
 }
+
+
+

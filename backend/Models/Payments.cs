@@ -1,16 +1,11 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.EntityFrameworkCore;
 
 namespace MeuCrudCsharp.Models
 {
-    [Index(nameof(UserId))]
-    [Index(nameof(SubscriptionId))] // A FK já é um Guid (string), então está ok.
-    [Index(nameof(ExternalId), IsUnique = true)]
-    [Index(nameof(Status))]
-    [Index(nameof(PayerEmail))]
-    public class Payments : TransactionBase
+         // A FK já é um Guid (string), então está ok.
+                public class Payments : TransactionBase
     {
         [Required]
         [MaxLength(20)]
@@ -42,3 +37,4 @@ namespace MeuCrudCsharp.Models
         public virtual Subscription? Subscription { get; set; }
     }
 }
+

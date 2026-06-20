@@ -1,16 +1,32 @@
-using MeuCrudCsharp.Data;
+﻿using MeuCrudCsharp.Data;
 using MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Interfaces;
 using MeuCrudCsharp.Models;
 using MeuCrudCsharp.Models.Enums;
-using Microsoft.EntityFrameworkCore;
+using MeuCrudCsharp.Features.Auth.Domain.Entities;
+using MongoDB.Driver;
+using MongoDB.Driver.Linq;
 
 namespace MeuCrudCsharp.Features.MercadoPago.Claims.Infrastructure.Persistence.Repositories;
 
-public class ClaimRepository(ApiDbContext context) : IClaimRepository
+public class ClaimRepository : IClaimRepository
 {
-    public async Task<Models.Claims?> GetByIdAsync(long id)
+    private readonly IMongoCollection<Models.Claims> _claims;
+    private readonly IMongoCollection<Users> _users;
+
+    public ClaimRepository(IMongoDbContext context)
     {
-        return await context.Claims.Include(c => c.User).FirstOrDefaultAsync(c => c.Id == id);
+        _claims = context.GetCollection<Models.Claims>("claims");
+        _users = context.GetCollection<Users>("users");
+    }
+
+    public async Task<Models.Claims?> GetByIdAsync(string id)
+    {
+        var claim = await _claims.Find(c => c.Id == id).FirstOrDefaultAsync();
+        if (claim != null && !string.IsNullOrEmpty(claim.UserId))
+        {
+            claim.User = await _users.Find(u => u.Id == claim.UserId).FirstOrDefaultAsync();
+        }
+        return claim;
     }
 
     public async Task<(List<Models.Claims> Claims, int TotalCount)> GetPaginatedClaimsAsync(
@@ -20,28 +36,48 @@ public class ClaimRepository(ApiDbContext context) : IClaimRepository
         int pageSize
     )
     {
-        var query = context.Claims.Include(c => c.User).AsQueryable();
+        var builder = Builders<Models.Claims>.Filter;
+        var filter = builder.Empty;
 
         if (!string.IsNullOrEmpty(searchTerm))
         {
-            query = query.Where(c =>
-                c.MpClaimId.ToString().Contains(searchTerm) ||
-                (c.User != null && !string.IsNullOrEmpty(c.User.Name) && c.User.Name.Contains(searchTerm))
-            );
+            if (long.TryParse(searchTerm, out var idSearch))
+            {
+                filter &= builder.Eq(c => c.MpClaimId, idSearch);
+            }
+            else
+            {
+                var userFilter = Builders<Users>.Filter.Regex(u => u.Name, new MongoDB.Bson.BsonRegularExpression(searchTerm, "i"));
+                var userIds = await _users.Find(userFilter).Project(u => u.Id).ToListAsync();
+                filter &= builder.In(c => c.UserId, userIds);
+            }
         }
 
-        if (!string.IsNullOrEmpty(statusFilter))
+        if (!string.IsNullOrEmpty(statusFilter) && Enum.TryParse<InternalClaimStatus>(statusFilter, true, out var statusEnum))
         {
-            query = query.Where(c => c.Status.ToString() == statusFilter);
+            filter &= builder.Eq(c => c.Status, statusEnum);
         }
 
-        var totalCount = await query.CountAsync();
+        var totalCount = (int)await _claims.CountDocumentsAsync(filter);
 
-        var claims = await query
-            .OrderByDescending(c => c.DataCreated)
+        var claims = await _claims.Find(filter)
+            .SortByDescending(c => c.DataCreated)
             .Skip((page - 1) * pageSize)
-            .Take(pageSize)
+            .Limit(pageSize)
             .ToListAsync();
+
+        var claimUserIds = claims.Where(c => !string.IsNullOrEmpty(c.UserId)).Select(c => c.UserId).Distinct().ToList();
+        if (claimUserIds.Any())
+        {
+            var users = await _users.Find(u => claimUserIds.Contains(u.Id)).ToListAsync();
+            foreach (var c in claims)
+            {
+                if (!string.IsNullOrEmpty(c.UserId))
+                {
+                    c.User = users.FirstOrDefault(u => u.Id == c.UserId);
+                }
+            }
+        }
 
         return (claims, totalCount);
     }
@@ -49,35 +85,33 @@ public class ClaimRepository(ApiDbContext context) : IClaimRepository
     public void UpdateClaimStatus(Models.Claims claim, InternalClaimStatus newStatus)
     {
         claim.Status = newStatus;
-        context.Claims.Update(claim);
+        _claims.ReplaceOne(c => c.Id == claim.Id, claim);
     }
 
     public void Update(Models.Claims claim)
     {
-        context.Claims.Update(claim);
+        _claims.ReplaceOne(c => c.Id == claim.Id, claim);
     }
 
     public async Task AddAsync(Models.Claims claim)
     {
-        await context.Claims.AddAsync(claim);
+        await _claims.InsertOneAsync(claim);
     }
 
     public async Task<bool> ExistsByMpClaimIdAsync(long mpClaimId)
     {
-        return await context.Claims.AsNoTracking().AnyAsync(c => c.MpClaimId == mpClaimId);
+        return await _claims.Find(c => c.MpClaimId == mpClaimId).AnyAsync();
     }
 
     public async Task<Models.Claims?> GetByMpClaimIdAsync(long mpClaimId)
     {
-        return await context.Claims.FirstOrDefaultAsync(c => c.MpClaimId == mpClaimId);
+        return await _claims.Find(c => c.MpClaimId == mpClaimId).FirstOrDefaultAsync();
     }
 
     public async Task<List<Models.Claims>> GetClaimsByUserIdAsync(string userId)
     {
-        return await context
-            .Claims.AsNoTracking()
-            .Where(c => c.UserId == userId)
-            .OrderByDescending(c => c.DataCreated)
+        return await _claims.Find(c => c.UserId == userId)
+            .SortByDescending(c => c.DataCreated)
             .ToListAsync();
     }
 }

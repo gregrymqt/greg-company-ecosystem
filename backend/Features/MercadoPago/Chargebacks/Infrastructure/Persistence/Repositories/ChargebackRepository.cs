@@ -1,12 +1,23 @@
-using MeuCrudCsharp.Data;
+﻿using MeuCrudCsharp.Data;
 using MeuCrudCsharp.Features.MercadoPago.Chargebacks.Domain.Interfaces;
 using MeuCrudCsharp.Models;
-using Microsoft.EntityFrameworkCore;
+using MeuCrudCsharp.Features.Auth.Domain.Entities;
+using MongoDB.Driver;
+using MongoDB.Driver.Linq;
 
 namespace MeuCrudCsharp.Features.MercadoPago.Chargebacks.Infrastructure.Persistence.Repositories;
 
-public class ChargebackRepository(ApiDbContext context) : IChargebackRepository
+public class ChargebackRepository : IChargebackRepository
 {
+    private readonly IMongoCollection<Chargeback> _chargebacks;
+    private readonly IMongoCollection<Users> _users;
+
+    public ChargebackRepository(IMongoDbContext context)
+    {
+        _chargebacks = context.GetCollection<Chargeback>("chargebacks");
+        _users = context.GetCollection<Users>("users");
+    }
+
     public async Task<(List<Chargeback> Chargebacks, int TotalCount)> GetPaginatedChargebacksAsync(
         string? searchTerm,
         string? statusFilter,
@@ -14,20 +25,21 @@ public class ChargebackRepository(ApiDbContext context) : IChargebackRepository
         int pageSize
     )
     {
-        var query = context.Chargebacks.Include(c => c.User).AsQueryable();
+        var builder = Builders<Chargeback>.Filter;
+        var filter = builder.Empty;
 
         if (!string.IsNullOrEmpty(searchTerm))
         {
             if (long.TryParse(searchTerm, out var idSearch))
             {
-                query = query.Where(c =>
-                    c.ChargebackId == idSearch || 
-                    (c.User != null && c.User.Name.Contains(searchTerm))
-                );
+                filter &= builder.Eq(c => c.ChargebackId, idSearch);
             }
             else
             {
-                query = query.Where(c => c.User != null && c.User.Name.Contains(searchTerm));
+                // This would be expensive, let's just do a manual lookup for user IDs that match
+                var userFilter = Builders<Users>.Filter.Regex(u => u.Name, new MongoDB.Bson.BsonRegularExpression(searchTerm, "i"));
+                var userIds = await _users.Find(userFilter).Project(u => u.Id).ToListAsync();
+                filter &= builder.In(c => c.UserId, userIds);
             }
         }
 
@@ -36,41 +48,50 @@ public class ChargebackRepository(ApiDbContext context) : IChargebackRepository
             && Enum.TryParse<ChargebackStatus>(statusFilter, true, out var statusEnum)
         )
         {
-            query = query.Where(c => c.Status == statusEnum);
+            filter &= builder.Eq(c => c.Status, statusEnum);
         }
 
-        // Contagem antes da paginação
-        var totalCount = await query.CountAsync();
+        var totalCount = (int)await _chargebacks.CountDocumentsAsync(filter);
 
-        // Paginação
-        var chargebacks = await query
-            .OrderByDescending(c => c.CreatedAt)
+        var chargebacks = await _chargebacks.Find(filter)
+            .SortByDescending(c => c.CreatedAt)
             .Skip((page - 1) * pageSize)
-            .Take(pageSize)
+            .Limit(pageSize)
             .ToListAsync();
+
+        var chargebackUserIds = chargebacks.Where(c => !string.IsNullOrEmpty(c.UserId)).Select(c => c.UserId).Distinct().ToList();
+        if (chargebackUserIds.Any())
+        {
+            var users = await _users.Find(u => chargebackUserIds.Contains(u.Id)).ToListAsync();
+            foreach (var c in chargebacks)
+            {
+                if (!string.IsNullOrEmpty(c.UserId))
+                {
+                    c.User = users.FirstOrDefault(u => u.Id == c.UserId);
+                }
+            }
+        }
 
         return (chargebacks, totalCount);
     }
 
     public async Task<bool> ExistsByExternalIdAsync(long chargebackId)
     {
-        return await context
-            .Chargebacks.AsNoTracking()
-            .AnyAsync(c => c.ChargebackId == chargebackId);
+        return await _chargebacks.Find(c => c.ChargebackId == chargebackId).AnyAsync();
     }
 
     public async Task<Chargeback?> GetByExternalIdAsync(long chargebackId)
     {
-        return await context.Chargebacks.FirstOrDefaultAsync(c => c.ChargebackId == chargebackId);
+        return await _chargebacks.Find(c => c.ChargebackId == chargebackId).FirstOrDefaultAsync();
     }
 
     public async Task AddAsync(Chargeback chargeback)
     {
-        await context.Chargebacks.AddAsync(chargeback);
+        await _chargebacks.InsertOneAsync(chargeback);
     }
 
     public void Update(Chargeback chargeback)
     {
-        context.Chargebacks.Update(chargeback);
+        _chargebacks.ReplaceOne(c => c.Id == chargeback.Id, chargeback);
     }
 }

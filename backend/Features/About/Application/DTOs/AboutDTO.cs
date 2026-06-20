@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 using MeuCrudCsharp.Features.Files.Application.DTOs;
@@ -6,7 +6,7 @@ using MeuCrudCsharp.Features.Files.Application.DTOs;
 namespace MeuCrudCsharp.Features.About.Application.DTOs;
 
 /// <summary>
-/// Enum para controlar o tipo de conteúdo no C#.
+/// Enum para controlar o tipo de conteÃºdo no C#.
 /// Ref: types/AboutTypes.ts [AboutContentType]
 /// </summary>
 public enum AboutContentTypeDto
@@ -16,16 +16,16 @@ public enum AboutContentTypeDto
 }
 
 /// <summary>
-/// DTO para a Seção Genérica (Texto + Imagem)
+/// DTO para a SeÃ§Ã£o GenÃ©rica (Texto + Imagem)
 /// Ref: types/AboutTypes.ts [AboutSectionData]
 /// </summary>
 public class AboutSectionDto
 {
     [JsonPropertyName("id")]
-    public string id { get; set; }
+    public string Id { get; set; }
 
-    // Converte o Enum para string (ex: "section1") na serialização se necessário,
-    // ou você pode enviar como string direto.
+    // Converte o Enum para string (ex: "section1") na serializaÃ§Ã£o se necessÃ¡rio,
+    // ou vocÃª pode enviar como string direto.
     [JsonPropertyName("contentType")]
     public string ContentType { get; set; } = "section1";
 
@@ -43,13 +43,13 @@ public class AboutSectionDto
 }
 
 /// <summary>
-/// DTO para a Seção de Equipe
+/// DTO para a SeÃ§Ã£o de Equipe
 /// Ref: types/AboutTypes.ts [AboutTeamData]
 /// </summary>
 public class AboutTeamSectionDto
 {
     [JsonPropertyName("id")]
-    public string id { get; set; }
+    public string Id { get; set; }
 
     [JsonPropertyName("contentType")]
     public string ContentType { get; set; } = "section2";
@@ -71,7 +71,7 @@ public class AboutTeamSectionDto
 public class TeamMemberDto
 {
     [JsonPropertyName("id")]
-    public string id { get; set; }
+    public string Id { get; set; }
 
     [JsonPropertyName("name")]
     public string Name { get; set; } = string.Empty;
@@ -123,4 +123,6 @@ public class AboutPageContentDto
     public List<AboutSectionDto> Sections { get; set; } = new();
     public AboutTeamSectionDto TeamSection { get; set; } = new();
 }
+
+
 

@@ -1,11 +1,11 @@
-using MeuCrudCsharp.Documents.Models;
+﻿using MeuCrudCsharp.Features.Support.Domain.Entities;
 using MeuCrudCsharp.Features.Support.Application.DTOs;
 
 namespace MeuCrudCsharp.Features.Support.Application.Utils
 {
     public static class SupportMapper
     {
-        public static SupportTicketResponseDto? ToDto(SupportTicketDocument? document)
+        public static SupportTicketResponseDto? ToDto(SupportTicket? document)
         {
             if (document == null)
                 return null;
@@ -22,7 +22,7 @@ namespace MeuCrudCsharp.Features.Support.Application.Utils
         }
 
         public static List<SupportTicketResponseDto> ToDtoList(
-            IEnumerable<SupportTicketDocument> documents
+            IEnumerable<SupportTicket> documents
         )
         {
             if (documents == null)

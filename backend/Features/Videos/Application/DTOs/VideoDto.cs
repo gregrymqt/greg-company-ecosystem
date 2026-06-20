@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.ComponentModel.DataAnnotations;
 using MeuCrudCsharp.Features.Files.Application.DTOs;
 
@@ -37,8 +37,10 @@ namespace MeuCrudCsharp.Features.Videos.Application.DTOs
         public string Description { get; set; } = string.Empty;
 
         [Required]
-        public int CourseId { get; set; }
+        public string CourseId { get; set; }
 
         public IFormFile? ThumbnailFile { get; set; }
     }
 }
+
+

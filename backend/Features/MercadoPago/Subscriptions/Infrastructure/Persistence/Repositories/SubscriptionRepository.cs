@@ -1,26 +1,38 @@
-using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Interfaces;
+﻿using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Interfaces;
 using MeuCrudCsharp.Data;
-using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Application.Interfaces;
 using MeuCrudCsharp.Models;
-using Microsoft.EntityFrameworkCore;
+using MeuCrudCsharp.Features.Auth.Domain.Entities;
+using MongoDB.Driver;
+using MongoDB.Driver.Linq;
 
 namespace MeuCrudCsharp.Features.MercadoPago.Subscriptions.Infrastructure.Persistence.Repositories;
 
-public class SubscriptionRepository(ApiDbContext context) : ISubscriptionRepository
+public class SubscriptionRepository : ISubscriptionRepository
 {
+    private readonly IMongoCollection<Subscription> _subscriptions;
+    private readonly IMongoCollection<Plan> _plans;
+    private readonly IMongoCollection<Users> _users;
+
+    public SubscriptionRepository(IMongoDbContext context)
+    {
+        _subscriptions = context.GetCollection<Subscription>("subscriptions");
+        _plans = context.GetCollection<Plan>("plans");
+        _users = context.GetCollection<Users>("users");
+    }
+
     public async Task AddAsync(Subscription subscription)
     {
-        await context.Subscriptions.AddAsync(subscription);
+        await _subscriptions.InsertOneAsync(subscription);
     }
 
     public void Update(Subscription subscription)
     {
-        context.Subscriptions.Update(subscription);
+        _subscriptions.ReplaceOne(s => s.Id == subscription.Id, subscription);
     }
 
     public void Remove(Subscription subscription)
     {
-        context.Subscriptions.Remove(subscription);
+        _subscriptions.DeleteOne(s => s.Id == subscription.Id);
     }
 
     public async Task<Subscription?> GetByExternalIdAsync(
@@ -29,64 +41,81 @@ public class SubscriptionRepository(ApiDbContext context) : ISubscriptionReposit
         bool asNoTracking = true
     )
     {
-        IQueryable<Subscription> query = context.Subscriptions;
-
-        if (asNoTracking)
+        var subscription = await _subscriptions.Find(s => s.ExternalId == externalId).FirstOrDefaultAsync();
+        
+        if (subscription != null && includePlan && !string.IsNullOrEmpty(subscription.PlanId))
         {
-            query = query.AsNoTracking();
+            subscription.Plan = await _plans.Find(p => p.Id == subscription.PlanId).FirstOrDefaultAsync();
         }
 
-        if (includePlan)
-        {
-            query = query.Include(s => s.Plan);
-        }
-
-        return await query.FirstOrDefaultAsync(s => s.ExternalId == externalId);
+        return subscription;
     }
 
     public async Task<Subscription?> GetActiveSubscriptionByUserIdAsync(string userId)
     {
         var activeStatuses = new[] { "authorized", "pending", "paused" };
 
-        return await context
-            .Subscriptions.AsNoTracking()
-            .Include(s => s.Plan)
-            .Where(s => s.UserId == userId && activeStatuses.Contains(s.Status))
-            .OrderByDescending(s => s.CurrentPeriodEndDate)
+        var filter = Builders<Subscription>.Filter.And(
+            Builders<Subscription>.Filter.Eq(s => s.UserId, userId),
+            Builders<Subscription>.Filter.In(s => s.Status, activeStatuses)
+        );
+
+        var subscription = await _subscriptions.Find(filter)
+            .SortByDescending(s => s.CurrentPeriodEndDate)
             .FirstOrDefaultAsync();
+
+        if (subscription != null && !string.IsNullOrEmpty(subscription.PlanId))
+        {
+            subscription.Plan = await _plans.Find(p => p.Id == subscription.PlanId).FirstOrDefaultAsync();
+        }
+
+        return subscription;
     }
 
     public async Task<Subscription?> GetActiveSubscriptionByCustomerIdAsync(string customerId)
     {
         var activeStatuses = new[] { "authorized", "pending", "paused" };
 
-        return await context
-            .Subscriptions
-            .Include(s => s.User)
-            .Where(s => 
-                s.User != null && 
-                s.User.CustomerId == customerId && 
-                activeStatuses.Contains(s.Status))
-            .OrderByDescending(s => s.CurrentPeriodEndDate)
+        // 1. Fetch the user by customerId
+        var user = await _users.Find(u => u.CustomerId == customerId).FirstOrDefaultAsync();
+        
+        if (user == null)
+        {
+            return null;
+        }
+
+        // 2. Fetch the active subscription for that user
+        var filter = Builders<Subscription>.Filter.And(
+            Builders<Subscription>.Filter.Eq(s => s.UserId, user.Id),
+            Builders<Subscription>.Filter.In(s => s.Status, activeStatuses)
+        );
+
+        var subscription = await _subscriptions.Find(filter)
+            .SortByDescending(s => s.CurrentPeriodEndDate)
             .FirstOrDefaultAsync();
+
+        if (subscription != null)
+        {
+            subscription.User = user;
+        }
+
+        return subscription;
     }
 
-    public Task<bool> HasActiveSubscriptionByUserIdAsync(string userId)
+    public async Task<bool> HasActiveSubscriptionByUserIdAsync(string userId)
     {
-        return context
-            .Subscriptions.AsNoTracking()
-            .AnyAsync(s =>
-                s.UserId == userId
-                && s.CurrentPeriodEndDate > DateTime.UtcNow
-                && (s.Status == "paid" || s.Status == "authorized")
-            );
+        var filter = Builders<Subscription>.Filter.And(
+            Builders<Subscription>.Filter.Eq(s => s.UserId, userId),
+            Builders<Subscription>.Filter.Gt(s => s.CurrentPeriodEndDate, DateTime.UtcNow),
+            Builders<Subscription>.Filter.In(s => s.Status, new[] { "paid", "authorized" })
+        );
+
+        return await _subscriptions.Find(filter).AnyAsync();
     }
 
     public async Task<Subscription?> GetByIdAsync(string subscriptionId)
     {
-        return await context.Subscriptions.FirstOrDefaultAsync(s =>
-            s.ExternalId == subscriptionId
-        );
+        return await _subscriptions.Find(s => s.ExternalId == subscriptionId).FirstOrDefaultAsync();
     }
 
     public async Task<Subscription?> GetByPaymentIdAsync(
@@ -95,18 +124,21 @@ public class SubscriptionRepository(ApiDbContext context) : ISubscriptionReposit
         bool includeUser = false
     )
     {
-        IQueryable<Subscription> query = context.Subscriptions;
+        var subscription = await _subscriptions.Find(s => s.PaymentId == paymentId).FirstOrDefaultAsync();
 
-        if (includePlan)
+        if (subscription != null)
         {
-            query = query.Include(s => s.Plan);
+            if (includePlan && !string.IsNullOrEmpty(subscription.PlanId))
+            {
+                subscription.Plan = await _plans.Find(p => p.Id == subscription.PlanId).FirstOrDefaultAsync();
+            }
+
+            if (includeUser && !string.IsNullOrEmpty(subscription.UserId))
+            {
+                subscription.User = await _users.Find(u => u.Id == subscription.UserId).FirstOrDefaultAsync();
+            }
         }
 
-        if (includeUser)
-        {
-            query = query.Include(s => s.User);
-        }
-
-        return await query.FirstOrDefaultAsync(s => s.PaymentId == paymentId);
+        return subscription;
     }
 }

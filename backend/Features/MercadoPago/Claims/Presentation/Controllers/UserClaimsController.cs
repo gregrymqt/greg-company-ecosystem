@@ -1,4 +1,4 @@
-using MeuCrudCsharp.Features.Base;
+﻿using MeuCrudCsharp.Features.Base;
 using MeuCrudCsharp.Features.MercadoPago.Claims.Application.Interfaces;
 using MeuCrudCsharp.Features.MercadoPago.Claims.Application.ViewModels;
 using Microsoft.AspNetCore.Authorization;
@@ -27,8 +27,8 @@ public class UserClaimsController : MercadoPagoApiControllerBase
         return Ok(result);
     }
 
-    [HttpGet("{id:int}")]
-    public async Task<IActionResult> GetMyClaimDetail(int id)
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetMyClaimDetail(string id)
     {
         try
         {
@@ -41,15 +41,15 @@ public class UserClaimsController : MercadoPagoApiControllerBase
         }
         catch (Exception ex)
         {
-            return HandleException(ex, "Erro ao obter detalhe da reclamação.");
+            return HandleException(ex, "Erro ao obter detalhe da reclamaÃ§Ã£o.");
         }
     }
 
-    [HttpPost("{id:int}/reply")]
-    public async Task<IActionResult> Reply(int id, [FromBody] ReplyRequestDto request)
+    [HttpPost("{id}/reply")]
+    public async Task<IActionResult> Reply(string id, [FromBody] ReplyRequestDto request)
     {
         if (string.IsNullOrWhiteSpace(request.Message))
-            return BadRequest("A mensagem não pode ser vazia.");
+            return BadRequest("A mensagem nÃ£o pode ser vazia.");
 
         try
         {
@@ -66,13 +66,13 @@ public class UserClaimsController : MercadoPagoApiControllerBase
         }
     }
 
-    [HttpPost("{id:int}/mediation")]
-    public async Task<IActionResult> RequestMediation(int id)
+    [HttpPost("{id}/mediation")]
+    public async Task<IActionResult> RequestMediation(string id)
     {
         try
         {
             await _userClaimService.RequestMediationAsync(id);
-            return Ok(new { message = "Mediação solicitada ao Mercado Pago." });
+            return Ok(new { message = "MediaÃ§Ã£o solicitada ao Mercado Pago." });
         }
         catch (UnauthorizedAccessException)
         {
@@ -84,3 +84,4 @@ public class UserClaimsController : MercadoPagoApiControllerBase
         }
     }
 }
+

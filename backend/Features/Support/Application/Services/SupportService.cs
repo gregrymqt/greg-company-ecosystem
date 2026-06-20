@@ -1,5 +1,5 @@
 using MeuCrudCsharp.Features.Support.Domain.Interfaces;
-using MeuCrudCsharp.Documents.Models;
+using MeuCrudCsharp.Features.Support.Domain.Entities;
 using MeuCrudCsharp.Features.Exceptions;
 using MeuCrudCsharp.Features.Support.Application.DTOs;
 using MeuCrudCsharp.Features.Support.Application.Interfaces;
@@ -19,7 +19,7 @@ namespace MeuCrudCsharp.Features.Support.Application.Services
 
         public async Task CreateTicketAsync(string userId, CreateSupportTicketDto dto)
         {
-            var document = new SupportTicketDocument
+            var document = new SupportTicket
             {
                 UserId = userId,
                 Context = dto.Context,
@@ -37,7 +37,7 @@ namespace MeuCrudCsharp.Features.Support.Application.Services
 
             if (ticket == null)
             {
-                throw new ResourceNotFoundException("Ticket de suporte não encontrado.");
+                throw new ResourceNotFoundException("Ticket de suporte nÃ£o encontrado.");
             }
 
             return new SupportTicketResponseDto
@@ -73,10 +73,18 @@ namespace MeuCrudCsharp.Features.Support.Application.Services
             var ticket = await _repository.GetByIdAsync(id);
             if (ticket == null)
             {
-                throw new ResourceNotFoundException("Ticket de suporte não encontrado.");
+                throw new ResourceNotFoundException("Ticket de suporte nÃ£o encontrado.");
             }
 
-            await _repository.UpdateStatusAsync(id, dto.Status);
+            ticket.Status = dto.Status;
+            await _repository.UpdateAsync(id, ticket);
         }
     }
 }
+
+
+
+
+
+
+

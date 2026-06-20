@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using MeuCrudCsharp.Models;
 
@@ -13,7 +13,7 @@ public interface IClaimRepository
         int pageSize
     );
     
-    Task<Models.Claims?> GetByIdAsync(long id);
+    Task<Models.Claims?> GetByIdAsync(string id);
     Task<Models.Claims?> GetByMpClaimIdAsync(long mpClaimId);
     Task<bool> ExistsByMpClaimIdAsync(long mpClaimId);
     Task<List<Models.Claims>> GetClaimsByUserIdAsync(string userId);
@@ -22,3 +22,4 @@ public interface IClaimRepository
     void Update(Models.Claims claim);
     void UpdateClaimStatus(Models.Claims claim, InternalClaimStatus newStatus);
 }
+

@@ -1,15 +1,29 @@
-using MeuCrudCsharp.Data;
+﻿using MeuCrudCsharp.Data;
 using MeuCrudCsharp.Features.MercadoPago.Payments.Application.Interfaces;
 using MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Interfaces;
-using Microsoft.EntityFrameworkCore;
+using MeuCrudCsharp.Features.Auth.Domain.Entities;
+using MeuCrudCsharp.Models;
+using MongoDB.Driver;
+using MongoDB.Driver.Linq;
 
 namespace MeuCrudCsharp.Features.MercadoPago.Payments.Infrastructure.Persistence.Repositories;
 
-public class PaymentRepository(ApiDbContext context) : IPaymentRepository
+public class PaymentRepository : IPaymentRepository
 {
+    private readonly IMongoCollection<Models.Payments> _payments;
+    private readonly IMongoCollection<Users> _users;
+    private readonly IMongoCollection<Subscription> _subscriptions;
+
+    public PaymentRepository(IMongoDbContext context)
+    {
+        _payments = context.GetCollection<Models.Payments>("payments");
+        _users = context.GetCollection<Users>("users");
+        _subscriptions = context.GetCollection<Subscription>("subscriptions");
+    }
+
     public async Task<bool> HasAnyPaymentByUserIdAsync(string userId)
     {
-        return await context.Payments.AsNoTracking().AnyAsync(p => p.UserId == userId);
+        return await _payments.Find(p => p.UserId == userId).AnyAsync();
     }
 
     public async Task<List<Models.Payments>> GetPaymentsByUserIdAndTypeAsync(
@@ -17,50 +31,62 @@ public class PaymentRepository(ApiDbContext context) : IPaymentRepository
         string? method = null
     )
     {
-        var query = context.Payments.AsNoTracking().Where(p => p.UserId == userId);
+        var builder = Builders<Models.Payments>.Filter;
+        var filter = builder.Eq(p => p.UserId, userId);
 
         if (!string.IsNullOrEmpty(method))
         {
-            query = query.Where(p => p.Method == method);
+            filter &= builder.Eq(p => p.Method, method);
         }
 
-        return await query.OrderByDescending(p => p.DateApproved).ToListAsync();
+        return await _payments.Find(filter)
+            .SortByDescending(p => p.DateApproved)
+            .ToListAsync();
     }
 
     public async Task<Models.Payments?> GetByIdWithUserAsync(string paymentId)
     {
-        return await context
-            .Payments.Include(p => p.User)
-            .FirstOrDefaultAsync(p => p.Id == paymentId);
+        var payment = await _payments.Find(p => p.Id == paymentId).FirstOrDefaultAsync();
+        if (payment != null && !string.IsNullOrEmpty(payment.UserId))
+        {
+            payment.User = await _users.Find(u => u.Id == payment.UserId).FirstOrDefaultAsync();
+        }
+        return payment;
     }
 
     public async Task<Models.Payments?> GetByExternalIdWithUserAsync(string externalPaymentId)
     {
-        return await context
-            .Payments.Include(p => p.User)
-            .FirstOrDefaultAsync(p => p.ExternalId == externalPaymentId);
+        var payment = await _payments.Find(p => p.ExternalId == externalPaymentId).FirstOrDefaultAsync();
+        if (payment != null && !string.IsNullOrEmpty(payment.UserId))
+        {
+            payment.User = await _users.Find(u => u.Id == payment.UserId).FirstOrDefaultAsync();
+        }
+        return payment;
     }
 
     public async Task<Models.Payments?> GetByExternalIdWithSubscriptionAsync(string externalId)
     {
-        return await context
-            .Payments.Include(p => p.Subscription)
-            .FirstOrDefaultAsync(p => p.ExternalId == externalId);
+        var payment = await _payments.Find(p => p.ExternalId == externalId).FirstOrDefaultAsync();
+        if (payment != null && !string.IsNullOrEmpty(payment.SubscriptionId))
+        {
+            payment.Subscription = await _subscriptions.Find(s => s.Id == payment.SubscriptionId).FirstOrDefaultAsync();
+        }
+        return payment;
     }
 
     public void Update(Models.Payments payment)
     {
-        context.Payments.Update(payment);
+        _payments.ReplaceOne(p => p.Id == payment.Id, payment);
     }
 
     public async Task AddAsync(Models.Payments payment)
     {
-        await context.Payments.AddAsync(payment);
+        await _payments.InsertOneAsync(payment);
     }
 
     public Task Remove(Models.Payments payment)
     {
-        context.Payments.Remove(payment);
+        _payments.DeleteOne(p => p.Id == payment.Id);
         return Task.CompletedTask;
     }
 }

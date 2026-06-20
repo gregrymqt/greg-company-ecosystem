@@ -1,56 +1,57 @@
+﻿using MeuCrudCsharp.Features.Support.Domain.Entities;
 using MeuCrudCsharp.Features.Support.Domain.Interfaces;
-using MeuCrudCsharp.Documents.Models;
-using MeuCrudCsharp.Features.Support.Application.Interfaces;
 using MongoDB.Driver;
+using MeuCrudCsharp.Data;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace MeuCrudCsharp.Features.Support.Infrastructure.Persistence.Repositories
 {
     public class SupportRepository : ISupportRepository
     {
-        private readonly IMongoCollection<SupportTicketDocument> _tickets;
+        private readonly IMongoCollection<SupportTicket> _tickets;
 
-        public SupportRepository(IMongoDatabase database)
+        public SupportRepository(IMongoDbContext context)
         {
-            _tickets = database.GetCollection<SupportTicketDocument>(
-                SupportTicketDocument.CollectionName
-            );
+            _tickets = context.GetCollection<SupportTicket>("support_tickets");
         }
 
-        public async Task CreateAsync(SupportTicketDocument ticket)
-        {
-            await _tickets.InsertOneAsync(ticket);
-        }
-
-        public async Task<(
-            IEnumerable<SupportTicketDocument> Data,
-            long Total
-        )> GetAllPaginatedAsync(int page, int pageSize)
-        {
-            var filter = Builders<SupportTicketDocument>.Filter.Empty;
-
-            var total = await _tickets.CountDocumentsAsync(filter);
-
-            var data = await _tickets
-                .Find(filter)
-                .SortByDescending(t => t.CreatedAt)
-                .Skip((page - 1) * pageSize)
-                .Limit(pageSize)
-                .ToListAsync();
-
-            return (data, total);
-        }
-
-        public async Task<SupportTicketDocument?> GetByIdAsync(string id)
+        public async Task<SupportTicket?> GetByIdAsync(string id)
         {
             return await _tickets.Find(t => t.Id == id).FirstOrDefaultAsync();
         }
 
-        public async Task UpdateStatusAsync(string id, string newStatus)
+        public async Task<IEnumerable<SupportTicket>> GetAllAsync()
         {
-            var filter = Builders<SupportTicketDocument>.Filter.Eq(t => t.Id, id);
-            var update = Builders<SupportTicketDocument>.Update.Set(t => t.Status, newStatus);
+            return await _tickets.Find(_ => true).ToListAsync();
+        }
 
-            await _tickets.UpdateOneAsync(filter, update);
+        public async Task<(IEnumerable<SupportTicket> Items, int TotalCount)> GetAllPaginatedAsync(int page, int pageSize)
+        {
+            var totalCount = (int)await _tickets.CountDocumentsAsync(Builders<SupportTicket>.Filter.Empty);
+            var items = await _tickets.Find(Builders<SupportTicket>.Filter.Empty).Skip((page - 1) * pageSize).Limit(pageSize).ToListAsync();
+            return (items, totalCount);
+        }
+
+        public async Task CreateAsync(SupportTicket ticket)
+        {
+            await _tickets.InsertOneAsync(ticket);
+        }
+
+        public async Task UpdateAsync(string id, SupportTicket ticket)
+        {
+            await _tickets.ReplaceOneAsync(t => t.Id == id, ticket);
+        }
+
+        public async Task DeleteAsync(string id)
+        {
+            await _tickets.DeleteOneAsync(t => t.Id == id);
+        }
+
+        public async Task<IEnumerable<SupportTicket>> GetByUserIdAsync(string userId)
+        {
+            return await _tickets.Find(t => t.UserId == userId).ToListAsync();
         }
     }
 }
+

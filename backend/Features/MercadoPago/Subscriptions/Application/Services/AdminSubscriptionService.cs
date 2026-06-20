@@ -1,4 +1,4 @@
-using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Interfaces;
+Ôªøusing MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Interfaces;
 using MeuCrudCsharp.Features.MercadoPago.Plans.Domain.Interfaces;
 using MeuCrudCsharp.Features.Caching.Application.Interfaces;
 using MeuCrudCsharp.Features.Exceptions;
@@ -9,7 +9,6 @@ using MeuCrudCsharp.Features.Shared.Domain.Interfaces;
 using MeuCrudCsharp.Features.Shared.Infrastructure.Persistence;
 using MeuCrudCsharp.Models;
 using MeuCrudCsharp.Models.Enums;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
 namespace MeuCrudCsharp.Features.MercadoPago.Subscriptions.Application.Services
@@ -54,7 +53,7 @@ namespace MeuCrudCsharp.Features.MercadoPago.Subscriptions.Application.Services
             var localPlan =
                 await _planRepository.GetActiveByExternalIdAsync(planExternalId)
                 ?? throw new ResourceNotFoundException(
-                    $"Plano com ID externo '{planExternalId}' n„o encontrado."
+                    $"Plano com ID externo '{planExternalId}' n√£o encontrado."
                 );
 
             var newSubscription = new Subscription
@@ -77,7 +76,7 @@ namespace MeuCrudCsharp.Features.MercadoPago.Subscriptions.Application.Services
             await _subscriptionRepository.AddAsync(newSubscription);
 
             _logger.LogInformation(
-                "Assinatura preparada para o usu·rio {UserId}. Aguardando resposta do MercadoPago.",
+                "Assinatura preparada para o usu√°rio {UserId}. Aguardando resposta do MercadoPago.",
                 userId
             );
 
@@ -127,7 +126,7 @@ namespace MeuCrudCsharp.Features.MercadoPago.Subscriptions.Application.Services
                 await _unitOfWork.CommitAsync();
 
                 _logger.LogInformation(
-                    "Assinatura {SubscriptionId} para o usu·rio {UserId} salva com sucesso. Status: {Status}",
+                    "Assinatura {SubscriptionId} para o usu√°rio {UserId} salva com sucesso. Status: {Status}",
                     newSubscription.ExternalId,
                     userId,
                     newSubscription.Status
@@ -139,35 +138,35 @@ namespace MeuCrudCsharp.Features.MercadoPago.Subscriptions.Application.Services
             {
                 _logger.LogError(
                     ex,
-                    "Falha no MP ao criar assinatura para o usu·rio {UserId}. Rollback autom·tico.",
+                    "Falha no MP ao criar assinatura para o usu√°rio {UserId}. Rollback autom√°tico.",
                     userId
                 );
 
                 _logger.LogInformation(
-                    "Rollback autom·tico concluÌdo. Assinatura para o usu·rio {UserId} N√O foi persistida.",
+                    "Rollback autom√°tico conclu√≠do. Assinatura para o usu√°rio {UserId} N√ÉO foi persistida.",
                     userId
                 );
 
                 throw;
             }
-            catch (DbUpdateException dbEx)
+            catch (Exception dbEx)
             {
                 _logger.LogError(
                     dbEx,
-                    "Erro ao salvar assinatura local apÛs sucesso no MP. Cancelando no MP..."
+                    "Erro ao salvar assinatura local ap√≥s sucesso no MP. Cancelando no MP..."
                 );
 
                 if (string.IsNullOrEmpty(newSubscription.ExternalId) ||
                     newSubscription.ExternalId == planExternalId)
                     throw new AppServiceException(
-                        "Erro de consistÍncia de dados. A operaÁ„o foi revertida.",
+                        "Erro de consist√™ncia de dados. A opera√ß√£o foi revertida.",
                         dbEx
                     );
                 try
                 {
                     await _mpSubscriptionService.CancelSubscriptionAsync(newSubscription.ExternalId);
                     _logger.LogInformation(
-                        "Assinatura {ExternalId} cancelada no MP devido a erro de persistÍncia local.",
+                        "Assinatura {ExternalId} cancelada no MP devido a erro de persist√™ncia local.",
                         newSubscription.ExternalId
                     );
                 }
@@ -175,13 +174,13 @@ namespace MeuCrudCsharp.Features.MercadoPago.Subscriptions.Application.Services
                 {
                     _logger.LogError(
                         cancelEx,
-                        "Falha ao cancelar assinatura {ExternalId} no MP. IntervenÁ„o manual necess·ria!",
+                        "Falha ao cancelar assinatura {ExternalId} no MP. Interven√ß√£o manual necess√°ria!",
                         newSubscription.ExternalId
                     );
                 }
 
                 throw new AppServiceException(
-                    "Erro de consistÍncia de dados. A operaÁ„o foi revertida.",
+                    "Erro de consist√™ncia de dados. A opera√ß√£o foi revertida.",
                     dbEx
                 );
             }
@@ -204,7 +203,7 @@ namespace MeuCrudCsharp.Features.MercadoPago.Subscriptions.Application.Services
                     asNoTracking: false
                 )
                 ?? throw new ResourceNotFoundException(
-                    $"Assinatura {subscriptionId} n„o encontrada."
+                    $"Assinatura {subscriptionId} n√£o encontrada."
                 );
 
             var originalAmount = localSubscription.CurrentAmount;
@@ -240,14 +239,14 @@ namespace MeuCrudCsharp.Features.MercadoPago.Subscriptions.Application.Services
             {
                 _logger.LogError(
                     ex,
-                    "Falha no MP ao atualizar valor da assinatura {SubscriptionId}. Rollback autom·tico.",
+                    "Falha no MP ao atualizar valor da assinatura {SubscriptionId}. Rollback autom√°tico.",
                     subscriptionId
                 );
 
                 localSubscription.CurrentAmount = originalAmount;
 
                 _logger.LogInformation(
-                    "Rollback concluÌdo. Valor da assinatura {SubscriptionId} permanece em {OriginalAmount}",
+                    "Rollback conclu√≠do. Valor da assinatura {SubscriptionId} permanece em {OriginalAmount}",
                     subscriptionId,
                     originalAmount
                 );
@@ -265,7 +264,7 @@ namespace MeuCrudCsharp.Features.MercadoPago.Subscriptions.Application.Services
                 await _subscriptionRepository.GetByExternalIdAsync(
                     subscriptionId,
                     asNoTracking: false
-                ) ?? throw new ResourceNotFoundException("Assinatura n„o encontrada.");
+                ) ?? throw new ResourceNotFoundException("Assinatura n√£o encontrada.");
 
             var originalStatus = localSubscription.Status;
 
@@ -295,14 +294,14 @@ namespace MeuCrudCsharp.Features.MercadoPago.Subscriptions.Application.Services
             {
                 _logger.LogError(
                     ex,
-                    "Falha no MP ao atualizar status da assinatura {SubscriptionId}. Rollback autom·tico.",
+                    "Falha no MP ao atualizar status da assinatura {SubscriptionId}. Rollback autom√°tico.",
                     subscriptionId
                 );
 
                 localSubscription.Status = originalStatus;
 
                 _logger.LogInformation(
-                    "Rollback concluÌdo. Status da assinatura {SubscriptionId} permanece em {OriginalStatus}",
+                    "Rollback conclu√≠do. Status da assinatura {SubscriptionId} permanece em {OriginalStatus}",
                     subscriptionId,
                     originalStatus
                 );
@@ -327,7 +326,7 @@ namespace MeuCrudCsharp.Features.MercadoPago.Subscriptions.Application.Services
         {
             var localPlan = await _planRepository.GetByPublicIdAsync(planPublicId, true);
             if (localPlan == null)
-                throw new ResourceNotFoundException("Plano n„o encontrado.");
+                throw new ResourceNotFoundException("Plano n√£o encontrado.");
 
             var now = DateTime.UtcNow;
             var expirationDate = now.AddMonths(localPlan.FrequencyInterval);
@@ -353,7 +352,7 @@ namespace MeuCrudCsharp.Features.MercadoPago.Subscriptions.Application.Services
             await _unitOfWork.CommitAsync();
 
             _logger.LogInformation(
-                "Assinatura ativada a partir de pagamento ˙nico. UserId: {UserId}, PaymentId: {PaymentId}",
+                "Assinatura ativada a partir de pagamento √∫nico. UserId: {UserId}, PaymentId: {PaymentId}",
                 userId,
                 paymentId
             );
@@ -362,3 +361,4 @@ namespace MeuCrudCsharp.Features.MercadoPago.Subscriptions.Application.Services
         }
     }
 }
+

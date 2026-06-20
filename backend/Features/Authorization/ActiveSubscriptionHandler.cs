@@ -1,14 +1,20 @@
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using MeuCrudCsharp.Data;
 using MeuCrudCsharp.Models;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.EntityFrameworkCore;
+using MongoDB.Driver;
 
 namespace MeuCrudCsharp.Features.Authorization;
 
-public class ActiveSubscriptionHandler(IDbContextFactory<MongoDbContext> dbContextFactory)
-    : AuthorizationHandler<ActiveSubscriptionRequirement>
+public class ActiveSubscriptionHandler : AuthorizationHandler<ActiveSubscriptionRequirement>
 {
+    private readonly IMongoDbContext _dbContext;
+
+    public ActiveSubscriptionHandler(IMongoDbContext dbContext)
+    {
+        _dbContext = dbContext;
+    }
+
     protected override async Task HandleRequirementAsync(
         AuthorizationHandlerContext context,
         ActiveSubscriptionRequirement requirement
@@ -28,11 +34,9 @@ public class ActiveSubscriptionHandler(IDbContextFactory<MongoDbContext> dbConte
             return;
         }
 
-        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+        var subscriptions = _dbContext.GetCollection<Subscription>("subscriptions");
 
-        var hasActiveSubscription = await dbContext
-            .Set<Subscription>()
-            .AnyAsync(s => s.UserId == userId && s.Status == "ativo");
+        var hasActiveSubscription = await subscriptions.Find(s => s.UserId == userId && s.Status == "ativo").AnyAsync();
 
         if (hasActiveSubscription)
         {

@@ -7,12 +7,14 @@ namespace MeuCrudCsharp.Features.Videos.Domain.Interfaces;
 
 public interface IVideoRepository
     {
-        Task<Video> GetByIdAsync(int id);
+        Task<Video> GetByIdAsync(string id);
         Task<Video> GetByStorageIdentifierAsync(string storageId);
         Task AddAsync(Video video);
         Task UpdateAsync(Video video);
-        Task UpdateStatusAsync(int videoId, VideoStatus newStatus);
+        Task UpdateStatusAsync(string videoId, VideoStatus newStatus);
         Task<(List<Video> Items, int TotalCount)> GetAllPaginatedAsync(int page, int pageSize);
         Task<Video> GetByPublicIdAsync(Guid publicId);
         Task DeleteAsync(Video video);
     }
+
+

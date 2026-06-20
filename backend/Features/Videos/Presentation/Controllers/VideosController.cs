@@ -1,29 +1,25 @@
 ﻿using MeuCrudCsharp.Data;
 using MeuCrudCsharp.Features.Base;
-using MeuCrudCsharp.Models;
 using MeuCrudCsharp.Features.Videos.Domain.Entities;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
+using MeuCrudCsharp.Features.Videos.Domain.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace MeuCrudCsharp.Features.Videos.Presentation.Controllers
 {
     [Route("/api/videos")]
     public class VideosController : ApiControllerBase
     {
-        private readonly ApiDbContext _context;
+        private readonly IVideoRepository _videoRepository;
         private readonly IWebHostEnvironment _env;
         private readonly ILogger<VideosController> _logger;
 
         public VideosController(
-            ApiDbContext context,
+            IVideoRepository videoRepository,
             IWebHostEnvironment env,
             ILogger<VideosController> logger
         )
         {
-            _context = context;
+            _videoRepository = videoRepository;
             _env = env;
             _logger = logger;
         }
@@ -34,11 +30,9 @@ namespace MeuCrudCsharp.Features.Videos.Presentation.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetManifest(string storageIdentifier)
         {
-            var videoExists = await _context.Videos.AnyAsync(v =>
-                v.StorageIdentifier == storageIdentifier && v.Status == VideoStatus.Available
-            );
+            var video = await _videoRepository.GetByStorageIdentifierAsync(storageIdentifier);
 
-            if (!videoExists)
+            if (video == null || video.Status != VideoStatus.Available)
             {
                 return NotFound("Video not found or is not yet available.");
             }

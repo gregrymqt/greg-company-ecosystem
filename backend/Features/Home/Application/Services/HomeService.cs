@@ -124,7 +124,7 @@ public class HomeService(
     {
         var entity = await repository.GetHeroByIdAsync(id);
         if (entity == null)
-            throw new ResourceNotFoundException($"Hero com ID {id} nÃ£o encontrado.");
+            throw new ResourceNotFoundException($"Hero com ID {id} nÃƒÂ£o encontrado.");
 
         if (dto is { IsChunk: true, File: not null })
         {
@@ -140,10 +140,10 @@ public class HomeService(
                 if (tempPath == null)
                     return false;
 
-                if (entity.FileId.HasValue)
+                if (!string.IsNullOrEmpty(entity.FileId))
                 {
                     var arquivoAtualizado = await fileService.SubstituirArquivoDoTempAsync(
-                        entity.FileId.Value,
+                        entity.FileId,
                         tempPath,
                         dto.FileName
                     );
@@ -164,10 +164,10 @@ public class HomeService(
         }
         else if (dto.File != null)
         {
-            if (entity.FileId.HasValue)
+            if (!string.IsNullOrEmpty(entity.FileId))
             {
                 var arquivoAtualizado = await fileService.SubstituirArquivoAsync(
-                    entity.FileId.Value,
+                    entity.FileId,
                     dto.File
                 );
                 entity.ImageUrl = arquivoAtualizado.CaminhoRelativo;
@@ -200,11 +200,11 @@ public class HomeService(
     {
         var entity = await repository.GetHeroByIdAsync(id);
         if (entity == null)
-            throw new ResourceNotFoundException($"Hero com ID {id} nÃ£o encontrado.");
+            throw new ResourceNotFoundException($"Hero com ID {id} nÃƒÂ£o encontrado.");
 
-        if (entity.FileId.HasValue)
+        if (!string.IsNullOrEmpty(entity.FileId))
         {
-            await fileService.DeletarArquivoAsync(entity.FileId.Value);
+            await fileService.DeletarArquivoAsync(entity.FileId);
         }
 
         await repository.DeleteHeroAsync(entity);
@@ -242,7 +242,7 @@ public class HomeService(
     {
         var entity = await repository.GetServiceByIdAsync(id);
         if (entity == null)
-            throw new ResourceNotFoundException($"ServiÃ§o com ID {id} nÃ£o encontrado.");
+            throw new ResourceNotFoundException($"ServiÃƒÂ§o com ID {id} nÃƒÂ£o encontrado.");
 
         entity.Title = dto.Title;
         entity.Description = dto.Description;
@@ -259,11 +259,17 @@ public class HomeService(
     {
         var entity = await repository.GetServiceByIdAsync(id);
         if (entity == null)
-            throw new ResourceNotFoundException($"ServiÃ§o com ID {id} nÃ£o encontrado.");
+            throw new ResourceNotFoundException($"ServiÃƒÂ§o com ID {id} nÃƒÂ£o encontrado.");
 
         await repository.DeleteServiceAsync(entity);
         await unitOfWork.CommitAsync();
         await cache.RemoveAsync(HOME_CACHE_KEY);
     }
 }
+
+
+
+
+
+
 

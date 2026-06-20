@@ -1,4 +1,4 @@
-using MongoDB.Bson;
+﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
 namespace MeuCrudCsharp.Features.Home.Domain.Entities;
@@ -15,10 +15,12 @@ public class HomeHero
 
     public string ImageUrl { get; set; } = string.Empty;
 
-    public string? fileId { get; set; }
+    public string? FileId { get; set; }
 
     public string ActionText { get; set; } = string.Empty;
 
     public string ActionUrl { get; set; } = string.Empty;
 }
+
+
 

@@ -1,20 +1,14 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.EntityFrameworkCore;
 
 namespace MeuCrudCsharp.Models
 {
-    [Index(nameof(UserId))]
-    [Index(nameof(PlanId))]
-    [Index(nameof(ExternalId), IsUnique = true)]
-    [Index(nameof(Status))]
-    [Index(nameof(PayerEmail))]
-    [Index(nameof(CurrentPeriodEndDate))] // <-- NOVO: Indexar a data de expiração é ótimo para performance
+                         // <-- NOVO: Indexar a data de expiração é ótimo para performance
     public class Subscription : TransactionBase
     {
         // --- RELACIONAMENTO COM PLAN ---
         [Required]
-        public int PlanId { get; set; }
+        public string PlanId { get; set; }
 
         [ForeignKey("PlanId")]
         public virtual Plan? Plan { get; set; }
@@ -43,3 +37,5 @@ namespace MeuCrudCsharp.Models
         public string? CardTokenId { get; set; }
     }
 }
+
+

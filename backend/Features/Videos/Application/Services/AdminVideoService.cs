@@ -1,4 +1,4 @@
-﻿using MeuCrudCsharp.Features.Videos.Domain.Interfaces;
+using MeuCrudCsharp.Features.Videos.Domain.Interfaces;
 using Hangfire;
 using MeuCrudCsharp.Features.Caching.Application.Interfaces;
 using MeuCrudCsharp.Features.Exceptions;
@@ -48,7 +48,7 @@ public class AdminVideoService : IAdminVideoService
 
     public async Task<VideoDto?> HandleVideoUploadAsync(CreateVideoDto dto)
     {
-        var fileId = 0;
+        var fileId = "";
         var thumbnailUrl = string.Empty;
         var storageIdentifier = Guid.NewGuid().ToString();
 
@@ -217,7 +217,7 @@ public class AdminVideoService : IAdminVideoService
 
             try
             {
-                if (fileId > 0)
+                if (!string.IsNullOrEmpty(fileId))
                 {
                     await _fileService.DeletarArquivoAsync(fileId);
                 }
@@ -251,3 +251,9 @@ public class AdminVideoService : IAdminVideoService
         }
     }
 }
+
+
+
+
+
+

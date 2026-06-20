@@ -1,4 +1,4 @@
-using MeuCrudCsharp.Features.Auth.Domain.Entities;
+﻿using MeuCrudCsharp.Features.Auth.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 using AspNetCore.Identity.Mongo;
 
@@ -16,8 +16,9 @@ public static class IdentityServicesExtensions
             DatabaseName = dbName
         }.ToMongoUrl().ToString();
 
-        // Configuração nativa do ASP.NET Core Identity adaptada para MongoDB
-        builder.Services.AddIdentityMongoDbProvider<Users, Roles, Guid>(
+        // ConfiguraÃ§Ã£o nativa do ASP.NET Core Identity adaptada para MongoDB
+        builder.Services.AddIdentityMongoDbProvider<Users, Roles, string>(
+            identityOptions => { },
             mongoOptions =>
             {
                 mongoOptions.ConnectionString = mongoUrl;

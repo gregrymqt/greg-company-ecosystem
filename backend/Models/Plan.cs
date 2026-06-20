@@ -1,7 +1,8 @@
-﻿﻿// Models/Plan.cs
+﻿// Models/Plan.cs
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.EntityFrameworkCore;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 
 // Enums/PlanFrequencyType.cs
 // Este enum representa os valores que a API do Mercado Pago aceita para a frequência.
@@ -14,12 +15,12 @@ public enum PlanFrequencyType
 
 namespace MeuCrudCsharp.Models
 {
-    [Index(nameof(PublicId), IsUnique = true)]
-    [Index(nameof(IsActive))]
-    public class Plan
+            public class Plan
     {
         [Key]
-        public int Id { get; set; }
+        [BsonId]
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string Id { get; set; } = null!;
 
         [Required]
         public Guid PublicId { get; set; } = Guid.NewGuid();
@@ -73,3 +74,5 @@ namespace MeuCrudCsharp.Models
         public bool IsActive { get; set; } = false;
     }
 }
+
+

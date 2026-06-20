@@ -1,4 +1,4 @@
-using MeuCrudCsharp.Features.Caching.Application.Interfaces;
+﻿using MeuCrudCsharp.Features.Caching.Application.Interfaces;
 using MeuCrudCsharp.Features.Exceptions;
 using MeuCrudCsharp.Features.MercadoPago.Claims.Application.Interfaces;
 using MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Interfaces;
@@ -25,7 +25,7 @@ public class AdminClaimService(
     {
         if (page < 1)
         {
-            logger.LogWarning("Página inválida recebida: {Page}. Usando página 1.", page);
+            logger.LogWarning("PÃ¡gina invÃ¡lida recebida: {Page}. Usando pÃ¡gina 1.", page);
             page = 1;
         }
 
@@ -68,11 +68,11 @@ public class AdminClaimService(
         ) ?? new ClaimsIndexViewModel();
     }
 
-    public async Task<ClaimDetailViewModel> GetClaimDetailsAsync(long localId)
+    public async Task<ClaimDetailViewModel> GetClaimDetailsAsync(string localId)
     {
         var localClaim = await claimRepository.GetByIdAsync(localId);
         if (localClaim == null)
-            throw new ResourceNotFoundException("Reclamação não encontrada.");
+            throw new ResourceNotFoundException("ReclamaÃ§Ã£o nÃ£o encontrada.");
 
         List<MpMessageResponse> messages;
         try
@@ -109,14 +109,14 @@ public class AdminClaimService(
         };
     }
 
-    public async Task ReplyToClaimAsync(long localId, string messageText)
+    public async Task ReplyToClaimAsync(string localId, string messageText)
     {
         if (string.IsNullOrWhiteSpace(messageText))
-            throw new ArgumentException("Mensagem não pode ser vazia.", nameof(messageText));
+            throw new ArgumentException("Mensagem nÃ£o pode ser vazia.", nameof(messageText));
 
         var localClaim = await claimRepository.GetByIdAsync(localId);
         if (localClaim == null)
-            throw new ResourceNotFoundException("Reclamação não encontrada.");
+            throw new ResourceNotFoundException("ReclamaÃ§Ã£o nÃ£o encontrada.");
 
         await mpService.SendMessageAsync(localClaim.MpClaimId, messageText);
 

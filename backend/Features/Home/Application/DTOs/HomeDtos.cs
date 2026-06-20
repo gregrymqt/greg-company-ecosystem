@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Text.Json.Serialization;
 using MeuCrudCsharp.Features.Files.Application.DTOs;
 using Microsoft.AspNetCore.Http;
@@ -16,7 +16,7 @@ public class HomeContentDto
 
 public class HeroSlideDto
 {
-    public string id { get; set; }
+    public string Id { get; set; }
     public string ImageUrl { get; set; } = string.Empty;
     public string Title { get; set; } = string.Empty;
     public string Subtitle { get; set; } = string.Empty;
@@ -26,7 +26,7 @@ public class HeroSlideDto
 
 public class ServiceDto
 {
-    public string id { get; set; }
+    public string Id { get; set; }
     public string IconClass { get; set; } = string.Empty;
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
@@ -50,4 +50,6 @@ public class CreateUpdateServiceDto
     public string ActionText { get; set; } = string.Empty;
     public string ActionUrl { get; set; } = string.Empty;
 }
+
+
 

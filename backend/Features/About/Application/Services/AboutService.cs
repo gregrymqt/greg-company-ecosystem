@@ -62,7 +62,7 @@ public class AboutService : IAboutService
                         TeamSection = new AboutTeamSectionDto
                         {
                             Title = "Nosso Time",
-                            Description = "Conheça os especialistas",
+                            Description = "ConheÃ§a os especialistas",
                             ContentType = "section2",
                             Members =
                             [
@@ -85,7 +85,7 @@ public class AboutService : IAboutService
     public async Task<AboutSectionDto?> CreateSectionAsync(CreateUpdateAboutSectionDto dto)
     {
         var imageUrl = string.Empty;
-        int? fileId = null;
+        string? fileId = null;
 
         if (dto is { IsChunk: true, File: not null })
         {
@@ -146,7 +146,7 @@ public class AboutService : IAboutService
     {
         var entity =
             await _repository.GetSectionByIdAsync(id)
-            ?? throw new ResourceNotFoundException($"Seção {id} não encontrada.");
+            ?? throw new ResourceNotFoundException($"SeÃ§Ã£o {id} nÃ£o encontrada.");
 
         if (dto is { IsChunk: true, File: not null })
         {
@@ -160,10 +160,10 @@ public class AboutService : IAboutService
             if (tempPath == null)
                 return false;
 
-            if (entity.FileId.HasValue)
+            if (!string.IsNullOrEmpty(entity.FileId))
             {
                 var arquivoAtualizado = await _fileService.SubstituirArquivoDoTempAsync(
-                    entity.FileId.Value,
+                    entity.FileId,
                     tempPath,
                     dto.FileName
                 );
@@ -183,10 +183,10 @@ public class AboutService : IAboutService
         }
         else if (dto.File != null)
         {
-            if (entity.FileId.HasValue)
+            if (!string.IsNullOrEmpty(entity.FileId))
             {
                 var arquivoAtualizado = await _fileService.SubstituirArquivoAsync(
-                    entity.FileId.Value,
+                    entity.FileId,
                     dto.File
                 );
                 entity.ImageUrl = arquivoAtualizado.CaminhoRelativo;
@@ -215,11 +215,11 @@ public class AboutService : IAboutService
     {
         var entity =
             await _repository.GetSectionByIdAsync(id)
-            ?? throw new ResourceNotFoundException($"Seção {id} não encontrada.");
+            ?? throw new ResourceNotFoundException($"SeÃ§Ã£o {id} nÃ£o encontrada.");
 
-        if (entity.FileId.HasValue)
+        if (!string.IsNullOrEmpty(entity.FileId))
         {
-            await _fileService.DeletarArquivoAsync(entity.FileId.Value);
+            await _fileService.DeletarArquivoAsync(entity.FileId);
         }
 
         await _repository.DeleteSectionAsync(entity);
@@ -230,7 +230,7 @@ public class AboutService : IAboutService
     public async Task<TeamMemberDto?> CreateTeamMemberAsync(CreateUpdateTeamMemberDto dto)
     {
         var photoUrl = string.Empty;
-        int? fileId = null;
+        string? fileId = null;
 
         if (dto is { IsChunk: true, File: not null })
         {
@@ -290,7 +290,7 @@ public class AboutService : IAboutService
     {
         var entity =
             await _repository.GetTeamMemberByIdAsync(id)
-            ?? throw new ResourceNotFoundException($"Membro {id} não encontrado.");
+            ?? throw new ResourceNotFoundException($"Membro {id} nÃ£o encontrado.");
 
         entity.Name = dto.Name;
         entity.Role = dto.Role;
@@ -299,10 +299,10 @@ public class AboutService : IAboutService
 
         if (dto.File != null)
         {
-            if (entity.FileId.HasValue)
+            if (!string.IsNullOrEmpty(entity.FileId))
             {
                 var arquivoAtualizado = await _fileService.SubstituirArquivoAsync(
-                    entity.FileId.Value,
+                    entity.FileId,
                     dto.File
                 );
                 entity.PhotoUrl = arquivoAtualizado.CaminhoRelativo;
@@ -327,11 +327,11 @@ public class AboutService : IAboutService
     {
         var entity =
             await _repository.GetTeamMemberByIdAsync(id)
-            ?? throw new ResourceNotFoundException($"Membro {id} não encontrado.");
+            ?? throw new ResourceNotFoundException($"Membro {id} nÃ£o encontrado.");
 
-        if (entity.FileId.HasValue)
+        if (!string.IsNullOrEmpty(entity.FileId))
         {
-            await _fileService.DeletarArquivoAsync(entity.FileId.Value);
+            await _fileService.DeletarArquivoAsync(entity.FileId);
         }
 
         await _repository.DeleteTeamMemberAsync(entity);
@@ -339,4 +339,8 @@ public class AboutService : IAboutService
         await _cache.RemoveAsync(ABOUT_CACHE_KEY);
     }
 }
+
+
+
+
 

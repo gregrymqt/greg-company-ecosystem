@@ -1,4 +1,4 @@
-using MeuCrudCsharp.Features.Base;
+﻿using MeuCrudCsharp.Features.Base;
 using MeuCrudCsharp.Features.MercadoPago.Claims.Application.Services;
 using MeuCrudCsharp.Features.MercadoPago.Claims.Application.ViewModels;
 using Microsoft.AspNetCore.Authorization;
@@ -29,8 +29,8 @@ public class AdminClaimsController : MercadoPagoApiControllerBase
         return Ok(result);
     }
 
-    [HttpGet("{id:long}")]
-    public async Task<IActionResult> GetClaimDetails(long id)
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetClaimDetails(string id)
     {
         try
         {
@@ -39,13 +39,13 @@ public class AdminClaimsController : MercadoPagoApiControllerBase
         }
         catch (Exception ex)
         {
-            return HandleException(ex, "Erro ao obter detalhes da reclamação.");
+            return HandleException(ex, "Erro ao obter detalhes da reclamaÃ§Ã£o.");
         }
     }
 
-    [HttpPost("{id:long}/reply")]
+    [HttpPost("{id}/reply")]
     public async Task<IActionResult> ReplyToClaim(
-        long id,
+        string id,
         [FromBody] MercadoPagoClaimsViewModels.ReplyClaimViewModel model
     )
     {
@@ -63,3 +63,5 @@ public class AdminClaimsController : MercadoPagoApiControllerBase
         }
     }
 }
+
+

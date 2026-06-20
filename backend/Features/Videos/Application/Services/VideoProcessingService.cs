@@ -50,7 +50,7 @@ public class VideoProcessingService : IVideoProcessingService
         _unitOfWork = unitOfWork;
     }
 
-    public async Task ProcessVideoToHlsAsync(int videoId, int fileId)
+    public async Task ProcessVideoToHlsAsync(string videoId, string fileId)
     {
         Video? video = null;
         var groupName = "";
@@ -217,3 +217,4 @@ public class VideoProcessingService : IVideoProcessingService
 
     }
 }
+

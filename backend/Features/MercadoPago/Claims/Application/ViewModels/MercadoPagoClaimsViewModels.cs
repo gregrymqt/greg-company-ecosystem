@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace MeuCrudCsharp.Features.MercadoPago.Claims.Application.ViewModels;
@@ -20,7 +20,7 @@ public class MercadoPagoClaimsViewModels
 
     public class ClaimSummaryViewModel
     {
-        public int InternalId { get; set; }
+        public string InternalId { get; set; }
 
         public long MpClaimId { get; set; }
 
@@ -39,7 +39,7 @@ public class MercadoPagoClaimsViewModels
 
     public class ClaimDetailViewModel
     {
-        public int InternalId { get; set; }
+        public string InternalId { get; set; }
         public long MpClaimId { get; set; }
 
         public string? Status { get; set; }
@@ -70,12 +70,13 @@ public class MercadoPagoClaimsViewModels
     public class ReplyClaimViewModel
     {
         [Required]
-        public long InternalId { get; set; }
+        public string InternalId { get; set; }
 
-        [Required(ErrorMessage = "A mensagem não pode ser vazia.")]
+        [Required(ErrorMessage = "A mensagem nÃ£o pode ser vazia.")]
         [MinLength(5, ErrorMessage = "Escreva uma resposta mais detalhada.")]
         public string? Message { get; set; }
 
         public List<string>? Attachments { get; set; }
     }
 }
+

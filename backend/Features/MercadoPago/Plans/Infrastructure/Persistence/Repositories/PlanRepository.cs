@@ -1,52 +1,67 @@
-using MeuCrudCsharp.Features.MercadoPago.Plans.Domain.Interfaces;
+﻿using MeuCrudCsharp.Features.MercadoPago.Plans.Domain.Interfaces;
 using MeuCrudCsharp.Data;
 using MeuCrudCsharp.Features.MercadoPago.Plans.Application.DTOs;
-using MeuCrudCsharp.Features.MercadoPago.Plans.Application.Interfaces;
 using MeuCrudCsharp.Models;
-using Microsoft.EntityFrameworkCore;
+using MongoDB.Driver;
+using MongoDB.Driver.Linq;
 
 namespace MeuCrudCsharp.Features.MercadoPago.Plans.Infrastructure.Persistence.Repositories;
 
-public class PlanRepository(ApiDbContext context) : IPlanRepository
+public class PlanRepository : IPlanRepository
 {
-    public async Task AddAsync(Plan plan) => await context.Plans.AddAsync(plan);
+    private readonly IMongoCollection<Plan> _plans;
 
-    public void Update(Plan plan) => context.Plans.Update(plan);
+    public PlanRepository(IMongoDbContext context)
+    {
+        _plans = context.GetCollection<Plan>("plans");
+    }
 
-    public void Remove(object payload) => context.Remove(payload);
+    public async Task AddAsync(Plan plan)
+    {
+        await _plans.InsertOneAsync(plan);
+    }
+
+    public void Update(Plan plan)
+    {
+        _plans.ReplaceOne(p => p.Id == plan.Id, plan);
+    }
+
+    public void Remove(object payload)
+    {
+        if (payload is Plan plan)
+        {
+            _plans.DeleteOne(p => p.Id == plan.Id);
+        }
+    }
 
     public async Task<Plan?> GetByPublicIdAsync(Guid publicId, bool asNoTracking = true)
     {
-        IQueryable<Plan> query = context.Plans;
-
-        if (asNoTracking)
-        {
-            query = query.AsNoTracking();
-        }
-
-        return await query.FirstOrDefaultAsync(p => p.PublicId == publicId);
+        return await _plans.Find(p => p.PublicId == publicId).FirstOrDefaultAsync();
     }
 
-    public async Task<Plan?> GetActiveByExternalIdAsync(string externalId) =>
-        await context
-            .Plans.AsNoTracking()
-            .FirstOrDefaultAsync(p => p.IsActive && p.ExternalPlanId == externalId);
+    public async Task<Plan?> GetActiveByExternalIdAsync(string externalId)
+    {
+        return await _plans.Find(p => p.IsActive && p.ExternalPlanId == externalId).FirstOrDefaultAsync();
+    }
 
     public async Task<PagedResultDto<Plan>> GetActivePlansAsync(int page, int pageSize)
     {
-        var query = context.Plans.AsNoTracking().Where(p => p.IsActive == true);
+        var filter = Builders<Plan>.Filter.Eq(p => p.IsActive, true);
+        
+        var totalCount = (int)await _plans.CountDocumentsAsync(filter);
 
-        var totalCount = await query.CountAsync();
-
-        var items = await query
-            .OrderBy(p => p.TransactionAmount)
+        var items = await _plans.Find(filter)
+            .SortBy(p => p.TransactionAmount)
             .Skip((page - 1) * pageSize)
-            .Take(pageSize)
+            .Limit(pageSize)
             .ToListAsync();
 
         return new PagedResultDto<Plan>(items, page, pageSize, totalCount);
     }
 
-    public async Task<List<Plan>> GetByExternalIdsAsync(IEnumerable<string> externalIds) =>
-        await context.Plans.Where(p => externalIds.Contains(p.ExternalPlanId)).ToListAsync();
+    public async Task<List<Plan>> GetByExternalIdsAsync(IEnumerable<string> externalIds)
+    {
+        var filter = Builders<Plan>.Filter.In(p => p.ExternalPlanId, externalIds);
+        return await _plans.Find(filter).ToListAsync();
+    }
 }

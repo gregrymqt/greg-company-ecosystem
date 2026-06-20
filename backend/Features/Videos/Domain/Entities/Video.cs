@@ -1,11 +1,15 @@
-using MeuCrudCsharp.Features.Courses.Domain.Entities;
+﻿using MeuCrudCsharp.Features.Courses.Domain.Entities;
 using MeuCrudCsharp.Features.Files.Domain.Entities;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace MeuCrudCsharp.Features.Videos.Domain.Entities;
 
 public class Video
 {
-    public int Id { get; set; }
+    [BsonId]
+    [BsonRepresentation(BsonType.ObjectId)]
+    public string Id { get; set; } = null!;
 
     public Guid PublicId { get; set; } = Guid.NewGuid();
 
@@ -24,11 +28,11 @@ public class Video
     // --- RELACIONAMENTOS ---
 
     // 1. Relacionamento com Curso
-    public int CourseId { get; set; }
+    public string CourseId { get; set; }
     public virtual Course? Course { get; set; }
 
     // 2. Relacionamento com Arquivo
-    public int FileId { get; set; }
+    public string FileId { get; set; }
     public virtual EntityFile? File { get; set; }
 
     // -----------------------
@@ -41,3 +45,7 @@ public class Video
         Status = VideoStatus.Processing;
     }
 }
+
+
+
+
