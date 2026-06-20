@@ -20,9 +20,8 @@ This is a **monorepo multi-service business suite** following a decoupled micro-
 Services and repositories are **auto-registered via Scrutor** by namespace scanning. When adding new features, create `Services/` and `Repositories/` folders strictly following the standard namespace pattern so they will be automatically discovered.
 
 ### Database & Background Jobs
-- **Primary DB:** SQL Server via EF Core. Migrations are managed from the `backend/` directory.
+- **Primary DB:** MongoDB via native `MongoDB.Driver`. It serves as the single source of truth for all structured and flexible data.
 - **Cache:** Redis for performance (`USE_REDIS` env var toggles it).
-- **NoSQL:** MongoDB for flexible document storage (e.g., Support tickets).
 - **Hangfire:** Handles all async processing (subscription renewals, MercadoPago webhooks).
 
 ## Frontends (React + TypeScript + Vite)
@@ -66,8 +65,7 @@ Images are published to GHCR using both `latest` and `${{ github.sha }}` tagging
 ### Backend Feature
 1. Create folder under `backend/Features/{FeatureName}/`
 2. Add subfolders: `Controllers/`, `Services/`, `Repositories/`, `DTOs/`, `Interfaces/`.
-3. Add DbSet to `backend/Data/ApiDbContext.cs` if it introduces a new entity.
-4. Create migration by running EF core CLI from the `backend/` directory.
+3. Implement the MongoDB collection repository or add it to your unified context.
 
 ### Frontend Feature
 1. Determine if the feature belongs to `portal/`, `admin/`, or both (e.g., `Payment` goes to both).
@@ -76,7 +74,7 @@ Images are published to GHCR using both `latest` and `${{ github.sha }}` tagging
 
 ## Key Files Reference
 - Backend entry: [backend/Program.cs](backend/Program.cs)
-- DB context: [backend/Data/ApiDbContext.cs](backend/Data/ApiDbContext.cs)
+- Identity Persistence: [backend/Extensions/Services/Persistence/IdentityServicesExtensions.cs](backend/Extensions/Services/Persistence/IdentityServicesExtensions.cs)
 - Portal entry: [portal/src/main.tsx](portal/src/main.tsx)
 - Admin entry: [admin/src/main.tsx](admin/src/main.tsx)
 - Infra config: [infra/docker-compose.yml](infra/docker-compose.yml)

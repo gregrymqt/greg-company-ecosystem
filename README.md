@@ -14,8 +14,7 @@ Ecossistema completo para gestão de cursos online com sistema integrado de paga
 
 *   **Backend (API & BI):** ASP.NET 8 (C#) para APIs RESTful e processamento de métricas e lógica de BI.
 *   **Frontends (Micro-frontends):** React com TypeScript e Vite. Dividido em dois projetos isolados: `portal` (vitrine) e `admin` (gestão).
-*   **Banco de Dados:** SQL Server para persistência de dados estruturados.
-*   **MongoDB:** Armazenamento NoSQL para dados flexíveis e documentos de suporte.
+*   **Banco de Dados:** MongoDB nativo (`MongoDB.Driver`) como banco de dados principal e *Single Source of Truth* para toda a plataforma.
 *   **Cache:** Redis para caching de alta performance.
 *   **Pagamentos:** Integração completa com MercadoPago (Checkout Pro, Webhooks, PIX e Assinaturas).
 *   **Jobs em Background:** Hangfire para processamento de tarefas assíncronas (ex: renovação de assinaturas).
@@ -94,7 +93,7 @@ greg-company-ecosystem/
 ├── backend/                   # .NET 8 API & BI Processing
 │   ├── Features/              # Vertical Slices (Auth, Courses, MercadoPago, Analytics, etc.)
 │   ├── Extensions/            # DI, Auth, Persistence config
-│   ├── Data/                  # DbContext, Migrations
+│   ├── Models/                # Entidades e Value Objects
 │   ├── Program.cs             # Entry point
 │   ├── docker-compose.yml     # Orquestração local do backend
 │   └── docker-compose.test.yml# Orquestração para a suíte de testes
@@ -124,8 +123,8 @@ greg-company-ecosystem/
 Configure no arquivo `.env`:
 
 ```env
-# Database
-ConnectionStrings__DefaultConnection=Server=localhost,1433;Database=GregCompany;...
+# MongoDB Connection
+MONGO_DATABASE_NAME=GregCompanyMongo
 
 # MercadoPago
 MERCADOPAGO_ACCESS_TOKEN=your_access_token
