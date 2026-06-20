@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using MeuCrudCsharp.Models;
 using MeuCrudCsharp.Features.Files.Domain.Entities;
 
@@ -6,8 +6,9 @@ namespace MeuCrudCsharp.Features.Files.Domain.Interfaces;
 
 public interface IFileRepository
 {
-    Task<EntityFile?> GetByIdAsync(int id);
+    Task<EntityFile?> GetByIdAsync(string id);
     Task AddAsync(EntityFile arquivo);
     Task UpdateAsync(EntityFile arquivo);
     Task DeleteAsync(EntityFile arquivo);
 }
+

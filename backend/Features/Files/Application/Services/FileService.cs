@@ -1,4 +1,4 @@
-﻿using MeuCrudCsharp.Features.Exceptions;
+using MeuCrudCsharp.Features.Exceptions;
 using MeuCrudCsharp.Features.Files.Application.Interfaces;
 using MeuCrudCsharp.Features.Files.Domain.Interfaces;
 using MeuCrudCsharp.Features.Shared.Domain.Interfaces;
@@ -91,7 +91,7 @@ public class FileService(
         try
         {
             if (!File.Exists(tempPath))
-                throw new FileNotFoundException("Arquivo temporÃ¡rio nÃ£o encontrado.", tempPath);
+                throw new FileNotFoundException("Arquivo temporário não encontrado.", tempPath);
 
             var novoNome = $"{Guid.NewGuid()}_{nomeOriginal}";
             caminhoFinalFisico = GerarCaminhoFisico(categoria, novoNome);
@@ -134,7 +134,7 @@ public class FileService(
     }
 
     public async Task<EntityFile> SubstituirArquivoDoTempAsync(
-        int fileId,
+        string fileId,
         string tempPath,
         string nomeOriginal
     )
@@ -147,7 +147,7 @@ public class FileService(
         {
             var arquivoBanco = await repository.GetByIdAsync(fileId);
             if (arquivoBanco == null)
-                throw new ResourceNotFoundException($"Arquivo ID {fileId} nÃ£o encontrado.");
+                throw new ResourceNotFoundException($"Arquivo ID {fileId} não encontrado.");
 
             caminhoAntigoFisico = Path.Combine(
                 environment.WebRootPath,
@@ -164,7 +164,7 @@ public class FileService(
 
             if (!File.Exists(tempPath))
             {
-                throw new FileNotFoundException("Arquivo temporÃ¡rio sumiu antes de mover.");
+                throw new FileNotFoundException("Arquivo temporário sumiu antes de mover.");
             }
 
             File.Move(tempPath, novoCaminhoFisico);
@@ -267,7 +267,7 @@ public class FileService(
         }
     }
 
-    public async Task<EntityFile> SubstituirArquivoAsync(int idArquivoAntigo, IFormFile novoArquivo)
+    public async Task<EntityFile> SubstituirArquivoAsync(string idArquivoAntigo, IFormFile novoArquivo)
     {
         string? caminhoAntigo = null;
         string? novoCaminho = null;
@@ -277,7 +277,7 @@ public class FileService(
         {
             var arquivoBanco = await repository.GetByIdAsync(idArquivoAntigo);
             if (arquivoBanco == null)
-                throw new ResourceNotFoundException("Arquivo antigo nÃ£o encontrado.");
+                throw new ResourceNotFoundException("Arquivo antigo não encontrado.");
 
             caminhoAntigo = Path.Combine(environment.WebRootPath, arquivoBanco.CaminhoRelativo);
             if (File.Exists(caminhoAntigo))
@@ -336,7 +336,7 @@ public class FileService(
         }
     }
 
-    public async Task DeletarArquivoAsync(int id)
+    public async Task DeletarArquivoAsync(string id)
     {
         var arquivo = await repository.GetByIdAsync(id);
         if (arquivo != null)
@@ -350,3 +350,4 @@ public class FileService(
         }
     }
 }
+

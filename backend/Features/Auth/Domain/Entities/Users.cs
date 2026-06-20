@@ -9,7 +9,7 @@ public class Users : IdentityUser
     public string? Name { get; set; }
 
     // --- IMAGENS ---
-    public int? AvatarFileId { get; set; }
+    public string? AvatarFileId { get; set; }
     public string? AvatarUrl { get; set; }
 
     // --- Autenticação Externa ---

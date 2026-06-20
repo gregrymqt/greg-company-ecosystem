@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using MeuCrudCsharp.Models;
 using MeuCrudCsharp.Features.Files.Domain.Entities;
 
@@ -19,9 +19,10 @@ public interface IFileService
         string categoria
     );
 
-    Task<EntityFile> SubstituirArquivoDoTempAsync(int fileId, string tempPath, string nomeOriginal);
+    Task<EntityFile> SubstituirArquivoDoTempAsync(string fileId, string tempPath, string nomeOriginal);
 
     Task<EntityFile> SalvarArquivoAsync(IFormFile arquivo, string featureCategoria);
-    Task<EntityFile> SubstituirArquivoAsync(int idArquivoAntigo, IFormFile novoArquivo);
-    Task DeletarArquivoAsync(int id);
+    Task<EntityFile> SubstituirArquivoAsync(string idArquivoAntigo, IFormFile novoArquivo);
+    Task DeletarArquivoAsync(string id);
 }
+
