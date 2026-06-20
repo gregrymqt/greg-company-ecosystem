@@ -11,9 +11,9 @@ metadata:
 spec:
   type: NodePort # <--- Adicionado
   ports:
-  - port: 27017
-    targetPort: 27017
-    nodePort: 32017 # <--- Bate com a containerPort do kind-config
+    - port: 27017
+      targetPort: 27017
+      nodePort: 32017 # <--- Bate com a containerPort do kind-config
   selector:
     app: mongodb-store
 ---

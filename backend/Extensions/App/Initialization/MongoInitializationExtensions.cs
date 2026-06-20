@@ -1,8 +1,8 @@
 using System.Reflection;
-using MeuCrudCsharp.Documents.Attributes;
-using MeuCrudCsharp.Documents.Interfaces;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using MeuCrudCsharp.Documents.Interfaces;
+using MeuCrudCsharp.Documents.Attributes;
 
 namespace MeuCrudCsharp.Extensions.App.Initialization;
 

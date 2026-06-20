@@ -12,7 +12,6 @@ public static class CentralAppExtensions
     public static async Task<WebApplication> ConfigureAppPipeline(this WebApplication app)
     {
         // 1. FASE DE INICIALIZAÇÃO (BOOTSTRAPPING)
-        await app.InitializeSqlDatabaseAsync();
         await app.InitializeMongoIndexesAsync();
 
         // 2. FASE DE MIDDLEWARES (PIPELINE HTTP)

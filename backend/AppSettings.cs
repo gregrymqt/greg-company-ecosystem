@@ -41,3 +41,11 @@ public class FFmpegSettings
     public string FfmpegPath { get; set; } = string.Empty;
     public string FfprobePath { get; set; } = string.Empty;
 }
+
+public class MongoDbSettings
+{
+    public string ConnectionString { get; set; } = null!;
+    public string DatabaseName { get; set; } = null!;
+    public string WriteConcern { get; set; } = "Majority";
+    public bool Journal { get; set; } = true;
+}

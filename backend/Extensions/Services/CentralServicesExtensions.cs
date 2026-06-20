@@ -18,7 +18,6 @@ public static class CentralServicesExtensions
             .AddSwaggerServices()
             .AddSignalRServices()
             .AddInfrastructureComponents()
-            .AddPostgrePersistence()
             .AddIdentityPersistence()
             .AddMongoPersistence()
             .AddDistributedServices()

@@ -1,58 +1,46 @@
-import { Form } from '@/components/Form/Form';
-import { useLoginForm } from '@/features/auth/hooks/useLoginForm';
-import { Eye, EyeOff } from 'lucide-react';
+// LoginForm.tsx - CORRIGIDO
+import { type FC } from 'react';
+import { useForm } from 'react-hook-form';
+import * as yup from 'yup';
 import styles from '../styles/LoginForm.module.scss';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { Form } from '@/components/Form';
 
-export const LoginForm = () => {
-  const { formMethods, onSubmit, showPassword, toggleShowPassword, handleForgotPassword } = useLoginForm();
+const loginSchema = yup.object({
+  email: yup.string().required('E-mail é obrigatório').email('E-mail inválido'),
+  password: yup.string().required('Senha é obrigatória').min(6, 'A senha deve ter pelo menos 6 caracteres'),
+});
+
+type LoginFormValues = yup.InferType<typeof loginSchema>;
+
+export const LoginForm: FC = () => {
+  const methods = useForm<LoginFormValues>({
+    resolver: yupResolver(loginSchema),
+    defaultValues: { email: '', password: '' },
+  });
+
+  const onSubmit = (data: LoginFormValues) => {
+    console.log('Dados do login:', data);
+  };
 
   return (
-    <div className={styles.loginForm}>
-      <h2 className={styles.title}>Entrar</h2>
-      
-      <Form formMethods={formMethods} onSubmit={onSubmit}>
-        <Form.Input
-          name="email"
-          label="Email"
-          type="email"
-          placeholder="seu@email.com"
-        />
+    <Form onSubmit={onSubmit} formMethods={methods} className={styles.loginForm}>
+      <Form.Input name="email" label="E-mail" placeholder="seu.email@exemplo.com" />
+      <Form.Input name="password" label="Senha" placeholder="••••••••" type="password" />
 
-        <div className={styles.passwordWrapper}>
-          <Form.Input
-            name="password"
-            label="Senha"
-            type={showPassword ? 'text' : 'password'}
-            placeholder="••••••••"
-          />
-          <button
-            type="button"
-            className={styles.passwordToggle}
-            onClick={toggleShowPassword}
-            aria-label="Alternar visibilidade da senha"
-          >
-            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-          </button>
+      <div className={styles.actions}>
+        {/* CORREÇÃO: Reativado o uso da classe submitButton */}
+        <Form.Submit className={styles.submitButton}>Entrar</Form.Submit>
+
+        <div className={styles.divider}>
+          <span>ou</span>
         </div>
 
-        <div className={styles.forgotPasswordWrapper}>
-          <a href="#" className={styles.forgotPassword} onClick={handleForgotPassword}>
-            Esqueci minha senha
-          </a>
-        </div>
-
-        {formMethods.formState.errors.root && (
-          <div className={styles.error}>
-            {formMethods.formState.errors.root.message}
-          </div>
-        )}
-
-        <Form.Actions>
-          <Form.Submit isLoading={formMethods.formState.isSubmitting} className={styles.submitButton}>
-            Entrar
-          </Form.Submit>
-        </Form.Actions>
-      </Form>
-    </div>
+        <a href="/login/google" className={styles.googleButton}>
+          <img src="/google.svg" alt="Google" />
+          Continuar com o Google
+        </a>
+      </div>
+    </Form>
   );
 };
