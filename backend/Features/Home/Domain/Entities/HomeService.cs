@@ -1,8 +1,13 @@
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
+
 namespace MeuCrudCsharp.Features.Home.Domain.Entities;
 
 public class HomeServiceEntry
 {
-    public int Id { get; set; }
+    [BsonId]
+    [BsonRepresentation(BsonType.ObjectId)]
+    public string Id { get; set; } = null!;
 
     public string IconClass { get; set; } = string.Empty;
 
@@ -14,3 +19,4 @@ public class HomeServiceEntry
 
     public string ActionUrl { get; set; } = string.Empty;
 }
+

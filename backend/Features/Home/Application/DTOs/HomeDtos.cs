@@ -16,7 +16,7 @@ public class HomeContentDto
 
 public class HeroSlideDto
 {
-    public int Id { get; set; }
+    public string id { get; set; }
     public string ImageUrl { get; set; } = string.Empty;
     public string Title { get; set; } = string.Empty;
     public string Subtitle { get; set; } = string.Empty;
@@ -26,7 +26,7 @@ public class HeroSlideDto
 
 public class ServiceDto
 {
-    public int Id { get; set; }
+    public string id { get; set; }
     public string IconClass { get; set; } = string.Empty;
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
@@ -50,3 +50,4 @@ public class CreateUpdateServiceDto
     public string ActionText { get; set; } = string.Empty;
     public string ActionUrl { get; set; } = string.Empty;
 }
+

@@ -62,7 +62,7 @@ public class HomeService(
     public async Task<HeroSlideDto?> CreateHeroAsync(CreateUpdateHeroDto dto)
     {
         var imageUrl = string.Empty;
-        int? fileId = null;
+        string? fileId = null;
 
         if (dto is { IsChunk: true, File: not null })
         {
@@ -120,7 +120,7 @@ public class HomeService(
         };
     }
 
-    public async Task<bool> UpdateHeroAsync(int id, CreateUpdateHeroDto dto)
+    public async Task<bool> UpdateHeroAsync(string id, CreateUpdateHeroDto dto)
     {
         var entity = await repository.GetHeroByIdAsync(id);
         if (entity == null)
@@ -196,7 +196,7 @@ public class HomeService(
         return true;
     }
 
-    public async Task DeleteHeroAsync(int id)
+    public async Task DeleteHeroAsync(string id)
     {
         var entity = await repository.GetHeroByIdAsync(id);
         if (entity == null)
@@ -238,7 +238,7 @@ public class HomeService(
         };
     }
 
-    public async Task UpdateServiceAsync(int id, CreateUpdateServiceDto dto)
+    public async Task UpdateServiceAsync(string id, CreateUpdateServiceDto dto)
     {
         var entity = await repository.GetServiceByIdAsync(id);
         if (entity == null)
@@ -255,7 +255,7 @@ public class HomeService(
         await cache.RemoveAsync(HOME_CACHE_KEY);
     }
 
-    public async Task DeleteServiceAsync(int id)
+    public async Task DeleteServiceAsync(string id)
     {
         var entity = await repository.GetServiceByIdAsync(id);
         if (entity == null)
@@ -266,3 +266,4 @@ public class HomeService(
         await cache.RemoveAsync(HOME_CACHE_KEY);
     }
 }
+

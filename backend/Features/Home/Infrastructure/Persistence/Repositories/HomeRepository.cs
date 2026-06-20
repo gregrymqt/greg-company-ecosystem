@@ -1,71 +1,70 @@
+using System;
 using MeuCrudCsharp.Data;
-using MeuCrudCsharp.Features.Home.Domain.Interfaces;
-using MeuCrudCsharp.Models;
 using MeuCrudCsharp.Features.Home.Domain.Entities;
-using Microsoft.EntityFrameworkCore;
+using MeuCrudCsharp.Features.Home.Domain.Interfaces;
+using MongoDB.Driver;
+using MongoDB.Driver.Linq;
 
 namespace MeuCrudCsharp.Features.Home.Infrastructure.Persistence.Repositories;
 
 public class HomeRepository : IHomeRepository
 {
-    private readonly ApiDbContext _context;
+    private readonly IMongoCollection<HomeHero> _homeHeroes;
+    private readonly IMongoCollection<HomeServiceEntry> _homeServices;
 
-    public HomeRepository(ApiDbContext context)
+    public HomeRepository(IMongoDbContext context)
     {
-        _context = context;
+        _homeHeroes = context.GetCollection<HomeHero>("home_heroes");
+        _homeServices = context.GetCollection<HomeServiceEntry>("home_services");
     }
 
     public async Task<List<HomeHero>> GetAllHeroesAsync()
     {
-        return await _context.HomeHeroes.AsNoTracking().ToListAsync();
+        return await _homeHeroes.Find(FilterDefinition<HomeHero>.Empty).ToListAsync();
     }
 
-    public async Task<HomeHero?> GetHeroByIdAsync(int id)
+    public async Task<HomeHero?> GetHeroByIdAsync(string id)
     {
-        return await _context.HomeHeroes.FindAsync(id);
+        return await _homeHeroes.Find(h => h.Id == id).FirstOrDefaultAsync();
     }
 
     public async Task AddHeroAsync(HomeHero hero)
     {
-        await _context.HomeHeroes.AddAsync(hero);
+        await _homeHeroes.InsertOneAsync(hero);
     }
 
-    public Task UpdateHeroAsync(HomeHero hero)
+    public async Task UpdateHeroAsync(HomeHero hero)
     {
-        _context.HomeHeroes.Update(hero);
-        return Task.CompletedTask;
+        await _homeHeroes.ReplaceOneAsync(h => h.Id == hero.Id, hero);
     }
 
-    public Task DeleteHeroAsync(HomeHero hero)
+    public async Task DeleteHeroAsync(HomeHero hero)
     {
-        _context.HomeHeroes.Remove(hero);
-        return Task.CompletedTask;
+        await _homeHeroes.DeleteOneAsync(h => h.Id == hero.Id);
     }
 
     public async Task<List<HomeServiceEntry>> GetAllServicesAsync()
     {
-        return await _context.HomeServices.AsNoTracking().ToListAsync();
+        return await _homeServices.Find(FilterDefinition<HomeServiceEntry>.Empty).ToListAsync();
     }
 
-    public async Task<HomeServiceEntry?> GetServiceByIdAsync(int id)
+    public async Task<HomeServiceEntry?> GetServiceByIdAsync(string id)
     {
-        return await _context.HomeServices.FindAsync(id);
+        return await _homeServices.Find(s => s.Id == id).FirstOrDefaultAsync();
     }
 
     public async Task AddServiceAsync(HomeServiceEntry service)
     {
-        await _context.HomeServices.AddAsync(service);
+        await _homeServices.InsertOneAsync(service);
     }
 
-    public Task UpdateServiceAsync(HomeServiceEntry service)
+    public async Task UpdateServiceAsync(HomeServiceEntry service)
     {
-        _context.HomeServices.Update(service);
-        return Task.CompletedTask;
+        await _homeServices.ReplaceOneAsync(s => s.Id == service.Id, service);
     }
 
-    public Task DeleteServiceAsync(HomeServiceEntry service)
+    public async Task DeleteServiceAsync(HomeServiceEntry service)
     {
-        _context.HomeServices.Remove(service);
-        return Task.CompletedTask;
+        await _homeServices.DeleteOneAsync(s => s.Id == service.Id);
     }
 }
