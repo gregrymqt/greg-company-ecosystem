@@ -1,6 +1,11 @@
-﻿using MeuCrudCsharp.Data;
+using MeuCrudCsharp.Data;
 using MeuCrudCsharp.Features.MercadoPago.Chargebacks.Domain.Interfaces;
-using MeuCrudCsharp.Models;
+using MeuCrudCsharp.Features.MercadoPago.Chargebacks.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Plans.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Entities;
+using MeuCrudCsharp.Features.Shared.Domain.Entities;
 using MeuCrudCsharp.Features.Auth.Domain.Entities;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
@@ -95,3 +100,4 @@ public class ChargebackRepository : IChargebackRepository
         _chargebacks.ReplaceOne(c => c.Id == chargeback.Id, chargeback);
     }
 }
+

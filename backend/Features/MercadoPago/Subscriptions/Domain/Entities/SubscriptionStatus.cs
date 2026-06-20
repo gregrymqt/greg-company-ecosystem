@@ -1,6 +1,6 @@
 using System;
 
-namespace MeuCrudCsharp.Models.Enums;
+namespace MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Entities;
 
 public enum SubscriptionStatus
 {

@@ -1,7 +1,12 @@
-﻿using MeuCrudCsharp.Data;
+using MeuCrudCsharp.Data;
 using MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Interfaces;
-using MeuCrudCsharp.Models;
-using MeuCrudCsharp.Models.Enums;
+using MeuCrudCsharp.Features.MercadoPago.Chargebacks.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Plans.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Entities;
+using MeuCrudCsharp.Features.Shared.Domain.Entities;
+
 using MeuCrudCsharp.Features.Auth.Domain.Entities;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
@@ -10,16 +15,16 @@ namespace MeuCrudCsharp.Features.MercadoPago.Claims.Infrastructure.Persistence.R
 
 public class ClaimRepository : IClaimRepository
 {
-    private readonly IMongoCollection<Models.Claims> _claims;
+    private readonly IMongoCollection<MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities.Claims> _claims;
     private readonly IMongoCollection<Users> _users;
 
     public ClaimRepository(IMongoDbContext context)
     {
-        _claims = context.GetCollection<Models.Claims>("claims");
+        _claims = context.GetCollection<MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities.Claims>("claims");
         _users = context.GetCollection<Users>("users");
     }
 
-    public async Task<Models.Claims?> GetByIdAsync(string id)
+    public async Task<MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities.Claims?> GetByIdAsync(string id)
     {
         var claim = await _claims.Find(c => c.Id == id).FirstOrDefaultAsync();
         if (claim != null && !string.IsNullOrEmpty(claim.UserId))
@@ -29,14 +34,14 @@ public class ClaimRepository : IClaimRepository
         return claim;
     }
 
-    public async Task<(List<Models.Claims> Claims, int TotalCount)> GetPaginatedClaimsAsync(
+    public async Task<(List<MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities.Claims> Claims, int TotalCount)> GetPaginatedClaimsAsync(
         string? searchTerm,
         string? statusFilter,
         int page,
         int pageSize
     )
     {
-        var builder = Builders<Models.Claims>.Filter;
+        var builder = Builders<MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities.Claims>.Filter;
         var filter = builder.Empty;
 
         if (!string.IsNullOrEmpty(searchTerm))
@@ -82,18 +87,18 @@ public class ClaimRepository : IClaimRepository
         return (claims, totalCount);
     }
 
-    public void UpdateClaimStatus(Models.Claims claim, InternalClaimStatus newStatus)
+    public void UpdateClaimStatus(MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities.Claims claim, InternalClaimStatus newStatus)
     {
         claim.Status = newStatus;
         _claims.ReplaceOne(c => c.Id == claim.Id, claim);
     }
 
-    public void Update(Models.Claims claim)
+    public void Update(MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities.Claims claim)
     {
         _claims.ReplaceOne(c => c.Id == claim.Id, claim);
     }
 
-    public async Task AddAsync(Models.Claims claim)
+    public async Task AddAsync(MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities.Claims claim)
     {
         await _claims.InsertOneAsync(claim);
     }
@@ -103,15 +108,19 @@ public class ClaimRepository : IClaimRepository
         return await _claims.Find(c => c.MpClaimId == mpClaimId).AnyAsync();
     }
 
-    public async Task<Models.Claims?> GetByMpClaimIdAsync(long mpClaimId)
+    public async Task<MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities.Claims?> GetByMpClaimIdAsync(long mpClaimId)
     {
         return await _claims.Find(c => c.MpClaimId == mpClaimId).FirstOrDefaultAsync();
     }
 
-    public async Task<List<Models.Claims>> GetClaimsByUserIdAsync(string userId)
+    public async Task<List<MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities.Claims>> GetClaimsByUserIdAsync(string userId)
     {
         return await _claims.Find(c => c.UserId == userId)
             .SortByDescending(c => c.DataCreated)
             .ToListAsync();
     }
 }
+
+
+
+

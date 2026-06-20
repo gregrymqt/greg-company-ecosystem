@@ -170,7 +170,7 @@ namespace MeuCrudCsharp.Features.MercadoPago.Payments.Application.Services
                     new PaymentStatusUpdate("A processar o seu pagamento...", "processing", false)
                 );
 
-                var novoPagamento = new Models.Payments()
+                var novoPagamento = new MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities.Payments()
                 {
                     UserId = userId,
                     Status = "iniciando",
@@ -417,3 +417,5 @@ namespace MeuCrudCsharp.Features.MercadoPago.Payments.Application.Services
         }
     }
 }
+
+

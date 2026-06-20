@@ -7,7 +7,12 @@ using MeuCrudCsharp.Features.MercadoPago.Plans.Application.Mappers;
 using MeuCrudCsharp.Features.MercadoPago.Plans.Application.Utils;
 using MeuCrudCsharp.Features.Shared.Domain.Interfaces;
 using MeuCrudCsharp.Features.Shared.Infrastructure.Persistence;
-using MeuCrudCsharp.Models;
+using MeuCrudCsharp.Features.MercadoPago.Chargebacks.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Plans.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Entities;
+using MeuCrudCsharp.Features.Shared.Domain.Entities;
 using Microsoft.Extensions.Options;
 
 namespace MeuCrudCsharp.Features.MercadoPago.Plans.Application.Services
@@ -336,3 +341,4 @@ namespace MeuCrudCsharp.Features.MercadoPago.Plans.Application.Services
         }
     }
 }
+

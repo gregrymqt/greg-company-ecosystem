@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using Models;
+
 
 public class JwtService : IJwtService
 {
@@ -109,3 +109,4 @@ public class JwtService : IJwtService
         return (tokenString, expires);
     }
 }
+

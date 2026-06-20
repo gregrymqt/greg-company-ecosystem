@@ -8,7 +8,12 @@ using MeuCrudCsharp.Features.Shared.Infrastructure.Persistence;
 using MeuCrudCsharp.Features.Videos.Application.DTOs;
 using MeuCrudCsharp.Features.Videos.Application.Interfaces;
 using MeuCrudCsharp.Features.Videos.Application.Utils;
-using MeuCrudCsharp.Models;
+using MeuCrudCsharp.Features.MercadoPago.Chargebacks.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Plans.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Entities;
+using MeuCrudCsharp.Features.Shared.Domain.Entities;
 using MeuCrudCsharp.Features.Videos.Domain.Entities;
 
 namespace MeuCrudCsharp.Features.Videos.Application.Services;
@@ -251,6 +256,7 @@ public class AdminVideoService : IAdminVideoService
         }
     }
 }
+
 
 
 

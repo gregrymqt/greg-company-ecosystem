@@ -6,7 +6,12 @@ using MeuCrudCsharp.Features.Auth.Application.Interfaces;
 using MeuCrudCsharp.Features.Base;
 using MeuCrudCsharp.Features.Caching.Application.Interfaces;
 using MeuCrudCsharp.Features.Exceptions;
-using MeuCrudCsharp.Models;
+using MeuCrudCsharp.Features.MercadoPago.Chargebacks.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Plans.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Entities;
+using MeuCrudCsharp.Features.Shared.Domain.Entities;
 using MeuCrudCsharp.Features.Auth.Domain.Entities;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
@@ -178,3 +183,4 @@ namespace MeuCrudCsharp.Features.Auth.Presentation.Controllers
         }
     }
 }
+

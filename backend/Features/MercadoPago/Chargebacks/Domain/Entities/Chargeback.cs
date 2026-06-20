@@ -1,3 +1,9 @@
+using MeuCrudCsharp.Features.MercadoPago.Chargebacks.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Plans.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Entities;
+using MeuCrudCsharp.Features.Shared.Domain.Entities;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using MeuCrudCsharp.Features.Auth.Domain.Entities;
@@ -6,7 +12,7 @@ using MeuCrudCsharp.Data.Configuration.Attributes;
 using System.ComponentModel.DataAnnotations;
 using System;
 
-namespace MeuCrudCsharp.Models;
+namespace MeuCrudCsharp.Features.MercadoPago.Chargebacks.Domain.Entities;
 
 /// <summary>
 /// Define o status interno de um chargeback para acompanhamento.
@@ -78,3 +84,4 @@ public class Chargeback : IMongoDocument
     /// </summary>
     public string? InternalNotes { get; set; }
 }
+

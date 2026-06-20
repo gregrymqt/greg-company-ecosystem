@@ -1,7 +1,8 @@
+using MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
-using MeuCrudCsharp.Models.Enums;
+
 
 namespace MeuCrudCsharp.Features.MercadoPago.Claims.Application.DTOs
 {
@@ -122,3 +123,4 @@ namespace MeuCrudCsharp.Features.MercadoPago.Claims.Application.DTOs
         }
     }
 }
+

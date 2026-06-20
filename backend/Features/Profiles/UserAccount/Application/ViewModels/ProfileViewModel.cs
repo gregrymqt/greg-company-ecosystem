@@ -11,7 +11,10 @@ namespace MeuCrudCsharp.Features.Profiles.UserAccount.Application.ViewModels
 
         public SubscriptionDetailsDto? Subscription { get; set; }
 
-        public IEnumerable<Models.Payments> PaymentHistory { get; set; } =
-            Enumerable.Empty<Models.Payments>();
+        public IEnumerable<MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities.Payments> PaymentHistory { get; set; } =
+            Enumerable.Empty<MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities.Payments>();
     }
 }
+
+
+

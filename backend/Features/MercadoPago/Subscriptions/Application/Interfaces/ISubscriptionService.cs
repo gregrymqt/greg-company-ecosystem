@@ -3,7 +3,12 @@ using System.Threading.Tasks;
 using MeuCrudCsharp.Features.Exceptions;
 using MeuCrudCsharp.Features.MercadoPago.Clients.Application.DTOs;
 using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Application.DTOs;
-using MeuCrudCsharp.Models;
+using MeuCrudCsharp.Features.MercadoPago.Chargebacks.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Plans.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Entities;
+using MeuCrudCsharp.Features.Shared.Domain.Entities;
 
 namespace MeuCrudCsharp.Features.MercadoPago.Subscriptions.Application.Interfaces
 {
@@ -38,3 +43,4 @@ namespace MeuCrudCsharp.Features.MercadoPago.Subscriptions.Application.Interface
         );
     }
 }
+

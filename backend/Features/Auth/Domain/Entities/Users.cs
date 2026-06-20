@@ -1,5 +1,10 @@
-﻿using Microsoft.AspNetCore.Identity;
-using MeuCrudCsharp.Models; // Temp for Payments and Subscription
+using Microsoft.AspNetCore.Identity;
+using MeuCrudCsharp.Features.MercadoPago.Chargebacks.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Plans.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Entities;
+using MeuCrudCsharp.Features.Shared.Domain.Entities; // Temp for Payments and Subscription
 
 namespace MeuCrudCsharp.Features.Auth.Domain.Entities;
 
@@ -12,7 +17,7 @@ public class Users : AspNetCore.Identity.Mongo.Model.MongoUser<string>
     public string? AvatarFileId { get; set; }
     public string? AvatarUrl { get; set; }
 
-    // --- AutenticaÃ§Ã£o Externa ---
+    // --- Autenticação Externa ---
     public string? GoogleId { get; set; }
     public string? CustomerId { get; set; }
 
@@ -20,4 +25,5 @@ public class Users : AspNetCore.Identity.Mongo.Model.MongoUser<string>
     public virtual Subscription? Subscription { get; set; }
     public virtual ICollection<Payments> Payments { get; set; } = new List<Payments>();
 }
+
 

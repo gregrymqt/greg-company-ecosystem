@@ -9,7 +9,12 @@ using MeuCrudCsharp.Features.MercadoPago.Payments.Application.DTOs;
 using MeuCrudCsharp.Features.MercadoPago.Payments.Application.Interfaces;
 using MeuCrudCsharp.Features.Shared.Domain.Interfaces;
 using MeuCrudCsharp.Features.Shared.Infrastructure.Persistence;
-using MeuCrudCsharp.Models;
+using MeuCrudCsharp.Features.MercadoPago.Chargebacks.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Plans.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Entities;
+using MeuCrudCsharp.Features.Shared.Domain.Entities;
 
 namespace MeuCrudCsharp.Features.MercadoPago.Payments.Application.Services;
 
@@ -40,7 +45,7 @@ public class PreferencePaymentService(
 
         try
         {
-            var initialPayment = new Models.Payments
+            var initialPayment = new MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities.Payments
             {
                 UserId = user.Id,
                 Status = "pending",
@@ -115,3 +120,6 @@ public class PreferencePaymentService(
         }
     }
 }
+
+
+

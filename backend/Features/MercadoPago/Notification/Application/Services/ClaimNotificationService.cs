@@ -7,9 +7,14 @@ using MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Interfaces;
 using MeuCrudCsharp.Features.Emails.Application.Interfaces;
 using MeuCrudCsharp.Features.MercadoPago.Notification.Application.Interfaces;
 using MeuCrudCsharp.Features.Emails.Application.ViewModels;
-using MeuCrudCsharp.Models;
+using MeuCrudCsharp.Features.MercadoPago.Chargebacks.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Plans.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Entities;
+using MeuCrudCsharp.Features.Shared.Domain.Entities;
 using MeuCrudCsharp.Features.Auth.Domain.Entities;
-using MeuCrudCsharp.Models.Enums;
+
 using MeuCrudCsharp.Features.Shared.Domain.Interfaces;
 using MeuCrudCsharp.Features.Shared.Infrastructure.Persistence;
 using MeuCrudCsharp.Features.MercadoPago.Payments.Application.Interfaces;
@@ -84,7 +89,7 @@ public class ClaimNotificationService(
 
             if (existingClaim == null)
             {
-                var newClaimRecord = new Models.Claims
+                var newClaimRecord = new MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities.Claims
                 {
                     MpClaimId = mpClaimId,
                     ResourceId = resourceId,
@@ -190,3 +195,6 @@ public class ClaimNotificationService(
     }
 
 }
+
+
+

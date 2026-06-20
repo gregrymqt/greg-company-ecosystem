@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
-namespace MeuCrudCsharp.Models.Enums
+namespace MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities
 {
     // Baseado em 
     public enum ClaimResource

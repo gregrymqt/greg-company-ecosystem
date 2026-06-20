@@ -1,6 +1,11 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using MeuCrudCsharp.Features.Auth.Application.DTOs;
-using MeuCrudCsharp.Models; using MeuCrudCsharp.Features.Auth.Domain.Entities; // Substitua pelo seu namespace
+using MeuCrudCsharp.Features.MercadoPago.Chargebacks.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Plans.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Entities;
+using MeuCrudCsharp.Features.Shared.Domain.Entities; using MeuCrudCsharp.Features.Auth.Domain.Entities; // Substitua pelo seu namespace
 
 namespace MeuCrudCsharp.Features.Auth.Application.Interfaces;
 
@@ -14,3 +19,4 @@ public interface IAppAuthService
 
     Task<LoginResponseDto> RegisterAsync(RegisterRequestDto request);
 }
+

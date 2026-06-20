@@ -1,6 +1,11 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using MeuCrudCsharp.Data;
-using MeuCrudCsharp.Models;
+using MeuCrudCsharp.Features.MercadoPago.Chargebacks.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Plans.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Entities;
+using MeuCrudCsharp.Features.Shared.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using MongoDB.Driver;
 
@@ -48,3 +53,4 @@ public class ActiveSubscriptionHandler : AuthorizationHandler<ActiveSubscription
         }
     }
 }
+

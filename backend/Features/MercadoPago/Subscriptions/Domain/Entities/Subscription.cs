@@ -1,8 +1,14 @@
+using MeuCrudCsharp.Features.MercadoPago.Chargebacks.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Plans.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Entities;
+using MeuCrudCsharp.Features.Shared.Domain.Entities;
 using MeuCrudCsharp.Data.Configuration.Interfaces;
 using MeuCrudCsharp.Data.Configuration.Attributes;
 using MongoDB.Bson.Serialization.Attributes;
 
-namespace MeuCrudCsharp.Models
+namespace MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Entities
 {
                          // <-- NOVO: Indexar a data de expiração é ótimo para performance
     public class Subscription : TransactionBase, IMongoDocument
@@ -33,5 +39,6 @@ namespace MeuCrudCsharp.Models
         public string? CardTokenId { get; set; }
     }
 }
+
 
 

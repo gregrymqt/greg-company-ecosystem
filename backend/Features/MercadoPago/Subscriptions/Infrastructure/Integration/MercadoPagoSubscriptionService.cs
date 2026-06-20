@@ -1,3 +1,4 @@
+using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Entities;
 namespace MeuCrudCsharp.Features.MercadoPago.Subscriptions.Infrastructure.Integration;
 
 using System.Text.Json;
@@ -5,7 +6,7 @@ using MeuCrudCsharp.Features.Exceptions;
 using MeuCrudCsharp.Features.MercadoPago.Base;
 using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Application.DTOs;
 using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Application.Interfaces;
-using MeuCrudCsharp.Models.Enums;
+
 
 public class MercadoPagoSubscriptionService
     : MercadoPagoServiceBase,
@@ -89,3 +90,5 @@ public class MercadoPagoSubscriptionService
         );
     }
 }
+
+

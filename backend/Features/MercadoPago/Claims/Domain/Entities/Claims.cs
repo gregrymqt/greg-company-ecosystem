@@ -1,4 +1,10 @@
-using MeuCrudCsharp.Models.Enums; 
+using MeuCrudCsharp.Features.MercadoPago.Chargebacks.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Plans.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Entities;
+using MeuCrudCsharp.Features.Shared.Domain.Entities;
+ 
 using MeuCrudCsharp.Features.Auth.Domain.Entities; 
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
@@ -8,7 +14,7 @@ using System.ComponentModel.DataAnnotations;
 using MeuCrudCsharp.Data.Configuration.Interfaces;
 using MeuCrudCsharp.Data.Configuration.Attributes;
 
-namespace MeuCrudCsharp.Models
+namespace MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities
 {
     // Seu status interno (Mantido conforme )
     public enum InternalClaimStatus
@@ -68,4 +74,6 @@ namespace MeuCrudCsharp.Models
         public virtual Users? User { get; set; }
     }
 }
+
+
 

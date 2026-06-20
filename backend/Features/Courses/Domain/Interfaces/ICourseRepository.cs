@@ -1,4 +1,9 @@
-using MeuCrudCsharp.Models;
+using MeuCrudCsharp.Features.MercadoPago.Chargebacks.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Plans.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Entities;
+using MeuCrudCsharp.Features.Shared.Domain.Entities;
 using MeuCrudCsharp.Features.Courses.Domain.Entities;
 
 namespace MeuCrudCsharp.Features.Courses.Domain.Interfaces
@@ -21,3 +26,4 @@ namespace MeuCrudCsharp.Features.Courses.Domain.Interfaces
         void Delete(Course course);
     }
 }
+

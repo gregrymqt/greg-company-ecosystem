@@ -1,4 +1,4 @@
-﻿using MeuCrudCsharp.Features.Videos.Domain.Interfaces;
+using MeuCrudCsharp.Features.Videos.Domain.Interfaces;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using MeuCrudCsharp.Features.Exceptions;
@@ -7,7 +7,12 @@ using MeuCrudCsharp.Features.Files.Domain.Interfaces;
 using MeuCrudCsharp.Features.Shared.Domain.Interfaces;
 using MeuCrudCsharp.Features.Shared.Infrastructure.Persistence;
 using MeuCrudCsharp.Features.Videos.Application.Interfaces;
-using MeuCrudCsharp.Models;
+using MeuCrudCsharp.Features.MercadoPago.Chargebacks.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Plans.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Entities;
+using MeuCrudCsharp.Features.Shared.Domain.Entities;
 using MeuCrudCsharp.Features.Videos.Domain.Entities;
 using Microsoft.Extensions.Options;
 
@@ -62,7 +67,7 @@ public class VideoProcessingService : IVideoProcessingService
 
             if (video == null || originalFile == null)
                 throw new ResourceNotFoundException(
-                    "Vï¿½deo ou Arquivo original nï¿½o encontrados no banco."
+                    "V�deo ou Arquivo original n�o encontrados no banco."
                 );
 
             groupName = video.StorageIdentifier;
@@ -83,12 +88,12 @@ public class VideoProcessingService : IVideoProcessingService
 
             if (!File.Exists(inputFilePath))
                 throw new FileNotFoundException(
-                    $"Arquivo fï¿½sico nï¿½o encontrado em: {inputFilePath}"
+                    $"Arquivo f�sico n�o encontrado em: {inputFilePath}"
                 );
 
             await _videoNotificationService.SendProgressUpdate(
                 groupName,
-                "Iniciando anï¿½lise...",
+                "Iniciando an�lise...",
                 0
             );
 
@@ -99,7 +104,7 @@ public class VideoProcessingService : IVideoProcessingService
             await _unitOfWork.CommitAsync();
             
             _logger.LogInformation(
-                "Duraï¿½ï¿½o do vï¿½deo {VideoId} detectada: {Duration}",
+                "Dura��o do v�deo {VideoId} detectada: {Duration}",
                 videoId,
                 duration
             );
@@ -120,7 +125,7 @@ public class VideoProcessingService : IVideoProcessingService
 
             await _videoNotificationService.SendProgressUpdate(
                 groupName,
-                "Convertendo vï¿½deo...",
+                "Convertendo v�deo...",
                 5
             );
 
@@ -136,20 +141,20 @@ public class VideoProcessingService : IVideoProcessingService
 
             await _videoNotificationService.SendProgressUpdate(
                 groupName,
-                "Processamento concluï¿½do!",
+                "Processamento conclu�do!",
                 100,
                 isComplete: true
             );
 
             _logger.LogInformation(
-                "Vï¿½deo {Id} ({StorageIdentifier}) processado com sucesso e disponï¿½vel para reproduï¿½ï¿½o.",
+                "V�deo {Id} ({StorageIdentifier}) processado com sucesso e dispon�vel para reprodu��o.",
                 videoId,
                 video.StorageIdentifier
             );
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Erro no processamento do vï¿½deo ID {VideoId}", videoId);
+            _logger.LogError(ex, "Erro no processamento do v�deo ID {VideoId}", videoId);
 
             if (video == null) throw;
             
@@ -191,7 +196,7 @@ public class VideoProcessingService : IVideoProcessingService
         }
 
         _logger.LogWarning(
-            "Falha ao ler duraï¿½ï¿½o. Saï¿½da: {Output} Erro: {Error}",
+            "Falha ao ler dura��o. Sa�da: {Output} Erro: {Error}",
             result.StandardOutput,
             result.StandardError
         );
@@ -217,4 +222,5 @@ public class VideoProcessingService : IVideoProcessingService
 
     }
 }
+
 

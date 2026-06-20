@@ -1,4 +1,4 @@
-Ôªøusing MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Interfaces;
+using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Interfaces;
 using MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Interfaces;
 using System.Text.Json;
 using MeuCrudCsharp.Features.Emails.Application.Interfaces;
@@ -11,7 +11,12 @@ using MeuCrudCsharp.Features.MercadoPago.Refunds.Application.Interfaces;
 using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Application.Interfaces;
 using MeuCrudCsharp.Features.Shared.Domain.Interfaces;
 using MeuCrudCsharp.Features.Shared.Infrastructure.Persistence;
-using MeuCrudCsharp.Models;
+using MeuCrudCsharp.Features.MercadoPago.Chargebacks.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Plans.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Entities;
+using MeuCrudCsharp.Features.Shared.Domain.Entities;
 using MeuCrudCsharp.Features.Auth.Domain.Entities;
 using Microsoft.Extensions.Options;
 
@@ -34,7 +39,7 @@ public class NotificationPaymentService(
     public async Task VerifyAndProcessNotificationAsync(string internalPaymentId)
     {
         logger.LogInformation(
-            "Iniciando processamento de notifica√ß√£o para PaymentId: {PaymentId}",
+            "Iniciando processamento de notificaÁ„o para PaymentId: {PaymentId}",
             internalPaymentId
         );
 
@@ -44,19 +49,19 @@ public class NotificationPaymentService(
 
             if (localPayment == null)
                 throw new ResourceNotFoundException(
-                    $"Pagamento com ID {internalPaymentId} n√£o foi encontrado."
+                    $"Pagamento com ID {internalPaymentId} n„o foi encontrado."
                 );
 
             var user = localPayment.User;
             if (user == null)
                 throw new ResourceNotFoundException(
-                    $"Usu√°rio associado ao pagamento {internalPaymentId} n√£o foi encontrado."
+                    $"Usu·rio associado ao pagamento {internalPaymentId} n„o foi encontrado."
                 );
 
             if (localPayment.Status != "pending" && localPayment.Status != "in_process")
             {
                 logger.LogInformation(
-                    "Pagamento {PaymentId} j√° foi processado (Status: {Status}). Ignorando notifica√ß√£o.",
+                    "Pagamento {PaymentId} j· foi processado (Status: {Status}). Ignorando notificaÁ„o.",
                     internalPaymentId,
                     localPayment.Status
                 );
@@ -66,7 +71,7 @@ public class NotificationPaymentService(
             if (string.IsNullOrEmpty(localPayment.ExternalId))
             {
                 throw new InvalidOperationException(
-                    $"Pagamento {internalPaymentId} n√£o possui ExternalId."
+                    $"Pagamento {internalPaymentId} n„o possui ExternalId."
                 );
             }
 
@@ -75,7 +80,7 @@ public class NotificationPaymentService(
             if (externPayment == null)
             {
                 logger.LogWarning(
-                    "N√£o foi poss√≠vel obter detalhes do pagamento externo {ExternalId}",
+                    "N„o foi possÌvel obter detalhes do pagamento externo {ExternalId}",
                     localPayment.ExternalId
                 );
                 throw new Exception(
@@ -99,7 +104,7 @@ public class NotificationPaymentService(
         {
             logger.LogError(
                 ex,
-                "Erro ao processar notifica√ß√£o para PaymentId: {PaymentId}",
+                "Erro ao processar notificaÁ„o para PaymentId: {PaymentId}",
                 internalPaymentId
             );
             throw;
@@ -107,7 +112,7 @@ public class NotificationPaymentService(
     }
 
     private async Task ProcessPaymentStatusAsync(
-        Models.Payments localPayment,
+        MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities.Payments localPayment,
         dynamic externPayment,
         Users user)
     {
@@ -128,7 +133,7 @@ public class NotificationPaymentService(
 
             default:
                 logger.LogWarning(
-                    "Status de pagamento n√£o tratado recebido do Mercado Pago: {Status}",
+                    "Status de pagamento n„o tratado recebido do Mercado Pago: {Status}",
                     (string)externPayment.Status
                 );
                 break;
@@ -136,7 +141,7 @@ public class NotificationPaymentService(
     }
 
     private async Task ProcessApprovedPaymentAsync(
-        Models.Payments localPayment,
+        MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities.Payments localPayment,
         dynamic externPayment,
         Users user)
     {
@@ -154,7 +159,7 @@ public class NotificationPaymentService(
             if (metadata == null || metadata.PlanPublicId == Guid.Empty)
             {
                 throw new InvalidOperationException(
-                    $"Metadados (ExternalReference) inv√°lidos ou ausentes no pagamento {externPayment.Id}. N√£o √© poss√≠vel criar a assinatura."
+                    $"Metadados (ExternalReference) inv·lidos ou ausentes no pagamento {externPayment.Id}. N„o È possÌvel criar a assinatura."
                 );
             }
 
@@ -170,7 +175,7 @@ public class NotificationPaymentService(
             }
 
             logger.LogInformation(
-                "Assinatura de pagamento √∫nico criada com sucesso para o usu√°rio {UserId}.",
+                "Assinatura de pagamento ˙nico criada com sucesso para o usu·rio {UserId}.",
                 user.Id
             );
         }
@@ -194,7 +199,7 @@ public class NotificationPaymentService(
         paymentRepository.Update(localPayment);
     }
 
-    private async Task ProcessRejectedPaymentAsync(Models.Payments localPayment, dynamic externPayment)
+    private async Task ProcessRejectedPaymentAsync(MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities.Payments localPayment, dynamic externPayment)
     {
         localPayment.Status = externPayment.Status;
         paymentRepository.Update(localPayment);
@@ -210,7 +215,7 @@ public class NotificationPaymentService(
         }
     }
 
-    private async Task ProcessRefundedPaymentAsync(Models.Payments localPayment)
+    private async Task ProcessRefundedPaymentAsync(MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities.Payments localPayment)
     {
         localPayment.Status = "refunded";
         paymentRepository.Update(localPayment);
@@ -263,7 +268,7 @@ public class NotificationPaymentService(
         try
         {
             var htmlBody = await razorRenderer.RenderViewToStringAsync(viewPath, viewModel);
-            var plainTextBody = $"Ol√°, {user.Name ?? "Cliente"}! Novidades sobre seu pagamento {paymentId}.";
+            var plainTextBody = $"Ol·, {user.Name ?? "Cliente"}! Novidades sobre seu pagamento {paymentId}.";
 
             if (!string.IsNullOrEmpty(user.Email))
             {
@@ -305,7 +310,7 @@ public class NotificationPaymentService(
             "Seu pagamento foi aprovado! ??",
             "~/Pages/EmailTemplates/Confirmation/Email.cshtml",
             viewModel,
-            "Confirma√ß√£o"
+            "ConfirmaÁ„o"
         );
     }
 
@@ -321,10 +326,10 @@ public class NotificationPaymentService(
         await SendPaymentEmailNotificationAsync(
             user,
             paymentId,
-            "Aten√ß√£o: Ocorreu um problema com seu pagamento",
+            "AtenÁ„o: Ocorreu um problema com seu pagamento",
             "~/Pages/EmailTemplates/Rejection/Email.cshtml",
             viewModel,
-            "Rejei√ß√£o"
+            "RejeiÁ„o"
         );
     }
 
@@ -341,7 +346,10 @@ public class NotificationPaymentService(
             "Seu Reembolso foi aprovado! ??",
             "~/Pages/EmailTemplates/Refund/Email.cshtml",
             viewModel,
-            "Confirma√ß√£o de Reembolso"
+            "ConfirmaÁ„o de Reembolso"
         );
     }
 }
+
+
+

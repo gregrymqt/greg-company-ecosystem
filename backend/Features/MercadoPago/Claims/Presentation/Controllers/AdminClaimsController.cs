@@ -1,4 +1,4 @@
-﻿using MeuCrudCsharp.Features.Base;
+using MeuCrudCsharp.Features.Base;
 using MeuCrudCsharp.Features.MercadoPago.Claims.Application.Services;
 using MeuCrudCsharp.Features.MercadoPago.Claims.Application.ViewModels;
 using Microsoft.AspNetCore.Authorization;
@@ -39,7 +39,7 @@ public class AdminClaimsController : MercadoPagoApiControllerBase
         }
         catch (Exception ex)
         {
-            return HandleException(ex, "Erro ao obter detalhes da reclamaÃ§Ã£o.");
+            return HandleException(ex, "Erro ao obter detalhes da reclamação.");
         }
     }
 
@@ -63,5 +63,7 @@ public class AdminClaimsController : MercadoPagoApiControllerBase
         }
     }
 }
+
+
 
 

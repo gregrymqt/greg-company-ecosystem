@@ -1,25 +1,34 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Threading.Tasks;
-using MeuCrudCsharp.Models;
+using MeuCrudCsharp.Features.MercadoPago.Chargebacks.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Plans.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Entities;
+using MeuCrudCsharp.Features.Shared.Domain.Entities;
 
 namespace MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Interfaces;
 
 public interface IClaimRepository
 {
-    Task<(List<Models.Claims> Claims, int TotalCount)> GetPaginatedClaimsAsync(
+    Task<(List<MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities.Claims> Claims, int TotalCount)> GetPaginatedClaimsAsync(
         string? searchTerm,
         string? statusFilter,
         int page,
         int pageSize
     );
     
-    Task<Models.Claims?> GetByIdAsync(string id);
-    Task<Models.Claims?> GetByMpClaimIdAsync(long mpClaimId);
+    Task<MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities.Claims?> GetByIdAsync(string id);
+    Task<MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities.Claims?> GetByMpClaimIdAsync(long mpClaimId);
     Task<bool> ExistsByMpClaimIdAsync(long mpClaimId);
-    Task<List<Models.Claims>> GetClaimsByUserIdAsync(string userId);
+    Task<List<MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities.Claims>> GetClaimsByUserIdAsync(string userId);
 
-    Task AddAsync(Models.Claims claim);
-    void Update(Models.Claims claim);
-    void UpdateClaimStatus(Models.Claims claim, InternalClaimStatus newStatus);
+    Task AddAsync(MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities.Claims claim);
+    void Update(MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities.Claims claim);
+    void UpdateClaimStatus(MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities.Claims claim, InternalClaimStatus newStatus);
 }
+
+
+
+
 

@@ -108,7 +108,7 @@ public class PixPaymentService(
                 new PaymentStatusUpdate("A processar o seu pagamento...", "processing", false)
             );
 
-            var novoPixPayment = new Models.Payments()
+            var novoPixPayment = new MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities.Payments()
             {
                 UserId = userId,
                 Status = "Iniciando",
@@ -254,3 +254,5 @@ public class PixPaymentService(
         }
     }
 }
+
+

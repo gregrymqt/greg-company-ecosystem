@@ -1,4 +1,4 @@
-Ôªøusing MeuCrudCsharp.Features.Caching.Application.Interfaces;
+using MeuCrudCsharp.Features.Caching.Application.Interfaces;
 using MeuCrudCsharp.Features.Courses.Application.DTOs;
 using MeuCrudCsharp.Features.Courses.Application.Interfaces;
 using MeuCrudCsharp.Features.Courses.Domain.Interfaces;
@@ -7,7 +7,12 @@ using MeuCrudCsharp.Features.Exceptions;
 using MeuCrudCsharp.Features.Shared.Domain.Interfaces;
 using MeuCrudCsharp.Features.Shared.Infrastructure.Persistence;
 using MeuCrudCsharp.Features.Videos.Application.DTOs;
-using MeuCrudCsharp.Models; using MeuCrudCsharp.Features.Courses.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Chargebacks.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Plans.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Entities;
+using MeuCrudCsharp.Features.Shared.Domain.Entities; using MeuCrudCsharp.Features.Courses.Domain.Entities;
 
 namespace MeuCrudCsharp.Features.Courses.Application.Services
 {
@@ -62,7 +67,7 @@ namespace MeuCrudCsharp.Features.Courses.Application.Services
         {
             if (await repository.ExistsByNameAsync(createDto.Name!))
             {
-                throw new AppServiceException("J√° existe um curso com este nome.");
+                throw new AppServiceException("J· existe um curso com este nome.");
             }
 
             var newCourse = new Course
@@ -105,13 +110,13 @@ namespace MeuCrudCsharp.Features.Courses.Application.Services
 
             if (course == null)
             {
-                throw new ResourceNotFoundException($"Curso com ID {publicId} n√£o encontrado.");
+                throw new ResourceNotFoundException($"Curso com ID {publicId} n„o encontrado.");
             }
 
             if (course.Videos.Count != 0)
             {
                 throw new AppServiceException(
-                    "N√£o √© poss√≠vel deletar um curso que possui v√≠deos associados."
+                    "N„o È possÌvel deletar um curso que possui vÌdeos associados."
                 );
             }
 
@@ -129,7 +134,7 @@ namespace MeuCrudCsharp.Features.Courses.Application.Services
             if (course == null)
             {
                 throw new ResourceNotFoundException(
-                    $"Curso com o PublicId {publicId} n√£o encontrado."
+                    $"Curso com o PublicId {publicId} n„o encontrado."
                 );
             }
 
@@ -163,3 +168,4 @@ namespace MeuCrudCsharp.Features.Courses.Application.Services
         }
     }
 }
+

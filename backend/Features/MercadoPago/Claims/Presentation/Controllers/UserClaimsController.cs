@@ -1,4 +1,4 @@
-﻿using MeuCrudCsharp.Features.Base;
+using MeuCrudCsharp.Features.Base;
 using MeuCrudCsharp.Features.MercadoPago.Claims.Application.Interfaces;
 using MeuCrudCsharp.Features.MercadoPago.Claims.Application.ViewModels;
 using Microsoft.AspNetCore.Authorization;
@@ -41,7 +41,7 @@ public class UserClaimsController : MercadoPagoApiControllerBase
         }
         catch (Exception ex)
         {
-            return HandleException(ex, "Erro ao obter detalhe da reclamaÃ§Ã£o.");
+            return HandleException(ex, "Erro ao obter detalhe da reclamação.");
         }
     }
 
@@ -49,7 +49,7 @@ public class UserClaimsController : MercadoPagoApiControllerBase
     public async Task<IActionResult> Reply(string id, [FromBody] ReplyRequestDto request)
     {
         if (string.IsNullOrWhiteSpace(request.Message))
-            return BadRequest("A mensagem nÃ£o pode ser vazia.");
+            return BadRequest("A mensagem não pode ser vazia.");
 
         try
         {
@@ -72,7 +72,7 @@ public class UserClaimsController : MercadoPagoApiControllerBase
         try
         {
             await _userClaimService.RequestMediationAsync(id);
-            return Ok(new { message = "MediaÃ§Ã£o solicitada ao Mercado Pago." });
+            return Ok(new { message = "Mediação solicitada ao Mercado Pago." });
         }
         catch (UnauthorizedAccessException)
         {
@@ -84,4 +84,7 @@ public class UserClaimsController : MercadoPagoApiControllerBase
         }
     }
 }
+
+
+
 

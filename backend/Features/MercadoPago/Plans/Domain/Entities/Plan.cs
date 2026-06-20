@@ -1,3 +1,9 @@
+using MeuCrudCsharp.Features.MercadoPago.Chargebacks.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Plans.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Entities;
+using MeuCrudCsharp.Features.Shared.Domain.Entities;
 // Models/Plan.cs
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
@@ -14,7 +20,7 @@ public enum PlanFrequencyType
     Months, // Corresponde a "months" na API
 }
 
-namespace MeuCrudCsharp.Models
+namespace MeuCrudCsharp.Features.MercadoPago.Plans.Domain.Entities
 {
     public class Plan : IMongoDocument
     {
@@ -64,5 +70,6 @@ namespace MeuCrudCsharp.Models
         public bool IsActive { get; set; } = false;
     }
 }
+
 
 

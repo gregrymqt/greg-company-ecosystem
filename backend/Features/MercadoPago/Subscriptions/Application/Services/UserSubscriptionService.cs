@@ -1,3 +1,4 @@
+using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Entities;
 using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Interfaces;
 namespace MeuCrudCsharp.Features.MercadoPago.Subscriptions.Application.Services;
 
@@ -8,7 +9,7 @@ using MeuCrudCsharp.Features.Caching.Application.Interfaces;
 using MeuCrudCsharp.Features.Exceptions;
 using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Application.DTOs;
 using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Application.Interfaces;
-using MeuCrudCsharp.Models.Enums;
+
 using MeuCrudCsharp.Features.Shared.Domain.Interfaces;
 using MeuCrudCsharp.Features.Shared.Infrastructure.Persistence;
 public class UserSubscriptionService : IUserSubscriptionService
@@ -150,3 +151,4 @@ public class UserSubscriptionService : IUserSubscriptionService
                ?? throw new ResourceNotFoundException("Nenhuma assinatura ativa encontrada.");
     }
 }
+

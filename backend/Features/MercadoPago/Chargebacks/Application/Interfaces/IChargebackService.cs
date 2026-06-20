@@ -14,3 +14,6 @@ public interface IChargebackService
 
     Task<ChargebackDetailViewModel> GetChargebackDetailAsync(string chargebackId);
 }
+
+
+

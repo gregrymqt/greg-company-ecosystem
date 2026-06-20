@@ -3,7 +3,7 @@ using MeuCrudCsharp.Features.Auth.Domain.Entities;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
-namespace MeuCrudCsharp.Models
+namespace MeuCrudCsharp.Features.Shared.Domain.Entities
 {
     public abstract class TransactionBase
     {

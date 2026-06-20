@@ -1,9 +1,15 @@
+using MeuCrudCsharp.Features.MercadoPago.Chargebacks.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Plans.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Entities;
+using MeuCrudCsharp.Features.Shared.Domain.Entities;
 using System;
 using MeuCrudCsharp.Data.Configuration.Interfaces;
 using MeuCrudCsharp.Data.Configuration.Attributes;
 using MongoDB.Bson.Serialization.Attributes;
 
-namespace MeuCrudCsharp.Models
+namespace MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities
 {
          // A FK já é um Guid (string), então está ok.
     public class Payments : TransactionBase, IMongoDocument
@@ -31,4 +37,5 @@ namespace MeuCrudCsharp.Models
         public virtual Subscription? Subscription { get; set; }
     }
 }
+
 

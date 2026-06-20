@@ -1,7 +1,12 @@
 using MeuCrudCsharp.Features.Profiles.Admin.Domain.Interfaces;
 using MeuCrudCsharp.Data;
 using MeuCrudCsharp.Features.Profiles.Admin.Application.Interfaces;
-using MeuCrudCsharp.Models;
+using MeuCrudCsharp.Features.MercadoPago.Chargebacks.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Plans.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Entities;
+using MeuCrudCsharp.Features.Shared.Domain.Entities;
 using MeuCrudCsharp.Features.Auth.Domain.Entities;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
@@ -76,3 +81,4 @@ namespace MeuCrudCsharp.Features.Profiles.Admin.Infrastructure.Persistence.Repos
         }
     }
 }
+

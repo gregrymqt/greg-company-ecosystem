@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using System.Text.Json;
 using MeuCrudCsharp.Data;
 using MeuCrudCsharp.Features.Caching.Application.Interfaces;
@@ -6,7 +6,12 @@ using MeuCrudCsharp.Features.Exceptions;
 using MeuCrudCsharp.Features.MercadoPago.Base;
 using MeuCrudCsharp.Features.MercadoPago.Plans.Application.DTOs;
 using MeuCrudCsharp.Features.MercadoPago.Plans.Application.Interfaces;
-using MeuCrudCsharp.Models;
+using MeuCrudCsharp.Features.MercadoPago.Chargebacks.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Plans.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Entities;
+using MeuCrudCsharp.Features.Shared.Domain.Entities;
 
 namespace MeuCrudCsharp.Features.MercadoPago.Plans.Application.Services;
 
@@ -80,4 +85,5 @@ public class MercadoPagoPlanService : MercadoPagoServiceBase, IMercadoPagoPlanSe
         return apiResponse?.Results?.Where(plan => plan.AutoRecurring != null) ?? [];
     }
 }
+
 

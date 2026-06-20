@@ -1,3 +1,4 @@
+using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Entities;
 using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Interfaces;
 using MeuCrudCsharp.Features.Emails.Application.Interfaces;
 using MeuCrudCsharp.Features.Emails.Application.ViewModels;
@@ -91,7 +92,7 @@ public class SubscriptionCreateNotificationService(
         }
     }
 
-    private async Task SendSubscriptionCreatedEmailAsync(Models.Subscription subscription)
+    private async Task SendSubscriptionCreatedEmailAsync(Subscription subscription)
     {
         if (string.IsNullOrEmpty(subscription.User?.Email))
         {
@@ -159,3 +160,5 @@ public class SubscriptionCreateNotificationService(
         }
     }
 }
+
+

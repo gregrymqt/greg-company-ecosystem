@@ -1,8 +1,13 @@
-﻿using MeuCrudCsharp.Features.Auth.Domain.Interfaces;
+using MeuCrudCsharp.Features.Auth.Domain.Interfaces;
 using MeuCrudCsharp.Features.Auth.Application.Interfaces;
 using MeuCrudCsharp.Features.MercadoPago.Claims.Application.Interfaces;
 using MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Interfaces;
-using MeuCrudCsharp.Models;
+using MeuCrudCsharp.Features.MercadoPago.Chargebacks.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Plans.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Entities;
+using MeuCrudCsharp.Features.Shared.Domain.Entities;
 using static MeuCrudCsharp.Features.MercadoPago.Claims.Application.ViewModels.MercadoPagoClaimsViewModels;
 
 namespace MeuCrudCsharp.Features.MercadoPago.Claims.Application.Services;
@@ -16,7 +21,7 @@ public class UserClaimService(
     public async Task<List<ClaimSummaryViewModel>> GetMyClaimsAsync()
     {
         var userId = userContext.GetCurrentUserId().ToString() 
-            ?? throw new UnauthorizedAccessException("UsuÃ¡rio nÃ£o autenticado.");
+            ?? throw new UnauthorizedAccessException("Usuário não autenticado.");
 
         var myClaims = await claimRepository.GetClaimsByUserIdAsync(userId);
 
@@ -39,7 +44,7 @@ public class UserClaimService(
         var claim = await claimRepository.GetByIdAsync(internalId);
 
         if (claim == null || claim.UserId != userId)
-            throw new UnauthorizedAccessException("Essa reclamaÃ§Ã£o nÃ£o Ã© sua.");
+            throw new UnauthorizedAccessException("Essa reclamação não é sua.");
 
         var messages = await mpService.GetClaimMessagesAsync(claim.MpClaimId);
 
@@ -65,13 +70,13 @@ public class UserClaimService(
     public async Task ReplyAsync(string internalId, string message)
     {
         if (string.IsNullOrWhiteSpace(message))
-            throw new ArgumentException("Mensagem nÃ£o pode ser vazia.", nameof(message));
+            throw new ArgumentException("Mensagem não pode ser vazia.", nameof(message));
 
         var userId = userContext.GetCurrentUserId().ToString();
         var claim = await claimRepository.GetByIdAsync(internalId);
 
         if (claim == null || claim.UserId != userId)
-            throw new UnauthorizedAccessException("AÃ§Ã£o nÃ£o permitida.");
+            throw new UnauthorizedAccessException("Ação não permitida.");
 
         await mpService.SendMessageAsync(claim.MpClaimId, message);
     }
@@ -82,9 +87,10 @@ public class UserClaimService(
         var claim = await claimRepository.GetByIdAsync(internalId);
 
         if (claim == null || claim.UserId != userId)
-            throw new UnauthorizedAccessException("AÃ§Ã£o nÃ£o permitida.");
+            throw new UnauthorizedAccessException("Ação não permitida.");
 
         await mpService.EscalateToMediationAsync(claim.MpClaimId);
     }
 }
+
 
