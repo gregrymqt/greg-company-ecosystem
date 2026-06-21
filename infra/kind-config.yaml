@@ -4,10 +4,3 @@ name: greg-company-cluster
 nodes:
 - role: control-plane
 - role: worker
-  extraPortMappings:
-  - containerPort: 32379  # Porta customizada do Node (Redis)
-    hostPort: 6379        # Porta física do seu PC local
-    protocol: TCP
-  - containerPort: 32017  # Porta customizada do Node (MongoDB)
-    hostPort: 27017       # Porta física do seu PC local
-    protocol: TCP

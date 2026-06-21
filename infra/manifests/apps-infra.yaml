@@ -1,0 +1,132 @@
+# =============================================================
+# 1. PORTAL (FRONTEND VITE) - Deployment & Service
+# =============================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: portal-deployment
+  namespace: greg-company
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: portal
+  template:
+    metadata:
+      labels:
+        app: portal
+    spec:
+      containers:
+        - name: portal-app
+          # ⚠️ SUBSTITUA pela imagem real do seu Portal
+          image: gregrymqt/greg-portal:latest
+          ports:
+            - containerPort: 5173 # Porta padrão do Vite no Portal
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: portal-service
+  namespace: greg-company
+spec:
+  type: ClusterIP # Fica isolado dentro do cluster, o Ingress fará o papel de expor
+  ports:
+    - port: 80 # Porta que o Service escuta internamente
+      targetPort: 5173 # Porta para onde ele redireciona dentro do container
+  selector:
+    app: portal
+
+---
+# =============================================================
+# 2. ADMIN (FRONTEND VITE) - Deployment & Service
+# =============================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: admin-deployment
+  namespace: greg-company
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: admin
+  template:
+    metadata:
+      labels:
+        app: admin
+    spec:
+      containers:
+        - name: admin-app
+          # ⚠️ SUBSTITUA pela imagem real do seu Admin
+          image: gregrymqt/greg-admin:latest
+          ports:
+            - containerPort: 5174 # Porta padrão do Vite no Admin
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: admin-service
+  namespace: greg-company
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 5174 #
+  selector:
+    app: admin
+
+---
+# =============================================================
+# 3. BACKEND API (.NET 8) - Deployment & Service
+# =============================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-api-deployment
+  namespace: greg-company
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend-api
+  template:
+    metadata:
+      labels:
+        app: backend-api
+    spec:
+      containers:
+        - name: api-app
+          image: gregrymqt/greg-api:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: ConnectionStrings__MongoConnection
+              value: "mongodb://mongo-service:27017"
+            - name: ConnectionStrings__Redis
+              value: "redis-service:6379"
+          envFrom:
+            - secretRef:
+                name: greg-api-secrets 
+          volumeMounts:
+            - name: api-uploads
+              mountPath: /app/wwwroot/uploads
+            - name: api-logs
+              mountPath: /app/logs
+      volumes:
+        - name: api-uploads
+          emptyDir: {}
+        - name: api-logs
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-api-service
+  namespace: greg-company
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080 # Mantemos a mesma porta estável para facilitar o roteamento
+      targetPort: 8080 #
+  selector:
+    app: backend-api

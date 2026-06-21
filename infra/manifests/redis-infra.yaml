@@ -9,11 +9,10 @@ metadata:
   name: redis-service
   namespace: greg-company
 spec:
-  type: NodePort # <--- Adicionado
+  type: LoadBalancer # <--- IP exclusivo para o Redis
   ports:
   - port: 6379
     targetPort: 6379
-    nodePort: 32379 # <--- Bate com a containerPort do kind-config
   selector:
     app: redis-cache
 ---
@@ -23,18 +22,18 @@ metadata:
   name: redis-deployment
   namespace: greg-company
 spec:
-  replicas: 1 # Começamos com 1 apartamento (Pod) do Redis
+  replicas: 1
   selector:
     matchLabels:
-      app: redis-cache # ID para o Deployment controlar seu Pod
+      app: redis-cache
   template:
     metadata:
       labels:
-        app: redis-cache # Etiqueta (Label) que o Service vai procurar
+        app: redis-cache
     spec:
       containers:
       - name: redis
         image: redis:latest
-        command: ["redis-server", "--appendonly", "yes"] # O comando exato do seu Compose!
+        command: ["redis-server", "--appendonly", "yes"]
         ports:
         - containerPort: 6379

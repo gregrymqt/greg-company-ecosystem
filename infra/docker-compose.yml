@@ -57,7 +57,6 @@ services:
       - ../.env
     environment:
       - ASPNETCORE_URLS=http://+:8080
-      - ConnectionStrings__DefaultConnection=${ConnectionStrings__DefaultConnection}
       - ConnectionStrings__MongoConnection=${MONGO_CONNECTION_STRING}
       - ConnectionStrings__Redis=${ConnectionStrings__Redis}
       - MercadoPago__AccessToken=${MercadoPago__AccessToken}
