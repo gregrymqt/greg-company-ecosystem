@@ -4,14 +4,12 @@ metadata:
   name: greg-company-ingress
   namespace: greg-company
   annotations:
-    # Dizemos ao cluster para usar o motor do NGINX
-    kubernetes.io/ingress.class: nginx
-    
     # O NGINX Ingress já ativa WebSockets por padrão, mas estas anotações 
     # otimizam os timeouts para o SignalR do .NET não cair a cada 60 segundos
     nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
 spec:
+  ingressClassName: nginx 
   rules:
   # --- REGRA 1: TRÁFEGO DO PORTAL ---
   - host: gregcompany.local

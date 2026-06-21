@@ -9,10 +9,11 @@ metadata:
   name: mongo-service
   namespace: greg-company
 spec:
-  type: LoadBalancer # <--- O cloud-provider-kind vai dar um IP exclusivo para ele
+  type: NodePort # 👈 Alterado para NodePort
   ports:
     - port: 27017
       targetPort: 27017
+      nodePort: 30017 # 👈 Porta fixa amarrada ao kind-config
   selector:
     app: mongodb-store
 ---

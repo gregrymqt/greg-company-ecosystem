@@ -9,10 +9,11 @@ metadata:
   name: redis-service
   namespace: greg-company
 spec:
-  type: LoadBalancer # <--- IP exclusivo para o Redis
+  type: NodePort # 👈 Alterado para NodePort
   ports:
   - port: 6379
     targetPort: 6379
+    nodePort: 30379 # 👈 Porta fixa amarrada ao kind-config
   selector:
     app: redis-cache
 ---

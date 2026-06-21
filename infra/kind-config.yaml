@@ -3,4 +3,25 @@ apiVersion: kind.x-k8s.io/v1alpha4
 name: greg-company-cluster
 nodes:
 - role: control-plane
+  kubeadmConfigPatches:
+  - |
+    kind: InitConfiguration
+    nodeRegistration:
+      kubeletExtraArgs:
+        node-labels: "ingress-ready=true"
+  extraPortMappings:
+  - containerPort: 80
+    hostPort: 80
+    protocol: TCP
+  - containerPort: 443
+    hostPort: 443
+    protocol: TCP
+  # Mapeia a porta NodePort 30017 do cluster para a 27017 da sua máquina
+  - containerPort: 30017
+    hostPort: 27017
+    protocol: TCP
+  # Mapeia a porta NodePort 30379 do cluster para a 6379 da sua máquina
+  - containerPort: 30379
+    hostPort: 6379
+    protocol: TCP
 - role: worker

@@ -18,8 +18,9 @@ spec:
     spec:
       containers:
         - name: portal-app
-          # ⚠️ SUBSTITUA pela imagem real do seu Portal
-          image: gregrymqt/greg-portal:latest
+          # ⚠️ Substituído para usar sua imagem local
+          image: infra-frontend-portal:latest
+          imagePullPolicy: Never
           ports:
             - containerPort: 5173 # Porta padrão do Vite no Portal
 ---
@@ -57,8 +58,9 @@ spec:
     spec:
       containers:
         - name: admin-app
-          # ⚠️ SUBSTITUA pela imagem real do seu Admin
-          image: gregrymqt/greg-admin:latest
+          # ⚠️ Substituído para usar sua imagem local
+          image: infra-frontend-admin:latest
+          imagePullPolicy: Never
           ports:
             - containerPort: 5174 # Porta padrão do Vite no Admin
 ---
@@ -96,7 +98,8 @@ spec:
     spec:
       containers:
         - name: api-app
-          image: gregrymqt/greg-api:latest
+          image: infra-backend:latest
+          imagePullPolicy: Never
           ports:
             - containerPort: 8080
           env:
