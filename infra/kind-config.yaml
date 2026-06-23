@@ -24,4 +24,12 @@ nodes:
   - containerPort: 30379
     hostPort: 6379
     protocol: TCP
+  # Mapeia a porta NodePort 30572 do cluster para a 5672 da sua máquina (RabbitMQ AMQP)
+  - containerPort: 30572
+    hostPort: 5672
+    protocol: TCP
+  # Mapeia a porta NodePort 31572 do cluster para a 15672 da sua máquina (RabbitMQ Management UI)
+  - containerPort: 31572
+    hostPort: 15672
+    protocol: TCP
 - role: worker

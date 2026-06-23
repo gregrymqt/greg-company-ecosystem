@@ -5,13 +5,7 @@ using MeuCrudCsharp.Features.Courses.Domain.Interfaces;
 using MeuCrudCsharp.Features.Courses.Application.Mappers;
 using MeuCrudCsharp.Features.Exceptions;
 using MeuCrudCsharp.Features.Shared.Domain.Interfaces;
-using MeuCrudCsharp.Features.Shared.Infrastructure.Persistence;
 using MeuCrudCsharp.Features.Videos.Application.DTOs;
-using MeuCrudCsharp.Features.MercadoPago.Chargebacks.Domain.Entities;
-using MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities;
-using MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities;
-using MeuCrudCsharp.Features.MercadoPago.Plans.Domain.Entities;
-using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Entities;
 using MeuCrudCsharp.Features.Shared.Domain.Entities; 
 using MeuCrudCsharp.Features.Courses.Domain.Entities;
 using MeuCrudCsharp.Data;
@@ -93,7 +87,7 @@ namespace MeuCrudCsharp.Features.Courses.Application.Services
                 var outboxEvent = new OutboxEvent
                 {
                     EventType = "CourseCreated",
-                    Payload = JsonSerializer.Serialize(new { CourseId = newCourse.Id, Name = newCourse.Name })
+                    Payload = JsonSerializer.Serialize(new { CourseId = newCourse.Id, newCourse.Name })
                 };
                 var outboxCollection = mongoContext.GetCollection<OutboxEvent>("OutboxEvents");
                 await outboxCollection.InsertOneAsync(session, outboxEvent);
@@ -136,12 +130,8 @@ namespace MeuCrudCsharp.Features.Courses.Application.Services
 
         public async Task DeleteCourseAsync(Guid publicId)
         {
-            var course = await repository.GetByPublicIdWithVideosAsync(publicId);
-
-            if (course == null)
-            {
-                throw new ResourceNotFoundException($"Curso com ID {publicId} não encontrado.");
-            }
+            var course = await repository.GetByPublicIdWithVideosAsync(publicId)
+                ?? throw new ResourceNotFoundException($"Curso com ID {publicId} não encontrado.");
 
             if (course.Videos.Count != 0)
             {
@@ -160,13 +150,10 @@ namespace MeuCrudCsharp.Features.Courses.Application.Services
 
         public async Task<Course> FindCourseByPublicIdOrFailAsync(Guid publicId)
         {
-            var course = await repository.GetByPublicIdAsync(publicId);
-            if (course == null)
-            {
-                throw new ResourceNotFoundException(
+            var course = await repository.GetByPublicIdAsync(publicId)
+                ?? throw new ResourceNotFoundException(
                     $"Curso com o PublicId {publicId} não encontrado."
                 );
-            }
 
             return course;
         }
@@ -180,6 +167,7 @@ namespace MeuCrudCsharp.Features.Courses.Application.Services
 
             if (course != null)
                 return course;
+            
             logger.LogInformation("Criando curso '{CourseName}'...", courseName);
             course = new Course { Name = courseName };
 

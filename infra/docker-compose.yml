@@ -27,6 +27,16 @@ services:
       - greg-network
     restart: always
 
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: rabbitmq-broker
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - greg-network
+    restart: always
+
   # --- [ GATEWAY PROXY LAYER ] ---
 
   proxy-gateway:
@@ -59,6 +69,7 @@ services:
       - ASPNETCORE_URLS=http://+:8080
       - ConnectionStrings__MongoConnection=${MONGO_CONNECTION_STRING}
       - ConnectionStrings__Redis=${ConnectionStrings__Redis}
+      - ConnectionStrings__RabbitMq=amqp://guest:guest@rabbitmq:5672/
       - MercadoPago__AccessToken=${MercadoPago__AccessToken}
       - MercadoPago__WebhookSecret=${MercadoPago__WebhookSecret}
       - MercadoPago__PublicKey=${MercadoPago__PublicKey}
@@ -74,6 +85,8 @@ services:
       redis:
         condition: service_started
       mongodb:
+        condition: service_started
+      rabbitmq:
         condition: service_started
     networks:
       - greg-network
