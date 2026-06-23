@@ -47,8 +47,6 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Documents\Attributes\" />
-    <Folder Include="Documents\Interfaces\" />
     <Folder Include="Features/About/" />
     <Folder Include="Features/About/Controllers/" />
     <Folder Include="Features/About/DTOs/" />
@@ -77,8 +75,7 @@
     <Folder Include="Features\Support\Services\" />
     <Folder Include="Features\Support\Utils\" />
     <Folder Include="Log\" />
-    <Folder Include="Migrations\" />
-    <Folder Include="wwwroot\videos\" />
+    <Folder Include="wwwroot\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.Build" Version="17.8.43" />

@@ -12,7 +12,10 @@ using MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities;
 using MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities;
 using MeuCrudCsharp.Features.MercadoPago.Plans.Domain.Entities;
 using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Entities;
-using MeuCrudCsharp.Features.Shared.Domain.Entities; using MeuCrudCsharp.Features.Courses.Domain.Entities;
+using MeuCrudCsharp.Features.Shared.Domain.Entities; 
+using MeuCrudCsharp.Features.Courses.Domain.Entities;
+using MeuCrudCsharp.Data;
+using System.Text.Json;
 
 namespace MeuCrudCsharp.Features.Courses.Application.Services
 {
@@ -20,7 +23,8 @@ namespace MeuCrudCsharp.Features.Courses.Application.Services
         ICourseRepository repository,
         ILogger<CourseService> logger,
         ICacheService cacheService,
-        IUnitOfWork unitOfWork
+        IUnitOfWork unitOfWork,
+        IMongoDbContext mongoContext
     ) : ICourseService
     {
         private const string CoursesCacheVersionKey = "courses_cache_version";
@@ -67,21 +71,47 @@ namespace MeuCrudCsharp.Features.Courses.Application.Services
         {
             if (await repository.ExistsByNameAsync(createDto.Name!))
             {
-                throw new AppServiceException("J· existe um curso com este nome.");
+                throw new AppServiceException("J√° existe um curso com este nome.");
             }
 
             var newCourse = new Course
             {
+                Id = Guid.NewGuid().ToString(),
                 Name = createDto.Name!,
                 Description = createDto.Description ?? string.Empty,
             };
 
-            await repository.AddAsync(newCourse);
-            await unitOfWork.CommitAsync();
+            using var session = await mongoContext.StartSessionAsync();
+            session.StartTransaction();
+            try
+            {
+                // 1. Grava o Dado Principal
+                var coursesCollection = mongoContext.GetCollection<Course>("Courses");
+                await coursesCollection.InsertOneAsync(session, newCourse);
 
+                // 2. Grava no Outbox
+                var outboxEvent = new OutboxEvent
+                {
+                    EventType = "CourseCreated",
+                    Payload = JsonSerializer.Serialize(new { CourseId = newCourse.Id, Name = newCourse.Name })
+                };
+                var outboxCollection = mongoContext.GetCollection<OutboxEvent>("OutboxEvents");
+                await outboxCollection.InsertOneAsync(session, outboxEvent);
+
+                // 3. Commit de forma at√¥mica
+                await session.CommitTransactionAsync();
+            }
+            catch (Exception ex)
+            {
+                await session.AbortTransactionAsync();
+                logger.LogError(ex, "Erro ao criar curso e salvar no Outbox.");
+                throw;
+            }
+
+            // Invalida cache e loga
             await cacheService.InvalidateCacheByKeyAsync(CoursesCacheVersionKey);
+            logger.LogInformation("Novo curso '{CourseName}' criado e evento enviado ao Outbox.", newCourse.Name);
 
-            logger.LogInformation("Novo curso '{CourseName}' criado.", newCourse.Name);
             return CourseMapper.ToDto(newCourse);
         }
 
@@ -110,13 +140,13 @@ namespace MeuCrudCsharp.Features.Courses.Application.Services
 
             if (course == null)
             {
-                throw new ResourceNotFoundException($"Curso com ID {publicId} n„o encontrado.");
+                throw new ResourceNotFoundException($"Curso com ID {publicId} n√£o encontrado.");
             }
 
             if (course.Videos.Count != 0)
             {
                 throw new AppServiceException(
-                    "N„o È possÌvel deletar um curso que possui vÌdeos associados."
+                    "N√£o √© poss√≠vel deletar um curso que possui v√≠deos associados."
                 );
             }
 
@@ -134,7 +164,7 @@ namespace MeuCrudCsharp.Features.Courses.Application.Services
             if (course == null)
             {
                 throw new ResourceNotFoundException(
-                    $"Curso com o PublicId {publicId} n„o encontrado."
+                    $"Curso com o PublicId {publicId} n√£o encontrado."
                 );
             }
 
@@ -168,4 +198,3 @@ namespace MeuCrudCsharp.Features.Courses.Application.Services
         }
     }
 }
-

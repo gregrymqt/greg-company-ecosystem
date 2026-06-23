@@ -3,6 +3,7 @@ using MeuCrudCsharp.Extensions.Services.Mcp;
 using MeuCrudCsharp.Extensions.Services.Persistence;
 using MeuCrudCsharp.Extensions.Services.Presentation;
 using MeuCrudCsharp.Extensions.Services.Web; // Novo
+using MeuCrudCsharp.Features.Shared.Infrastructure.Workers;
 
 namespace MeuCrudCsharp.Extensions.Services;
 
@@ -28,6 +29,7 @@ public static class CentralServicesExtensions
             .AddAuthConfiguration();
 
         builder.Services.AddMcpContextServer(builder.Configuration);
+        builder.Services.AddHostedService<OutboxProcessorWorker>();
 
         return builder;
     }

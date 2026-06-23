@@ -11,8 +11,6 @@ using MongoDB.Bson.Serialization.Attributes;
 using MeuCrudCsharp.Data.Configuration.Interfaces;
 using MeuCrudCsharp.Data.Configuration.Attributes;
 using System.ComponentModel.DataAnnotations;
-using MeuCrudCsharp.Data.Configuration.Interfaces;
-using MeuCrudCsharp.Data.Configuration.Attributes;
 
 namespace MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities
 {
