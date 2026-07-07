@@ -8,28 +8,32 @@ public class UnitOfWork : IUnitOfWork, IDisposable
 {
     private readonly IMongoDbContext _context;
     private IClientSessionHandle? _session;
-    private bool _isDisposed;
+    private bool _isDisposed = false;
 
     public UnitOfWork(IMongoDbContext context)
     {
         _context = context;
     }
 
-    public async Task CommitAsync()
+    // Expõe a sessão atual para que os Repositories a utilizem nos métodos do Mongo
+    public IClientSessionHandle? Session => _session;
+
+    public async Task BeginTransactionAsync()
     {
         if (_session == null)
-            return;
+        {
+            _session = await _context.StartSessionAsync();
+            _session.StartTransaction();
+        }
+    }
+
+    public async Task CommitAsync()
+    {
+        if (_session == null) return;
 
         try
         {
             await _session.CommitTransactionAsync();
-        }
-        catch (Exception ex)
-        {
-            throw new InvalidOperationException(
-                "Erro ao persistir alterações no banco de dados. Verifique os logs para mais detalhes.",
-                ex
-            );
         }
         finally
         {

@@ -4,32 +4,34 @@
 
 This is a **monorepo multi-service business suite** following a decoupled micro-frontend architecture.
 
-1. **Backend (.NET 8):** Primary transactional API, background job processing (Hangfire), and Business Intelligence metrics calculation.
-2. **Portal Frontend (React):** Facing application for end-users, students, and course consumers.
-3. **Admin Frontend (React):** Backoffice management, analytics dashboards, and refund workflows.
-4. **Infra:** Centralized infrastructure orchestration directory.
+1. **Proxy Gateway (Nginx):** Acts as the sole entry point to the ecosystem (Port 80) and routes traffic to the respective services.
+2. **Backend (.NET 8):** Primary transactional API named `MeuCrudCsharp`. Handles logic, Hangfire background jobs, RabbitMQ messaging, and Business Intelligence metrics.
+3. **Portal Frontend (React):** Facing application for end-users, students, and course consumers.
+4. **Admin Frontend (React):** Backoffice management, analytics dashboards, and refund workflows.
+5. **Infra:** Centralized infrastructure orchestration directory containing docker-compose and proxy configs.
 
 ## Backend (C# / .NET 8)
 
 ### Architecture Pattern: Clean Architecture with Vertical Slice
-- **Features-first organization:** All features live under `backend/Features/` directory (Auth, Courses, Analytics, Support, etc.)
+- **Features-first organization:** All features live under `backend/Features/` directory (e.g., Auth, Courses, Support, MercadoPago, Mcp, etc.).
 - Each feature contains its own: Controllers, Services, Repositories, DTOs, Interfaces, Mappers.
-- **Extension-based startup:** `Program.cs` uses extension methods from `Extensions/` for clean dependency registration.
+- **Extension-based startup:** `Program.cs` uses extension methods from `Extensions/` for clean dependency registration and app pipeline setup.
 
 ### Dependency Injection Convention
 Services and repositories are **auto-registered via Scrutor** by namespace scanning. When adding new features, create `Services/` and `Repositories/` folders strictly following the standard namespace pattern so they will be automatically discovered.
 
 ### Database & Background Jobs
-- **Primary DB:** MongoDB via native `MongoDB.Driver`. It serves as the single source of truth for all structured and flexible data.
+- **Primary DB:** MongoDB via native `MongoDB.Driver`. It serves as the single source of truth.
 - **Cache:** Redis for performance (`USE_REDIS` env var toggles it).
-- **Hangfire:** Handles all async processing (subscription renewals, MercadoPago webhooks).
+- **Messaging:** RabbitMQ is used as the AMQP broker.
+- **Hangfire:** Handles all async processing.
 
 ## Frontends (React + TypeScript + Vite)
 
 ### Micro-frontend Separation
-The application UI is split into two completely independent React projects to avoid coupling and cross-environment bleeding:
-1. **`portal/`**: For end-users. Runs on port `5173`.
-2. **`admin/`**: For administrators. Runs on port `5174`.
+The application UI is split into two completely independent React projects:
+1. **`portal/`**: For end-users.
+2. **`admin/`**: For administrators.
 
 ### Project Structure (Inside portal/ or admin/)
 ```
@@ -42,16 +44,13 @@ src/
 ```
 *Note: Features in these folders are flattened. Do not use generic `Public/` or `Admin/` subfolders inside a feature. Place the code directly in the relevant micro-frontend's feature folder.*
 
-### UI & Real-time Context
-- **WebSockets:** Uses SignalR (`@microsoft/signalr`) for live payment confirmations and analytics updates.
-- Components use `AppHubsCSharp` to connect to appropriate backend hubs.
-
 ## Docker Orchestration
 
 ### Infrastructure Layout
-- **Global Stack:** Production orchestration lives in `infra/docker-compose.yml` (It orchestrates Backend, DBs, and the Frontends built on Nginx).
+- **Global Stack:** Production orchestration lives in `infra/docker-compose.yml`. This creates the `greg-network` and spins up MongoDB, Redis, RabbitMQ, the Backend, both Frontends, and the Nginx `proxy-gateway`.
+- **Nginx Config:** Located at `infra/nginx.conf`. 
 - **Local Stacks:** Local dev configs reside inside each project folder (e.g., `backend/docker-compose.yml`).
-- **Testing Stack:** The automated tests orchestration is located at `backend/docker-compose.test.yml`.
+- **Testing Stack:** Automated tests orchestration is located at `backend/docker-compose.test.yml`.
 
 ## CI/CD Pipelines (GitHub Actions)
 The pipelines are fully decoupled and trigger based on path filters (`.github/workflows/`):
@@ -65,16 +64,16 @@ Images are published to GHCR using both `latest` and `${{ github.sha }}` tagging
 ### Backend Feature
 1. Create folder under `backend/Features/{FeatureName}/`
 2. Add subfolders: `Controllers/`, `Services/`, `Repositories/`, `DTOs/`, `Interfaces/`.
-3. Implement the MongoDB collection repository or add it to your unified context.
+3. Ensure it aligns with `MeuCrudCsharp.csproj` structure.
 
 ### Frontend Feature
-1. Determine if the feature belongs to `portal/`, `admin/`, or both (e.g., `Payment` goes to both).
+1. Determine if the feature belongs to `portal/`, `admin/`, or both.
 2. Create folder under `src/features/{featurename}/` in the target application(s).
 3. Do not cross-import. Ensure features use their isolated routing and contexts.
 
 ## Key Files Reference
 - Backend entry: [backend/Program.cs](backend/Program.cs)
-- Identity Persistence: [backend/Extensions/Services/Persistence/IdentityServicesExtensions.cs](backend/Extensions/Services/Persistence/IdentityServicesExtensions.cs)
+- Backend csproj: [backend/MeuCrudCsharp.csproj](backend/MeuCrudCsharp.csproj)
 - Portal entry: [portal/src/main.tsx](portal/src/main.tsx)
 - Admin entry: [admin/src/main.tsx](admin/src/main.tsx)
 - Infra config: [infra/docker-compose.yml](infra/docker-compose.yml)

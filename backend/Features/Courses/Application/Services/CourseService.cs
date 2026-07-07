@@ -6,7 +6,7 @@ using MeuCrudCsharp.Features.Courses.Application.Mappers;
 using MeuCrudCsharp.Features.Exceptions;
 using MeuCrudCsharp.Features.Shared.Domain.Interfaces;
 using MeuCrudCsharp.Features.Videos.Application.DTOs;
-using MeuCrudCsharp.Features.Shared.Domain.Entities; 
+using MeuCrudCsharp.Features.Shared.Domain.Entities;
 using MeuCrudCsharp.Features.Courses.Domain.Entities;
 using MeuCrudCsharp.Data;
 using System.Text.Json;
@@ -89,8 +89,7 @@ namespace MeuCrudCsharp.Features.Courses.Application.Services
                     EventType = "CourseCreated",
                     Payload = JsonSerializer.Serialize(new { CourseId = newCourse.Id, newCourse.Name })
                 };
-                var outboxCollection = mongoContext.GetCollection<OutboxEvent>("OutboxEvents");
-                await outboxCollection.InsertOneAsync(session, outboxEvent);
+                await mongoContext.GetCollection<OutboxEvent>("OutboxEvents").InsertOneAsync(session, outboxEvent);
 
                 // 3. Commit de forma atômica
                 await session.CommitTransactionAsync();
@@ -167,7 +166,7 @@ namespace MeuCrudCsharp.Features.Courses.Application.Services
 
             if (course != null)
                 return course;
-            
+
             logger.LogInformation("Criando curso '{CourseName}'...", courseName);
             course = new Course { Name = courseName };
 
