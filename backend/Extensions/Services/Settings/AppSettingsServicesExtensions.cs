@@ -24,9 +24,6 @@ public static class AppSettingsServicesExtensions
             builder.Configuration.GetSection(JwtSettings.SectionName)
         );
 
-        builder.Services.Configure<FFmpegSettings>(
-            builder.Configuration.GetSection(FFmpegSettings.SectionName)
-        );
 
         builder.Services.Configure<MongoDbSettings>(
             builder.Configuration.GetSection(MongoDbSettings.SectionName)

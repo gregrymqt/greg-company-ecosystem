@@ -1,5 +1,4 @@
 using MeuCrudCsharp.Features.Videos.Domain.Interfaces;
-using Hangfire;
 using MeuCrudCsharp.Features.Caching.Application.Interfaces;
 using MeuCrudCsharp.Features.Exceptions;
 using MeuCrudCsharp.Features.Files.Application.Interfaces;
@@ -18,7 +17,6 @@ public class AdminVideoService : IAdminVideoService
 {
     private readonly IVideoRepository _videoRepository;
     private readonly IFileService _fileService;
-    private readonly IBackgroundJobClient _jobs;
     private readonly ICacheService _cacheService;
     private readonly IWebHostEnvironment _env;
     private readonly ILogger<AdminVideoService> _logger;
@@ -33,7 +31,6 @@ public class AdminVideoService : IAdminVideoService
     public AdminVideoService(
         IVideoRepository videoRepository,
         IFileService fileService,
-        IBackgroundJobClient jobs,
         ICacheService cacheService,
         IWebHostEnvironment env,
         ILogger<AdminVideoService> logger,
@@ -44,7 +41,6 @@ public class AdminVideoService : IAdminVideoService
     {
         _videoRepository = videoRepository;
         _fileService = fileService;
-        _jobs = jobs;
         _cacheService = cacheService;
         _env = env;
         _logger = logger;

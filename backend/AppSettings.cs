@@ -36,12 +36,6 @@ public class GoogleSettings
     public string? ClientSecret { get; set; }
 }
 
-public class FFmpegSettings
-{
-    public const string SectionName = "FFmpeg";
-    public string? FfmpegPath { get; set; }
-    public string? FfprobePath { get; set; }
-}
 
 public class MongoDbSettings
 {

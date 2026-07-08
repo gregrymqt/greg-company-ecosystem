@@ -1,4 +1,3 @@
-using Hangfire;
 using MeuCrudCsharp.Features.Base;
 using MeuCrudCsharp.Features.Files.Presentation.Attributes;
 using MeuCrudCsharp.Features.Videos.Application.DTOs;
