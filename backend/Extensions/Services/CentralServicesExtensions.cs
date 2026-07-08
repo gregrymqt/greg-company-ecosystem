@@ -22,8 +22,8 @@ public static class CentralServicesExtensions
             .AddIdentityPersistence()
             .AddMongoPersistence()
             .AddDistributedServices()
-            // --- OS 3 NOVOS MÓDULOS DE WEB E INTEGRAÇÃO ---
             .AddMercadoPagoIntegration()
+            .AddRabbitMqIntegration()
             .AddWebSecurity()
             .AddCookiePolicies()
             .AddAuthConfiguration();
