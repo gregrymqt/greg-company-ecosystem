@@ -26,6 +26,7 @@ public static class FeatureDiscoveryExtensions
                             || type.Name.EndsWith("Renderer")
                             || type.Name.EndsWith("Hub")
                         )
+                        .Where(type => type.Name != "SendGridEmailSenderService")
                 )
                 .AsImplementedInterfaces()
                 .WithScopedLifetime()
