@@ -74,12 +74,13 @@ async def process_message(ch, method, properties, body):
                 desc_tag = soup.select_one("#product_description ~ p")
                 description = desc_tag.text if desc_tag else "Produto genérico extraído"
                 
+                from app.models.products import ScraperMetadata
                 product_data = Product(
-                    name=title.strip(),
+                    title=title.strip(),
                     description=description.strip(),
-                    cost_price=float(price.replace("£", "").replace("€", "").replace("$", "").strip()),
+                    price=float(price.replace("£", "").replace("€", "").replace("$", "").strip()),
                     sku=target_url.split("/")[-2] if "/" in target_url else "",
-                    source_url=target_url
+                    metadata=ScraperMetadata(source_url=target_url)
                 )
 
         # 2. Use LLM com Lookup de Cache Semântico
@@ -92,7 +93,11 @@ async def process_message(ch, method, properties, body):
             enriched_product = Product.model_validate(cached_doc["enriched_product"])
         else:
             logger.info(f"Cache miss para o produto {product_id}. Iniciando chamada para o LLM...")
-            llm = LLMService()
+            
+            # Fetch custom API key if BYOK is configured
+            tenant_openai_key = tenant_doc.get("settings", {}).get("openai_api_key") or tenant_doc.get("openai_api_key")
+            llm = LLMService(openai_api_key=tenant_openai_key)
+            
             enriched_product = await llm.enrich_product(product_data)
             
             await cache_col.insert_one({
@@ -105,9 +110,9 @@ async def process_message(ch, method, properties, body):
             Success=True,
             ProductId=product_id,
             TenantId=tenant_id,
-            Title=enriched_product.name,
+            Title=enriched_product.title,
             Description=enriched_product.description,
-            Price=enriched_product.cost_price,
+            Price=enriched_product.price,
             Images=[str(img) for img in enriched_product.images] if enriched_product.images else []
         )
         

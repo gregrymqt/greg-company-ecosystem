@@ -33,7 +33,7 @@ public class ImportProductFromScraperCommandHandler
             var product = new Product
             {
                 TenantId = command.TenantId,
-                Status = "Integrating",
+                Status = "Raw",
                 Metadata = new Product.ScraperMetadata
                 {
                     SourceUrl = command.TargetUrl

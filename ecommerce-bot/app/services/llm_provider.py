@@ -21,8 +21,9 @@ class LLMProvider(abc.ABC):
 
 
 class OpenAIProvider(LLMProvider):
-    def __init__(self):
-        self.client = openai.AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+    def __init__(self, api_key: str = None):
+        key = api_key or os.getenv("OPENAI_API_KEY")
+        self.client = openai.AsyncOpenAI(api_key=key)
         
     @property
     def name(self) -> str:

@@ -7,7 +7,7 @@ namespace MeuCrudCsharp.Features.Products.Domain.Entities;
 
 public class Product : IMongoDocument
 {
-    public static string CollectionName => "Products";
+    public static string CollectionName => "products";
 
     [BsonId]
     [BsonRepresentation(BsonType.ObjectId)]
@@ -16,18 +16,25 @@ public class Product : IMongoDocument
     [MongoIndex]
     public string TenantId { get; set; } = string.Empty;
 
+    public string Sku { get; set; } = string.Empty;
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public decimal Price { get; set; }
+    public string Currency { get; set; } = "BRL";
+    public string Category { get; set; } = "Geral";
     
-    // Status: "Integrating", "Active", "Failed"
-    public string Status { get; set; } = "Integrating";
+    // Status: "Raw", "Processing", "Processed", "Failed"
+    public string Status { get; set; } = "Raw";
     
     public List<string> Images { get; set; } = new();
     
     public Dictionary<string, string> Attributes { get; set; } = new();
 
     public ScraperMetadata Metadata { get; set; } = new();
+    
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime? UpdatedAt { get; set; }
+    public string? LastError { get; set; }
 
     public class ScraperMetadata
     {

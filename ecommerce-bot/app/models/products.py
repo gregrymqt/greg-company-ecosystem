@@ -4,30 +4,40 @@ from datetime import datetime
 from enum import Enum
 
 class ProductStatus(str, Enum):
-    RAW = "raw"
-    PROCESSED = "processed"
-    PUBLISHED = "published"
-    ERROR = "error"
+    RAW = "Raw"
+    PROCESSING = "Processing"
+    PROCESSED = "Processed"
+    FAILED = "Failed"
+
+class ScraperMetadata(BaseModel):
+    source_url: HttpUrl
+    last_scraped_at: Optional[datetime] = None
+    scraper_version: str = ""
 
 class Product(BaseModel):
     # Identificadores e Rastreabilidade
     id: Optional[str] = Field(None, alias="_id")
+    tenant_id: Optional[str] = None
     sku: str = Field(..., min_length=3)
-    source_url: HttpUrl  # Valida se é uma URL real
     
     # Informações de Negócio
-    name: str
+    title: str
     description: str
-    cost_price: float = Field(..., gt=0) # Preço deve ser maior que zero
+    price: float = Field(..., gt=0) # Preço deve ser maior que zero
     currency: str = "BRL"
     
     # Dados de Mídia e Categorização
-    images: List[HttpUrl] = []
+    images: List[str] = []
     category: str = "Geral"
+    attributes: Dict[str, str] = {}
+    
+    # Sub-documento
+    metadata: ScraperMetadata
     
     # Controle de Pipeline
     status: ProductStatus = ProductStatus.RAW
     created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: Optional[datetime] = None
     last_error: Optional[str] = None
 
     class Config:

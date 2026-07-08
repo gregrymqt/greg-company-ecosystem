@@ -13,11 +13,11 @@ class AllProvidersExhaustedError(Exception):
     pass
 
 class LLMService:
-    def __init__(self):
+    def __init__(self, openai_api_key: str = None):
         # Initialize the list of providers in the order we want to use them
         self.providers = []
         try:
-            self.providers.append(OpenAIProvider())
+            self.providers.append(OpenAIProvider(api_key=openai_api_key))
         except Exception as e:
             logger.warning(f"OpenAIProvider não configurado: {e}")
             
@@ -30,7 +30,7 @@ class LLMService:
         prompt = f"""
         Você é um especialista em e-commerce. Traduza e reescreva a descrição abaixo 
         para português do Brasil, focando em persuasão de vendas (copywriting).
-        Produto: {product.name}
+        Produto: {product.title}
         Descrição original: {product.description}
         
         Retorne apenas o texto da nova descrição persuasiva.

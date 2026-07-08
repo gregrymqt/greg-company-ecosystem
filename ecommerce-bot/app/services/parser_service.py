@@ -21,11 +21,12 @@ class ParserService:
             # Usamos a URL como SKU (ou parte dela)
             sku = link_tag["href"].split("_")[-1].replace("/index.html", "")
             
+            from app.models.products import ScraperMetadata
             return Product(
                 sku=sku,
-                name=name,
-                cost_price=float(price_text),
-                source_url=f"https://books.toscrape.com/{link_tag['href']}",
+                title=name,
+                price=float(price_text),
+                metadata=ScraperMetadata(source_url=f"https://books.toscrape.com/{link_tag['href']}"),
                 description="Produto extraído do site Books to Scrape."
             )
             

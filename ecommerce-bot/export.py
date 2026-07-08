@@ -29,8 +29,8 @@ class ExporterWorker:
     def fetch_processed_products(self):
         """Busca no MongoDB os produtos que já passaram pela IA e estão com status 'processed'."""
         try:
-            # Traz apenas produtos 'processed'
-            raw_products = list(self.collection.find({"status": "processed"}))
+            # Traz apenas produtos 'Processed'
+            raw_products = list(self.collection.find({"status": "Processed"}))
             products = []
             for rp in raw_products:
                 try:
@@ -52,7 +52,7 @@ class ExporterWorker:
 
         return {
             "Handle": product.sku.lower().replace(" ", "-"), # Identificador amigável na URL
-            "Title": product.name,
+            "Title": product.title,
             "Body (HTML)": product.description, # Aqui entra a descrição rica gerada pela IA
             "Vendor": "Loja Padrão",
             "Type": product.category,
@@ -62,35 +62,21 @@ class ExporterWorker:
             "Option1 Value": "Default Title",
             "Variant SKU": product.sku,
             "Variant Grams": 0,
-            "Variant Inventory Tracker": "shopify",
-            "Variant Inventory Qty": 0,
-            "Variant Inventory Policy": "deny",
-            "Variant Fulfillment Service": "manual",
-            "Variant Price": product.cost_price,
-            "Variant Compare At Price": "",
-            "Variant Requires Shipping": "TRUE",
-            "Variant Taxable": "TRUE",
-            "Image Src": image_url,
-            "Image Position": 1,
-            "Image Alt Text": product.name,
+            "Variant Price": product.price,
+            "Image Src": str(product.images[0]) if product.images else ""
         }
 
     def map_to_nuvemshop(self, product: Product):
         """
         Exemplo extra: Mapeamento para Nuvemshop.
         """
-        image_url = str(product.images[0]) if product.images else ""
         return {
-            "Identificador URL": product.sku.lower().replace(" ", "-"),
-            "Nome": product.name,
-            "Descrição": product.description,
+            "Identificador URL": product.sku,
+            "Nome": product.title,
             "Categorias": product.category,
-            "Preço": product.cost_price,
-            "Preço Promocional": "",
-            "Estoque": 0,
-            "SKU": product.sku,
-            "Exibir na loja": "Sim",
-            "Imagens": image_url
+            "Preço": product.price,
+            "Descrição": product.description,
+            "Imagens": ",".join([str(img) for img in product.images]) if product.images else ""
         }
 
     def export(self):
@@ -108,11 +94,15 @@ class ExporterWorker:
         # Direciona para o mapeamento correto da plataforma alvo
         mapped_data = []
         if self.platform == "shopify":
+            from app.models.products import ScraperMetadata
+            dummy_product = Product(sku="dummy", title="dummy", description="dummy", price=1.0, metadata=ScraperMetadata(source_url="http://dummy.com"))
+            fieldnames = self.map_to_shopify(dummy_product).keys()
             mapped_data = [self.map_to_shopify(p) for p in products]
-            fieldnames = self.map_to_shopify({}).keys()
         elif self.platform == "nuvemshop":
+            from app.models.products import ScraperMetadata
+            dummy_product = Product(sku="dummy", title="dummy", description="dummy", price=1.0, metadata=ScraperMetadata(source_url="http://dummy.com"))
+            fieldnames = self.map_to_nuvemshop(dummy_product).keys()
             mapped_data = [self.map_to_nuvemshop(p) for p in products]
-            fieldnames = self.map_to_nuvemshop({}).keys()
         else:
             print(f"Plataforma '{self.platform}' não configurada no ExporterWorker.")
             return
@@ -143,9 +133,9 @@ class ExporterWorker:
         try:
             result = self.collection.update_many(
                 {"_id": {"$in": product_ids}},
-                {"$set": {"status": "exported"}}
+                {"$set": {"status": "Exported"}}
             )
-            print(f"Concluído: {result.modified_count} documentos marcados como 'exported' no MongoDB.")
+            print(f"Concluído: {result.modified_count} documentos marcados como 'Exported' no MongoDB.")
         except Exception as e:
             print(f"Erro ao atualizar o status no MongoDB: {e}")
 
