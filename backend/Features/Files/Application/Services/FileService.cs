@@ -2,13 +2,6 @@ using MeuCrudCsharp.Features.Exceptions;
 using MeuCrudCsharp.Features.Files.Application.Interfaces;
 using MeuCrudCsharp.Features.Files.Domain.Interfaces;
 using MeuCrudCsharp.Features.Shared.Domain.Interfaces;
-using MeuCrudCsharp.Features.Shared.Infrastructure.Persistence;
-using MeuCrudCsharp.Features.MercadoPago.Chargebacks.Domain.Entities;
-using MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities;
-using MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities;
-using MeuCrudCsharp.Features.MercadoPago.Plans.Domain.Entities;
-using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Entities;
-using MeuCrudCsharp.Features.Shared.Domain.Entities;
 using MeuCrudCsharp.Features.Files.Domain.Entities;
 using Microsoft.AspNetCore.StaticFiles;
 

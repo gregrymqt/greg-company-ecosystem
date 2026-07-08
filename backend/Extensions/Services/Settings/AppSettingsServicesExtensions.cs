@@ -20,10 +20,24 @@ public static class AppSettingsServicesExtensions
             builder.Configuration.GetSection(GoogleSettings.SectionName)
         );
 
-        builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"));
+        builder.Services.Configure<JwtSettings>(
+            builder.Configuration.GetSection(JwtSettings.SectionName)
+        );
 
         builder.Services.Configure<FFmpegSettings>(
-            builder.Configuration.GetSection("FFmpegSettings")
+            builder.Configuration.GetSection(FFmpegSettings.SectionName)
+        );
+
+        builder.Services.Configure<MongoDbSettings>(
+            builder.Configuration.GetSection(MongoDbSettings.SectionName)
+        );
+
+        builder.Services.Configure<RabbitMqSettings>(
+            builder.Configuration.GetSection(RabbitMqSettings.SectionName)
+        );
+
+        builder.Services.Configure<SupabaseSettings>(
+            builder.Configuration.GetSection(SupabaseSettings.SectionName)
         );
 
         return builder;

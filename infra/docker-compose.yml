@@ -67,7 +67,10 @@ services:
       - ../.env
     environment:
       - ASPNETCORE_URLS=http://+:8080
-      - ConnectionStrings__MongoConnection=${MONGO_CONNECTION_STRING}
+      - ConnectionStrings__MongoConnection=${ConnectionStrings__MongoConnection}
+      - MongoDb__DatabaseName=${MONGO_DATABASE_NAME}
+      - MongoDb__WriteConcern=${MONGO_WRITE_CONCERN}
+      - MongoDb__Journal=${MONGO_JOURNAL}
       - ConnectionStrings__Redis=${ConnectionStrings__Redis}
       - ConnectionStrings__RabbitMq=amqp://guest:guest@rabbitmq:5672/
       - MercadoPago__AccessToken=${MercadoPago__AccessToken}
@@ -79,7 +82,7 @@ services:
       - SendGrid__ApiKey=${SendGrid__ApiKey}
       - SendGrid__FromEmail=${SendGrid__FromEmail}
       - SendGrid__FromName=${SendGrid__FromName}
-      - General__BaseUrl=${VITE_GENERAL__BASEURL}
+      - General__BaseUrl=${GENERAL__BASEURL}
       - USE_REDIS=${USE_REDIS}
     depends_on:
       redis:
@@ -104,13 +107,23 @@ services:
     env_file:
       - ../.env
     environment:
-      - ConnectionStrings__MongoConnection=${MONGO_CONNECTION_STRING}
+      - ConnectionStrings__MongoConnection=${ConnectionStrings__MongoConnection}
+      - MongoDb__DatabaseName=${MONGO_DATABASE_NAME}
+      - MongoDb__WriteConcern=${MONGO_WRITE_CONCERN}
+      - MongoDb__Journal=${MONGO_JOURNAL}
       - ConnectionStrings__Redis=${ConnectionStrings__Redis}
       - ConnectionStrings__RabbitMq=amqp://guest:guest@rabbitmq:5672/
       - SendGrid__ApiKey=${SendGrid__ApiKey}
       - SendGrid__FromEmail=${SendGrid__FromEmail}
       - SendGrid__FromName=${SendGrid__FromName}
       - USE_REDIS=${USE_REDIS}
+      - RabbitMq__HostName=${RabbitMq__HostName}
+      - RabbitMq__UserName=${RabbitMq__UserName}
+      - RabbitMq__Password=${RabbitMq__Password}
+      - RabbitMq__VirtualHost=${RabbitMq__VirtualHost}
+      - Supabase__AccessKeyID=${Access_key_ID}
+      - Supabase__SecretAccessKey=${Secret_Access_key}
+      - Supabase__EndPointS3=${EndPoint_S3}
     depends_on:
       redis:
         condition: service_started
@@ -132,7 +145,7 @@ services:
       context: ../portal
       dockerfile: Dockerfile
       args:
-        - VITE_GENERAL_BASEURL=${VITE_GENERAL__BASEURL}
+        - VITE_GENERAL_BASEURL=${GENERAL__BASEURL}
     expose:
       - "80" # Fechado para fora, acessível apenas pelo Nginx internamente
     depends_on:
@@ -146,7 +159,7 @@ services:
       context: ../admin
       dockerfile: Dockerfile
       args:
-        - VITE_GENERAL_BASEURL=${VITE_GENERAL__BASEURL}
+        - VITE_GENERAL_BASEURL=${GENERAL__BASEURL}
     expose:
       - "80" # Fechado para fora, acessível apenas pelo Nginx internamente
     depends_on:
@@ -163,7 +176,7 @@ services:
       - ../.env
     environment:
       - MONGO_URI=mongodb://mongodb:27017
-      - MONGO_DB_NAME=${MONGO_DB_NAME}
+      - MONGO_DB_NAME=${MONGO_DATABASE_NAME}
       - MONGO_COLLECTION_NAME=${MONGO_COLLECTION_NAME}
       - RABBITMQ_HOST=rabbitmq
     depends_on:
