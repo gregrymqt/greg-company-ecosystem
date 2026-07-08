@@ -5,6 +5,8 @@ using Microsoft.Extensions.Caching.Distributed;
 using RabbitMQ.Client;
 using MeuCrudCsharp.Features.Base.Workers;
 using MeuCrudCsharp.Features.Products.Infrastructure.Persistence;
+using MeuCrudCsharp.Features.Shared.Infrastructure.Hubs;
+using Microsoft.AspNetCore.SignalR;
 
 namespace MeuCrudCsharp.Features.Products.Shared.Infrastructure.Workers;
 
@@ -77,6 +79,14 @@ public class ProductImportCompletedConsumer : RabbitMqConsumerBase
 
         var cacheKey = $"products_{product.TenantId}";
         await cache.RemoveAsync(cacheKey, cancellationToken);
+
+        var hubContext = scope.ServiceProvider.GetRequiredService<IHubContext<NotificationHub>>();
+        await hubContext.Clients.Group(product.TenantId).SendAsync("ProductImportStatusUpdated", new 
+        { 
+            productId = product.Id, 
+            tenantId = product.TenantId, 
+            status = product.Status 
+        }, cancellationToken);
     }
 
     private class ImportCompletedPayload

@@ -39,6 +39,8 @@ public static class RabbitMqExtensions
             }
         });
 
+        builder.Services.AddSingleton<MeuCrudCsharp.Features.Shared.Application.Interfaces.IRabbitMqPublisher, MeuCrudCsharp.Features.Shared.Infrastructure.Messaging.RabbitMqPublisher>();
+
         return builder;
     }
 }
