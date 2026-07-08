@@ -35,7 +35,7 @@ namespace MeuCrudCsharp.Features.Videos.Presentation.Controllers
                     return Ok(new { message = $"Chunk {dto.ChunkIndex} do vídeo recebido." });
                 }
 
-                return CreatedAtAction(nameof(GetAllVideos), new { id = result.Id }, result);
+                return Accepted(new { message = "Vídeo recebido e em processamento assíncrono.", id = result.Id });
             }
             catch (Exception ex)
             {

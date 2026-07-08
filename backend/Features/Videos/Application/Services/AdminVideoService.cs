@@ -4,16 +4,12 @@ using MeuCrudCsharp.Features.Caching.Application.Interfaces;
 using MeuCrudCsharp.Features.Exceptions;
 using MeuCrudCsharp.Features.Files.Application.Interfaces;
 using MeuCrudCsharp.Features.Shared.Domain.Interfaces;
-using MeuCrudCsharp.Features.Shared.Infrastructure.Persistence;
 using MeuCrudCsharp.Features.Videos.Application.DTOs;
 using MeuCrudCsharp.Features.Videos.Application.Interfaces;
 using MeuCrudCsharp.Features.Videos.Application.Utils;
-using MeuCrudCsharp.Features.MercadoPago.Chargebacks.Domain.Entities;
-using MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities;
-using MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities;
-using MeuCrudCsharp.Features.MercadoPago.Plans.Domain.Entities;
-using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Entities;
+using MeuCrudCsharp.Data;
 using MeuCrudCsharp.Features.Shared.Domain.Entities;
+using System.Text.Json;
 using MeuCrudCsharp.Features.Videos.Domain.Entities;
 
 namespace MeuCrudCsharp.Features.Videos.Application.Services;
@@ -27,6 +23,8 @@ public class AdminVideoService : IAdminVideoService
     private readonly IWebHostEnvironment _env;
     private readonly ILogger<AdminVideoService> _logger;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly ISupabaseStorageService _supabaseStorageService;
+    private readonly IMongoDbContext _context;
 
     private const string CatVideo = "Videos";
     private const string CatThumb = "VideoThumbnails";
@@ -39,7 +37,9 @@ public class AdminVideoService : IAdminVideoService
         ICacheService cacheService,
         IWebHostEnvironment env,
         ILogger<AdminVideoService> logger,
-        IUnitOfWork unitOfWork
+        IUnitOfWork unitOfWork,
+        ISupabaseStorageService supabaseStorageService,
+        IMongoDbContext context
     )
     {
         _videoRepository = videoRepository;
@@ -49,6 +49,8 @@ public class AdminVideoService : IAdminVideoService
         _env = env;
         _logger = logger;
         _unitOfWork = unitOfWork;
+        _supabaseStorageService = supabaseStorageService;
+        _context = context;
     }
 
     public async Task<VideoDto?> HandleVideoUploadAsync(CreateVideoDto dto)
@@ -56,6 +58,11 @@ public class AdminVideoService : IAdminVideoService
         var fileId = "";
         var thumbnailUrl = string.Empty;
         var storageIdentifier = Guid.NewGuid().ToString();
+
+        await _unitOfWork.BeginTransactionAsync();
+
+        try
+        {
 
         if (dto is { IsChunk: true, File: not null })
         {
@@ -77,12 +84,20 @@ public class AdminVideoService : IAdminVideoService
                 CatVideo
             );
 
-            fileId = videoSalvo.Id;
+            var localFilePath = System.IO.Path.Combine(_env.WebRootPath, videoSalvo.CaminhoRelativo.TrimStart('/'));
+            storageIdentifier = await _supabaseStorageService.UploadRawVideoAsync(localFilePath, fileName, "greg-videos-raw");
+            await _fileService.DeletarArquivoAsync(videoSalvo.Id);
+            fileId = "";
         }
         else if (dto.File != null)
         {
+            var fileName = dto.FileName ?? $"{Guid.NewGuid()}{System.IO.Path.GetExtension(dto.File.FileName)}";
             var videoSalvo = await _fileService.SalvarArquivoAsync(dto.File, CatVideo);
-            fileId = videoSalvo.Id;
+            
+            var localFilePath = System.IO.Path.Combine(_env.WebRootPath, videoSalvo.CaminhoRelativo.TrimStart('/'));
+            storageIdentifier = await _supabaseStorageService.UploadRawVideoAsync(localFilePath, fileName, "greg-videos-raw");
+            await _fileService.DeletarArquivoAsync(videoSalvo.Id);
+            fileId = "";
         }
 
         if (dto.ThumbnailFile != null)
@@ -106,21 +121,34 @@ public class AdminVideoService : IAdminVideoService
 
         await _videoRepository.AddAsync(entity);
 
+        var outboxEvent = new OutboxEvent
+        {
+            EventType = "video.process.request",
+            Payload = JsonSerializer.Serialize(new 
+            { 
+                VideoId = entity.Id, 
+                StorageIdentifier = entity.StorageIdentifier,
+                SupabasePath = entity.StorageIdentifier
+            })
+        };
+
+        var outboxCollection = _context.GetCollection<OutboxEvent>("OutboxEvents");
+        
+        if (_unitOfWork.Session != null)
+        {
+            await outboxCollection.InsertOneAsync(_unitOfWork.Session, outboxEvent);
+        }
+        else
+        {
+            await outboxCollection.InsertOneAsync(outboxEvent);
+        }
+
         await _unitOfWork.CommitAsync();
 
         _logger.LogInformation(
-            "Vï¿½deo {VideoId} criado com sucesso. StorageId: {StorageId}",
+            "Vï¿½deo {VideoId} criado com sucesso e evento Outbox inserido. StorageId: {StorageId}",
             entity.PublicId,
             entity.StorageIdentifier
-        );
-
-        _jobs.Enqueue<IVideoProcessingService>(
-            service => service.ProcessVideoToHlsAsync(entity.Id, entity.FileId)
-        );
-
-        _logger.LogInformation(
-            "Job de processamento HLS agendado para o vï¿½deo {VideoId}",
-            entity.PublicId
         );
 
         return new VideoDto
@@ -131,6 +159,12 @@ public class AdminVideoService : IAdminVideoService
 
             ThumbnailUrl = entity.ThumbnailUrl ?? string.Empty,
         };
+        }
+        catch
+        {
+            await _unitOfWork.RollbackAsync();
+            throw;
+        }
     }
 
     public async Task<PaginatedResultDto<VideoDto>> GetAllVideosAsync(int page, int pageSize)
