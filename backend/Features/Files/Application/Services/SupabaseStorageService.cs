@@ -47,4 +47,25 @@ public class SupabaseStorageService : ISupabaseStorageService
 
         return $"{bucketName}/{fileName}";
     }
+
+    public async Task DeleteObjectAsync(string bucketName, string key)
+    {
+        await _s3Client.DeleteObjectAsync(bucketName, key);
+    }
+
+    public async Task DeleteFolderAsync(string bucketName, string prefix)
+    {
+        var listRequest = new Amazon.S3.Model.ListObjectsV2Request
+        {
+            BucketName = bucketName,
+            Prefix = prefix
+        };
+
+        var listResponse = await _s3Client.ListObjectsV2Async(listRequest);
+
+        foreach (var obj in listResponse.S3Objects)
+        {
+            await _s3Client.DeleteObjectAsync(bucketName, obj.Key);
+        }
+    }
 }

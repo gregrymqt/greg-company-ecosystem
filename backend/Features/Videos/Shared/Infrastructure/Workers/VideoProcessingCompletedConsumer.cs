@@ -34,7 +34,7 @@ public class VideoProcessingCompletedConsumer : RabbitMqConsumerBase
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
             payload = JsonSerializer.Deserialize<VideoProcessingCompletedEvent>(message, options);
             
-            if (payload == null || payload.VideoId == Guid.Empty)
+            if (payload == null || !Guid.TryParse(payload.VideoId, out var parsedVideoId) || parsedVideoId == Guid.Empty)
             {
                 _logger.LogWarning("Payload invalido ignorado: {Message}", message);
                 return;
@@ -51,7 +51,7 @@ public class VideoProcessingCompletedConsumer : RabbitMqConsumerBase
         var cacheService = scope.ServiceProvider.GetRequiredService<ICacheService>();
         var hubContext = scope.ServiceProvider.GetRequiredService<IHubContext<NotificationHub>>();
 
-        var video = await videoRepository.GetByPublicIdAsync(payload.VideoId);
+        var video = await videoRepository.GetByPublicIdAsync(Guid.Parse(payload.VideoId));
         if (video == null)
         {
             _logger.LogWarning("Video com ID {VideoId} nao encontrado no banco.", payload.VideoId);
@@ -84,11 +84,11 @@ public class VideoProcessingCompletedConsumer : RabbitMqConsumerBase
         }, cancellationToken);
     }
 
-    private class VideoProcessingCompletedEvent
-    {
-        public Guid VideoId { get; set; }
-        public bool Success { get; set; }
-        public string? Error { get; set; }
-        public double DurationInSeconds { get; set; }
-    }
+    public record VideoProcessingCompletedEvent(
+        string VideoId,
+        string StorageIdentifier,
+        double DurationInSeconds,
+        bool Success,
+        string Error
+    );
 }

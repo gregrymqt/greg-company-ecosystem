@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log/slog"
-	"time"
 	"video-processor/internal/processor"
 
 	amqp "github.com/rabbitmq/amqp091-go"
@@ -24,9 +23,11 @@ type VideoProcessRequest struct {
 
 // VideoProcessingCompletedEvent mapeia o payload idêntico ao esperado pelo VideoProcessingCompletedConsumer no C#
 type VideoProcessingCompletedEvent struct {
-	VideoId           string `json:"VideoId"`
-	StorageIdentifier string `json:"StorageIdentifier"`
-	Duration          string `json:"Duration"` // Formato "hh:mm:ss" compatível com o TimeSpan do .NET
+	VideoId           string  `json:"VideoId"`
+	StorageIdentifier string  `json:"StorageIdentifier"`
+	DurationInSeconds float64 `json:"DurationInSeconds"`
+	Success           bool    `json:"Success"`
+	Error             string  `json:"Error"`
 }
 
 func NewConsumer(conn *RabbitMQConnection, proc *processor.FfmpegProcessor) *Consumer {
@@ -80,18 +81,18 @@ func (c *Consumer) StartConsuming(exchange, queueName, routingKey string) error 
 			)
 
 			// 1. Executa o processamento e obtém a duração do vídeo em segundos
-			durationSeconds, err := c.processor.ProcessVideo(req.VideoId, req.StorageIdentifier, req.SupabasePath)
-			if err != nil {
-				slog.Error("Failed to process video", "video_id", req.VideoId, "error", err)
-				d.Nack(false, false)
-				continue
-			}
+			durationSeconds, processErr := c.processor.ProcessVideo(req.VideoId, req.StorageIdentifier, req.SupabasePath)
 
 			// 2. Prepara o evento de integração de volta para o .NET 8
 			completedEvent := VideoProcessingCompletedEvent{
 				VideoId:           req.VideoId,
 				StorageIdentifier: req.StorageIdentifier,
-				Duration:          formatSecondsToTimeSpan(durationSeconds),
+				DurationInSeconds: durationSeconds,
+				Success:           processErr == nil,
+			}
+			if processErr != nil {
+				slog.Error("Failed to process video", "video_id", req.VideoId, "error", processErr)
+				completedEvent.Error = processErr.Error()
 			}
 
 			eventBody, err := json.Marshal(completedEvent)
@@ -123,23 +124,15 @@ func (c *Consumer) StartConsuming(exchange, queueName, routingKey string) error 
 				continue
 			}
 
-			// ACK FINAL: Vídeo processado, upado e sistema notificado com sucesso!
+			// ACK FINAL: Vídeo processado (com sucesso ou falha controlada), upado e sistema notificado!
 			d.Ack(false)
-			slog.Info("Video pipeline completed and core notified successfully", "video_id", req.VideoId)
+			if processErr == nil {
+				slog.Info("Video pipeline completed and core notified successfully", "video_id", req.VideoId)
+			} else {
+				slog.Info("Video pipeline completed with errors and core notified", "video_id", req.VideoId)
+			}
 		}
 	}()
 
 	return nil
-}
-
-// formatSecondsToTimeSpan converte float64 segundos para string no formato "HH:MM:SS" exigido pelo .NET
-func formatSecondsToTimeSpan(totalSeconds float64) string {
-	d := time.Duration(totalSeconds * float64(time.Second))
-	hours := d / time.Hour
-	d -= hours * time.Hour
-	minutes := d / time.Minute
-	d -= minutes * time.Minute
-	seconds := d / time.Second
-
-	return fmt.Sprintf("%02d:%02d:%02d", hours, minutes, seconds)
 }

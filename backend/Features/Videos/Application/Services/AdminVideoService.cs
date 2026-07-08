@@ -64,101 +64,101 @@ public class AdminVideoService : IAdminVideoService
         try
         {
 
-        if (dto is { IsChunk: true, File: not null })
-        {
-            var fileName = dto.FileName ?? $"{Guid.NewGuid()}.tmp";
+            if (dto is { IsChunk: true, File: not null })
+            {
+                var fileName = dto.FileName ?? $"{Guid.NewGuid()}.tmp";
 
-            var tempPath = await _fileService.ProcessChunkAsync(
-                dto.File,
-                fileName,
-                dto.ChunkIndex,
-                dto.TotalChunks
+                var tempPath = await _fileService.ProcessChunkAsync(
+                    dto.File,
+                    fileName,
+                    dto.ChunkIndex,
+                    dto.TotalChunks
+                );
+
+                if (tempPath == null)
+                    return null;
+
+                var videoSalvo = await _fileService.SalvarArquivoDoTempAsync(
+                    tempPath,
+                    fileName,
+                    CatVideo
+                );
+
+                var localFilePath = System.IO.Path.Combine(_env.WebRootPath, videoSalvo.CaminhoRelativo.TrimStart('/'));
+                storageIdentifier = await _supabaseStorageService.UploadRawVideoAsync(localFilePath, fileName, "greg-videos-raw");
+                await _fileService.DeletarArquivoAsync(videoSalvo.Id);
+                fileId = "";
+            }
+            else if (dto.File != null)
+            {
+                var fileName = dto.FileName ?? $"{Guid.NewGuid()}{System.IO.Path.GetExtension(dto.File.FileName)}";
+                var videoSalvo = await _fileService.SalvarArquivoAsync(dto.File, CatVideo);
+
+                var localFilePath = System.IO.Path.Combine(_env.WebRootPath, videoSalvo.CaminhoRelativo.TrimStart('/'));
+                storageIdentifier = await _supabaseStorageService.UploadRawVideoAsync(localFilePath, fileName, "greg-videos-raw");
+                await _fileService.DeletarArquivoAsync(videoSalvo.Id);
+                fileId = "";
+            }
+
+            if (dto.ThumbnailFile != null)
+            {
+                var thumbSalva = await _fileService.SalvarArquivoAsync(dto.ThumbnailFile, CatThumb);
+                thumbnailUrl = thumbSalva.CaminhoRelativo;
+            }
+
+            var entity = new Video
+            {
+                Title = dto.Title ?? "Sem Tï¿½tulo",
+                Description = dto.Description ?? string.Empty,
+                CourseId = dto.CourseId,
+                StorageIdentifier = storageIdentifier,
+                FileId = fileId,
+                ThumbnailUrl = thumbnailUrl,
+                Status = VideoStatus.Processing,
+                UploadDate = DateTime.UtcNow,
+                Duration = TimeSpan.Zero,
+            };
+
+            await _videoRepository.AddAsync(entity);
+
+            var outboxEvent = new OutboxEvent
+            {
+                EventType = "video.process.request",
+                Payload = JsonSerializer.Serialize(new
+                {
+                    VideoId = entity.PublicId.ToString(),
+                    StorageIdentifier = entity.StorageIdentifier,
+                    SupabasePath = $"greg-videos-raw/{entity.StorageIdentifier}"
+                })
+            };
+
+            var outboxCollection = _context.GetCollection<OutboxEvent>("OutboxEvents");
+
+            if (_unitOfWork.Session != null)
+            {
+                await outboxCollection.InsertOneAsync(_unitOfWork.Session, outboxEvent);
+            }
+            else
+            {
+                await outboxCollection.InsertOneAsync(outboxEvent);
+            }
+
+            await _unitOfWork.CommitAsync();
+
+            _logger.LogInformation(
+                "Vï¿½deo {VideoId} criado com sucesso e evento Outbox inserido. StorageId: {StorageId}",
+                entity.PublicId,
+                entity.StorageIdentifier
             );
 
-            if (tempPath == null)
-                return null;
+            return new VideoDto
+            {
+                Id = entity.PublicId,
+                Title = entity.Title,
+                Status = entity.Status.ToString(),
 
-            var videoSalvo = await _fileService.SalvarArquivoDoTempAsync(
-                tempPath,
-                fileName,
-                CatVideo
-            );
-
-            var localFilePath = System.IO.Path.Combine(_env.WebRootPath, videoSalvo.CaminhoRelativo.TrimStart('/'));
-            storageIdentifier = await _supabaseStorageService.UploadRawVideoAsync(localFilePath, fileName, "greg-videos-raw");
-            await _fileService.DeletarArquivoAsync(videoSalvo.Id);
-            fileId = "";
-        }
-        else if (dto.File != null)
-        {
-            var fileName = dto.FileName ?? $"{Guid.NewGuid()}{System.IO.Path.GetExtension(dto.File.FileName)}";
-            var videoSalvo = await _fileService.SalvarArquivoAsync(dto.File, CatVideo);
-            
-            var localFilePath = System.IO.Path.Combine(_env.WebRootPath, videoSalvo.CaminhoRelativo.TrimStart('/'));
-            storageIdentifier = await _supabaseStorageService.UploadRawVideoAsync(localFilePath, fileName, "greg-videos-raw");
-            await _fileService.DeletarArquivoAsync(videoSalvo.Id);
-            fileId = "";
-        }
-
-        if (dto.ThumbnailFile != null)
-        {
-            var thumbSalva = await _fileService.SalvarArquivoAsync(dto.ThumbnailFile, CatThumb);
-            thumbnailUrl = thumbSalva.CaminhoRelativo;
-        }
-
-        var entity = new Video
-        {
-            Title = dto.Title ?? "Sem Tï¿½tulo",
-            Description = dto.Description ?? string.Empty,
-            CourseId = dto.CourseId,
-            StorageIdentifier = storageIdentifier,
-            FileId = fileId,
-            ThumbnailUrl = thumbnailUrl,
-            Status = VideoStatus.Processing,
-            UploadDate = DateTime.UtcNow,
-            Duration = TimeSpan.Zero,
-        };
-
-        await _videoRepository.AddAsync(entity);
-
-        var outboxEvent = new OutboxEvent
-        {
-            EventType = "video.process.request",
-            Payload = JsonSerializer.Serialize(new 
-            { 
-                VideoId = entity.Id, 
-                StorageIdentifier = entity.StorageIdentifier,
-                SupabasePath = entity.StorageIdentifier
-            })
-        };
-
-        var outboxCollection = _context.GetCollection<OutboxEvent>("OutboxEvents");
-        
-        if (_unitOfWork.Session != null)
-        {
-            await outboxCollection.InsertOneAsync(_unitOfWork.Session, outboxEvent);
-        }
-        else
-        {
-            await outboxCollection.InsertOneAsync(outboxEvent);
-        }
-
-        await _unitOfWork.CommitAsync();
-
-        _logger.LogInformation(
-            "Vï¿½deo {VideoId} criado com sucesso e evento Outbox inserido. StorageId: {StorageId}",
-            entity.PublicId,
-            entity.StorageIdentifier
-        );
-
-        return new VideoDto
-        {
-            Id = entity.PublicId,
-            Title = entity.Title,
-            Status = entity.Status.ToString(),
-
-            ThumbnailUrl = entity.ThumbnailUrl ?? string.Empty,
-        };
+                ThumbnailUrl = entity.ThumbnailUrl ?? string.Empty,
+            };
         }
         catch
         {
@@ -236,9 +236,9 @@ public class AdminVideoService : IAdminVideoService
 
     public async Task DeleteVideoAsync(Guid id)
     {
-        var video = await _videoRepository.GetByPublicIdAsync(id);
-        if (video == null)
-            throw new ResourceNotFoundException("Vï¿½deo nï¿½o encontrado.");
+        var video = await _videoRepository.GetByPublicIdAsync(id)
+                            ?? throw new ResourceNotFoundException("Video não encontrado");
+
 
         var fileId = video.FileId;
         var storageIdentifier = video.StorageIdentifier;
@@ -261,10 +261,11 @@ public class AdminVideoService : IAdminVideoService
                     await _fileService.DeletarArquivoAsync(fileId);
                 }
 
-                VideoDirectoryHelper.DeleteHlsFolder(_env.WebRootPath, storageIdentifier);
+                await _supabaseStorageService.DeleteObjectAsync("greg-videos-raw", storageIdentifier);
+                await _supabaseStorageService.DeleteFolderAsync("processed-videos", storageIdentifier);
 
                 _logger.LogInformation(
-                    "Arquivos fï¿½sicos do vï¿½deo {VideoId} removidos com sucesso.",
+                    "Arquivos remotos do vï¿½deo {VideoId} removidos com sucesso.",
                     video.PublicId
                 );
             }
