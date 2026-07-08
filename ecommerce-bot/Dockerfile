@@ -13,5 +13,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copia o resto do código da aplicação
 COPY . .
 
-# Comando de inicialização padrão do worker
-CMD ["python", "export.py"]
+# Comando de inicialização padrão do worker (consumidor RabbitMQ)
+CMD ["python", "-m", "app.main"]
