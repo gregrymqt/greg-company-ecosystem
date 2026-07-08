@@ -16,6 +16,9 @@ nodes:
   - containerPort: 443
     hostPort: 443
     protocol: TCP
+  - containerPort: 30080
+    hostPort: 8080
+    protocol: TCP
   # Mapeia a porta NodePort 30017 do cluster para a 27017 da sua máquina
   - containerPort: 30017
     hostPort: 27017

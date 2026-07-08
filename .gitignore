@@ -55,3 +55,10 @@ Ajuda_Referente_URL
 backend/log/*
 
 infra/manifests/greg-secrets.yaml
+
+# Python specific
+**/ecommerce-bot/venv/
+**/ecommerce-bot/.env
+**/__pycache__/
+**/*.pyc
+.pytest_cache/
