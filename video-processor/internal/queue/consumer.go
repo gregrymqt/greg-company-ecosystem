@@ -1,13 +1,19 @@
 package queue
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log/slog"
+	"time"
+	"video-processor/internal/processor"
+
+	amqp "github.com/rabbitmq/amqp091-go"
 )
 
 type Consumer struct {
-	conn *RabbitMQConnection
+	conn      *RabbitMQConnection
+	processor *processor.FfmpegProcessor
 }
 
 type VideoProcessRequest struct {
@@ -16,8 +22,18 @@ type VideoProcessRequest struct {
 	SupabasePath      string `json:"SupabasePath"`
 }
 
-func NewConsumer(conn *RabbitMQConnection) *Consumer {
-	return &Consumer{conn: conn}
+// VideoProcessingCompletedEvent mapeia o payload idêntico ao esperado pelo VideoProcessingCompletedConsumer no C#
+type VideoProcessingCompletedEvent struct {
+	VideoId           string `json:"VideoId"`
+	StorageIdentifier string `json:"StorageIdentifier"`
+	Duration          string `json:"Duration"` // Formato "hh:mm:ss" compatível com o TimeSpan do .NET
+}
+
+func NewConsumer(conn *RabbitMQConnection, proc *processor.FfmpegProcessor) *Consumer {
+	return &Consumer{
+		conn:      conn,
+		processor: proc,
+	}
 }
 
 func (c *Consumer) StartConsuming(exchange, queueName, routingKey string) error {
@@ -26,50 +42,22 @@ func (c *Consumer) StartConsuming(exchange, queueName, routingKey string) error 
 		return fmt.Errorf("failed to open a channel: %w", err)
 	}
 
-	err = ch.ExchangeDeclare(
-		exchange, // name
-		"direct", // type
-		true,     // durable
-		false,    // auto-deleted
-		false,    // internal
-		false,    // no-wait
-		nil,      // arguments
-	)
+	err = ch.ExchangeDeclare(exchange, "direct", true, false, false, false, nil)
 	if err != nil {
 		return fmt.Errorf("failed to declare an exchange: %w", err)
 	}
 
-	q, err := ch.QueueDeclare(
-		queueName, // name
-		true,      // durable
-		false,     // delete when unused
-		false,     // exclusive
-		false,     // no-wait
-		nil,       // arguments
-	)
+	q, err := ch.QueueDeclare(queueName, true, false, false, false, nil)
 	if err != nil {
 		return fmt.Errorf("failed to declare a queue: %w", err)
 	}
 
-	err = ch.QueueBind(
-		q.Name,     // queue name
-		routingKey, // routing key
-		exchange,   // exchange
-		false,
-		nil)
+	err = ch.QueueBind(q.Name, routingKey, exchange, false, nil)
 	if err != nil {
 		return fmt.Errorf("failed to bind a queue: %w", err)
 	}
 
-	msgs, err := ch.Consume(
-		q.Name, // queue
-		"",     // consumer
-		false,  // auto-ack
-		false,  // exclusive
-		false,  // no-local
-		false,  // no-wait
-		nil,    // args
-	)
+	msgs, err := ch.Consume(q.Name, "", false, false, false, false, nil)
 	if err != nil {
 		return fmt.Errorf("failed to register a consumer: %w", err)
 	}
@@ -91,12 +79,67 @@ func (c *Consumer) StartConsuming(exchange, queueName, routingKey string) error 
 				"raw_video_path", req.SupabasePath,
 			)
 
-			// Here you would call the FFmpeg processor
-			// ...
+			// 1. Executa o processamento e obtém a duração do vídeo em segundos
+			durationSeconds, err := c.processor.ProcessVideo(req.VideoId, req.StorageIdentifier, req.SupabasePath)
+			if err != nil {
+				slog.Error("Failed to process video", "video_id", req.VideoId, "error", err)
+				d.Nack(false, false)
+				continue
+			}
 
+			// 2. Prepara o evento de integração de volta para o .NET 8
+			completedEvent := VideoProcessingCompletedEvent{
+				VideoId:           req.VideoId,
+				StorageIdentifier: req.StorageIdentifier,
+				Duration:          formatSecondsToTimeSpan(durationSeconds),
+			}
+
+			eventBody, err := json.Marshal(completedEvent)
+			if err != nil {
+				slog.Error("Failed to marshal completion event", "video_id", req.VideoId, "error", err)
+				d.Nack(false, false)
+				continue
+			}
+
+			// 3. Publica o resultado na exchange usando a routing key de retorno
+			// O consumidor em C# estará escutando a fila vinculada a esta routing key
+			err = ch.PublishWithContext(
+				context.Background(),
+				exchange,
+				"video.process.completed", // Routing Key de Conclusão
+				false,
+				false,
+				amqp.Publishing{
+					ContentType:  "application/json",
+					DeliveryMode: amqp.Persistent, // Garante resiliência se o broker reiniciar
+					Body:         eventBody,
+				},
+			)
+
+			if err != nil {
+				slog.Error("Failed to publish completion event to RabbitMQ", "video_id", req.VideoId, "error", err)
+				// Se a notificação falhar, damos Requeue (true) para processar novamente e tentar retransmitir
+				d.Nack(false, true)
+				continue
+			}
+
+			// ACK FINAL: Vídeo processado, upado e sistema notificado com sucesso!
 			d.Ack(false)
+			slog.Info("Video pipeline completed and core notified successfully", "video_id", req.VideoId)
 		}
 	}()
 
 	return nil
+}
+
+// formatSecondsToTimeSpan converte float64 segundos para string no formato "HH:MM:SS" exigido pelo .NET
+func formatSecondsToTimeSpan(totalSeconds float64) string {
+	d := time.Duration(totalSeconds * float64(time.Second))
+	hours := d / time.Hour
+	d -= hours * time.Hour
+	minutes := d / time.Minute
+	d -= minutes * time.Minute
+	seconds := d / time.Second
+
+	return fmt.Sprintf("%02d:%02d:%02d", hours, minutes, seconds)
 }
