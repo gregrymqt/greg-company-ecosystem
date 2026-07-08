@@ -2,6 +2,7 @@ import os
 import pika
 import json
 import logging
+from app.models.messages import ImportCompletedMessage
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +32,7 @@ class RabbitMQService:
             self.connection = None
             self.channel = None
 
-    def publish_completed_event(self, payload: dict):
+    def publish_completed_event(self, payload: ImportCompletedMessage):
         if not self.connection or self.connection.is_closed:
             self.connect()
             
@@ -46,7 +47,7 @@ class RabbitMQService:
             
             # Publish message
             routing_key = "product.import.completed"
-            message_body = json.dumps(payload)
+            message_body = payload.model_dump_json(by_alias=True)
             
             self.channel.basic_publish(
                 exchange=exchange_name,

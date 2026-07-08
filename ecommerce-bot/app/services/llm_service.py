@@ -7,6 +7,8 @@ from app.utils.logger import get_logger
 logger = get_logger("LLMService")
 load_dotenv()
 
+from app.models.products import Product, ProductStatus
+
 class AllProvidersExhaustedError(Exception):
     pass
 
@@ -24,17 +26,17 @@ class LLMService:
         except Exception as e:
             logger.warning(f"GeminiProvider não configurado: {e}")
 
-    async def enrich_product(self, product: dict) -> dict:
+    async def enrich_product(self, product: Product) -> Product:
         prompt = f"""
         Você é um especialista em e-commerce. Traduza e reescreva a descrição abaixo 
         para português do Brasil, focando em persuasão de vendas (copywriting).
-        Produto: {product.get('name', '')}
-        Descrição original: {product.get('description', '')}
+        Produto: {product.name}
+        Descrição original: {product.description}
         
         Retorne apenas o texto da nova descrição persuasiva.
         """
         
-        sku = product.get('sku')
+        sku = product.sku
         start_time = time.time()
         
         for provider in self.providers:
@@ -48,8 +50,8 @@ class LLMService:
                 
                 enriched_response = await provider.enrich(prompt)
                 
-                product['description'] = enriched_response.description
-                product['status'] = "processed"
+                product.description = enriched_response.description
+                product.status = ProductStatus.PROCESSED
                 
                 duration = round(time.time() - start_time, 2)
                 logger.info(f"Sucesso com {provider.name} para SKU: {sku} em {duration}s.", extra=log_extra)

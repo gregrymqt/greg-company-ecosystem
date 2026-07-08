@@ -4,7 +4,7 @@ from app.models.products import Product
 
 class ParserService:
     @staticmethod
-    def _extract_data(element) -> Optional[dict]:
+    def _extract_data(element) -> Optional[Product]:
         try:
             # Seletores baseados no HTML que você enviou
             title_tag = element.select_one("h3 > a")
@@ -27,7 +27,7 @@ class ParserService:
                 cost_price=float(price_text),
                 source_url=f"https://books.toscrape.com/{link_tag['href']}",
                 description="Produto extraído do site Books to Scrape."
-            ).model_dump(mode='json')
+            )
             
         except Exception as e:
             print(f"Erro ao parsear card: {e}")

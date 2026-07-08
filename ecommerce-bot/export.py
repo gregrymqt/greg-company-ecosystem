@@ -3,6 +3,11 @@ import csv
 from datetime import datetime
 from pymongo import MongoClient
 from dotenv import load_dotenv
+import sys
+
+# Garante que as importações absolutas do app funcionem a partir da raiz
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+from app.models.products import Product
 
 # Carrega variáveis de ambiente (como MONGO_URI)
 load_dotenv()
@@ -25,60 +30,65 @@ class ExporterWorker:
         """Busca no MongoDB os produtos que já passaram pela IA e estão com status 'processed'."""
         try:
             # Traz apenas produtos 'processed'
-            return list(self.collection.find({"status": "processed"}))
+            raw_products = list(self.collection.find({"status": "processed"}))
+            products = []
+            for rp in raw_products:
+                try:
+                    products.append(Product(**rp))
+                except Exception as e:
+                    print(f"Aviso: Não foi possível carregar o produto {rp.get('_id')} no modelo Product. Erro: {e}")
+            return products
         except Exception as e:
             print(f"Erro ao buscar produtos no MongoDB: {e}")
             return []
 
-    def map_to_shopify(self, product):
+    def map_to_shopify(self, product: Product):
         """
-        Mapeia o documento do MongoDB para o padrão de colunas do Shopify.
-        Muitos campos são fixos ou dependem da regra de negócio.
+        Mapeia o modelo Product para o padrão de colunas do Shopify.
         """
-        # Tratamento de segurança para dados ausentes, como a URL da imagem
-        image_url = product.get("image_url", "")
+        image_url = str(product.images[0]) if product.images else ""
         if not image_url:
-            print(f"Aviso: Produto {product.get('sku')} não possui imagem.")
+            print(f"Aviso: Produto {product.sku} não possui imagem.")
 
         return {
-            "Handle": str(product.get("sku", "")).lower().replace(" ", "-"), # Identificador amigável na URL
-            "Title": product.get("title", "Produto sem título"),
-            "Body (HTML)": product.get("description", ""), # Aqui entra a descrição rica gerada pela IA
-            "Vendor": product.get("vendor", "Loja Padrão"),
-            "Type": product.get("category", "Geral"),
-            "Tags": ",".join(product.get("tags", [])),
+            "Handle": product.sku.lower().replace(" ", "-"), # Identificador amigável na URL
+            "Title": product.name,
+            "Body (HTML)": product.description, # Aqui entra a descrição rica gerada pela IA
+            "Vendor": "Loja Padrão",
+            "Type": product.category,
+            "Tags": "",
             "Published": "TRUE",
             "Option1 Name": "Title",
             "Option1 Value": "Default Title",
-            "Variant SKU": product.get("sku", ""),
-            "Variant Grams": product.get("weight", 0),
+            "Variant SKU": product.sku,
+            "Variant Grams": 0,
             "Variant Inventory Tracker": "shopify",
-            "Variant Inventory Qty": product.get("stock", 0),
+            "Variant Inventory Qty": 0,
             "Variant Inventory Policy": "deny",
             "Variant Fulfillment Service": "manual",
-            "Variant Price": product.get("price", 0.0),
-            "Variant Compare At Price": product.get("compare_at_price", ""),
+            "Variant Price": product.cost_price,
+            "Variant Compare At Price": "",
             "Variant Requires Shipping": "TRUE",
             "Variant Taxable": "TRUE",
             "Image Src": image_url,
             "Image Position": 1,
-            "Image Alt Text": product.get("title", ""),
+            "Image Alt Text": product.name,
         }
 
-    def map_to_nuvemshop(self, product):
+    def map_to_nuvemshop(self, product: Product):
         """
         Exemplo extra: Mapeamento para Nuvemshop.
         """
-        image_url = product.get("image_url", "")
+        image_url = str(product.images[0]) if product.images else ""
         return {
-            "Identificador URL": str(product.get("sku", "")).lower().replace(" ", "-"),
-            "Nome": product.get("title", ""),
-            "Descrição": product.get("description", ""),
-            "Categorias": product.get("category", "Geral"),
-            "Preço": product.get("price", 0.0),
-            "Preço Promocional": product.get("compare_at_price", ""),
-            "Estoque": product.get("stock", 0),
-            "SKU": product.get("sku", ""),
+            "Identificador URL": product.sku.lower().replace(" ", "-"),
+            "Nome": product.name,
+            "Descrição": product.description,
+            "Categorias": product.category,
+            "Preço": product.cost_price,
+            "Preço Promocional": "",
+            "Estoque": 0,
+            "SKU": product.sku,
             "Exibir na loja": "Sim",
             "Imagens": image_url
         }
@@ -120,7 +130,7 @@ class ExporterWorker:
             print(f"Sucesso: Arquivo gerado em '{filename}'.")
             
             # Etapa crucial: marcar no banco como exportado para evitar duplicidade
-            self.mark_as_exported([p["_id"] for p in products])
+            self.mark_as_exported([p.id for p in products if p.id])
             
         except Exception as e:
             print(f"Erro crítico ao gerar o arquivo CSV: {e}")

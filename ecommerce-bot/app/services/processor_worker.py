@@ -49,11 +49,22 @@ class ProcessorWorker:
                 await asyncio.sleep(10)
                 continue
 
-            sku = product.get('sku')
+            from app.models.products import Product
+            try:
+                product_model = Product(**product)
+            except Exception as e:
+                logger.error(f"Erro de validação no DB para o produto {product.get('sku', 'unknown')}: {e}", exc_info=True)
+                await collection.update_one(
+                    {"_id": product["_id"]},
+                    {"$set": {"status": "validation_error", "last_error": str(e), "updated_at": datetime.now(timezone.utc)}}
+                )
+                continue
+
+            sku = product_model.sku
             log_extra = {"sku": sku}
             try:
                 logger.info(f"Iniciando SKU: {sku}", extra=log_extra)
-                processed_data = await self._process_with_retry(product)
+                processed_data = await self._process_with_retry(product_model)
                 await self.repo.upsert_product(processed_data)
             except (ValueError, TypeError) as e:
                 logger.error(f"Erro de validação de dados no produto {sku}: {e}", extra=log_extra, exc_info=True)
