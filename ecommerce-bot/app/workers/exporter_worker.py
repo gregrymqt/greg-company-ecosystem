@@ -1,17 +1,18 @@
 import os
-import csv
 import asyncio
 from datetime import datetime, timezone
 from dotenv import load_dotenv
 
 from app.config.database import db
 from app.models.products import Product, ProductStatus
+from app.services.csv_export_service import CsvExportService
 
 load_dotenv()
 
 class ExporterWorker:
     """
-    Worker assíncrono responsável por exportar produtos enriquecidos para plataformas de E-commerce.
+    Worker assíncrono responsável por buscar produtos enriquecidos e integrá-los
+    com o novo motor CsvExportService.
     """
     def __init__(self, platform="shopify"):
         self.platform = platform.lower()
@@ -33,45 +34,8 @@ class ExporterWorker:
             print(f"Erro ao buscar produtos no MongoDB: {e}")
             return []
 
-    def map_to_shopify(self, product: Product):
-        """
-        Mapeia o modelo Product para o padrão de colunas do Shopify.
-        """
-        image_url = str(product.images[0]) if product.images else ""
-        if not image_url:
-            print(f"Aviso: Produto {product.sku} não possui imagem.")
-
-        return {
-            "Handle": product.sku.lower().replace(" ", "-"), # Identificador amigável na URL
-            "Title": product.title,
-            "Body (HTML)": product.description, # Aqui entra a descrição rica gerada pela IA
-            "Vendor": "Loja Padrão",
-            "Type": product.category,
-            "Tags": "",
-            "Published": "TRUE",
-            "Option1 Name": "Title",
-            "Option1 Value": "Default Title",
-            "Variant SKU": product.sku,
-            "Variant Grams": 0,
-            "Variant Price": product.price,
-            "Image Src": image_url
-        }
-
-    def map_to_nuvemshop(self, product: Product):
-        """
-        Exemplo extra: Mapeamento para Nuvemshop.
-        """
-        return {
-            "Identificador URL": product.sku,
-            "Nome": product.title,
-            "Categorias": product.category,
-            "Preço": product.price,
-            "Descrição": product.description,
-            "Imagens": ",".join([str(img) for img in product.images]) if product.images else ""
-        }
-
     async def export(self):
-        """Executa o fluxo completo: Buscar, Mapear, Exportar para CSV e Atualizar Banco."""
+        """Executa o fluxo completo: Buscar, delegar pro Service, salvar e atualizar Banco."""
         print(f"[{datetime.now()}] Iniciando processo de exportação para {self.platform.capitalize()}...")
         
         products = await self.fetch_processed_products()
@@ -82,31 +46,33 @@ class ExporterWorker:
 
         print(f"Encontrados {len(products)} produtos para exportar.")
 
-        # Direciona para o mapeamento correto da plataforma alvo
-        mapped_data = []
+        # Preparar dados para o Export Service (convertendo do Modelo Pydantic)
+        product_dicts = []
+        for p in products:
+            p_dict = p.model_dump()
+            # Mapeia atributos caso a LLM tenha gerado tags e campos SEO dentro do dict 'attributes'
+            p_dict["tags"] = p_dict.get("attributes", {}).get("tags", [])
+            p_dict["seo_title"] = p_dict.get("attributes", {}).get("seo_title", p.title)
+            p_dict["seo_description"] = p_dict.get("attributes", {}).get("seo_description", p.description[:150])
+            product_dicts.append(p_dict)
+
+        # Delegação para o CsvExportService
+        csv_bytes = b""
         if self.platform == "shopify":
-            from app.models.products import ScraperMetadata
-            dummy_product = Product(sku="dummy", title="dummy", description="dummy", price=1.0, metadata=ScraperMetadata(source_url="http://dummy.com"))
-            fieldnames = self.map_to_shopify(dummy_product).keys()
-            mapped_data = [self.map_to_shopify(p) for p in products]
+            csv_bytes = CsvExportService.generate_shopify_csv(product_dicts)
         elif self.platform == "nuvemshop":
-            from app.models.products import ScraperMetadata
-            dummy_product = Product(sku="dummy", title="dummy", description="dummy", price=1.0, metadata=ScraperMetadata(source_url="http://dummy.com"))
-            fieldnames = self.map_to_nuvemshop(dummy_product).keys()
-            mapped_data = [self.map_to_nuvemshop(p) for p in products]
+            csv_bytes = CsvExportService.generate_nuvemshop_csv(product_dicts)
         else:
             print(f"Plataforma '{self.platform}' não configurada no ExporterWorker.")
             return
 
-        # Gera o arquivo CSV
+        # Simula a gravação de um arquivo localmente por agora (ou pode ser repassado via API)
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"export_{self.platform}_{timestamp}.csv"
 
         try:
-            with open(filename, mode='w', newline='', encoding='utf-8') as file:
-                writer = csv.DictWriter(file, fieldnames=fieldnames)
-                writer.writeheader()
-                writer.writerows(mapped_data)
+            with open(filename, mode='wb') as file:
+                file.write(csv_bytes)
             
             print(f"Sucesso: Arquivo gerado em '{filename}'.")
             
@@ -136,6 +102,7 @@ if __name__ == "__main__":
         from app.config.database import connect_to_mongo, close_mongo_connection
         await connect_to_mongo()
         
+        # Teste rápido
         exporter = ExporterWorker(platform="shopify")
         await exporter.export()
         

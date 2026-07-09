@@ -5,7 +5,10 @@ from bs4 import BeautifulSoup
 from app.models.products import Product, ScraperMetadata, ProductStatus
 from app.services.json_ld_parser_service import JsonLdParserService
 from app.services.markdown_parser_service import MarkdownParserService
-from urllib.parse import urljoin
+from app.services.notification_service import NotificationService
+from app.config.database import db
+from urllib.parse import urljoin, urlparse
+from datetime import datetime, timezone, timedelta
 import os
 from dotenv import load_dotenv
 
@@ -20,9 +23,48 @@ class ScraperWorker:
         # Load API key for MarkdownParserService
         api_key = os.getenv("OPENAI_API_KEY", "")
         self.markdown_parser = MarkdownParserService(api_key=api_key)
+        self.notification_service = NotificationService()
+
+    async def _handle_scraping_failure(self, domain: str, error_type: str, url: str):
+        """Registra falha consecutiva e dispara alerta se atingir o limiar (Regra dos 3 Erros)."""
+        collection = db.client["ecommerce"]["scraping_metadata"]
+        
+        doc = await collection.find_one_and_update(
+            {"domain": domain},
+            {"$inc": {"consecutive_failures": 1}},
+            upsert=True,
+            return_document=True
+        )
+        
+        failures = doc.get("consecutive_failures", 1)
+        silenced_until = doc.get("silenced_until")
+        
+        # Verifica Anti-Spam (cool-down)
+        is_silenced = silenced_until and silenced_until.replace(tzinfo=timezone.utc) > datetime.now(timezone.utc)
+        
+        if failures >= 3 and not is_silenced:
+            # Dispara webhook
+            await self.notification_service.send_discord_alert(domain, error_type, url)
+            
+            # Silencia novos alertas para esse domínio por 1 hora
+            await collection.update_one(
+                {"domain": domain},
+                {"$set": {"silenced_until": datetime.now(timezone.utc) + timedelta(hours=1)}}
+            )
+
+    async def _handle_scraping_success(self, domain: str):
+        """Reseta o contador de falhas após um scraping bem sucedido."""
+        collection = db.client["ecommerce"]["scraping_metadata"]
+        await collection.update_one(
+            {"domain": domain},
+            {"$set": {"consecutive_failures": 0}}
+        )
 
     async def _process_product_page(self, product_url: str):
         """Busca e extrai os dados do produto individual."""
+        domain = urlparse(product_url).netloc
+        error_type = "Parser retornou dados nulos"
+
         try:
             # Tenta a Estratégia 1
             product_dict = await self.json_ld_parser.parse(product_url)
@@ -37,6 +79,7 @@ class ScraperWorker:
                 
             if not product_dict.get("title"):
                 logging.warning(f"Não foi possível extrair dados estruturados de {product_url}")
+                await self._handle_scraping_failure(domain, error_type, product_url)
                 return None
                 
             # Preenche o modelo
@@ -50,10 +93,15 @@ class ScraperWorker:
                 metadata=ScraperMetadata(source_url=product_url),
                 status=ProductStatus.RAW
             )
+            
+            # Resetamos os erros pois tivemos sucesso
+            await self._handle_scraping_success(domain)
+            
             return product_obj
             
         except Exception as e:
             logging.error(f"Erro ao processar página de produto {product_url}: {e}")
+            await self._handle_scraping_failure(domain, str(e), product_url)
             return None
 
     async def run(self, base_url: str):
