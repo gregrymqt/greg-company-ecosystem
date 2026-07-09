@@ -10,7 +10,9 @@ from app.config.database import db
 from urllib.parse import urljoin, urlparse
 from datetime import datetime, timezone, timedelta
 from app.config.settings import settings
-
+from app.config.rabbitmq import get_rabbitmq_connection, configure_rabbitmq_topology
+import aio_pika
+import json
 class ScraperWorker:
     def __init__(self, repository):
         self.client = httpx.AsyncClient(timeout=10.0, follow_redirects=True)
@@ -139,3 +141,42 @@ class ScraperWorker:
             except Exception as e:
                 logging.error(f"Erro na navegação do catálogo: {e}")
                 break
+
+    async def start_consuming(self, queue_name: str = "ecommerce_prod"):
+        """Inicia o consumo de mensagens do RabbitMQ de forma assíncrona."""
+        try:
+            connection = await get_rabbitmq_connection()
+            async with connection:
+                channel = await connection.channel()
+                
+                # Garante que a topologia seja declarada antes do loop de consumo
+                await configure_rabbitmq_topology(channel)
+                
+                await channel.set_qos(prefetch_count=1)
+                queue = await channel.get_queue(queue_name)
+                
+                logging.info(f"Worker is waiting for messages in {queue_name}. To exit press CTRL+C")
+                
+                # Inicia o loop de consumo (equivalente ao basic_consume assíncrono do aio-pika)
+                async with queue.iterator() as queue_iter:
+                    async for message in queue_iter:
+                        async with message.process(requeue=False, ignore_processed=True):
+                            try:
+                                payload = message.body.decode()
+                                logging.info(f"Received message on {queue_name}: {payload}")
+                                
+                                data = json.loads(payload)
+                                url_to_scrape = data.get("url")
+                                
+                                if url_to_scrape:
+                                    product = await self._process_product_page(url_to_scrape)
+                                    if product:
+                                        await self.repository.upsert_product(product)
+                                        
+                            except Exception as process_err:
+                                logging.error(f"Erro ao processar mensagem do RabbitMQ: {process_err}")
+                                # O message.process(requeue=False) já lida com o reject automaticamente no final do bloco se falhar,
+                                # enviando a mensagem para o ecommerce_dlx com routing key failed graças à nossa topologia.
+                                raise
+        except Exception as e:
+            logging.error(f"Erro assíncrono na conexão/consumo do RabbitMQ: {e}")

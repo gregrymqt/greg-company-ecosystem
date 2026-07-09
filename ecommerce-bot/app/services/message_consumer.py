@@ -9,7 +9,6 @@ from bs4 import BeautifulSoup
 import pika
 from dotenv import load_dotenv
 
-from app.services.parser_service import ParserService
 from app.services.llm_service import LLMService
 from app.services.rabbitmq_service import rabbitmq_service
 
