@@ -9,10 +9,7 @@ from app.services.notification_service import NotificationService
 from app.config.database import db
 from urllib.parse import urljoin, urlparse
 from datetime import datetime, timezone, timedelta
-import os
-from dotenv import load_dotenv
-
-load_dotenv()
+from app.config.settings import settings
 
 class ScraperWorker:
     def __init__(self, repository):
@@ -21,7 +18,7 @@ class ScraperWorker:
         self.json_ld_parser = JsonLdParserService()
         
         # Load API key for MarkdownParserService
-        api_key = os.getenv("OPENAI_API_KEY", "")
+        api_key = settings.OPENAI_API_KEY
         self.markdown_parser = MarkdownParserService(api_key=api_key)
         self.notification_service = NotificationService()
 
@@ -56,7 +53,7 @@ class ScraperWorker:
         """Reseta o contador de falhas após um scraping bem sucedido."""
         collection = db.client["ecommerce"]["scraping_metadata"]
         await collection.update_one(
-            {"domain": domain},
+            {"domain": domain, "consecutive_failures": {"$gt": 0}},
             {"$set": {"consecutive_failures": 0}}
         )
 
@@ -67,7 +64,7 @@ class ScraperWorker:
 
         try:
             # Tenta a Estratégia 1
-            product_dict = await self.json_ld_parser.parse(product_url)
+            product_dict = await self.json_ld_parser.parse(product_url, client=self.client)
             
             # Se falhou em trazer o básico (title ou description nulos), tenta o Fallback (Estratégia 2)
             if not product_dict.get("title") or not product_dict.get("description"):
@@ -86,8 +83,8 @@ class ScraperWorker:
             product_obj = Product(
                 sku=product_dict.get("sku") or product_url.split("/")[-2],
                 title=product_dict.get("title"),
-                description=product_dict.get("description") or "Descrição não encontrada",
-                price=float(product_dict.get("price") or 0.0),
+                description=product_dict.get("description"),
+                price=float(product_dict.get("price")) if product_dict.get("price") else None,
                 currency=product_dict.get("currency") or "BRL",
                 images=[product_dict.get("image_url")] if product_dict.get("image_url") else [],
                 metadata=ScraperMetadata(source_url=product_url),

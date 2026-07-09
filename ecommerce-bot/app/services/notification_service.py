@@ -4,6 +4,8 @@ import logging
 from datetime import datetime
 from typing import Optional
 
+from app.config.settings import settings
+
 logger = logging.getLogger(__name__)
 
 class NotificationService:
@@ -13,7 +15,7 @@ class NotificationService:
     """
 
     def __init__(self):
-        self.discord_webhook_url = os.getenv("DISCORD_WEBHOOK_URL")
+        self.discord_webhook_url = settings.DISCORD_WEBHOOK_URL
 
     async def send_discord_alert(self, domain: str, error_type: str, example_url: Optional[str] = None):
         """

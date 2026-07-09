@@ -7,8 +7,10 @@ class Database:
 
 db = Database()
 
+from app.config.settings import settings
+
 async def connect_to_mongo():
-    mongo_uri = os.getenv('MONGO_URI', "mongodb://localhost:27017")
+    mongo_uri = settings.MONGO_URI
     db.client = AsyncIOMotorClient(mongo_uri)
     
     # Criar índices

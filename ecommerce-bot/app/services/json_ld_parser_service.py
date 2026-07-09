@@ -74,26 +74,31 @@ class JsonLdParserService:
             "Upgrade-Insecure-Requests": "1"
         }
 
-    async def _fetch_html(self, url: str) -> str:
+    async def _fetch_html(self, url: str, client: httpx.AsyncClient = None) -> str:
         """
         Realiza a requisição HTTP de forma assíncrona com tratamento de erros.
         """
         headers = self._get_random_headers()
         
-        async with httpx.AsyncClient(timeout=15.0, follow_redirects=True) as client:
-            try:
+        try:
+            if client:
                 response = await client.get(url, headers=headers)
                 response.raise_for_status()
                 return response.text
-            except httpx.HTTPStatusError as e:
-                raise ScrapingException(
-                    f"Falha ao acessar {url}: Erro HTTP {e.response.status_code}", 
-                    status_code=e.response.status_code
-                ) from e
-            except httpx.RequestError as e:
-                raise ScrapingException(
-                    f"Erro de conexão ao acessar {url}: {str(e)}"
-                ) from e
+            else:
+                async with httpx.AsyncClient(timeout=15.0, follow_redirects=True) as temp_client:
+                    response = await temp_client.get(url, headers=headers)
+                    response.raise_for_status()
+                    return response.text
+        except httpx.HTTPStatusError as e:
+            raise ScrapingException(
+                f"Falha ao acessar {url}: Erro HTTP {e.response.status_code}", 
+                status_code=e.response.status_code
+            ) from e
+        except httpx.RequestError as e:
+            raise ScrapingException(
+                f"Erro de conexão ao acessar {url}: {str(e)}"
+            ) from e
 
     def _find_product_node(self, data: Any) -> Optional[Dict[str, Any]]:
         """
@@ -203,7 +208,7 @@ class JsonLdParserService:
                 
         return current_data
 
-    async def parse(self, url: str) -> Dict[str, Any]:
+    async def parse(self, url: str, client: httpx.AsyncClient = None) -> Dict[str, Any]:
         """
         Método principal a ser chamado pelo Worker.
         Executa os passos da esteira na ordem solicitada:
@@ -214,7 +219,7 @@ class JsonLdParserService:
         Retorna:
             Dict: Os dados estruturados com as chaves preenchidas (ou None).
         """
-        html = await self._fetch_html(url)
+        html = await self._fetch_html(url, client)
         soup = BeautifulSoup(html, "html.parser")
 
         # Passo A

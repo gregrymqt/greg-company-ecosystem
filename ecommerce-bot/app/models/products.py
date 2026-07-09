@@ -22,9 +22,9 @@ class Product(BaseModel):
     sku: str = Field(..., min_length=3)
     
     # Informações de Negócio
-    title: str
-    description: str
-    price: float = Field(..., gt=0) # Preço deve ser maior que zero
+    title: Optional[str] = None
+    description: Optional[str] = None
+    price: Optional[float] = Field(default=None, ge=0) # Preço pode ser zero ou nulo
     currency: str = "BRL"
     
     # Dados de Mídia e Categorização
