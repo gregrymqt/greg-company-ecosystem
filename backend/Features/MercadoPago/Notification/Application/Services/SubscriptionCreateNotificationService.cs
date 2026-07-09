@@ -8,6 +8,9 @@ using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Application.Interfaces;
 using MeuCrudCsharp.Features.Shared.Domain.Interfaces;
 using MeuCrudCsharp.Features.Shared.Infrastructure.Persistence;
 using Microsoft.Extensions.Options;
+using MeuCrudCsharp.Features.Shared.Domain.Entities;
+using MeuCrudCsharp.Data;
+using System.Text.Json;
 
 namespace MeuCrudCsharp.Features.MercadoPago.Notification.Application.Services;
 
@@ -15,7 +18,7 @@ public class SubscriptionCreateNotificationService(
     ILogger<SubscriptionCreateNotificationService> logger,
     ISubscriptionRepository subscriptionRepository,
     IUnitOfWork unitOfWork,
-    IEmailSenderService emailService,
+    IMongoDbContext mongoContext,
     IRazorViewToStringRenderer razorViewToStringRenderer,
     IOptions<GeneralSettings> generalSettings)
     : ISubscriptionCreateNotificationService
@@ -62,16 +65,20 @@ public class SubscriptionCreateNotificationService(
                 externalId
             );
 
-            await unitOfWork.CommitAsync();
-
-            logger.LogInformation(
-                "Assinatura {ExternalId} atualizada com sucesso no banco de dados.",
-                externalId
-            );
+            var statusEvent = new OutboxEvent
+            {
+                EventType = "subscription.status.changed",
+                Payload = JsonSerializer.Serialize(new { 
+                    userId = subscription.UserId, 
+                    status = "active", 
+                    planName = subscription.Plan?.Name ?? "" 
+                })
+            };
+            await mongoContext.GetCollection<OutboxEvent>("OutboxEvents").InsertOneAsync(unitOfWork.Session, statusEvent);
 
             if (subscription is { User: not null, Plan: not null })
             {
-                await SendSubscriptionCreatedEmailAsync(subscription);
+                await EnqueueSubscriptionCreatedEmailAsync(subscription);
             }
             else
             {
@@ -80,6 +87,13 @@ public class SubscriptionCreateNotificationService(
                     externalId
                 );
             }
+
+            await unitOfWork.CommitAsync();
+
+            logger.LogInformation(
+                "Assinatura {ExternalId} atualizada com sucesso no banco de dados.",
+                externalId
+            );
         }
         catch (Exception ex)
         {
@@ -92,7 +106,7 @@ public class SubscriptionCreateNotificationService(
         }
     }
 
-    private async Task SendSubscriptionCreatedEmailAsync(Subscription subscription)
+    private async Task EnqueueSubscriptionCreatedEmailAsync(Subscription subscription)
     {
         if (string.IsNullOrEmpty(subscription.User?.Email))
         {
@@ -111,7 +125,7 @@ public class SubscriptionCreateNotificationService(
             accountUrl: $"{_generalSettings.BaseUrl}/Profile/User/index.cshtml"
         );
 
-        await SendEmailFromTemplateAsync(
+        await EnqueueEmailFromTemplateAsync(
             recipientEmail: subscription.User.Email,
             subject: "Sua assinatura foi criada com sucesso!",
             viewPath: "/Pages/EmailTemplates/SubscriptionCreate/index.cshtml",
@@ -119,7 +133,7 @@ public class SubscriptionCreateNotificationService(
         );
     }
 
-    private async Task SendEmailFromTemplateAsync<TModel>(
+    private async Task EnqueueEmailFromTemplateAsync<TModel>(
         string recipientEmail,
         string subject,
         string viewPath,
@@ -132,33 +146,28 @@ public class SubscriptionCreateNotificationService(
             recipientEmail
         );
 
-        try
+        var htmlBody = await razorViewToStringRenderer.RenderViewToStringAsync(
+            viewPath,
+            model
+        );
+
+        var plainTextBody =
+            $"Assunto: {subject}. Para visualizar esta mensagem, utilize um leitor de e-mail compatível com HTML.";
+
+        var emailPayload = new
         {
-            var htmlBody = await razorViewToStringRenderer.RenderViewToStringAsync(
-                viewPath,
-                model
-            );
+            to = recipientEmail,
+            subject = subject,
+            htmlBody = htmlBody,
+            plainTextBody = plainTextBody
+        };
 
-            var plainTextBody =
-                $"Assunto: {subject}. Para visualizar esta mensagem, utilize um leitor de e-mail compatível com HTML.";
-
-            await emailService.SendEmailAsync(recipientEmail, subject, htmlBody, plainTextBody);
-
-            logger.LogInformation(
-                "E-mail para {RecipientEmail} enviado com sucesso.",
-                recipientEmail
-            );
-        }
-        catch (Exception ex)
+        var outboxEvent = new OutboxEvent
         {
-            logger.LogError(
-                ex,
-                "Falha no processo de montagem e envio de e-mail para {RecipientEmail}.",
-                recipientEmail
-            );
-            throw;
-        }
+            EventType = "email.send.requested",
+            Payload = JsonSerializer.Serialize(emailPayload)
+        };
+
+        await mongoContext.GetCollection<OutboxEvent>("OutboxEvents").InsertOneAsync(unitOfWork.Session, outboxEvent);
     }
 }
-
-

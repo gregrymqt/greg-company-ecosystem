@@ -5,6 +5,7 @@ using MeuCrudCsharp.Features.Exceptions;
 using MeuCrudCsharp.Features.MercadoPago.Notification.Application.Interfaces;
 using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Application.Interfaces;
 using MeuCrudCsharp.Features.Shared.Domain.Interfaces;
+
 using MeuCrudCsharp.Features.Shared.Infrastructure.Persistence;
 using MeuCrudCsharp.Features.MercadoPago.Chargebacks.Domain.Entities;
 using MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities;
@@ -13,6 +14,8 @@ using MeuCrudCsharp.Features.MercadoPago.Plans.Domain.Entities;
 using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Entities;
 using MeuCrudCsharp.Features.Shared.Domain.Entities;
 using Microsoft.Extensions.Options;
+using MeuCrudCsharp.Data;
+using System.Text.Json;
 
 namespace MeuCrudCsharp.Features.MercadoPago.Notification.Application.Services;
 
@@ -20,7 +23,7 @@ public class SubscriptionRenewalNotificationService(
     ILogger<SubscriptionRenewalNotificationService> logger,
     ISubscriptionRepository subscriptionRepository,
     IUnitOfWork unitOfWork,
-    IEmailSenderService emailSenderService,
+    IMongoDbContext mongoContext,
     IRazorViewToStringRenderer razorViewToStringRenderer,
     IOptions<GeneralSettings> generalSettings)
     : ISubscriptionNotificationService
@@ -89,17 +92,28 @@ public class SubscriptionRenewalNotificationService(
                 newExpirationDate
             );
 
+            var statusEvent = new OutboxEvent
+            {
+                EventType = "subscription.status.changed",
+                Payload = JsonSerializer.Serialize(new { 
+                    userId = subscription.UserId, 
+                    status = "active", 
+                    planName = subscription.Plan?.Name ?? "" 
+                })
+            };
+            await mongoContext.GetCollection<OutboxEvent>("OutboxEvents").InsertOneAsync(unitOfWork.Session, statusEvent);
+
+            if (subscription.User != null && !string.IsNullOrEmpty(subscription.User.Email))
+            {
+                await EnqueueRenewalEmailAsync(subscription, newExpirationDate);
+            }
+
             await unitOfWork.CommitAsync();
 
             logger.LogInformation(
                 "Assinatura {SubscriptionId} renovada com sucesso.",
                 subscription.Id
             );
-
-            if (subscription.User != null && !string.IsNullOrEmpty(subscription.User.Email))
-            {
-                await SendRenewalEmailAsync(subscription, newExpirationDate);
-            }
         }
         catch (Exception ex)
         {
@@ -108,7 +122,7 @@ public class SubscriptionRenewalNotificationService(
         }
     }
 
-    private async Task SendRenewalEmailAsync(Subscription subscription, DateTime newExpirationDate)
+    private async Task EnqueueRenewalEmailAsync(Subscription subscription, DateTime newExpirationDate)
     {
         var viewModel = new RenewalEmailViewModel(
             userName: subscription.User?.Name ?? "Cliente",
@@ -119,7 +133,7 @@ public class SubscriptionRenewalNotificationService(
             supportUrl: $"{_generalSettings.BaseUrl}/Support/Contact/index.cshtml"
         );
 
-        await SendEmailFromTemplateAsync(
+        await EnqueueEmailFromTemplateAsync(
             recipientEmail: subscription.User!.Email!,
             subject: "Sua assinatura foi renovada com sucesso!",
             viewPath: "Pages/EmailTemplates/Renewal/index.cshtml",
@@ -127,7 +141,7 @@ public class SubscriptionRenewalNotificationService(
         );
     }
 
-    private async Task SendEmailFromTemplateAsync<TModel>(
+    private async Task EnqueueEmailFromTemplateAsync<TModel>(
         string recipientEmail,
         string subject,
         string viewPath,
@@ -140,37 +154,28 @@ public class SubscriptionRenewalNotificationService(
             recipientEmail
         );
 
-        try
+        var htmlBody = await razorViewToStringRenderer.RenderViewToStringAsync(
+            viewPath,
+            model
+        );
+
+        var plainTextBody =
+            $"Assunto: {subject}. Para visualizar esta mensagem, utilize um leitor de e-mail compatível com HTML.";
+
+        var emailPayload = new
         {
-            var htmlBody = await razorViewToStringRenderer.RenderViewToStringAsync(
-                viewPath,
-                model
-            );
+            to = recipientEmail,
+            subject = subject,
+            htmlBody = htmlBody,
+            plainTextBody = plainTextBody
+        };
 
-            var plainTextBody =
-                $"Assunto: {subject}. Para visualizar esta mensagem, utilize um leitor de e-mail compatível com HTML.";
-
-            await emailSenderService.SendEmailAsync(
-                recipientEmail,
-                subject,
-                htmlBody,
-                plainTextBody
-            );
-
-            logger.LogInformation(
-                "E-mail para {RecipientEmail} enviado com sucesso.",
-                recipientEmail
-            );
-        }
-        catch (Exception ex)
+        var outboxEvent = new OutboxEvent
         {
-            logger.LogError(
-                ex,
-                "Falha no processo de montagem e envio de e-mail para {RecipientEmail}.",
-                recipientEmail
-            );
-            throw;
-        }
+            EventType = "email.send.requested",
+            Payload = JsonSerializer.Serialize(emailPayload)
+        };
+
+        await mongoContext.GetCollection<OutboxEvent>("OutboxEvents").InsertOneAsync(unitOfWork.Session, outboxEvent);
     }
 }
-

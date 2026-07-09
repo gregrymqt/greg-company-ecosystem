@@ -19,6 +19,8 @@ using MeuCrudCsharp.Features.Shared.Domain.Interfaces;
 using MeuCrudCsharp.Features.Shared.Infrastructure.Persistence;
 using MeuCrudCsharp.Features.MercadoPago.Payments.Application.Interfaces;
 using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Application.Interfaces;
+using MeuCrudCsharp.Data;
+using System.Text.Json;
 
 namespace MeuCrudCsharp.Features.MercadoPago.Notification.Application.Services;
 
@@ -28,7 +30,7 @@ public class ClaimNotificationService(
     ISubscriptionRepository subscriptionRepository,
     IUnitOfWork unitOfWork,
     ILogger<ClaimNotificationService> logger,
-    IEmailSenderService emailSenderService,
+    IMongoDbContext mongoContext,
     IRazorViewToStringRenderer razorViewToStringRenderer,
     IOptions<GeneralSettings> generalSettings,
     IMercadoPagoIntegrationService mpIntegrationService)
@@ -109,12 +111,12 @@ public class ClaimNotificationService(
                 logger.LogInformation("Claim ID {ClaimId} já existe. Verificando atualizações.", mpClaimId);
             }
 
-            await unitOfWork.CommitAsync();
-
             if (user != null && existingClaim == null)
             {
-                await SendClaimReceivedEmailAsync(user, mpClaimId);
+                await EnqueueClaimReceivedEmailAsync(user, mpClaimId);
             }
+
+            await unitOfWork.CommitAsync();
 
             logger.LogInformation("Claim {Id} processada com sucesso.", mpClaimId);
         }
@@ -125,7 +127,7 @@ public class ClaimNotificationService(
         }
     }
 
-    private async Task SendClaimReceivedEmailAsync(Users user, long claimId)
+    private async Task EnqueueClaimReceivedEmailAsync(Users user, long claimId)
     {
         if (string.IsNullOrEmpty(user.Email))
         {
@@ -140,7 +142,7 @@ public class ClaimNotificationService(
             supportUrl: $"{_generalSettings.BaseUrl}/Support/Contact/index.cshtml"
         );
 
-        await SendEmailFromTemplateAsync(
+        await EnqueueEmailFromTemplateAsync(
             recipientEmail: user.Email,
             subject: $"Notificação de Reclamação (ID: {claimId})",
             viewPath: "Pages/EmailTemplates/ClaimReceived/index.cshtml",
@@ -148,7 +150,7 @@ public class ClaimNotificationService(
         );
     }
 
-    private async Task SendEmailFromTemplateAsync<TModel>(
+    private async Task EnqueueEmailFromTemplateAsync<TModel>(
         string recipientEmail,
         string subject,
         string viewPath,
@@ -161,40 +163,28 @@ public class ClaimNotificationService(
             recipientEmail
         );
 
-        try
+        var htmlBody = await razorViewToStringRenderer.RenderViewToStringAsync(
+            viewPath,
+            model
+        );
+
+        var plainTextBody =
+            $"Assunto: {subject}. Para visualizar esta mensagem, utilize um leitor de e-mail compatível com HTML.";
+
+        var emailPayload = new
         {
-            var htmlBody = await razorViewToStringRenderer.RenderViewToStringAsync(
-                viewPath,
-                model
-            );
+            to = recipientEmail,
+            subject = subject,
+            htmlBody = htmlBody,
+            plainTextBody = plainTextBody
+        };
 
-            var plainTextBody =
-                $"Assunto: {subject}. Para visualizar esta mensagem, utilize um leitor de e-mail compatível com HTML.";
-
-            await emailSenderService.SendEmailAsync(
-                recipientEmail,
-                subject,
-                htmlBody,
-                plainTextBody
-            );
-
-            logger.LogInformation(
-                "E-mail para {RecipientEmail} enviado com sucesso.",
-                recipientEmail
-            );
-        }
-        catch (Exception ex)
+        var outboxEvent = new OutboxEvent
         {
-            logger.LogError(
-                ex,
-                "Falha no processo de montagem e envio de e-mail para {RecipientEmail}.",
-                recipientEmail
-            );
-            throw;
-        }
+            EventType = "email.send.requested",
+            Payload = JsonSerializer.Serialize(emailPayload)
+        };
+
+        await mongoContext.GetCollection<OutboxEvent>("OutboxEvents").InsertOneAsync(unitOfWork.Session, outboxEvent);
     }
-
 }
-
-
-

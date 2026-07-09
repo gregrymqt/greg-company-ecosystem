@@ -10,6 +10,7 @@ using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Application.Interfaces;
 using MeuCrudCsharp.Features.MercadoPago.Webhooks.Application.DTOs;
 using MeuCrudCsharp.Features.Shared.Domain.Interfaces;
 using MeuCrudCsharp.Features.Shared.Infrastructure.Persistence;
+
 using MeuCrudCsharp.Features.MercadoPago.Chargebacks.Domain.Entities;
 using MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities;
 using MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities;
@@ -18,6 +19,8 @@ using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Entities;
 using MeuCrudCsharp.Features.Shared.Domain.Entities;
 using MeuCrudCsharp.Features.Auth.Domain.Entities;
 using Microsoft.Extensions.Options;
+using MeuCrudCsharp.Data;
+using System.Text.Json;
 
 namespace MeuCrudCsharp.Features.MercadoPago.Notification.Application.Services;
 
@@ -27,7 +30,7 @@ public class ChargeBackNotificationService(
     ISubscriptionRepository subscriptionRepository,
     IUnitOfWork unitOfWork,
     ILogger<ChargeBackNotificationService> logger,
-    IEmailSenderService emailSenderService,
+    IMongoDbContext mongoContext,
     IRazorViewToStringRenderer razorViewToStringRenderer,
     IOptions<GeneralSettings> generalSettings,
     IMercadoPagoChargebackIntegrationService mpIntegrationService)
@@ -39,12 +42,8 @@ public class ChargeBackNotificationService(
     {
         var mpDetails = await mpIntegrationService.GetChargebackDetailsFromApiAsync(
             chargebackData.Id
-        );
-
-        if (mpDetails == null)
-            throw new Exception(
-                $"Chargeback {chargebackData.Id} não encontrado na API do Mercado Pago."
-            );
+        ) ?? throw new Exception($"Chargeback {chargebackData.Id} não encontrado na API do Mercado Pago.");
+    
 
         var paymentIdStr = mpDetails.Payments?.FirstOrDefault()?.Id;
         if (string.IsNullOrEmpty(paymentIdStr))
@@ -89,6 +88,17 @@ public class ChargeBackNotificationService(
                             "Assinatura {SubId} cancelada por chargeback.",
                             subscription.Id
                         );
+
+                        var outboxEvent = new OutboxEvent
+                        {
+                            EventType = "subscription.status.changed",
+                            Payload = JsonSerializer.Serialize(new { 
+                                userId = payment.UserId, 
+                                status = "canceled", 
+                                planName = subscription.Plan?.Name ?? "" 
+                            })
+                        };
+                        await mongoContext.GetCollection<OutboxEvent>("OutboxEvents").InsertOneAsync(unitOfWork.Session, outboxEvent);
                     }
                 }
             }
@@ -116,12 +126,12 @@ public class ChargeBackNotificationService(
                 chargebackRepository.Update(existingChargeback);
             }
 
-            await unitOfWork.CommitAsync();
-
             if (payment?.User != null && !string.IsNullOrEmpty(payment.User.Email))
             {
-                await SendChargebackReceivedEmailAsync(payment.User, mpChargebackId);
+                await EnqueueChargebackReceivedEmailAsync(payment.User, mpChargebackId);
             }
+
+            await unitOfWork.CommitAsync();
 
             logger.LogInformation("Chargeback {Id} processado com sucesso.", mpChargebackId);
         }
@@ -132,7 +142,7 @@ public class ChargeBackNotificationService(
         }
     }
 
-    private async Task SendChargebackReceivedEmailAsync(Users user, long chargebackId)
+    private async Task EnqueueChargebackReceivedEmailAsync(Users user, long chargebackId)
     {
         if (string.IsNullOrEmpty(user.Email))
         {
@@ -154,11 +164,20 @@ public class ChargeBackNotificationService(
             viewModel
         );
 
-        await emailSenderService.SendEmailAsync(
-            user.Email,
-            $"Notificação de Contestação (ID: {chargebackId})",
-            htmlBody,
-            string.Empty
-        );
+        var emailPayload = new
+        {
+            to = user.Email,
+            subject = $"Notificação de Contestação (ID: {chargebackId})",
+            htmlBody = htmlBody,
+            plainTextBody = string.Empty
+        };
+
+        var outboxEvent = new OutboxEvent
+        {
+            EventType = "email.send.requested",
+            Payload = JsonSerializer.Serialize(emailPayload)
+        };
+
+        await mongoContext.GetCollection<OutboxEvent>("OutboxEvents").InsertOneAsync(unitOfWork.Session, outboxEvent);
     }
 }

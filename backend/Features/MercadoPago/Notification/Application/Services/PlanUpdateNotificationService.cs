@@ -8,6 +8,9 @@ using MeuCrudCsharp.Features.MercadoPago.Plans.Application.Interfaces;
 using MeuCrudCsharp.Features.Shared.Domain.Interfaces;
 using MeuCrudCsharp.Features.Shared.Infrastructure.Persistence;
 using Microsoft.Extensions.Options;
+using MeuCrudCsharp.Features.Shared.Domain.Entities;
+using MeuCrudCsharp.Data;
+using System.Text.Json;
 
 namespace MeuCrudCsharp.Features.MercadoPago.Notification.Application.Services;
 
@@ -16,7 +19,7 @@ public class PlanUpdateNotificationService(
     IUnitOfWork unitOfWork,
     IMercadoPagoPlanService mercadoPagoApiService,
     IRazorViewToStringRenderer razorViewToStringRenderer,
-    IEmailSenderService emailSenderService,
+    IMongoDbContext mongoContext,
     IOptions<GeneralSettings> generalSettings,
     ILogger<PlanUpdateNotificationService> logger,
     IUserContext userContext)
@@ -110,18 +113,18 @@ public class PlanUpdateNotificationService(
             {
                 planRepository.Update(localPlan);
 
+                await EnqueueAdminNotificationEmailAsync(
+                    adminEmail: await userContext.GetCurrentEmail(),
+                    planName: localPlan.Name,
+                    externalId: externalId,
+                    changes: changes
+                );
+
                 await unitOfWork.CommitAsync();
 
                 logger.LogInformation(
                     "Plano {ExternalId} foi atualizado no banco de dados para refletir os dados do Mercado Pago.",
                     externalId
-                );
-
-                await SendAdminNotificationEmailAsync(
-                    adminEmail: await userContext.GetCurrentEmail(),
-                    planName: localPlan.Name,
-                    externalId: externalId,
-                    changes: changes
                 );
             }
             else
@@ -143,7 +146,7 @@ public class PlanUpdateNotificationService(
         }
     }
 
-    private async Task SendAdminNotificationEmailAsync(
+    private async Task EnqueueAdminNotificationEmailAsync(
         string adminEmail,
         string planName,
         string externalId,
@@ -157,7 +160,7 @@ public class PlanUpdateNotificationService(
             DashboardUrl: $"{_generalSettings.BaseUrl}/Admin/Dashboard"
         );
 
-        await SendEmailFromTemplateAsync(
+        await EnqueueEmailFromTemplateAsync(
             recipientEmail: adminEmail,
             subject: $"[Alerta] O Plano '{planName}' foi atualizado automaticamente",
             viewPath: "Pages/EmailTemplates/PlanUpdate/AdminNotification.cshtml",
@@ -165,7 +168,7 @@ public class PlanUpdateNotificationService(
         );
     }
 
-    private async Task SendEmailFromTemplateAsync<TModel>(
+    private async Task EnqueueEmailFromTemplateAsync<TModel>(
         string recipientEmail,
         string subject,
         string viewPath,
@@ -178,35 +181,27 @@ public class PlanUpdateNotificationService(
             recipientEmail
         );
 
-        try
-        {
-            var htmlBody = await razorViewToStringRenderer.RenderViewToStringAsync(
-                viewPath,
-                model
-            );
-            var plainTextBody =
-                $"Assunto: {subject}. Para visualizar esta mensagem, utilize um leitor de e-mail compatível com HTML.";
+        var htmlBody = await razorViewToStringRenderer.RenderViewToStringAsync(
+            viewPath,
+            model
+        );
+        var plainTextBody =
+            $"Assunto: {subject}. Para visualizar esta mensagem, utilize um leitor de e-mail compatível com HTML.";
 
-            await emailSenderService.SendEmailAsync(
-                recipientEmail,
-                subject,
-                htmlBody,
-                plainTextBody
-            );
-
-            logger.LogInformation(
-                "E-mail para {RecipientEmail} enviado com sucesso.",
-                recipientEmail
-            );
-        }
-        catch (Exception ex)
+        var emailPayload = new
         {
-            logger.LogError(
-                ex,
-                "Falha no processo de montagem e envio de e-mail para {RecipientEmail}.",
-                recipientEmail
-            );
-            throw;
-        }
+            to = recipientEmail,
+            subject = subject,
+            htmlBody = htmlBody,
+            plainTextBody = plainTextBody
+        };
+
+        var outboxEvent = new OutboxEvent
+        {
+            EventType = "email.send.requested",
+            Payload = JsonSerializer.Serialize(emailPayload)
+        };
+
+        await mongoContext.GetCollection<OutboxEvent>("OutboxEvents").InsertOneAsync(unitOfWork.Session, outboxEvent);
     }
 }
