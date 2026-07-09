@@ -1,57 +1,62 @@
 # E-commerce Bot 🛒🤖
 
-Um sistema de automação completo para extração e enriquecimento de dados de produtos de e-commerce. O projeto utiliza web scraping para coletar informações brutas de produtos e integrações com LLM (OpenAI) para reescrever descrições com foco em persuasão de vendas (copywriting).
+Um microserviço escalável focado em extração, processamento e enriquecimento de dados de produtos de e-commerce utilizando Inteligência Artificial (OpenAI e Gemini).
 
 ## 🏗️ Arquitetura do Sistema
 
-O projeto foi construído focando em processamento assíncrono e arquitetura desacoplada:
+O projeto evoluiu para uma arquitetura de microserviço baseada no **FastAPI**, processamento assíncrono profundo (via `asyncio` e `aio-pika`), e filas do **RabbitMQ**.
 
-- **ScraperWorker:** Navega por páginas de um e-commerce alvo, faz o parse do HTML e extrai produtos, salvando-os no banco de dados com status `raw`.
-- **ProcessorWorker:** Atua de forma independente buscando itens na fila do banco (status `raw`) e enviando para a API da OpenAI. Se bem sucedido, o status muda para `processing` e depois `processed`. Em caso de falha, muda para `error`.
-- **Database (MongoDB):** Armazena o estado dos produtos. Conta com índices de performance em `status` e `sku` (único) garantindo integridade e agilidade na fila de processamento.
-- **Modelagem Pydantic:** Validação rigorosa dos dados na entrada da aplicação, garantindo URLs consistentes e tipagens corretas.
+- **API Central (FastAPI):** Expõe rotas HTTP sob demanda. Possui rotas de Landing Page (`/demo`) integradas com mensageria e rotas de extração de relatórios (`/export`). Conta com dependências robustas como Rate Limiting (armazenado no MongoDB com TTL).
+- **Mensageria (RabbitMQ):** Topologia com isolamento multi-tenant. Separa filas para contas de demonstração (`ecommerce_demo`) e clientes assinantes (`ecommerce_prod`). Implementa um Dead Letter Exchange (DLX) nativo garantindo resiliência de falhas estruturais.
+- **ScraperWorker:** Ouve ativamente a fila do RabbitMQ em background de forma não-bloqueante à API. Realiza as estratégias de crawling/parsing (JsonLD ou Markdown/LLM Fallback), salva os produtos no banco e processa contratos externos da arquitetura C# (PascalCase).
+- **ProcessorWorker:** Robô independente que busca itens recém scrapeados ou em falha no banco de dados para envio às LLMs. Executa rotinas de limpeza com proteção temporal contra I/O intensivo (Anti DB Hammering).
+- **ExporterWorker:** Agente encapsulado para criar exportações paginadas e padronizadas (gerando arquivos CSV para plataformas como Shopify e Nuvemshop). Ele suporta segurança Multi-Tenant via filtragem e paginação para não estourar a memória (OOM).
+- **Database (MongoDB):** Central de estado unificada. Seus índices compostos (ex: `[("tenant_id", 1), ("sku", 1)]`) garantem estrito isolamento de dados por cliente e previnem vazamentos cross-tenant.
 
 ## 🚀 Como Rodar o Projeto Localmente
 
 ### 1. Pré-requisitos
 - Python 3.10+ instalado.
-- Docker e Docker Compose (para subir o MongoDB).
+- Gerenciador de pacotes `uv` (opcional, porém recomendado para altíssima performance).
+- Docker e Docker Compose (necessários para subir o MongoDB e o RabbitMQ).
 
-### 2. Configuração do Banco de Dados
-Na raiz do projeto, inicie o contêiner do MongoDB usando o Docker Compose:
+### 2. Subindo a Infraestrutura
+Inicie as dependências do ambiente via Docker. O compose levantará tanto o banco de dados quanto o broker de mensageria:
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
-### 3. Variáveis de Ambiente (.env)
-Crie um arquivo `.env` na raiz do projeto (se ainda não existir) baseado no modelo abaixo:
+### 3. Configuração de Ambiente (.env)
+Crie um arquivo `.env` na raiz, baseando-se nas variáveis suportadas pelo `settings.py`:
 ```env
-# Chave da API da OpenAI
+# Chaves de API das Inteligências Artificiais
 OPENAI_API_KEY=sk-sua-chave-aqui
+GEMINI_API_KEY=sua-chave-gemini-aqui
 
-# Conexão com o banco (O padrão para o docker local é esse)
+# Conexões de Infraestrutura (Padrão para uso local com Docker Compose)
 MONGO_URI=mongodb://localhost:27017
+RABBITMQ_URL=amqp://guest:guest@localhost:5672/
 
-# URL do e-commerce alvo
-SCRAPER_BASE_URL=https://site-do-fornecedor.com/produtos
+# Alertas Críticos e Notificações (Slack / Discord)
+DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/dummy
 ```
 
-### 4. Ambiente Virtual e Dependências
-Crie um ambiente virtual (`venv`) para isolar as bibliotecas:
+### 4. Instalação e Execução
+O projeto utiliza o `uvicorn` sob o capô para inicializar o FastAPI e as rotinas background:
+
+**Recomendado (com UV):**
 ```bash
-# Criar o ambiente
+uv venv
+uv pip install -r requirements.txt
+uv run python -m app.main
+```
+
+**Alternativo (com pip clássico):**
+```bash
 python -m venv venv
-
-# Ativar no Windows (PowerShell)
-.\venv\Scripts\activate
-
-# Instalar dependências
+.\venv\Scripts\activate  # No Linux: source venv/bin/activate
 pip install -r requirements.txt
-```
-
-### 5. Iniciando a Aplicação
-Com o banco rodando e as dependências instaladas, basta executar o ponto de entrada principal:
-```bash
 python -m app.main
 ```
-Os logs começarão a aparecer no terminal demonstrando a extração e enriquecimento dos itens de forma paralela.
+
+> **Nota:** Ao rodar, a API ficará online em `http://localhost:8000`, e o worker de Scraping será inicializado atrelado ao evento de _lifespan_ da API escutando a fila de produção sem bloquear o recebimento de requisições web.

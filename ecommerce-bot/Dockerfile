@@ -14,4 +14,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Comando de inicialização padrão do worker (consumidor RabbitMQ)
-CMD ["python", "-m", "app.main"]
+CMD ["uvicorn", "app.main:app", "--host", "[IP_ADDRESS]", "--port", "8000"]

@@ -12,3 +12,5 @@ pika==1.3.2
 pydantic-settings
 fastapi
 uvicorn
+html2text
+aio_pika
