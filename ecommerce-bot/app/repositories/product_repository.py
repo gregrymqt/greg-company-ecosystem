@@ -1,5 +1,5 @@
 import logging
-from app.database import db
+from app.config.database import db
 from app.models.products import Product
 
 class ProductRepository:

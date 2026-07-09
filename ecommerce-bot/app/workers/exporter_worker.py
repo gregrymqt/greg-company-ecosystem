@@ -1,36 +1,27 @@
 import os
 import csv
-from datetime import datetime
-from pymongo import MongoClient
+import asyncio
+from datetime import datetime, timezone
 from dotenv import load_dotenv
-import sys
 
-# Garante que as importações absolutas do app funcionem a partir da raiz
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-from app.models.products import Product
+from app.config.database import db
+from app.models.products import Product, ProductStatus
 
-# Carrega variáveis de ambiente (como MONGO_URI)
 load_dotenv()
-
-MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017")
-DATABASE_NAME = os.getenv("MONGO_DB_NAME", "ecommerce_db")
-COLLECTION_NAME = os.getenv("MONGO_COLLECTION_NAME", "products")
 
 class ExporterWorker:
     """
-    Worker responsável por exportar produtos enriquecidos para plataformas de E-commerce.
+    Worker assíncrono responsável por exportar produtos enriquecidos para plataformas de E-commerce.
     """
     def __init__(self, platform="shopify"):
-        self.client = MongoClient(MONGO_URI)
-        self.db = self.client[DATABASE_NAME]
-        self.collection = self.db[COLLECTION_NAME]
         self.platform = platform.lower()
 
-    def fetch_processed_products(self):
+    async def fetch_processed_products(self):
         """Busca no MongoDB os produtos que já passaram pela IA e estão com status 'processed'."""
         try:
+            collection = db.client["ecommerce"]["products"]
             # Traz apenas produtos 'Processed'
-            raw_products = list(self.collection.find({"status": "Processed"}))
+            raw_products = await collection.find({"status": ProductStatus.PROCESSED.value}).to_list(length=None)
             products = []
             for rp in raw_products:
                 try:
@@ -63,7 +54,7 @@ class ExporterWorker:
             "Variant SKU": product.sku,
             "Variant Grams": 0,
             "Variant Price": product.price,
-            "Image Src": str(product.images[0]) if product.images else ""
+            "Image Src": image_url
         }
 
     def map_to_nuvemshop(self, product: Product):
@@ -79,11 +70,11 @@ class ExporterWorker:
             "Imagens": ",".join([str(img) for img in product.images]) if product.images else ""
         }
 
-    def export(self):
+    async def export(self):
         """Executa o fluxo completo: Buscar, Mapear, Exportar para CSV e Atualizar Banco."""
         print(f"[{datetime.now()}] Iniciando processo de exportação para {self.platform.capitalize()}...")
         
-        products = self.fetch_processed_products()
+        products = await self.fetch_processed_products()
         
         if not products:
             print("Nenhum produto com status 'processed' encontrado. Nada a exportar.")
@@ -120,30 +111,34 @@ class ExporterWorker:
             print(f"Sucesso: Arquivo gerado em '{filename}'.")
             
             # Etapa crucial: marcar no banco como exportado para evitar duplicidade
-            self.mark_as_exported([p.id for p in products if p.id])
+            await self.mark_as_exported([p.sku for p in products])
             
         except Exception as e:
             print(f"Erro crítico ao gerar o arquivo CSV: {e}")
 
-    def mark_as_exported(self, product_ids):
-        """Atualiza os documentos exportados para 'status: exported' no MongoDB."""
-        if not product_ids:
+    async def mark_as_exported(self, product_skus):
+        """Atualiza os documentos exportados para 'status: Exported' no MongoDB."""
+        if not product_skus:
             return
 
         try:
-            result = self.collection.update_many(
-                {"_id": {"$in": product_ids}},
-                {"$set": {"status": "Exported"}}
+            collection = db.client["ecommerce"]["products"]
+            result = await collection.update_many(
+                {"sku": {"$in": product_skus}},
+                {"$set": {"status": ProductStatus.EXPORTED.value, "updated_at": datetime.now(timezone.utc)}}
             )
             print(f"Concluído: {result.modified_count} documentos marcados como 'Exported' no MongoDB.")
         except Exception as e:
             print(f"Erro ao atualizar o status no MongoDB: {e}")
 
 if __name__ == "__main__":
-    # Exemplo de como inicializar e rodar o worker para o Shopify
-    exporter = ExporterWorker(platform="shopify")
-    exporter.export()
-    
-    # Se fosse para Nuvemshop:
-    # exporter_nuvem = ExporterWorker(platform="nuvemshop")
-    # exporter_nuvem.export()
+    async def main():
+        from app.config.database import connect_to_mongo, close_mongo_connection
+        await connect_to_mongo()
+        
+        exporter = ExporterWorker(platform="shopify")
+        await exporter.export()
+        
+        await close_mongo_connection()
+        
+    asyncio.run(main())

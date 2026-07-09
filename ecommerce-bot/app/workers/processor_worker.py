@@ -2,9 +2,10 @@ import asyncio
 import logging
 from datetime import datetime, timezone, timedelta
 from tenacity import retry, wait_exponential, stop_after_attempt, retry_if_exception_type
-from app.database import db
+from app.config.database import db
 from app.services.llm_service import AllProvidersExhaustedError
 from app.utils.logger import get_logger
+from app.models.products import Product, ProductStatus
 
 logger = get_logger("ProcessorWorker")
 
@@ -34,14 +35,14 @@ class ProcessorWorker:
             # Limpeza de produtos órfãos (travados em Processing há mais de 10 min)
             ten_minutes_ago = datetime.now(timezone.utc) - timedelta(minutes=10)
             await collection.update_many(
-                {"status": "Processing", "updated_at": {"$lt": ten_minutes_ago}},
-                {"$set": {"status": "Raw"}}
+                {"status": ProductStatus.PROCESSING.value, "updated_at": {"$lt": ten_minutes_ago}},
+                {"$set": {"status": ProductStatus.RAW.value}}
             )
 
             # Pega um produto com status Raw e atualiza para Processing atomicamente
             product = await collection.find_one_and_update(
-                {"status": "Raw"},
-                {"$set": {"status": "Processing", "updated_at": datetime.now(timezone.utc)}},
+                {"status": ProductStatus.RAW.value},
+                {"$set": {"status": ProductStatus.PROCESSING.value, "updated_at": datetime.now(timezone.utc)}},
                 return_document=True
             )
             
@@ -50,14 +51,13 @@ class ProcessorWorker:
                 await asyncio.sleep(10)
                 continue
 
-            from app.models.products import Product
             try:
                 product_model = Product(**product)
             except Exception as e:
                 logger.error(f"Erro de validação no DB para o produto {product.get('sku', 'unknown')}: {e}", exc_info=True)
                 await collection.update_one(
                     {"_id": product["_id"]},
-                    {"$set": {"status": "Failed", "last_error": str(e), "updated_at": datetime.now(timezone.utc)}}
+                    {"$set": {"status": ProductStatus.FAILED.value, "last_error": str(e), "updated_at": datetime.now(timezone.utc)}}
                 )
                 continue
 
@@ -79,19 +79,24 @@ class ProcessorWorker:
                             current_llm = LLMService(openai_api_key=tenant_openai_key)
                             
                 processed_data = await self._process_with_retry(product_model, current_llm)
+                
+                # Atualizar o status para PROCESSED
+                processed_data.status = ProductStatus.PROCESSED
+                processed_data.updated_at = datetime.now(timezone.utc)
                 await self.repo.upsert_product(processed_data)
+                
             except (ValueError, TypeError) as e:
                 logger.error(f"Erro de validação de dados no produto {sku}: {e}", extra=log_extra, exc_info=True)
                 await collection.update_one(
                     {"sku": sku},
-                    {"$set": {"status": "Failed", "last_error": str(e), "updated_at": datetime.now(timezone.utc)}}
+                    {"$set": {"status": ProductStatus.FAILED.value, "last_error": str(e), "updated_at": datetime.now(timezone.utc)}}
                 )
             except Exception as e:
                 logger.error(f"Erro final (após retries) ao processar produto {sku}: {e}", extra=log_extra, exc_info=True)
                 # Atualiza para erro para não entrar em loop infinito (Poison Pill)
                 await collection.update_one(
                     {"sku": sku},
-                    {"$set": {"status": "Failed", "last_error": str(e), "updated_at": datetime.now(timezone.utc)}}
+                    {"$set": {"status": ProductStatus.FAILED.value, "last_error": str(e), "updated_at": datetime.now(timezone.utc)}}
                 )
             
             # Pequena pausa entre itens para não sobrecarregar as APIs

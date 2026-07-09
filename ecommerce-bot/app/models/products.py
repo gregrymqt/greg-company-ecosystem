@@ -8,6 +8,7 @@ class ProductStatus(str, Enum):
     PROCESSING = "Processing"
     PROCESSED = "Processed"
     FAILED = "Failed"
+    EXPORTED = "Exported"
 
 class ScraperMetadata(BaseModel):
     source_url: HttpUrl
