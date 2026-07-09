@@ -28,12 +28,16 @@ class LLMService:
 
     async def enrich_product(self, product: Product) -> Product:
         prompt = f"""
-        Você é um especialista em e-commerce. Traduza e reescreva a descrição abaixo 
-        para português do Brasil, focando em persuasão de vendas (copywriting).
-        Produto: {product.title}
-        Descrição original: {product.description}
+        Você é um especialista em e-commerce e SEO. 
+        Com base no produto abaixo, gere:
+        1. Um título otimizado e focado em conversão de vendas.
+        2. Uma descrição magnética e persuasiva (copywriting agressivo) em português do Brasil.
+        3. Uma lista de tags estratégicas para SEO.
+
+        Produto Original: {product.title}
+        Descrição Original: {product.description}
         
-        Retorne apenas o texto da nova descrição persuasiva.
+        Retorne os dados respeitando o formato solicitado.
         """
         
         sku = product.sku
@@ -50,7 +54,14 @@ class LLMService:
                 
                 enriched_response = await provider.enrich(prompt)
                 
+                product.title = enriched_response.title
                 product.description = enriched_response.description
+                
+                if hasattr(product, "attributes"):
+                    if product.attributes is None:
+                        product.attributes = {}
+                    product.attributes["seo_tags"] = ",".join(enriched_response.tags)
+                    
                 product.status = ProductStatus.PROCESSED
                 
                 duration = round(time.time() - start_time, 2)

@@ -1,11 +1,11 @@
 import abc
-import os
 import asyncio
 import logging
 import openai
 from google import genai
 from app.models.llm_responses import EnrichedProductResponse
 from app.utils.logger import get_logger
+from app.config.settings import settings
 
 logger = get_logger("LLMProvider")
 
@@ -22,7 +22,7 @@ class LLMProvider(abc.ABC):
 
 class OpenAIProvider(LLMProvider):
     def __init__(self, api_key: str = None):
-        key = api_key or os.getenv("OPENAI_API_KEY")
+        key = api_key or settings.OPENAI_API_KEY
         self.client = openai.AsyncOpenAI(api_key=key)
         
     @property
@@ -40,7 +40,7 @@ class OpenAIProvider(LLMProvider):
 
 class GeminiProvider(LLMProvider):
     def __init__(self):
-        api_key = os.getenv("GEMINI_API_KEY")
+        api_key = settings.GEMINI_API_KEY
         if not api_key:
             raise ValueError("GEMINI_API_KEY is not configured.")
         self.client = genai.Client(api_key=api_key)

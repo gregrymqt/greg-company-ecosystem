@@ -16,7 +16,7 @@ async def connect_to_mongo():
     # Criar índices
     collection = db.client["ecommerce"]["products"]
     await collection.create_index("status")
-    await collection.create_index("sku", unique=True)
+    await collection.create_index([("tenant_id", 1), ("sku", 1)], unique=True)
     
     logging.info("Conectado ao MongoDB e índices verificados!")
 
