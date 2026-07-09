@@ -16,6 +16,7 @@ class ProcessorWorker:
     def __init__(self, repo, llm):
         self.repo = repo
         self.llm = llm
+        self.last_cleanup = datetime.now(timezone.utc)
 
     @retry(
         wait=wait_exponential(multiplier=1, min=4, max=60), 
@@ -33,11 +34,14 @@ class ProcessorWorker:
             collection = db.client["ecommerce"]["products"]
             
             # Limpeza de produtos órfãos (travados em Processing há mais de 10 min)
-            ten_minutes_ago = datetime.now(timezone.utc) - timedelta(minutes=10)
-            await collection.update_many(
-                {"status": ProductStatus.PROCESSING.value, "updated_at": {"$lt": ten_minutes_ago}},
-                {"$set": {"status": ProductStatus.RAW.value}}
-            )
+            current_time = datetime.now(timezone.utc)
+            if current_time - self.last_cleanup > timedelta(minutes=5):
+                ten_minutes_ago = current_time - timedelta(minutes=10)
+                await collection.update_many(
+                    {"status": ProductStatus.PROCESSING.value, "updated_at": {"$lt": ten_minutes_ago}},
+                    {"$set": {"status": ProductStatus.RAW.value}}
+                )
+                self.last_cleanup = current_time
 
             # Pega um produto com status Raw e atualiza para Processing atomicamente
             product = await collection.find_one_and_update(
@@ -88,14 +92,14 @@ class ProcessorWorker:
             except (ValueError, TypeError) as e:
                 logger.error(f"Erro de validação de dados no produto {sku}: {e}", extra=log_extra, exc_info=True)
                 await collection.update_one(
-                    {"sku": sku},
+                    {"tenant_id": product_model.tenant_id, "sku": sku},
                     {"$set": {"status": ProductStatus.FAILED.value, "last_error": str(e), "updated_at": datetime.now(timezone.utc)}}
                 )
             except Exception as e:
                 logger.error(f"Erro final (após retries) ao processar produto {sku}: {e}", extra=log_extra, exc_info=True)
                 # Atualiza para erro para não entrar em loop infinito (Poison Pill)
                 await collection.update_one(
-                    {"sku": sku},
+                    {"tenant_id": product_model.tenant_id, "sku": sku},
                     {"$set": {"status": ProductStatus.FAILED.value, "last_error": str(e), "updated_at": datetime.now(timezone.utc)}}
                 )
             

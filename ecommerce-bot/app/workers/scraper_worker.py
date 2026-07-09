@@ -3,6 +3,7 @@ import asyncio
 import logging
 from bs4 import BeautifulSoup
 from app.models.products import Product, ScraperMetadata, ProductStatus
+from app.models.messages import ImportRequestMessage
 from app.services.json_ld_parser_service import JsonLdParserService
 from app.services.markdown_parser_service import MarkdownParserService
 from app.services.notification_service import NotificationService
@@ -13,6 +14,8 @@ from app.config.settings import settings
 from app.config.rabbitmq import get_rabbitmq_connection, configure_rabbitmq_topology
 import aio_pika
 import json
+
+
 class ScraperWorker:
     def __init__(self, repository):
         self.client = httpx.AsyncClient(timeout=10.0, follow_redirects=True)
@@ -59,7 +62,7 @@ class ScraperWorker:
             {"$set": {"consecutive_failures": 0}}
         )
 
-    async def _process_product_page(self, product_url: str):
+    async def _process_product_page(self, product_url: str, tenant_id: str):
         """Busca e extrai os dados do produto individual."""
         domain = urlparse(product_url).netloc
         error_type = "Parser retornou dados nulos"
@@ -90,7 +93,8 @@ class ScraperWorker:
                 currency=product_dict.get("currency") or "BRL",
                 images=[product_dict.get("image_url")] if product_dict.get("image_url") else [],
                 metadata=ScraperMetadata(source_url=product_url),
-                status=ProductStatus.RAW
+                status=ProductStatus.RAW,
+                tenant_id=tenant_id
             )
             
             # Resetamos os erros pois tivemos sucesso
@@ -123,7 +127,7 @@ class ScraperWorker:
                 product_links = [urljoin(current_url, el["href"]) for el in products_elements]
                 
                 for product_url in product_links:
-                    product_obj = await self._process_product_page(product_url)
+                    product_obj = await self._process_product_page(product_url, tenant_id="default")
                     if product_obj:
                         await self.repository.upsert_product(product_obj)
                     await asyncio.sleep(1) # Pausa entre produtos
@@ -165,11 +169,13 @@ class ScraperWorker:
                                 payload = message.body.decode()
                                 logging.info(f"Received message on {queue_name}: {payload}")
                                 
-                                data = json.loads(payload)
-                                url_to_scrape = data.get("url")
+                                raw_data = json.loads(payload)
+                                msg_model = ImportRequestMessage.model_validate(raw_data)
+                                url_to_scrape = msg_model.target_url
+                                tenant_id = msg_model.tenant_id
                                 
                                 if url_to_scrape:
-                                    product = await self._process_product_page(url_to_scrape)
+                                    product = await self._process_product_page(url_to_scrape, tenant_id)
                                     if product:
                                         await self.repository.upsert_product(product)
                                         
