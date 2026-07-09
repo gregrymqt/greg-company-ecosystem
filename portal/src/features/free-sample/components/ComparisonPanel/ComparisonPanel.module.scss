@@ -1,0 +1,214 @@
+@use '../../../../styles/variables' as *;
+
+.wrapper {
+  max-width: $container-max-width;
+  margin: $spacing-xxl auto;
+  padding: 0 $spacing-md;
+}
+
+.sectionHeader {
+  text-align: center;
+  margin-bottom: $spacing-xxl;
+
+  .badgeLabel {
+    background-color: rgba($success-color, 0.1);
+    color: $success-color;
+    font-size: $font-size-sm;
+    font-weight: 700;
+    padding: $spacing-sm $spacing-md;
+    border-radius: 50px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: inline-block;
+    margin-bottom: $spacing-md;
+  }
+
+  h2 {
+    font-size: $font-size-lg;
+    color: $text-dark;
+    font-weight: 800;
+    margin-bottom: $spacing-sm;
+
+    @include desktop {
+      font-size: $font-size-xxl;
+    }
+  }
+
+  p {
+    color: $text-secondary;
+    font-size: $font-size-sm;
+    max-width: 600px;
+    margin: 0 auto;
+
+    @include desktop {
+      font-size: $font-size-base;
+    }
+  }
+}
+
+.comparisonGrid {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xxl;
+}
+
+.comparisonRow {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-lg;
+  background-color: $bg-grey;
+  padding: $spacing-md;
+  border-radius: 20px;
+  border: 1px solid $border-color;
+
+  @include desktop {
+    flex-direction: row;
+    padding: $spacing-xl;
+    align-items: stretch;
+  }
+}
+
+.column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.columnTitle {
+  font-size: $font-size-sm;
+  font-weight: 700;
+  color: $text-muted;
+  margin-bottom: $spacing-sm;
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+
+  &.enhancedTitle {
+    color: $primary-color;
+  }
+}
+
+// Customizações estritas sobre as classes injetadas no seu Card global
+.cardOriginal {
+  border: 1px solid $border-color !important;
+  opacity: 0.75;
+  height: 100%;
+}
+
+.cardEnhanced {
+  border: 2px solid $primary-color !important;
+  box-shadow: $shadow-lg !important;
+  background-color: $bg-light;
+  height: 100%;
+}
+
+.priceTag {
+  font-size: $font-size-sm;
+  font-weight: 600;
+  color: $danger-color;
+  margin-bottom: $spacing-sm;
+}
+
+.descriptionText {
+  font-size: $font-size-sm;
+  color: $text-muted;
+  line-height: 1.5;
+}
+
+// Estilizações exclusivas do output ultra-persuasivo do LLM
+.enhancedMeta {
+  margin-bottom: $spacing-md;
+
+  .seoBadge {
+    font-size: 0.8rem;
+    background-color: $bg-grey;
+    border: 1px solid $border-color;
+    padding: 4px 8px;
+    border-radius: 4px;
+    color: $text-dark;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+}
+
+.copyContainer {
+  font-size: $font-size-sm;
+  color: $text-dark;
+  line-height: 1.7;
+  font-weight: 400;
+
+  p {
+    margin-bottom: $spacing-md;
+    
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  // Destaca gatilhos mentais ou bolds trazidos em Markdown da OpenAI
+  strong {
+    color: $danger-color;
+    font-weight: 700;
+  }
+}
+
+.tagSection {
+  margin-top: $spacing-lg;
+  border-top: 1px dashed $border-color;
+  padding-top: $spacing-md;
+
+  h4 {
+    font-size: 0.8rem;
+    color: $text-muted;
+    text-transform: uppercase;
+    margin-bottom: $spacing-sm;
+    font-weight: 700;
+  }
+}
+
+.tagCloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tagBadge {
+  background-color: rgba($primary-color, 0.06);
+  color: $primary-color;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 4px;
+  border: 1px solid rgba($primary-color, 0.1);
+}
+
+// Zona intermediária de transição visual com ícone de raio centralizado
+.dividerZone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+
+  @include desktop {
+    width: 60px;
+  }
+}
+
+.lightningCircle {
+  width: 40px;
+  height: 40px;
+  background-color: $primary-color;
+  color: $text-light;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 12px rgba($primary-color, 0.4);
+  z-index: 2;
+
+  i {
+    font-size: 1.1rem;
+  }
+}

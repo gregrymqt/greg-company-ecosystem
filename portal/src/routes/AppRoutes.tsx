@@ -15,6 +15,7 @@ import { CreateSupportPage } from "@/pages/Support/CreateSupportPage";
 import { AboutPage } from "@/pages/About/AboutPage";
 import { MainLayout } from "@/components/layout/components/MainLayout";
 import { PlanFeed } from "@/pages/Plans/PlanFeed";
+import { FreeSamplePage } from "@/pages/FreeSample/FreeSamplePage";
 
 export const AppRoutes = () => {
   return (
@@ -24,6 +25,7 @@ export const AppRoutes = () => {
       <Route path="/acesso-negado" element={<AccessDenied />} />
       <Route path="/suporte/novo" element={<CreateSupportPage />} />
       <Route path="/sobre" element={<AboutPage />} />
+      <Route path="/amostra-gratis" element={<FreeSamplePage />} />
 
       {/* === LAYOUT PRINCIPAL === */}
       <Route element={<MainLayout />}>

@@ -1,0 +1,91 @@
+@use '../../../../styles/variables' as *;
+
+.ctaWrapper {
+  max-width: 800px;
+  margin: $spacing-xxl auto;
+  padding-bottom: $spacing-xxl;
+}
+
+.ctaCard {
+  border-radius: 24px !important;
+  overflow: hidden;
+  transition: all $transition-speed ease;
+
+  &.limitAlert {
+    border: 2px solid $danger-color !important;
+    background-color: rgba($danger-color, 0.02);
+  }
+
+  &.successPulse {
+    border: 2px solid $success-color !important;
+    animation: successGlow 3s infinite alternate;
+  }
+}
+
+.content {
+  padding: $spacing-md 0;
+}
+
+.description {
+  font-size: $font-size-base;
+  color: $text-secondary;
+  line-height: 1.6;
+  margin-bottom: $spacing-lg;
+}
+
+.benefitsList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-lg;
+
+  li {
+    font-size: $font-size-sm;
+    color: $text-dark;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+
+    i {
+      color: $success-color;
+      font-size: 1rem;
+    }
+  }
+}
+
+.primaryBtn {
+  background-color: $primary-color;
+  color: $text-light;
+  border: none;
+  padding: 14px 28px;
+  border-radius: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background $transition-speed;
+  display: flex;
+  align-items: center;
+
+  &:hover {
+    background-color: $primary-hover;
+  }
+}
+
+.secondaryBtn {
+  background: transparent;
+  color: $text-muted;
+  border: 1px solid $border-color;
+  padding: 14px 24px;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover {
+    background: $bg-grey;
+  }
+}
+
+@keyframes successGlow {
+  from { box-shadow: 0 0 10px rgba($success-color, 0.1); }
+  to { box-shadow: 0 0 30px rgba($success-color, 0.25); }
+}

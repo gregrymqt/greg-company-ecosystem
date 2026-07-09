@@ -1,0 +1,54 @@
+@use '../../../../styles/variables' as *;
+
+.container {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: $spacing-xl $spacing-md;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: $spacing-xl;
+
+  h2 {
+    font-size: $font-size-lg;
+    color: $text-dark;
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: -0.03em;
+    margin-bottom: $spacing-sm;
+
+    @include desktop {
+      font-size: $font-size-xxl;
+    }
+  }
+
+  p {
+    font-size: $font-size-sm;
+    color: $text-secondary;
+    line-height: 1.6;
+
+    @include desktop {
+      font-size: $font-size-base;
+    }
+  }
+}
+
+.glassForm {
+  background-color: $bg-light;
+  border: 1px solid $border-color;
+  border-radius: 16px;
+  padding: $spacing-lg;
+  box-shadow: $shadow-lg;
+  transition: transform $transition-speed ease, box-shadow $transition-speed ease;
+
+  // Feedback sutil focado na experiência de preenchimento do lojista
+  &:focus-within {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+  }
+
+  @include desktop {
+    padding: $spacing-xl;
+  }
+}

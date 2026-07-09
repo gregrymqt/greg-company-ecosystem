@@ -28,7 +28,7 @@ import  {
   type FieldError,
   type UseFormReturn 
 } from 'react-hook-form';
-import styles from './GenericForm.module.scss';
+import styles from './Form.module.scss';
 
 // ============ FORM WRAPPER (Provider) ============
 

@@ -24,6 +24,3 @@ export {
   FormSubmit
 } from './Form';
 
-// Config-based Pattern (Legacy)
-export { GenericForm } from './GenericForm';
-export type { FormField, InputType } from './GenericForm';
