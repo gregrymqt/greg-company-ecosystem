@@ -5,10 +5,12 @@
 This is a **monorepo multi-service business suite** following a decoupled micro-frontend architecture.
 
 1. **Proxy Gateway (Nginx):** Acts as the sole entry point to the ecosystem (Port 80) and routes traffic to the respective services.
-2. **Backend (.NET 8):** Primary transactional API named `MeuCrudCsharp`. Handles logic, Hangfire background jobs, RabbitMQ messaging, and Business Intelligence metrics.
-3. **Portal Frontend (React):** Facing application for end-users, students, and course consumers.
-4. **Admin Frontend (React):** Backoffice management, analytics dashboards, and refund workflows.
-5. **Infra:** Centralized infrastructure orchestration directory containing docker-compose and proxy configs.
+2. **Backend (.NET 8):** Primary transactional API named `MeuCrudCsharp`. Handles logic, RabbitMQ messaging, Transactional Outbox Pattern, and Business Intelligence metrics.
+3. **Go Worker (Golang):** Microservice dedicated to video transcoding, relieving the C# backend from heavy local file system I/O.
+4. **Ecommerce Bot (Python):** Python automation project located in `ecommerce-bot/`.
+5. **Portal Frontend (React):** Facing application for end-users, students, and course consumers.
+6. **Admin Frontend (React):** Backoffice management, analytics dashboards, and refund workflows.
+7. **Infra:** Centralized infrastructure orchestration directory containing docker-compose and proxy configs.
 
 ## Backend (C# / .NET 8)
 
@@ -16,6 +18,7 @@ This is a **monorepo multi-service business suite** following a decoupled micro-
 - **Features-first organization:** All features live under `backend/Features/` directory (e.g., Auth, Courses, Support, MercadoPago, Mcp, etc.).
 - Each feature contains its own: Controllers, Services, Repositories, DTOs, Interfaces, Mappers.
 - **Extension-based startup:** `Program.cs` uses extension methods from `Extensions/` for clean dependency registration and app pipeline setup.
+- **Transactional Outbox:** To prevent distributed transaction failures, asynchronous events (like emails and status changes) are saved to `OutboxEvents` within the same transaction as the database operation.
 
 ### Dependency Injection Convention
 Services and repositories are **auto-registered via Scrutor** by namespace scanning. When adding new features, create `Services/` and `Repositories/` folders strictly following the standard namespace pattern so they will be automatically discovered.
@@ -24,7 +27,15 @@ Services and repositories are **auto-registered via Scrutor** by namespace scann
 - **Primary DB:** MongoDB via native `MongoDB.Driver`. It serves as the single source of truth.
 - **Cache:** Redis for performance (`USE_REDIS` env var toggles it).
 - **Messaging:** RabbitMQ is used as the AMQP broker.
-- **Hangfire:** Handles all async processing.
+- **Storage:** Supabase Storage is used for files.
+
+## Microservices and Bots
+
+### Go Worker (Video Transcoding)
+The `go-worker` directory contains the logic for processing and transcoding videos asynchronously. The C# backend pushes tasks to RabbitMQ, which are consumed by the Go worker.
+
+### Ecommerce Bot (Python)
+The `ecommerce-bot` directory houses the Python automation scripts and services. Make sure `venv` is excluded from source control.
 
 ## Frontends (React + TypeScript + Vite)
 
@@ -47,7 +58,7 @@ src/
 ## Docker Orchestration
 
 ### Infrastructure Layout
-- **Global Stack:** Production orchestration lives in `infra/docker-compose.yml`. This creates the `greg-network` and spins up MongoDB, Redis, RabbitMQ, the Backend, both Frontends, and the Nginx `proxy-gateway`.
+- **Global Stack:** Production orchestration lives in `infra/docker-compose.yml`. This creates the `greg-network` and spins up MongoDB, Redis, RabbitMQ, the Backend, both Frontends, the Go Worker, and the Nginx `proxy-gateway`.
 - **Nginx Config:** Located at `infra/nginx.conf`. 
 - **Local Stacks:** Local dev configs reside inside each project folder (e.g., `backend/docker-compose.yml`).
 - **Testing Stack:** Automated tests orchestration is located at `backend/docker-compose.test.yml`.
