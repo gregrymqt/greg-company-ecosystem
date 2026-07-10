@@ -38,4 +38,17 @@ spec:
             mountPath: /data
       volumes:
         - name: redis-persistent-storage
-          emptyDir: {}
+          persistentVolumeClaim:
+            claimName: redis-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: redis-pvc
+  namespace: greg-company
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi

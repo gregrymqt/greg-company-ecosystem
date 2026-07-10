@@ -37,6 +37,17 @@ spec:
               mountPath: /data/db
       volumes:
         - name: mongo-persistent-storage
-          # emptyDir mantém os dados vivos mesmo se o contêiner falhar internamente.
-          # Para produção real, substituiríamos por um PersistentVolumeClaim (PVC).
-          emptyDir: {}
+          persistentVolumeClaim:
+            claimName: mongo-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mongo-pvc
+  namespace: greg-company
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi

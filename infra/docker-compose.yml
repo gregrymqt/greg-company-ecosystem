@@ -31,8 +31,10 @@ services:
     image: rabbitmq:3.13-management-alpine
     container_name: rabbitmq-broker
     ports:
-      - "5672:5672"
-      - "15672:15672" # Mantido para acesso direto do host Dev
+      - "127.0.0.1:5672:5672"
+      - "127.0.0.1:15672:15672" # Protegido limitando o bind ao host local
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
     networks:
       - backend-net
       - data-net
@@ -169,3 +171,4 @@ networks:
 volumes:
   mongo-data:
   redis-data:
+  rabbitmq-data:
