@@ -60,3 +60,7 @@ async def export_data(tenant_id: str, platform: str = "shopify"):
     except Exception as e:
         logger.error(f"Erro ao exportar dados: {e}")
         raise HTTPException(status_code=500, detail="Erro interno durante a exportação")
+
+@router.get("/health")
+async def health_check():
+    return {"status": "ok"}

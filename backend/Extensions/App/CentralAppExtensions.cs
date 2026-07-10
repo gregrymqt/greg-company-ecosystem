@@ -50,6 +50,7 @@ public static class CentralAppExtensions
         app.MapRazorPages();
         app.MapControllers();
         app.MapControllerRoute(name: "default", pattern: "{controller=Home}/{action=Index}/{id?}");
+        app.MapHealthChecks("/healthz");
 
         // Registro do Servidor de Contexto MCP
         app.UseMcpEndpoints();

@@ -30,6 +30,7 @@ public static class CentralServicesExtensions
 
         builder.Services.AddMcpContextServer(builder.Configuration);
         builder.Services.AddHostedService<OutboxProcessorWorker>();
+        builder.Services.AddHealthChecks();
 
         return builder;
     }

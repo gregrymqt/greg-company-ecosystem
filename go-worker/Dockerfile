@@ -1,7 +1,7 @@
 # ========================================================
 # Estágio 1: Build (Ambiente Go Otimizado)
 # ========================================================
-FROM golang:1.22-alpine AS builder
+FROM golang:1.26-alpine AS builder
 
 WORKDIR /app
 
