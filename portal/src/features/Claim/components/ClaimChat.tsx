@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from "react";
 import styles from '../styles/ClaimChat.module.scss';
-import { type FormField, GenericForm } from "@/components/Form/GenericForm";
+import { Form } from "@/components/Form";
 import { useClaimChatLogic } from '../hooks/useClaimChatLogic';
 
 interface Props {
@@ -22,25 +22,7 @@ export const ClaimChat: React.FC<Props> = ({ claimId, role }) => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Configuração dos campos para o GenericForm
-  const formFields: FormField<ReplyFormData>[] = [
-    {
-      name: "message",
-      label: "Sua Resposta",
-      type: "textarea",
-      placeholder: "Descreva sua resposta ou solução...",
-      validation: { required: "A mensagem é obrigatória" },
-      colSpan: 12,
-    },
-    {
-      name: "attachments",
-      label: "Anexar Comprovantes",
-      type: "file",
-      accept: "image/*, .pdf",
-      multiple: true,
-      colSpan: 12,
-    },
-  ];
+
 
   return (
     <div className={styles.container}>
@@ -96,12 +78,18 @@ export const ClaimChat: React.FC<Props> = ({ claimId, role }) => {
 
       {/* 2. ÁREA DE INPUT (Usando seu GenericForm) */}
       <div className={styles.footer}>
-        <GenericForm<ReplyFormData>
-          fields={formFields}
+        <Form<ReplyFormData>
           onSubmit={handleSendResponse}
-          submitText={isLoading ? "Enviando..." : "Enviar Resposta"}
-          isLoading={isLoading}
-        />
+        >
+          <Form.Textarea name="message" label="Sua Resposta" placeholder="Descreva sua resposta ou solução..." validation={{ required: "A mensagem é obrigatória" }} colSpan={12} />
+          <Form.Input name="attachments" label="Anexar Comprovantes" type="file" accept="image/*, .pdf" multiple colSpan={12} />
+          
+          <Form.Actions>
+            <Form.Submit isLoading={isLoading}>
+              {isLoading ? "Enviando..." : "Enviar Resposta"}
+            </Form.Submit>
+          </Form.Actions>
+        </Form>
       </div>
     </div>
   );

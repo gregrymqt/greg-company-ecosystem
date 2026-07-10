@@ -1,7 +1,7 @@
 import React from 'react';
 
 import  { Card } from '@/components/Card/Card';
-import { type FormField, GenericForm } from '@/components/Form/GenericForm';
+import { Form } from '@/components/Form';
 import { useAdminTerminal } from '../hooks/useAdminTerminal';
 import type { TerminalFormData } from '../types';
 import styles from '../styles/AdminTerminal.module.scss';
@@ -9,45 +9,7 @@ import styles from '../styles/AdminTerminal.module.scss';
 export const AdminTerminal: React.FC = () => {
   const { handleTerminalCommand } = useAdminTerminal();
 
-  // Definição dos campos conforme seu GenericForm exige [cite: 4]
-  const terminalFields: FormField<TerminalFormData>[] = [
-    {
-      name: 'module',
-      label: '1. Módulo de Acesso',
-      type: 'select', // [cite: 17]
-      colSpan: 12,
-      validation: { required: 'Selecione um módulo' },
-      options: [
-        { label: 'Gestão de Cursos (CourseAdmin)', value: 'course' },
-        { label: 'Gestão de Vídeos (VideoAdmin)', value: 'video' },
-        { label: 'Financeiro (MercadoPago)', value: 'mercadopago' },
-      ]
-    },
-    {
-      name: 'action',
-      label: '2. Operação Inicial',
-      type: 'select',
-      colSpan: 6, // Divide a linha
-      validation: { required: 'Selecione a ação' },
-      options: [
-        { label: 'Dashboard / Visão Geral', value: 'dashboard' },
-        { label: 'Listagem de Dados', value: 'list' },
-        { label: 'Cadastrar Novo', value: 'create' },
-      ]
-    },
-    {
-      name: 'filter',
-      label: '3. Filtro de Dados',
-      type: 'select',
-      colSpan: 6, // Divide a linha
-      validation: { required: 'Selecione o filtro' },
-      options: [
-        { label: 'Todos os Registros', value: 'all' },
-        { label: 'Apenas Ativos', value: 'active' },
-        { label: 'Arquivados / Inativos', value: 'archived' },
-      ]
-    }
-  ];
+
 
   return (
     <Card className={styles.terminalCard}>
@@ -57,11 +19,31 @@ export const AdminTerminal: React.FC = () => {
             Configure os parâmetros abaixo para inicializar o ambiente administrativo desejado.
         </p>
         
-        <GenericForm<TerminalFormData>
-          fields={terminalFields}
+        <Form<TerminalFormData>
           onSubmit={handleTerminalCommand}
-          submitText="Executar Comando 🚀"
-        />
+        >
+          <Form.Select name="module" label="1. Módulo de Acesso" options={[
+            { label: 'Gestão de Cursos (CourseAdmin)', value: 'course' },
+            { label: 'Gestão de Vídeos (VideoAdmin)', value: 'video' },
+            { label: 'Financeiro (MercadoPago)', value: 'mercadopago' },
+          ]} validation={{ required: 'Selecione um módulo' }} colSpan={12} />
+          
+          <Form.Select name="action" label="2. Operação Inicial" options={[
+            { label: 'Dashboard / Visão Geral', value: 'dashboard' },
+            { label: 'Listagem de Dados', value: 'list' },
+            { label: 'Cadastrar Novo', value: 'create' },
+          ]} validation={{ required: 'Selecione a ação' }} colSpan={6} />
+
+          <Form.Select name="filter" label="3. Filtro de Dados" options={[
+            { label: 'Todos os Registros', value: 'all' },
+            { label: 'Apenas Ativos', value: 'active' },
+            { label: 'Arquivados / Inativos', value: 'archived' },
+          ]} validation={{ required: 'Selecione o filtro' }} colSpan={6} />
+
+          <Form.Actions>
+            <Form.Submit>Executar Comando 🚀</Form.Submit>
+          </Form.Actions>
+        </Form>
       </Card.Body>
     </Card>
   );

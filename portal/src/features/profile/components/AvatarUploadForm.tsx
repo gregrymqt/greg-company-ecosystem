@@ -1,7 +1,7 @@
 import React from 'react';
 
 import styles from '../styles/AvatarUploadForm.module.scss';
-import { type FormField, GenericForm } from '@/components/Form/GenericForm';
+import { Form } from '@/components/Form';
 import { useAvatarUpdate } from '../hooks/useAvatarUpdate';
 
 interface AvatarFormSchema {
@@ -11,17 +11,7 @@ interface AvatarFormSchema {
 export const AvatarUploadForm: React.FC = () => {
   const { uploading, updateAvatar } = useAvatarUpdate();
 
-  const fields: FormField<AvatarFormSchema>[] = [
-    {
-      name: 'file',
-      label: 'Selecione uma nova foto',
-      type: 'file',
-      accept: 'image/png, image/jpeg, image/jpg',
-      validation: {
-        required: 'A imagem é obrigatória'
-      }
-    }
-  ];
+
 
   const handleSubmit = async (data: AvatarFormSchema) => {
     if (data.file && data.file.length > 0) {
@@ -35,12 +25,15 @@ export const AvatarUploadForm: React.FC = () => {
         Formatos aceitos: JPG, PNG. Tamanho máximo: 5MB.
       </p>
       
-      <GenericForm<AvatarFormSchema>
-        fields={fields}
+      <Form<AvatarFormSchema>
         onSubmit={handleSubmit}
-        submitText="Atualizar Foto"
-        isLoading={uploading}
-      />
+      >
+        <Form.Input name="file" label="Selecione uma nova foto" type="file" accept="image/png, image/jpeg, image/jpg" validation={{ required: 'A imagem é obrigatória' }} colSpan={12} />
+        
+        <Form.Actions>
+          <Form.Submit isLoading={uploading}>Atualizar Foto</Form.Submit>
+        </Form.Actions>
+      </Form>
     </div>
   );
 };

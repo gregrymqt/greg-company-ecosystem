@@ -3,10 +3,7 @@ import React from "react";
 
 import styles from '../styles/AboutForm.module.scss';
 
-import {
-  type FormField,
-  GenericForm,
-} from '@/components/Form/GenericForm';
+import { Form } from '@/components/Form';
 import type {
   AboutSectionData,
   AboutSectionFormValues,
@@ -25,40 +22,7 @@ export const AboutSectionForm: React.FC<SectionFormProps> = ({
 }) => {
   const isEditing = !!initialData;
 
-  const fields: FormField<AboutSectionFormValues>[] = [
-    {
-      name: "title",
-      label: "Título Principal",
-      type: "text",
-      placeholder: "Ex: Nossa História",
-      validation: { required: "O título é obrigatório" },
-      colSpan: 12,
-    },
-    {
-      name: "description",
-      label: "Conteúdo da Seção",
-      type: "textarea",
-      placeholder: "Escreva sobre a empresa...",
-      validation: { required: "A descrição é obrigatória" },
-      colSpan: 12,
-    },
-    {
-      name: "newImage",
-      label: isEditing ? "Alterar Imagem (Opcional)" : "Imagem de Destaque",
-      type: "file",
-      accept: "image/*",
-      validation: { required: isEditing ? false : "A imagem é obrigatória" },
-      colSpan: 6,
-    },
-    {
-      name: "imageAlt",
-      label: "Descrição da Imagem (Alt Text)",
-      type: "text",
-      placeholder: "Descreva a imagem para acessibilidade",
-      validation: { required: "O texto alternativo é obrigatório para SEO" },
-      colSpan: 6,
-    },
-  ];
+
 
   // CORREÇÃO 2: Substituído 'any' por 'Partial<AboutSectionFormValues>'
   const defaultValues: Partial<AboutSectionFormValues> = initialData
@@ -85,13 +49,21 @@ export const AboutSectionForm: React.FC<SectionFormProps> = ({
         </div>
       )}
 
-      <GenericForm<AboutSectionFormValues>
-        fields={fields}
+      <Form<AboutSectionFormValues>
         onSubmit={onSubmit}
         defaultValues={defaultValues}
-        isLoading={isLoading}
-        submitText={isEditing ? "Salvar Alterações" : "Criar Seção"}
-      />
+      >
+        <Form.Input name="title" label="Título Principal" placeholder="Ex: Nossa História" validation={{ required: "O título é obrigatório" }} colSpan={12} />
+        <Form.Textarea name="description" label="Conteúdo da Seção" placeholder="Escreva sobre a empresa..." validation={{ required: "A descrição é obrigatória" }} colSpan={12} />
+        <Form.Input name="newImage" label={isEditing ? "Alterar Imagem (Opcional)" : "Imagem de Destaque"} type="file" accept="image/*" validation={{ required: isEditing ? false : "A imagem é obrigatória" }} colSpan={6} />
+        <Form.Input name="imageAlt" label="Descrição da Imagem (Alt Text)" placeholder="Descreva a imagem para acessibilidade" validation={{ required: "O texto alternativo é obrigatório para SEO" }} colSpan={6} />
+        
+        <Form.Actions>
+          <Form.Submit isLoading={isLoading}>
+            {isEditing ? "Salvar Alterações" : "Criar Seção"}
+          </Form.Submit>
+        </Form.Actions>
+      </Form>
     </div>
   );
 };
