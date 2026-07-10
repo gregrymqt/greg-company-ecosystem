@@ -1,19 +1,14 @@
 apiVersion: v1
-kind: Namespace
-metadata:
-  name: greg-company
----
-apiVersion: v1
 kind: Service
 metadata:
   name: redis-service
   namespace: greg-company
 spec:
-  type: NodePort # 👈 Alterado para NodePort
+  type: NodePort
   ports:
   - port: 6379
     targetPort: 6379
-    nodePort: 30379 # 👈 Porta fixa amarrada ao kind-config
+    nodePort: 30379
   selector:
     app: redis-cache
 ---
@@ -34,7 +29,13 @@ spec:
     spec:
       containers:
       - name: redis
-        image: redis:latest
+        image: redis:7-alpine # Imagem leve e previsível
         command: ["redis-server", "--appendonly", "yes"]
         ports:
         - containerPort: 6379
+        volumeMounts:
+          - name: redis-persistent-storage
+            mountPath: /data
+      volumes:
+        - name: redis-persistent-storage
+          emptyDir: {}

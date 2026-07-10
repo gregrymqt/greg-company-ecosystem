@@ -40,11 +40,24 @@ bi-dashboard/output/
 uploads/
 
 # Node modules (frontend já tem seu próprio .dockerignore)
-node_modules/
+node_modules
+dist
+.git
+.gitignore
+README.md
+DockerFile
+.env*
 
 # .NET build artifacts
+**/.dockerignore
+**/.env
+**/.git
+**/.gitignore
+**/.vs
+**/.vscode
 **/bin/
 **/obj/
+Dockerfile
 
 # Documentation
 README.md

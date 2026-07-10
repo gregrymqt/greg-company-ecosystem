@@ -1,19 +1,14 @@
 apiVersion: v1
-kind: Namespace
-metadata:
-  name: greg-company
----
-apiVersion: v1
 kind: Service
 metadata:
   name: mongo-service
   namespace: greg-company
 spec:
-  type: NodePort # 👈 Alterado para NodePort
+  type: NodePort
   ports:
     - port: 27017
       targetPort: 27017
-      nodePort: 30017 # 👈 Porta fixa amarrada ao kind-config
+      nodePort: 30017
   selector:
     app: mongodb-store
 ---
@@ -34,6 +29,14 @@ spec:
     spec:
       containers:
         - name: mongodb-store
-          image: mongo:latest
+          image: mongo:7.0 # Versão fixa para paridade de ambiente
           ports:
             - containerPort: 27017
+          volumeMounts:
+            - name: mongo-persistent-storage
+              mountPath: /data/db
+      volumes:
+        - name: mongo-persistent-storage
+          # emptyDir mantém os dados vivos mesmo se o contêiner falhar internamente.
+          # Para produção real, substituiríamos por um PersistentVolumeClaim (PVC).
+          emptyDir: {}

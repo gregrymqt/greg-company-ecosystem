@@ -4,10 +4,11 @@ metadata:
   name: greg-company-ingress
   namespace: greg-company
   annotations:
-    # O NGINX Ingress já ativa WebSockets por padrão, mas estas anotações 
-    # otimizam os timeouts para o SignalR do .NET não cair a cada 60 segundos
     nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    # 🔥 INDISPENSÁVEL PARA SSE: Impede o Nginx de reter o chunked stream na memória
+    nginx.ingress.kubernetes.io/proxy-buffering: "off"
+    nginx.ingress.kubernetes.io/proxy-http-version: "1.1"
 spec:
   ingressClassName: nginx 
   rules:
@@ -19,9 +20,9 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: portal-service # O Service que aponta para o teu Pod do Vite
+            name: portal-service
             port:
-              number: 80 # Porta exposta pelo Service interno
+              number: 8080 # Alinhado com a nova porta do Service
 
   # --- REGRA 2: TRÁFEGO DO ADMIN ---
   - host: admin.gregcompany.local
@@ -31,18 +32,27 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: admin-service # O Service do painel de administração
+            name: admin-service
             port:
-              number: 80
+              number: 8080 # Alinhado com a nova porta do Service
 
-  # --- REGRA 3: TRÁFEGO DA API (.NET 8) ---
+  # --- REGRA 3: TRÁFEGO DA API & STREAM BOT ---
   - host: api.gregcompany.local
     http:
       paths:
+      # Rota específica do Bot de IA (SSE Stream) interceptada primeiro
+      - path: /api/v1/demo/stream
+        pathType: Prefix
+        backend:
+          service:
+            name: ecommerce-bot-service
+            port:
+              number: 8000
+      # Rota genérica da API direcionada ao .NET 8
       - path: /
         pathType: Prefix
         backend:
           service:
-            name: backend-api-service # Substitui o "backend-api:8080" do teu conf
+            name: backend-api-service
             port:
-              number: 8080 # A porta em que a tua API .NET está a ouvir
+              number: 8080
