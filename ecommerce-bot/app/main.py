@@ -8,7 +8,7 @@ from app.config.settings import settings
 from app.config.database import connect_to_mongo, close_mongo_connection
 from app.repositories.product_repository import ProductRepository
 from app.workers.scraper_worker import ScraperWorker
-from app.api.v1.endpoints import router as v1_router
+from app.api.v1.api import router as v1_router
 
 logger = logging.getLogger(__name__)
 
