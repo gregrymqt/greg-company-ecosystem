@@ -3,6 +3,8 @@ import io
 import re
 from typing import List, Dict
 
+from app.models.nuvemshop_models import NuvemshopProductRequest
+
 class CsvExportService:
     """
     Serviço dedicado à geração de arquivos CSV de produtos compatíveis com plataformas de E-commerce.
@@ -56,7 +58,7 @@ class CsvExportService:
         return output.getvalue().encode('utf-8-sig')
 
     @staticmethod
-    def generate_nuvemshop_csv(products: List[Dict]) -> bytes:
+    def generate_nuvemshop_csv(products: List[NuvemshopProductRequest]) -> bytes:
         """
         Gera o payload em bytes de um CSV formatado para a Nuvemshop.
         """
@@ -71,20 +73,16 @@ class CsvExportService:
         writer.writeheader()
         
         for p in products:
-            tags = p.get("tags", "")
-            tags_str = ",".join(tags) if isinstance(tags, list) else str(tags)
-            title = p.get("title", "")
-            
             row = {
-                "Identificador URL": CsvExportService._create_slug(title),
-                "Nome": title,
-                "Preço": p.get("price", 0.0),
-                "Descrição": p.get("description", ""),
-                "Tags": tags_str,
-                "Título para SEO": p.get("seo_title", title),
-                "Descrição para SEO": p.get("seo_description", ""),
-                "Exibir na loja": "SIM",
-                "Produto Físico": "SIM"
+                "Identificador URL": p.handle.pt,
+                "Nome": p.name.pt,
+                "Preço": p.variants[0].price if p.variants else 0.0,
+                "Descrição": p.description.pt,
+                "Tags": p.tags or "",
+                "Título para SEO": p.seo_title.pt if p.seo_title else "",
+                "Descrição para SEO": p.seo_description.pt if p.seo_description else "",
+                "Exibir na loja": "SIM" if p.published else "NÃO",
+                "Produto Físico": "SIM" if p.requires_shipping else "NÃO"
             }
             writer.writerow(row)
             

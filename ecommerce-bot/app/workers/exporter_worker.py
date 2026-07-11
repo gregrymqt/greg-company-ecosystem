@@ -64,7 +64,9 @@ class ExporterWorker:
         if self.platform == "shopify":
             csv_bytes = CsvExportService.generate_shopify_csv(product_dicts)
         elif self.platform == "nuvemshop":
-            csv_bytes = CsvExportService.generate_nuvemshop_csv(product_dicts)
+            from app.models.nuvemshop_models import NuvemshopProductRequest
+            nuvemshop_products = [NuvemshopProductRequest.from_internal_data(pd) for pd in product_dicts]
+            csv_bytes = CsvExportService.generate_nuvemshop_csv(nuvemshop_products)
         else:
             logger.warning(f"Plataforma '{self.platform}' não configurada no ExporterWorker.")
             return
