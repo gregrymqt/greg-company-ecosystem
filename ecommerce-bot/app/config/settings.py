@@ -7,6 +7,6 @@ class Settings(BaseSettings):
     GEMINI_API_KEY: str
     DISCORD_WEBHOOK_URL: str
 
-    model_config = SettingsConfigDict(env_file='.env', env_file_encoding='utf-8', extra='ignore')
+    model_config = SettingsConfigDict(env_file='.env', env_file_encoding='utf-8', extra='ignore', case_sensitive=False)
 
 settings = Settings()

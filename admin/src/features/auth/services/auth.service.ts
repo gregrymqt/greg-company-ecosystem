@@ -21,7 +21,7 @@ export const authService = {
    * Redireciona para o Google Login
    */
   loginGoogle: () => {
-    const baseUrl = import.meta.env.VITE_GENERAL__BASEURL || 'https://localhost:5045';
+    const baseUrl = import.meta.env.VITE_GENERAL_BASEURL || 'https://localhost:5045';
     window.location.href = `${baseUrl}/api/auth/google-login`;
   },
 
