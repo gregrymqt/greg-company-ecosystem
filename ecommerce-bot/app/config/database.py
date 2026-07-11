@@ -21,6 +21,12 @@ async def connect_to_mongo():
     # Criar índice TTL de 1 hora (3600 segundos) para Rate Limiting
     await db.client["ecommerce"]["demo_rate_limits"].create_index("created_at", expireAfterSeconds=3600)
     
+    # Criar índice de Busca Semântica na coleção de cache
+    await db.client["ecommerce"]["semantic_cache"].create_index([("description", "text"), ("title", "text")])
+    
+    # Criar índice TTL de 24 horas (86400 segundos) para expurgo da Landing Page
+    await collection.create_index("created_at", expireAfterSeconds=86400, partialFilterExpression={"tenant_id": "demo_tenant"})
+    
     logging.info("Conectado ao MongoDB e índices verificados!")
 
 async def close_mongo_connection():

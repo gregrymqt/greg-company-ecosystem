@@ -5,6 +5,7 @@ using MeuCrudCsharp.Data.Configuration.Attributes;
 
 namespace MeuCrudCsharp.Features.Products.Domain.Entities;
 
+[BsonIgnoreExtraElements]
 public class Product : IMongoDocument
 {
     public static string CollectionName => "products";

@@ -124,6 +124,7 @@ services:
       - MONGO_URI=mongodb://mongodb:27017
       - MONGO_DB_NAME=${MONGO_DATABASE_NAME}
       - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
+      - AES_MASTER_KEY=${AES_MASTER_KEY}
     depends_on:
       mongodb:
         condition: service_started

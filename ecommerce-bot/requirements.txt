@@ -4,6 +4,7 @@ beautifulsoup4
 httpx
 openai
 python-dotenv
+cryptography
 
 tenacity
 

@@ -5,6 +5,7 @@ from tenacity import retry, wait_exponential, stop_after_attempt, retry_if_excep
 from app.config.database import db
 from app.services.llm_service import AllProvidersExhaustedError
 from app.utils.logger import get_logger
+from app.utils.crypto import decrypt_api_key
 from app.models.products import Product, ProductStatus
 
 logger = get_logger("ProcessorWorker")
@@ -76,7 +77,8 @@ class ProcessorWorker:
                     tenant_col = collection.database["tenants"]
                     tenant_doc = await tenant_col.find_one({"tenant_id": product_model.tenant_id})
                     if tenant_doc:
-                        tenant_openai_key = tenant_doc.get("settings", {}).get("openai_api_key") or tenant_doc.get("openai_api_key")
+                        raw_key = tenant_doc.get("settings", {}).get("openai_api_key") or tenant_doc.get("openai_api_key")
+                        tenant_openai_key = decrypt_api_key(raw_key) if raw_key else None
                         if tenant_openai_key:
                             from app.services.llm_service import LLMService
                             logger.info(f"Usando chave de API própria (BYOK) para o tenant: {product_model.tenant_id}")
