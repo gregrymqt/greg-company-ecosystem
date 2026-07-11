@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 
 from app.config.database import db
 from app.models.products import Product, ProductStatus
-from app.services.csv_export_service import CsvExportService
+from app.exporters.csv_exporter import CsvExportService
 
 load_dotenv()
 logger = logging.getLogger(__name__)

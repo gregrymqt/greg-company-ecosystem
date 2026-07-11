@@ -1,7 +1,7 @@
 import asyncio
 import time
 from dotenv import load_dotenv
-from app.services.llm_provider import OpenAIProvider, GeminiProvider
+from app.providers.llm_provider import OpenAIProvider, GeminiProvider
 from app.utils.logger import get_logger
 
 logger = get_logger("LLMService")

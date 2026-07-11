@@ -4,8 +4,8 @@ import logging
 from bs4 import BeautifulSoup
 from app.models.products import Product, ScraperMetadata, ProductStatus
 from app.models.messages import ImportRequestMessage
-from app.services.json_ld_parser_service import JsonLdParserService
-from app.services.markdown_parser_service import MarkdownParserService
+from app.parsers.json_ld_parser import JsonLdParserService
+from app.parsers.markdown_parser import MarkdownParserService
 from app.services.notification_service import NotificationService
 from app.config.database import db
 from urllib.parse import urljoin, urlparse
