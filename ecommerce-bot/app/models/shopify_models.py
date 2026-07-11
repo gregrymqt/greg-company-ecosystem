@@ -77,3 +77,148 @@ class ShopifyGraphQLRequest(BaseModel):
     """
     variables: ShopifyGraphQLVariables
 
+class ShopifyMediaInput(BaseModel):
+    """Mapeia uma imagem individual a ser injetada em um produto existente."""
+    mediaContentType: str = "IMAGE"
+    alt: Optional[str] = Field(None, description="Texto alternativo gerado pela IA para SEO.")
+    originalSource: str = Field(..., description="URL pública da imagem hospedada.")
+
+class ShopifyCreateMediaVariables(BaseModel):
+    productId: str = Field(..., description="Global ID (GID) do produto no Shopify, ex: 'gid://shopify/Product/123'")
+    media: List[ShopifyMediaInput]
+
+class ShopifyCreateMediaRequest(BaseModel):
+    """Payload final para anexar mídias no GraphQL."""
+    query: str = """
+    mutation productCreateMedia($productId: ID!, $media: [CreateMediaInput!]!) {
+      productCreateMedia(productId: $productId, media: $media) {
+        media {
+          id
+          status
+        }
+        userErrors {
+          field
+          message
+        }
+      }
+    }
+    """
+    variables: ShopifyCreateMediaVariables
+
+
+from typing import List, Optional
+from pydantic import BaseModel, Field
+
+class ShopifySEOInput(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+
+class ShopifyProductUpdateInput(BaseModel):
+    """
+    Propriedades passíveis de modificação pela IA no ciclo de atualização.
+    """
+    id: str = Field(..., description="GID do Produto, ex: 'gid://shopify/Product/108828309'")
+    title: Optional[str] = None
+    handle: Optional[str] = None
+    vendor: Optional[str] = None
+    productType: Optional[str] = None
+    status: Optional[str] = None  # ACTIVE, ARCHIVED, DRAFT
+    tags: Optional[List[str]] = None
+    seo: Optional[ShopifySEOInput] = None
+
+class ShopifyCreateMediaInput(BaseModel):
+    """
+    Formato aceito pelo argumento 'media' do productUpdate para novas cargas de IA.
+    """
+    originalSource: str = Field(..., description="URL pública da imagem gerada.")
+    alt: Optional[str] = Field(None, description="Alt text otimizado para acessibilidade e SEO.")
+    mediaContentType: str = "IMAGE"  # IMAGE, VIDEO, EXTERNAL_VIDEO
+
+class ShopifyProductUpdateVariables(BaseModel):
+    product: ShopifyProductUpdateInput
+    media: Optional[List[ShopifyCreateMediaInput]] = None
+
+class ShopifyProductUpdateRequest(BaseModel):
+    """
+    Payload final envelopado para a mutação productUpdate (Stable 2026-07).
+    """
+    query: str = """
+    mutation UpdateProductComprehensive($product: ProductUpdateInput!, $media: [CreateMediaInput!]) {
+      productUpdate(product: $product, media: $media) {
+        product {
+          id
+          title
+          status
+          media(first: 10) {
+            nodes {
+              alt
+              mediaContentType
+              preview {
+                status
+              }
+            }
+          }
+        }
+        userErrors {
+          field
+          message
+        }
+      }
+    }
+    """
+    variables: ShopifyProductUpdateVariables    
+
+
+class ShopifyProductDeleteInput(BaseModel):
+    id: str = Field(..., description="GID do Produto a ser removido definitivamente, ex: 'gid://shopify/Product/108828309'")
+
+class ShopifyProductDeleteVariables(BaseModel):
+    input: ShopifyProductDeleteInput
+
+class ShopifyProductDeleteRequest(BaseModel):
+    """
+    Payload para execução da mutação productDelete.
+    """
+    query: str = """
+    mutation DeleteProduct($input: ProductDeleteInput!) {
+      productDelete(input: $input) {
+        deletedProductId
+        userErrors {
+          field
+          message
+        }
+      }
+    }
+    """
+    variables: ShopifyProductDeleteVariables
+
+
+class ShopifyPaginationParams(BaseModel):
+    first: int = Field(default=10, ge=1, le=250, description="Quantidade de registros a buscar.")
+    after: Optional[str] = Field(None, description="Cursor em Base64 para buscar registros após esta posição.")
+
+class ShopifyProductListRequest(BaseModel):
+    """
+    Payload que encapsula a query de listagem com suporte a filtros e cursores.
+    """
+    query: str = """
+    query GetProductsList($first: Int!, $after: String) {
+      products(first: $first, after: $after) {
+        edges {
+          cursor
+          node {
+            id
+            title
+            vendor
+            status
+            productType
+          }
+        }
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+      }
+    }
+    """
+    variables: dict    
