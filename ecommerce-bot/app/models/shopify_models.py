@@ -5,11 +5,18 @@ class ShopifyOptionValueInput(BaseModel):
     optionName: str = Field(..., description="Nome da opção, ex: 'Color'")
     name: str = Field(..., description="Valor da opção, ex: 'Blue'")
 
+class ShopifyFileInput(BaseModel):
+    originalSource: str = Field(..., description="URL pública da imagem hospedada.")
+    alt: Optional[str] = Field(None, description="Texto alternativo gerado pela IA para SEO.")
+    filename: Optional[str] = Field(None, description="Nome do arquivo.")
+    contentType: str = "IMAGE"
+
 class ShopifyVariantInput(BaseModel):
     price: str
     sku: Optional[str] = None
     inventoryItem: Optional[dict] = Field(None, description="Dados de estoque e rastreamento")
     optionValues: List[ShopifyOptionValueInput]
+    file: Optional[ShopifyFileInput] = None
 
 class ShopifyProductOptionInput(BaseModel):
     name: str
@@ -27,6 +34,7 @@ class ShopifyProductSetInput(BaseModel):
     status: str = "DRAFT" # ACTIVE, ARCHIVED, DRAFT
     productOptions: List[ShopifyProductOptionInput] = []
     variants: List[ShopifyVariantInput] = []
+    files: List[ShopifyFileInput] = []
     seoTitle: Optional[str] = None
     seoDescription: Optional[str] = None
     tags: Optional[str] = None
@@ -68,31 +76,7 @@ class ShopifyGraphQLRequest(BaseModel):
           id
           title
         }
-        userErrors {
-          field
-          message
-        }
-      }
-    }
-    """
-    variables: ShopifyGraphQLVariables
-
-class ShopifyMediaInput(BaseModel):
-    """Mapeia uma imagem individual a ser injetada em um produto existente."""
-    mediaContentType: str = "IMAGE"
-    alt: Optional[str] = Field(None, description="Texto alternativo gerado pela IA para SEO.")
-    originalSource: str = Field(..., description="URL pública da imagem hospedada.")
-
-class ShopifyCreateMediaVariables(BaseModel):
-    productId: str = Field(..., description="Global ID (GID) do produto no Shopify, ex: 'gid://shopify/Product/123'")
-    media: List[ShopifyMediaInput]
-
-class ShopifyCreateMediaRequest(BaseModel):
-    """Payload final para anexar mídias no GraphQL."""
-    query: str = """
-    mutation productCreateMedia($productId: ID!, $media: [CreateMediaInput!]!) {
-      productCreateMedia(productId: $productId, media: $media) {
-        media {
+        operation {
           id
           status
         }
@@ -103,7 +87,9 @@ class ShopifyCreateMediaRequest(BaseModel):
       }
     }
     """
-    variables: ShopifyCreateMediaVariables
+    variables: ShopifyGraphQLVariables
+
+
 
 
 from typing import List, Optional
@@ -183,6 +169,10 @@ class ShopifyProductDeleteRequest(BaseModel):
     mutation DeleteProduct($input: ProductDeleteInput!) {
       productDelete(input: $input) {
         deletedProductId
+        productDeleteOperation {
+          id
+          status
+        }
         userErrors {
           field
           message
