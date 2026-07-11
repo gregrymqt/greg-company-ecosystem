@@ -7,6 +7,7 @@ Todos os componentes agora usam **CSS Modules** para evitar conflitos de estilos
 ## 📋 Table Component
 
 ### Uso Básico
+
 ```tsx
 import { Table } from '@/components/Table/Table';
 import { ActionMenu } from '@/components/ActionMenu/ActionMenu';
@@ -37,6 +38,7 @@ const columns = [
 ```
 
 ### Recursos Avançados
+
 - ✅ Renderização customizada com `render` prop
 - ✅ Callback `onRowClick` para linhas clicáveis
 - ✅ Classes CSS customizadas por coluna ou linha
@@ -48,6 +50,7 @@ const columns = [
 ## 🎴 Card Component
 
 ### Composition Pattern
+
 ```tsx
 import { Card } from '@/components/Card/Card';
 
@@ -68,6 +71,7 @@ import { Card } from '@/components/Card/Card';
 ## 📝 Form Components
 
 ### ⭐ Composition Pattern (Recomendado)
+
 ```tsx
 import { Form } from '@/components/Form';
 
@@ -102,6 +106,7 @@ interface LoginForm {
 ```
 
 ### Legacy Config-based (Para compatibilidade)
+
 ```tsx
 import { GenericForm } from '@/components/Form';
 
@@ -143,6 +148,7 @@ import { Card } from '@/components/Card/Card';
 ## 📱 Sidebar Component
 
 ### Estrutura Simplificada
+
 Agora em `components/SideBar/Sidebar.tsx` (sem aninhamento excessivo)
 
 ```tsx
@@ -187,6 +193,7 @@ import { ActionMenu } from '@/components/ActionMenu/ActionMenu';
 ## 🎨 CSS Modules
 
 Todos os componentes agora usam `*.module.scss`:
+
 - ✅ `ActionMenu.module.scss`
 - ✅ `Card.module.scss`
 - ✅ `Table.module.scss`
@@ -215,22 +222,26 @@ import { ActionMenu } from '@/components/ActionMenu/ActionMenu';
 ## 🚀 Melhorias Implementadas
 
 ### 1. **CSS Modules Padronizado**
+
 - Classes com escopo local
 - Sem conflitos de nomes
 - Melhor manutenibilidade
 
 ### 2. **Sidebar Reestruturada**
+
 - De `SideBar/components/Sidebar.tsx` → `SideBar/Sidebar.tsx`
 - Imports mais limpos
 - Melhor organização
 
 ### 3. **Form com Composition Pattern**
+
 - Componentes menores e reutilizáveis
 - `<Form.Input>`, `<Form.Select>`, etc.
 - Melhor DX (Developer Experience)
 - Mantém compatibilidade com `GenericForm` legacy
 
 ### 4. **Table Super Flexível**
+
 - Renderização customizada por coluna
 - Callbacks para cliques em linhas
 - Alinhamento e largura de colunas

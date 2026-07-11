@@ -6,8 +6,8 @@ This is a **monorepo multi-service business suite** following a decoupled micro-
 
 1. **Proxy Gateway (Nginx):** Acts as the sole entry point to the ecosystem (Port 80) and routes traffic to the respective services.
 2. **Backend (.NET 8):** Primary transactional API named `MeuCrudCsharp`. Handles logic, RabbitMQ messaging, Transactional Outbox Pattern, and Business Intelligence metrics.
-3. **Go Worker (Golang):** Microservice dedicated to video transcoding, relieving the C# backend from heavy local file system I/O.
-4. **Ecommerce Bot (Python):** Python automation project located in `ecommerce-bot/`.
+3. **Go Worker (Golang):** Microservice dedicated to video transcoding and email sending, relieving the C# backend from heavy I/O.
+4. **Ecommerce Bot (Python):** Web scraping, semantic search and AI product enrichment located in `ecommerce-bot/`.
 5. **Portal Frontend (React):** Facing application for end-users, students, and course consumers.
 6. **Admin Frontend (React):** Backoffice management, analytics dashboards, and refund workflows.
 7. **Infra:** Centralized infrastructure orchestration directory containing docker-compose and proxy configs.
@@ -24,18 +24,24 @@ This is a **monorepo multi-service business suite** following a decoupled micro-
 Services and repositories are **auto-registered via Scrutor** by namespace scanning. When adding new features, create `Services/` and `Repositories/` folders strictly following the standard namespace pattern so they will be automatically discovered.
 
 ### Database & Background Jobs
-- **Primary DB:** MongoDB via native `MongoDB.Driver`. It serves as the single source of truth.
+- **Primary DB:** MongoDB. C# backend uses the native `MongoDB.Driver`. Python uses asynchronous `motor`. It serves as the single source of truth.
 - **Cache:** Redis for performance (`USE_REDIS` env var toggles it).
 - **Messaging:** RabbitMQ is used as the AMQP broker.
 - **Storage:** Supabase Storage is used for files.
 
 ## Microservices and Bots
 
-### Go Worker (Video Transcoding)
-The `go-worker` directory contains the logic for processing and transcoding videos asynchronously. The C# backend pushes tasks to RabbitMQ, which are consumed by the Go worker.
+### Go Worker (Golang)
+The `go-worker` directory contains logic for asynchronously processing videos and emails. The C# backend pushes tasks to RabbitMQ (`marketplace.exchange` -> `video.process.request.queue` & `email.send.queue`), which are consumed by the Go worker.
 
 ### Ecommerce Bot (Python)
-The `ecommerce-bot` directory houses the Python automation scripts and services. Make sure `venv` is excluded from source control.
+The `ecommerce-bot` directory houses web scraping and LLM processing services. 
+**Crucial Architectural Details for AI Agents:**
+- Uses `motor` for MongoDB access and Pydantic for validation.
+- Enforces strict Multi-tenant isolation relying on `(tenant_id, sku)` composite keys.
+- Utilizes RabbitMQ queues `ecommerce_prod` (Priority) and `ecommerce_demo` (TTL and Max-Length restrictions) via an exclusive Dead Letter Exchange (DLX).
+- Implements BYOK (Bring Your Own Key) Security: OpenAI/Gemini API keys are **strictly encrypted in MongoDB using AES-256 GCM**. If modifying the `ProcessorWorker` or `LLMService`, always respect the decryption layer `decrypt_api_key` located in `app/utils/crypto.py`. Do NOT write plaintext keys to the database.
+Make sure `venv` is excluded from source control.
 
 ## Frontends (React + TypeScript + Vite)
 
@@ -58,7 +64,9 @@ src/
 ## Docker Orchestration
 
 ### Infrastructure Layout
-- **Global Stack:** Production orchestration lives in `infra/docker-compose.yml`. This creates the `greg-network` and spins up MongoDB, Redis, RabbitMQ, the Backend, both Frontends, the Go Worker, and the Nginx `proxy-gateway`.
+- **Global Stack (Docker):** Production orchestration lives in `infra/docker-compose.yml`. This creates the `greg-network` and spins up MongoDB, Redis, RabbitMQ, the Backend, both Frontends, the Go Worker, and the Nginx `proxy-gateway`.
+- **Global Stack (Kubernetes):** Kubernetes manifests are located in `infra/manifests/` (e.g., `apps-infra.yaml`, `greg-secrets.yaml`). 
+  *CRITICAL FOR AI AGENTS: When creating or renaming environment variables (e.g., `VITE_` prefixes, `.NET` double underscores `__`), you MUST ensure strict 1:1 parity between `.env`, `docker-compose.yml`, and `greg-secrets.yaml` to prevent Environment Drift.*
 - **Nginx Config:** Located at `infra/nginx.conf`. 
 - **Local Stacks:** Local dev configs reside inside each project folder (e.g., `backend/docker-compose.yml`).
 - **Testing Stack:** Automated tests orchestration is located at `backend/docker-compose.test.yml`.

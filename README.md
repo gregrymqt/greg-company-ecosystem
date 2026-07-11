@@ -9,13 +9,13 @@ Ecossistema completo para gestão de cursos online com sistema integrado de paga
 - 📊 Inteligência de Negócios (BI) processada de forma unificada
 - 🔔 Suporte e sistema de reclamações
 - 💰 Gestão de carteira digital e transações
-- ✉️ Integração com SendGrid para envio de e-mails usando Transactional Outbox
-- 🤖 Automação e bots desenvolvidos em Python
+- ✉️ Integração com SendGrid para envio de e-mails via RabbitMQ (Transactional Outbox)
+- 🤖 Automação, Web Scraping e Enriquecimento de IA com Bot em Python
 
 ## 🚀 Tecnologias e Integrações
 
 *   **Backend (API & BI):** ASP.NET 8 (C#) para APIs RESTful e processamento de métricas e lógica de BI. O projeto principal chama-se `MeuCrudCsharp`.
-*   **Microserviços (Transcodificação):** Golang (`go-worker`) para processamento assíncrono e transcodificação de vídeos.
+*   **Microserviços (Workers):** Golang (`go-worker`) para processamento assíncrono (transcodificação de vídeos e envio de e-mails).
 *   **Frontends (Micro-frontends):** React com TypeScript e Vite. Dividido em dois projetos isolados: `portal` (vitrine) e `admin` (gestão).
 *   **Banco de Dados:** MongoDB nativo (`MongoDB.Driver`) como banco de dados principal e *Single Source of Truth* para toda a plataforma.
 *   **Cache:** Redis para caching de alta performance.
@@ -23,8 +23,8 @@ Ecossistema completo para gestão de cursos online com sistema integrado de paga
 *   **Gateway Proxy:** Nginx como API Gateway, servindo como única porta de entrada (Porta 80) para todo o ecossistema.
 *   **Pagamentos:** Integração completa com MercadoPago (Checkout Pro, Webhooks, PIX e Assinaturas).
 *   **Armazenamento de Arquivos:** Integração com Supabase Storage.
-*   **Automação:** Bot de e-commerce implementado em Python (`ecommerce-bot`).
-*   **Containerização:** Docker, Docker Compose e Kubernetes para orquestração da infraestrutura local e em nuvem.
+*   **Automação de IA:** Bot implementado em Python (`ecommerce-bot`) responsável por Web Scraping, busca semântica em Cache e enriquecimento LLM com segurança BYOK (AES-256).
+*   **Containerização:** Docker e Docker Compose para ambiente local, e Kubernetes (manifestos em `infra/manifests/`) para orquestração em nuvem.
 
 ## 🏗️ Arquitetura
 
@@ -32,8 +32,8 @@ O ecossistema adota uma arquitetura de **Monorepo**, separado em serviços indep
 
 1. **Proxy Gateway (Nginx):** Roteador central que recebe todas as requisições na porta 80 e direciona para o portal, admin ou backend.
 2. **Backend (C#):** Clean Architecture com Vertical Slices - cada feature (Auth, Courses, MercadoPago, Analytics, etc.) possui sua própria estrutura completa. Auto-registro de dependências via Scrutor. Utiliza o Transactional Outbox Pattern.
-3. **Go Worker (Golang):** Microserviço dedicado à transcodificação de vídeos, consumindo mensagens do RabbitMQ, aliviando o Backend C# de operações intensivas de I/O de arquivos locais.
-4. **Ecommerce Bot (Python):** Projeto de automação Python hospedado na raiz do repositório.
+3. **Go Worker (Golang):** Microserviço dedicado à transcodificação de vídeos e envio de e-mails, consumindo mensagens do RabbitMQ (`marketplace.exchange`).
+4. **Ecommerce Bot (Python):** Worker de Automação de E-commerce operando Web Scraping assíncrono, processamento de NLP/LLM com isolamento Multi-tenant e criptografia de chaves (AES-256 GCM). O bot se expõe parcialmente via API para recebimento de streams SSE.
 5. **Portal Frontend (React):** Aplicação voltada para o usuário final. Contém a vitrine de cursos, player de vídeos e área do aluno.
 6. **Admin Frontend (React):** Painel de backoffice para gestão da plataforma.
 
@@ -164,7 +164,15 @@ SendGrid__FromEmail=your_email@domain.com
 SendGrid__FromName=Greg Company
 
 # Base URL para Gateway
-VITE_GENERAL__BASEURL=http://localhost
+VITE_GENERAL_BASEURL=http://localhost
+
+# Integrações de Inteligência Artificial e Segurança BYOK
+OPENAI_API_KEY=sua_chave_openai
+Gemini_Api_Key=sua_chave_gemini
+AES_MASTER_KEY=chave_mestre_base64_aes256_32bytes
+
+# Armazenamento (Storage)
+SUPABASE_S3_URL=sua_url_supabase
 ```
 
 ---
