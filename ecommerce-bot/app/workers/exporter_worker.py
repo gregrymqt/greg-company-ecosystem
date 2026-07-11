@@ -62,7 +62,9 @@ class ExporterWorker:
         # Delegação para o CsvExportService
         csv_bytes = b""
         if self.platform == "shopify":
-            csv_bytes = CsvExportService.generate_shopify_csv(product_dicts)
+            from app.models.shopify_models import ShopifyProductSetInput
+            shopify_products = [ShopifyProductSetInput.from_internal_data(pd) for pd in product_dicts]
+            csv_bytes = CsvExportService.generate_shopify_csv(shopify_products)
         elif self.platform == "nuvemshop":
             from app.models.nuvemshop_models import NuvemshopProductRequest
             nuvemshop_products = [NuvemshopProductRequest.from_internal_data(pd) for pd in product_dicts]

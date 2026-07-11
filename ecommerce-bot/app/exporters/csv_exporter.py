@@ -4,6 +4,7 @@ import re
 from typing import List, Dict
 
 from app.models.nuvemshop_models import NuvemshopProductRequest
+from app.models.shopify_models import ShopifyProductSetInput
 
 class CsvExportService:
     """
@@ -20,7 +21,7 @@ class CsvExportService:
         return re.sub(r'[\s_-]+', '-', slug).strip('-')
 
     @staticmethod
-    def generate_shopify_csv(products: List[Dict]) -> bytes:
+    def generate_shopify_csv(products: List[ShopifyProductSetInput]) -> bytes:
         """
         Gera o payload em bytes de um CSV formatado para o Shopify.
         """
@@ -35,21 +36,16 @@ class CsvExportService:
         writer.writeheader()
         
         for p in products:
-            tags = p.get("tags", "")
-            tags_str = ",".join(tags) if isinstance(tags, list) else str(tags)
-            
-            title = p.get("title", "")
-            
             row = {
-                "Title": title,
-                "URL handle": CsvExportService._create_slug(title),
-                "Description": p.get("description", ""),
-                "Tags": tags_str,
-                "Status": "draft",
-                "SKU": p.get("sku", ""),
-                "Price": p.get("price", 0.0),
-                "SEO title": p.get("seo_title", title),
-                "SEO description": p.get("seo_description", ""),
+                "Title": p.title,
+                "URL handle": CsvExportService._create_slug(p.title),
+                "Description": p.descriptionHtml,
+                "Tags": p.tags or "",
+                "Status": p.status.lower(),
+                "SKU": p.variants[0].sku if p.variants else "",
+                "Price": p.variants[0].price if p.variants else "0.0",
+                "SEO title": p.seoTitle or "",
+                "SEO description": p.seoDescription or "",
                 "Published on online store": "TRUE"
             }
             writer.writerow(row)
