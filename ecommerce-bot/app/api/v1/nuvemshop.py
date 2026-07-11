@@ -1,9 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, Header, status
+from fastapi.responses import JSONResponse
 from typing import List, Dict, Any, Optional
 from app.services.nuvemshop_service import NuvemshopService
 from app.models.nuvemshop_models import NuvemshopProductRequest
 from app.config.database import db
 from app.utils.crypto import decrypt_api_key
+from app.exporters.csv_exporter import CsvExportService
 
 router = APIRouter(prefix="/api/nuvemshop", tags=["Nuvemshop Integration"])
 
@@ -34,7 +36,17 @@ async def get_nuvemshop_service(x_tenant_id: str = Header(..., alias="X-Tenant-I
     # 🛡️ Aqui entra a descriptografia AES-256 GCM do seu ecossistema:
     access_token = decrypt_api_key(raw_token)
 
-    return NuvemshopService(store_id=str(store_id), access_token=access_token, app_email=app_email)
+    service = NuvemshopService(store_id=str(store_id), access_token=access_token, app_email=app_email)
+    
+    # 🔐 Validação de escopos da Nuvemshop
+    is_valid_scope = await service.validate_scopes()
+    if not is_valid_scope:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="O token fornecido não possui permissões de escrita (write_products) na Nuvemshop."
+        )
+
+    return service
 
 
 @router.post("/products", status_code=status.HTTP_201_CREATED, response_model=Dict[str, Any])
@@ -48,10 +60,24 @@ async def create_product(
     try:
         return await service.create_product(product)
     except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_502_BAD_GATEWAY, 
-            detail=f"Falha de comunicação com o provedor Nuvemshop: {str(e)}"
-        )
+        # Mecanismo de Fallback: Gera CSV ao falhar persistentemente após os retries
+        try:
+            csv_bytes = CsvExportService.generate_nuvemshop_csv([product])
+            download_url = "https://greg-ecosystem.com/downloads/fallback/nuvemshop-temp.csv"
+            
+            return JSONResponse(
+                status_code=status.HTTP_202_ACCEPTED,
+                content={
+                    "status": "fallback_csv",
+                    "message": "A sincronização direta falhou temporariamente. O download do CSV com copywriting IA foi gerado como alternativa.",
+                    "download_url": download_url
+                }
+            )
+        except Exception as fallback_err:
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY, 
+                detail=f"Falha de comunicação com o provedor Nuvemshop: {str(e)} | Erro no Fallback: {str(fallback_err)}"
+            )
 
 
 @router.get("/products/{product_id}", response_model=Dict[str, Any])

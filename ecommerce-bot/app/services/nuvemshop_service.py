@@ -2,8 +2,12 @@ import httpx
 import logging
 from typing import List, Dict, Any, Optional
 from app.models.nuvemshop_models import NuvemshopProductRequest
+from tenacity import retry, wait_exponential, stop_after_attempt, retry_if_exception
 
 logger = logging.getLogger(__name__)
+
+def is_rate_limit_error(exception: Exception) -> bool:
+    return isinstance(exception, httpx.HTTPStatusError) and exception.response.status_code == 429
 
 class NuvemshopService:
     """
@@ -23,6 +27,45 @@ class NuvemshopService:
             "User-Agent": f"EcommerceBotGreg ({app_email})"
         }
 
+    async def validate_scopes(self) -> bool:
+        """
+        Realiza uma chamada rápida GET ao endpoint base da loja para inspecionar os headers 
+        de resposta e validar se o token possui o escopo (scope) 'write_products'.
+        """
+        url = f"{self.base_url}/store"
+        
+        async with httpx.AsyncClient() as client:
+            try:
+                response = await client.get(url, headers=self.headers)
+                
+                # Se o token for totalmente inválido (401), já rejeitamos
+                if response.status_code in (401, 403):
+                    return False
+                
+                response.raise_for_status()
+                
+                # Inspecionamos os headers retornados pela API da Nuvemshop
+                scopes_header = response.headers.get("X-Tiendanube-Scopes", response.headers.get("X-Supported-Scopes", ""))
+                
+                if not scopes_header:
+                    logger.warning(f"Headers de escopo não encontrados na resposta para a loja {self.store_id}.")
+                    return False
+                
+                return "write_products" in scopes_header
+                
+            except httpx.HTTPStatusError as e:
+                logger.error(f"Erro ao tentar validar escopos na Nuvemshop [Status {e.response.status_code}]: {e.response.text}")
+                return False
+            except Exception as e:
+                logger.error(f"Falha de conexão ao validar escopos na Nuvemshop: {str(e)}")
+                return False
+
+    @retry(
+        stop=stop_after_attempt(3),
+        wait=wait_exponential(multiplier=1, min=2, max=10),
+        retry=retry_if_exception(is_rate_limit_error),
+        reraise=True
+    )
     async def create_product(self, product: NuvemshopProductRequest) -> Dict[str, Any]:
         """
         [POST] /v1/{store_id}/products
@@ -39,7 +82,10 @@ class NuvemshopService:
                 logger.info(f"Produto criado com sucesso na Nuvemshop. ID: {response.json().get('id')}")
                 return response.json()
             except httpx.HTTPStatusError as e:
-                logger.error(f"Erro ao criar produto na Nuvemshop [Status {e.response.status_code}]: {e.response.text}")
+                if e.response.status_code == 429:
+                    logger.warning("Rate limit (429) atingido na Nuvemshop ao criar produto. Acionando retry...")
+                else:
+                    logger.error(f"Erro ao criar produto na Nuvemshop [Status {e.response.status_code}]: {e.response.text}")
                 raise e
 
     async def get_product_by_id(self, product_id: int) -> Dict[str, Any]:
@@ -78,6 +124,12 @@ class NuvemshopService:
                 logger.error(f"Erro ao buscar SKU {sku} na Nuvemshop: {e.response.text}")
                 raise e
 
+    @retry(
+        stop=stop_after_attempt(3),
+        wait=wait_exponential(multiplier=1, min=2, max=10),
+        retry=retry_if_exception(is_rate_limit_error),
+        reraise=True
+    )
     async def update_product_metadata(self, product_id: int, update_data: Dict[str, Any]) -> Dict[str, Any]:
         """
         [PUT] /v1/{store_id}/products/{id}
@@ -94,9 +146,18 @@ class NuvemshopService:
                 logger.info(f"Metadados do produto {product_id} atualizados com sucesso.")
                 return response.json()
             except httpx.HTTPStatusError as e:
-                logger.error(f"Erro ao atualizar produto {product_id}: {e.response.text}")
+                if e.response.status_code == 429:
+                    logger.warning(f"Rate limit (429) atingido na Nuvemshop ao atualizar produto {product_id}. Acionando retry...")
+                else:
+                    logger.error(f"Erro ao atualizar produto {product_id}: {e.response.text}")
                 raise e
 
+    @retry(
+        stop=stop_after_attempt(3),
+        wait=wait_exponential(multiplier=1, min=2, max=10),
+        retry=retry_if_exception(is_rate_limit_error),
+        reraise=True
+    )
     async def update_stock_price_batch(self, batch_data: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """
         [PATCH] /v1/{store_id}/products/stock-price
@@ -115,9 +176,18 @@ class NuvemshopService:
                 logger.info("Atualização em lote de preço/estoque processada.")
                 return response.json()
             except httpx.HTTPStatusError as e:
-                logger.error(f"Erro no PATCH em lote da Nuvemshop: {e.response.text}")
+                if e.response.status_code == 429:
+                    logger.warning("Rate limit (429) atingido na Nuvemshop no PATCH em lote. Acionando retry...")
+                else:
+                    logger.error(f"Erro no PATCH em lote da Nuvemshop: {e.response.text}")
                 raise e
 
+    @retry(
+        stop=stop_after_attempt(3),
+        wait=wait_exponential(multiplier=1, min=2, max=10),
+        retry=retry_if_exception(is_rate_limit_error),
+        reraise=True
+    )
     async def delete_product(self, product_id: int) -> bool:
         """
         [DELETE] /v1/{store_id}/products/{id}
@@ -132,5 +202,8 @@ class NuvemshopService:
                 logger.info(f"Produto {product_id} removido com sucesso da Nuvemshop.")
                 return True
             except httpx.HTTPStatusError as e:
-                logger.error(f"Erro ao deletar produto {product_id}: {e.response.text}")
+                if e.response.status_code == 429:
+                    logger.warning(f"Rate limit (429) atingido na Nuvemshop ao remover produto {product_id}. Acionando retry...")
+                else:
+                    logger.error(f"Erro ao deletar produto {product_id}: {e.response.text}")
                 raise e

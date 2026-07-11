@@ -15,8 +15,12 @@ import httpx
 import logging
 from typing import Dict, Any, Optional
 from app.models.shopify_models import ShopifyProductSetInput, ShopifyGraphQLVariables, ShopifyGraphQLRequest
+from tenacity import retry, wait_exponential, stop_after_attempt, retry_if_exception
 
 logger = logging.getLogger(__name__)
+
+def is_rate_limit_error(exception: Exception) -> bool:
+    return isinstance(exception, httpx.HTTPStatusError) and exception.response.status_code == 429
 
 class ShopifyService:
     """
@@ -37,6 +41,12 @@ class ShopifyService:
             "Accept": "application/json"
         }
 
+    @retry(
+        stop=stop_after_attempt(3),
+        wait=wait_exponential(multiplier=1, min=2, max=10),
+        retry=retry_if_exception(is_rate_limit_error),
+        reraise=True
+    )
     async def sync_product(self, internal_product_data: dict) -> Dict[str, Any]:
         """
         Executa a mutação idempotente productSet utilizando o payload interno do bot.
@@ -85,13 +95,20 @@ class ShopifyService:
 
             except httpx.HTTPStatusError as e:
                 if e.response.status_code == 429:
-                    logger.warning("Limite do algoritmo Leaky Bucket atingido no Shopify. É necessário aplicar backoff.")
-                logger.error(f"Erro de transporte HTTP com a API do Shopify [Status {e.response.status_code}]: {e.response.text}")
+                    logger.warning("Limite do algoritmo Leaky Bucket atingido no Shopify (429). Acionando backoff...")
+                else:
+                    logger.error(f"Erro de transporte HTTP com a API do Shopify [Status {e.response.status_code}]: {e.response.text}")
                 raise e
             except Exception as e:
                 logger.error(f"Falha inesperada na sincronização com o Shopify: {str(e)}")
                 raise e
                 
+    @retry(
+        stop=stop_after_attempt(3),
+        wait=wait_exponential(multiplier=1, min=2, max=10),
+        retry=retry_if_exception(is_rate_limit_error),
+        reraise=True
+    )
     async def create_product_media(self, product_id: str, image_urls: list[str], alt_text: str = None) -> dict:
         """
         Anexa novas imagens geradas por IA a um produto existente no Shopify via GraphQL.
@@ -125,10 +142,20 @@ class ShopifyService:
 
                 logger.info(f"Mídias anexadas com sucesso ao produto {product_id}.")
                 return result
+            except httpx.HTTPStatusError as e:
+                if e.response.status_code == 429:
+                    logger.warning("Limite do algoritmo Leaky Bucket atingido no Shopify (429) ao criar mídia. Acionando backoff...")
+                raise e
             except Exception as e:
                 logger.error(f"Falha ao executar productCreateMedia: {str(e)}")
                 raise e            
 
+    @retry(
+        stop=stop_after_attempt(3),
+        wait=wait_exponential(multiplier=1, min=2, max=10),
+        retry=retry_if_exception(is_rate_limit_error),
+        reraise=True
+    )
     async def update_product(self, product_id: str, update_fields: dict, new_images: List[dict] = None) -> dict:
         """
         Atualiza os dados de copywriting de um produto e anexa opcionalmente
@@ -188,10 +215,20 @@ class ShopifyService:
 
                 logger.info(f"Produto {product_id} e suas mídias atualizados com sucesso no Shopify.")
                 return result
+            except httpx.HTTPStatusError as e:
+                if e.response.status_code == 429:
+                    logger.warning("Limite do algoritmo Leaky Bucket atingido no Shopify (429) no update. Acionando backoff...")
+                raise e
             except Exception as e:
                 logger.error(f"Falha ao executar productUpdate: {str(e)}")
                 raise e            
 
+    @retry(
+        stop=stop_after_attempt(3),
+        wait=wait_exponential(multiplier=1, min=2, max=10),
+        retry=retry_if_exception(is_rate_limit_error),
+        reraise=True
+    )
     async def delete_product(self, product_id: str) -> Optional[str]:
         """
         Deleta permanentemente um produto do catálogo do Shopify via GraphQL Admin API.
@@ -224,10 +261,20 @@ class ShopifyService:
                 deleted_id = result.get("deletedProductId")
                 logger.info(f"Produto {deleted_id} removido com sucesso do catálogo Shopify.")
                 return deleted_id
+            except httpx.HTTPStatusError as e:
+                if e.response.status_code == 429:
+                    logger.warning("Limite do algoritmo Leaky Bucket atingido no Shopify (429) no delete. Acionando backoff...")
+                raise e
             except Exception as e:
                 logger.error(f"Falha ao executar productDelete: {str(e)}")
                 raise e            
 
+    @retry(
+        stop=stop_after_attempt(3),
+        wait=wait_exponential(multiplier=1, min=2, max=10),
+        retry=retry_if_exception(is_rate_limit_error),
+        reraise=True
+    )
     async def list_products(self, first: int = 10, after: Optional[str] = None) -> dict:
         """
         Retorna uma lista paginada por cursor contendo os produtos do Tenant.
@@ -254,7 +301,10 @@ class ShopifyService:
                 # Extrai o nó central de produtos conforme o contrato da documentação
                 products_connection = response_json.get("data", {}).get("products", {})
                 return products_connection
-                
+            except httpx.HTTPStatusError as e:
+                if e.response.status_code == 429:
+                    logger.warning("Limite do algoritmo Leaky Bucket atingido no Shopify (429) ao listar. Acionando backoff...")
+                raise e
             except Exception as e:
                 logger.error(f"Falha ao listar produtos via Shopify GraphQL: {str(e)}")
                 raise e            
