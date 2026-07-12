@@ -60,30 +60,41 @@
 .heroSection {
   position: relative;
   width: 100%;
-  height: 80vh; // Altura padrão do Hero
-  background-color: #000; // Fallback
-  transition: opacity 0.3s ease-out; // Suavidade no scroll opacity hook
+  min-height: 80vh;
+  transition: opacity 0.3s ease-out;
+  display: flex;
+  flex-direction: column; // mobile fallback
 
-  // Ajustes no Swiper (Carousel)
-  :global(.swiper) {
-    width: 100%;
-    height: 100%;
+  @media (min-width: 768px) {
+    flex-direction: row;
+    flex-wrap: wrap;
   }
+}
 
-  :global(.swiper-slide) {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.heroColumn {
+  flex: 1 1 50%;
+  min-width: 300px;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  position: relative;
 
-    // Overlay escuro para melhorar leitura do texto sobre a imagem
-    &::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0, 0, 0, 0.4); 
-      z-index: 1;
-    }
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+  }
+  
+  &.studentSide::before {
+    background-color: rgba(0, 0, 0, 0.4);
+  }
+  
+  &.merchantSide::before {
+    background-color: rgba(0, 0, 0, 0.5);
   }
 }
 
@@ -94,7 +105,7 @@
   text-align: center;
   color: #fff;
   padding: 0 1rem;
-  max-width: 800px;
+  max-width: 600px;
   animation: fadeInUp 0.8s ease-out;
 
   h1 {
@@ -104,7 +115,7 @@
     text-shadow: 0 2px 4px rgba(0,0,0,0.5);
 
     @media (min-width: 768px) {
-      font-size: 3.5rem;
+      font-size: 3rem;
     }
   }
 
@@ -119,19 +130,31 @@
   }
 
   a {
-    // Estilo do botão dentro do hero
     display: inline-block;
     padding: 0.75rem 2rem;
-    background-color: $primary-color;
     color: #fff;
-    border-radius: 50px;
+    border-radius: 8px;
     text-decoration: none;
     font-weight: 600;
+    font-size: 1.1rem;
     transition: transform 0.2s, background-color 0.2s;
 
-    &:hover {
-      background-color: color.adjust($primary-color, $lightness: -10%);
-      transform: translateY(-2px);
+    &.btnStudent {
+      background-color: #4CAF50;
+      border: 2px solid #4CAF50;
+      &:hover {
+        background-color: color.adjust(#4CAF50, $lightness: -10%);
+        transform: translateY(-2px);
+      }
+    }
+
+    &.btnMerchant {
+      background-color: #2196F3;
+      border: 2px solid #2196F3;
+      &:hover {
+        background-color: color.adjust(#2196F3, $lightness: -10%);
+        transform: translateY(-2px);
+      }
     }
   }
 }
@@ -150,7 +173,7 @@
 
   h2 { // .section-title
     text-align: center;
-    margin-bottom: 3rem;
+    margin-bottom: 1.5rem;
     font-size: 2rem;
     color: $text-dark;
     position: relative;
@@ -163,6 +186,44 @@
       background-color: $primary-color;
       margin: 0.5rem auto 0;
       border-radius: 2px;
+    }
+  }
+}
+
+.tabsContainer {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 3rem;
+  flex-wrap: wrap;
+}
+
+.tabButton {
+  padding: 0.75rem 2rem;
+  border-radius: 30px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-size: 1rem;
+  background-color: transparent;
+
+  &.studentTab {
+    border: 2px solid #4CAF50;
+    color: #4CAF50;
+
+    &.active {
+      background-color: #4CAF50;
+      color: #fff;
+    }
+  }
+
+  &.merchantTab {
+    border: 2px solid #2196F3;
+    color: #2196F3;
+
+    &.active {
+      background-color: #2196F3;
+      color: #fff;
     }
   }
 }

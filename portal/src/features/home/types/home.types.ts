@@ -20,6 +20,7 @@ export interface HeroSlideDto {
   subtitle: string;
   actionText: string;
   actionUrl: string;
+  audience?: 'student' | 'merchant' | 'universal';
 }
 
 /**
@@ -33,6 +34,7 @@ export interface ServiceDto {
   description: string;
   actionText: string;
   actionUrl: string;
+  audience?: 'student' | 'merchant' | 'universal';
 }
 
 /**
