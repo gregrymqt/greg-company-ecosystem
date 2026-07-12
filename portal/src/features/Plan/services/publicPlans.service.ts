@@ -18,5 +18,14 @@ export const PublicPlansService = {
   getPublicPlans: async (page = 1, pageSize = 10): Promise<PagedResult<PlanPublic>> => {
     const query = `?page=${page}&pageSize=${pageSize}`;
     return await ApiService.get<PagedResult<PlanPublic>>(`${PUBLIC_ENDPOINT}${query}`);
+  },
+
+  /**
+   * C# Controller: PublicPlansController.GetById
+   * Retorna os detalhes de um plano específico pelo ID.
+   * (Opcional: pode ser usado pelo hook de checkout se preferir buscar o plano separadamente)
+   */
+  getPlanById: async (planId: string): Promise<PlanPublic> => {
+    return await ApiService.get<PlanPublic>(`${PUBLIC_ENDPOINT}/${planId}`);
   }
 };

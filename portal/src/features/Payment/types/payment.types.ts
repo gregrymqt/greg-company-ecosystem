@@ -1,16 +1,7 @@
-// src/types/payment.types.ts
-
-export type PlanFrequency = 'monthly' | 'quarterly' | 'semiannual' | 'annual';
-
-export interface PlanDetails {
-  id: string;
-  name: string; // ex: "Plano Premium Anual"
-  frequency: PlanFrequency;
-  amount: number;
-}
+import type { PlanPublic } from '@/features/Plan/types/plan.types';
 
 export interface PaymentLayoutProps {
-  plan: PlanDetails; // O plano que o usuário escolheu anteriormente
+  plan?: PlanPublic; // O plano pode ser lido dinamicamente agora via URL/hooks
   userParams?: {
     email: string;
     name: string;

@@ -15,7 +15,7 @@ import { AppHubsCSharp } from "@/shared/enums/hub";
 
 interface UseCreditCardProps {
   planId: string;   // Guid do plano
-  planName: string; // Para lógica "anual"
+  frequency: number; // Para lógica "anual" (ex: 12) em vez de planName
   amount: number;
   mode: CreditCardMode;
   onSuccess: () => void;
@@ -23,11 +23,14 @@ interface UseCreditCardProps {
 
 export const useCreditCardPayment = ({ 
   planId, 
-  planName, 
+  frequency, 
   amount, 
   mode, 
   onSuccess 
 }: UseCreditCardProps) => {
+  
+  // 1. Chave de idempotência estável para a sessão do checkout
+  const [idempotencyKey] = useState(() => self.crypto.randomUUID());
   
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -68,7 +71,7 @@ export const useCreditCardPayment = ({
     try {
       // TRADUÇÃO DE DADOS: Frontend (Brick) -> Backend (DTO)
       // O Backend verifica: if (string.Equals(request.Plano, "anual"...))
-      const isAnnual = planName.toLowerCase().includes('anual');
+      const isAnnual = frequency === 12;
 
       const payload: CreditCardPaymentRequestDto = {
         token: brickData.token,
@@ -89,9 +92,8 @@ export const useCreditCardPayment = ({
         }
       };
 
-      // Dispara a requisição. A resposta final virá via WebSocket, 
-      // mas o retorno imediato da API diz se o processo iniciou (201 Created).
-      await CreditCardService.processPayment(payload);
+      // Dispara a requisição repassando a chave de idempotência preservada
+      await CreditCardService.processPayment(payload, idempotencyKey);
 
       // Não setamos loading(false) aqui, esperamos o Socket dizer "approved" ou "failed"
 

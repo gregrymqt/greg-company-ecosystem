@@ -7,13 +7,13 @@ import type { SidebarItem } from "@/components/SideBar/types/sidebar.types";
 import { CreditCardPayment, PixPayment } from "@/features/Payment";
 import type { PaymentMethodId } from "@/features/Payment";
 import { Sidebar } from "@/components/SideBar/Sidebar";
-import { usePaymentCheckout } from "@/features/Payment/Public/hooks/usePaymentCheckout";
+import { usePaymentCheckout } from "@/features/Payment/hooks/usePaymentCheckout";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 
 export const PaymentLayout: React.FC = () => {
   const { planId } = useParams<{ planId: string }>();
   const { user } = useAuth();
-  
+
   const [activeTab, setActiveTab] = useState<PaymentMethodId>("credit-card");
   const [paymentSuccess, setPaymentSuccess] = useState(false);
 
@@ -30,7 +30,7 @@ export const PaymentLayout: React.FC = () => {
     if (!planData) return [];
 
     const items: SidebarItem[] = [];
-    const isMensal = planData.frequency === "monthly";
+    const isMensal = planData.frequency === 1;
 
     if (isMensal) {
       items.push({ id: "pix", label: "PIX", icon: "fas fa-qrcode" });
@@ -70,7 +70,7 @@ export const PaymentLayout: React.FC = () => {
   if (error || !planData) {
     return (
       <div className={styles.layoutContainer}>
-         <div className="alert alert-warning" style={{ margin: '3rem auto', maxWidth: '500px', textAlign: 'center' }}>
+        <div className="alert alert-warning" style={{ margin: '3rem auto', maxWidth: '500px', textAlign: 'center' }}>
           <i className="fas fa-exclamation-triangle" style={{ fontSize: '2rem', marginBottom: '1rem' }}></i>
           <p>{error || "Não foi possível carregar os dados do plano selecionado."}</p>
           <button
@@ -103,7 +103,7 @@ export const PaymentLayout: React.FC = () => {
         return (
           <PixPayment
             amount={planData.amount}
-            planId={planData.id}
+            planId={planData.publicId}
             planName={planData.name}
             userParams={userParams}
             onPaymentSuccess={handleSuccess}
@@ -129,10 +129,11 @@ export const PaymentLayout: React.FC = () => {
 
         return (
           <CreditCardPayment
-            planId={planData.id}
+            planId={planData.publicId}
             planName={planData.name}
+            frequency={planData.frequency}
             amount={planData.amount}
-            mode={planData.frequency === "monthly" ? "payment" : "subscription"}
+            mode={planData.frequency === 1 ? "payment" : "subscription"}
             preferenceId={preferenceId}
             onPaymentSuccess={handleSuccess}
           />

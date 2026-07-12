@@ -8,6 +8,7 @@ import type { CreditCardMode } from '../../types';
 interface CreditCardPaymentProps {
   planName: string;
   planId: string;
+  frequency: number;
   amount: number;
   mode: CreditCardMode;
   preferenceId: string;
@@ -17,6 +18,7 @@ interface CreditCardPaymentProps {
 export const CreditCardPayment: React.FC<CreditCardPaymentProps> = ({ 
   planName, 
   planId,
+  frequency,
   amount, 
   mode,
   preferenceId,
@@ -25,7 +27,7 @@ export const CreditCardPayment: React.FC<CreditCardPaymentProps> = ({
   
   const { loading, error, handleCreditCardSubmit } = useCreditCardPayment({
     planId,
-    planName,
+    frequency,
     amount,
     mode,
     onSuccess: () => {

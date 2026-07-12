@@ -19,6 +19,7 @@ export interface PlanPublic {
   publicId: string;
   name: string;
   slug: string;
+  amount: number; // Necessário para os payloads e UI do front
   priceDisplay: string;
   billingInfo: string;
   features: string[]; // Lista de benefícios

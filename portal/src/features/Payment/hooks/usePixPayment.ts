@@ -25,6 +25,9 @@ export const usePixPayment = ({
   amount,
   onSuccess,
 }: UsePixPaymentProps) => {
+  // 1. Chave de idempotência persistente na sessão do usuário
+  const [idempotencyKey] = useState(() => self.crypto.randomUUID());
+  
   const [step, setStep] = useState<PixStep>("FORM");
   const [loading, setLoading] = useState(false);
   const [pixData, setPixData] = useState<PixResponse | null>(null);
@@ -99,7 +102,7 @@ export const usePixPayment = ({
         },
       };
 
-      const response = await PixService.createPix(payload);
+      const response = await PixService.createPix(payload, idempotencyKey);
 
       setPixData(response);
       setStep("QR_CODE");

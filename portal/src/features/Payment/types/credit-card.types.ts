@@ -27,11 +27,11 @@ export interface BrickPaymentData {
 // Props do Componente Wrapper
 export interface CreditCardPaymentProps {
   planName: string;
+  planId: string;
   amount: number;
-  // Se for parcelado, geralmente é via assinatura (subscription)
-  // Se for à vista, é via pagamento único (payment)
-  mode: CreditCardMode; 
-  userEmail?: string;
+  mode: CreditCardMode;
+  preferenceId: string;
+  onPaymentSuccess?: () => void;
 }
 
 // DTO que o Backend C# espera no Body

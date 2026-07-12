@@ -7,7 +7,7 @@ import type {
 } from "../../types";
 
 // Inicialize com sua PUBLIC KEY
-initMercadoPago(process.env.REACT_APP_MP_PUBLIC_KEY || "SUA_PUBLIC_KEY_AQUI", {
+initMercadoPago(import.meta.env.VITE_MP_PUBLIC_KEY || "SUA_PUBLIC_KEY_AQUI", {
   locale: "pt-BR",
 });
 

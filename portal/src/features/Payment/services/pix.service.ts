@@ -6,9 +6,8 @@ import type {
 } from "../types";
 
 export const PixService = {
-  createPix: async (data: CreatePixDTO): Promise<PixResponse> => {
-    // 1. Geramos uma chave única para garantir que não haja cobrança duplicada
-    const idempotencyKey = self.crypto.randomUUID();
+  createPix: async (data: CreatePixDTO, idempotencyKey: string): Promise<PixResponse> => {
+    // 1. Chave de idempotência agora vem da camada superior (hook/component)
     const headers = {
       "X-Idempotency-Key": idempotencyKey,
     };

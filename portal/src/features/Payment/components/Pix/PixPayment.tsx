@@ -16,7 +16,6 @@ interface PixPaymentProps {
 export const PixPayment: React.FC<PixPaymentProps> = ({ 
   amount,
   planId,
-  planName, 
   userParams, 
   onPaymentSuccess 
 }) => {
@@ -38,15 +37,9 @@ export const PixPayment: React.FC<PixPaymentProps> = ({
   });
 
   // Tela de Sucesso (Controlada pelo WebSocket agora)
+  // Como o PaymentLayout gerencia o sucesso global, apenas retornamos null
   if (step === 'SUCCESS') {
-    return (
-      <div className={styles.successState} style={{textAlign: 'center', padding: '40px'}}>
-        <i className="fas fa-check-circle" style={{color: '#28a745', fontSize: '4rem', marginBottom: '20px'}}></i>
-        <h3>Pagamento Confirmado!</h3>
-        <p className="text-muted">Recebemos a confirmação do seu banco.</p>
-        <p>Ativando seu plano {planName}...</p>
-      </div>
-    );
+    return null;
   }
 
   return (

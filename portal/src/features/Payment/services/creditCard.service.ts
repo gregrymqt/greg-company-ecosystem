@@ -3,11 +3,8 @@ import { ApiService } from "@/shared/services/api.service";
 import type { CreditCardPaymentRequestDto, PaymentResponse } from "../types";
 
 export const CreditCardService = {
-  processPayment: async (data: CreditCardPaymentRequestDto): Promise<PaymentResponse> => {
-    // 1. Gerar UUID v4 para Idempotência (Obrigatório pelo Controller C#)
-    const idempotencyKey = self.crypto.randomUUID();
-
-    // 2. Enviar para o endpoint configurado no Controller
+  processPayment: async (data: CreditCardPaymentRequestDto, idempotencyKey: string): Promise<PaymentResponse> => {
+    // A chave de idempotência agora é recebida por parâmetro da camada superior
     // O ApiService já concatena '/api', então chamamos '/credit/card/process-payment'
     return await ApiService.post<PaymentResponse>(
       '/credit/card/process-payment',
