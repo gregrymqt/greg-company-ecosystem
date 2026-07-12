@@ -1,13 +1,18 @@
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Check, Star } from 'lucide-react';
-import styles from './styles/PublicPlansList.module.scss';
+import { useEffect, useMemo } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Check, Star, ArrowLeft } from 'lucide-react';
+import styles from './PlanFeed.module.scss';
 import { usePublicPlans } from '@/features/Plan';
 import { Card } from '@/components/Card/Card';
 
-export const PlanFeed = () => {
+export interface PlanFeedProps {
+  category: 'course' | 'ecommerce';
+}
+
+export const PlanFeed = ({ category }: PlanFeedProps) => {
   const { publicPlans, loading, fetchPublicPlans } = usePublicPlans();
   const navigate = useNavigate();
+  const [, setSearchParams] = useSearchParams();
 
   useEffect(() => {
     fetchPublicPlans();
@@ -16,6 +21,16 @@ export const PlanFeed = () => {
   const handleSelectPlan = (planId: string) => {
     navigate(`/payment/checkout/${planId}`);
   };
+
+  const handleBack = () => {
+    setSearchParams({}); // Limpa os parâmetros de busca
+  };
+
+  // Filtragem e ordenação em memória (performance)
+  const sortedAndFilteredPlans = useMemo(() => {
+    const filtered = publicPlans.filter(p => p.category === category);
+    return filtered.sort((a, b) => a.frequency - b.frequency);
+  }, [publicPlans, category]);
 
   // Se estiver carregando, retornamos apenas a div do container
   // O Layout global cuidará do resto da estrutura
@@ -27,21 +42,29 @@ export const PlanFeed = () => {
     );
   }
 
-  // Ordenação lógica (ex: Mensal -> Anual)
-  const sortedPlans = [...publicPlans].sort((a, b) => a.frequency - b.frequency); 
+  const title = category === 'course' 
+    ? "Planos de Cursos Online" 
+    : "Planos de Automação para E-commerce";
 
   return (
       // Apenas a div container, pois o <Outlet /> do router já está dentro do Layout principal
       <div className={styles.container}>
         
         <header className={styles.header}>
-          <h1>Planos Disponíveis</h1> 
+          <button 
+            onClick={handleBack} 
+            className={styles.backButton}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-neutral-600)', marginBottom: '1rem' }}
+          >
+            <ArrowLeft size={16} /> Voltar para seleção de perfis
+          </button>
+          <h1>{title}</h1> 
           {/* Adicionei uma descrição opcional para melhorar o header visualmente */}
           <p>Escolha a melhor opção para o seu negócio</p>
         </header>
 
         <div className={styles.grid}>
-          {sortedPlans.map((plan) => (
+          {sortedAndFilteredPlans.map((plan) => (
             <Card 
               key={plan.publicId} 
               className={`${styles.planCard} ${plan.isRecommended ? styles.recommended : ''}`}

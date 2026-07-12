@@ -1,6 +1,6 @@
 import React from 'react';
 import { useFreeSample } from '../../features/free-sample/hooks/useFreeSample';
-
+import { useNavigate } from 'react-router-dom';
 import styles from './FreeSamplePage.module.scss';
 import { ComparisonPanel } from '@/features/free-sample/components/ComparisonPanel/ComparisonPanel';
 import { ConversionCTA } from '@/features/free-sample/components/ConversionCTA/ConversionCTA';
@@ -18,6 +18,7 @@ export const FreeSamplePage: React.FC = () => {
 
     // Verifica se houve erro de limite pelo status ou mensagem
     const isLimitReached = globalError?.includes('limite') || false;
+    const navigate = useNavigate();
 
     return (
         <main className={styles.pageContainer}>
@@ -41,7 +42,7 @@ export const FreeSamplePage: React.FC = () => {
                 {(isLimitReached) && (
                     <ConversionCTA
                         reason="limit_reached"
-                        onUpgrade={() => window.location.href = '/plans'}
+                        onUpgrade={() => navigate('/plans?type=ecommerce')}
                     />
                 )}
 
@@ -52,7 +53,7 @@ export const FreeSamplePage: React.FC = () => {
                         </button>
                         <ConversionCTA
                             reason="success"
-                            onUpgrade={() => window.location.href = '/plans'}
+                            onUpgrade={() => navigate('/plans')}
                         />
                     </div>
                 )}

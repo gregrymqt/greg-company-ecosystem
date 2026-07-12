@@ -1,8 +1,8 @@
 // src/features/Plan/Public/hooks/usePublicPlans.ts
 import { useState, useCallback } from 'react';
 import { PublicPlansService } from '../services/publicPlans.service';
-import type { PlanPublic } from '../types';
 import { ApiError } from '@/shared/services/api.service';
+import type { PlanPublic } from '../types/plan.types';
 
 export const usePublicPlans = () => {
     const [loading, setLoading] = useState(false);

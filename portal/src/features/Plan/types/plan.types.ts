@@ -1,4 +1,4 @@
-// src/features/Plan/shared/types/plans.types.ts
+// src/features/Plan/types/plan.types.ts
 
 // --- GENERIC SHARED ---
 
@@ -25,6 +25,7 @@ export interface PlanPublic {
   isRecommended: boolean;
   isActive: boolean;
   frequency: number; // 1 = mensal, 12 = anual, etc.
+  category: 'course' | 'ecommerce';
 }
 
 // --- ADMIN TYPES ---

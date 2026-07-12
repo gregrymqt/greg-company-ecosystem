@@ -14,7 +14,7 @@ import { ProfileDashboard } from "@/pages/Profile/ProfileDashboard";
 import { CreateSupportPage } from "@/pages/Support/CreateSupportPage";
 import { AboutPage } from "@/pages/About/AboutPage";
 import { MainLayout } from "@/components/layout/components/MainLayout";
-import { PlanFeed } from "@/pages/Plans/PlanFeed";
+import { PlanFeed } from "@/features/Plan/components/PlanFeed/PlanFeed";
 import { FreeSamplePage } from "@/pages/FreeSample/FreeSamplePage";
 
 export const AppRoutes = () => {
