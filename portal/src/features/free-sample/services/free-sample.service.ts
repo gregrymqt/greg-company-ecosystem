@@ -1,5 +1,6 @@
 import { ApiService } from "../../../shared/services/api.service";
 import type { SseStreamPayload } from "../types/free-sample.types";
+import { STORAGE_KEYS, StorageService } from "../../../shared/services/storage.service";
 
 // Helper para expor os mesmos headers base configurados no seu api.service.ts
 const getStreamHeaders = (): Record<string, string> => {
@@ -9,7 +10,7 @@ const getStreamHeaders = (): Record<string, string> => {
   };
   
   // Recupera o token caso a demo passe a exigir identificação posterior
-  const token = localStorage.getItem("@GregCompany:Token"); // Alinhado ao seu STORAGE_KEYS.TOKEN
+  const token = StorageService.getItem<string>(STORAGE_KEYS.TOKEN);
   if (token) {
     headers["Authorization"] = `Bearer ${JSON.parse(token)}`;
   }

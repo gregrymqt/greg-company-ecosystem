@@ -1,4 +1,5 @@
 import { useForm } from 'react-hook-form';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Form } from '@/components/Form/Form';
 import { authService } from '@/features/auth/services/auth.service';
 import { useAuth } from '@/features/auth/hooks/useAuth';
@@ -17,6 +18,8 @@ export const LoginPage = () => {
     }
   });
   const { setSession } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const onSubmit = async (data: LoginFormData) => {
     try {
@@ -29,7 +32,8 @@ export const LoginPage = () => {
         expiration: response.expiration
       });
 
-      window.location.href = '/';
+      const from = location.state?.from?.pathname || "/";
+      navigate(from, { replace: true });
     } catch (error) {
       console.error('Erro ao fazer login:', error);
       formMethods.setError('root', {
@@ -40,6 +44,8 @@ export const LoginPage = () => {
   };
 
   const handleGoogleLogin = () => {
+    const from = location.state?.from?.pathname || "/";
+    sessionStorage.setItem('oauth_redirect', from);
     authService.loginGoogle();
   };
 

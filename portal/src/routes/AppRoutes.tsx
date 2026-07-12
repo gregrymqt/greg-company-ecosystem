@@ -14,8 +14,9 @@ import { ProfileDashboard } from "@/pages/Profile/ProfileDashboard";
 import { CreateSupportPage } from "@/pages/Support/CreateSupportPage";
 import { AboutPage } from "@/pages/About/AboutPage";
 import { MainLayout } from "@/components/layout/components/MainLayout";
-import { PlanFeed } from "@/features/Plan/components/PlanFeed/PlanFeed";
+import { PlanPage } from "@/pages/Plans/PlanPage";
 import { FreeSamplePage } from "@/pages/FreeSample/FreeSamplePage";
+import { PaymentLayout } from "@/pages/Payment/PaymentLayout";
 
 export const AppRoutes = () => {
   return (
@@ -25,7 +26,12 @@ export const AppRoutes = () => {
       <Route path="/acesso-negado" element={<AccessDenied />} />
       <Route path="/suporte/novo" element={<CreateSupportPage />} />
       <Route path="/sobre" element={<AboutPage />} />
-      <Route path="/amostra-gratis" element={<FreeSamplePage />} />
+
+      {/* === ROTAS PROTEGIDAS FULL SCREEN (Sem Layout) === */}
+      <Route element={<ProtectedRoute />}>
+        <Route path="/amostra-gratis" element={<FreeSamplePage />} />
+        <Route path="/payment/checkout/:planId" element={<PaymentLayout />} />
+      </Route>
 
       {/* === LAYOUT PRINCIPAL === */}
       <Route element={<MainLayout />}>
@@ -35,7 +41,7 @@ export const AppRoutes = () => {
         <Route element={<ProtectedRoute />}>
           {/* Rotas que todo logado pode ver */}
           <Route path="/perfil" element={<ProfileDashboard />} />
-          <Route path="/plans" element={<PlanFeed />} />
+          <Route path="/plans" element={<PlanPage />} />
           <Route path="/login/callback" element={<GoogleCallbackPage />} />
           <Route path="reclamacoes" element={<UserClaimsPage />} />
 

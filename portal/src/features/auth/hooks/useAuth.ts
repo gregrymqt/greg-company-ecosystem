@@ -61,7 +61,11 @@ export const useAuth = () => {
 
         // 5. Notifica app
         window.dispatchEvent(new Event(AUTH_EVENT_NAME));
-        navigate("/", { replace: true });
+        
+        // 6. Recupera redirect persistido
+        const redirectUrl = sessionStorage.getItem(STORAGE_KEYS.OAUTH_REDIRECT) || "/";
+        sessionStorage.removeItem(STORAGE_KEYS.OAUTH_REDIRECT);
+        navigate(redirectUrl, { replace: true });
       } catch (error) {
         console.error("Erro no login Google:", error);
         navigate("/login?error=google_failed");
