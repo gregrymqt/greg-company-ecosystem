@@ -93,7 +93,7 @@ const reportToMcp = (url: string, method: string, status: number) => {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ source: "Front", url, method, status }),
-  }).catch(() => {}); // Ignora se o MCP estiver desligado
+  }).catch(() => { }); // Ignora se o MCP estiver desligado
 };
 
 
@@ -254,7 +254,7 @@ export const ApiService = {
 
     if (!bypassSmartLogic && isComplexUpload) {
       console.log("Detectado upload complexo. Usando SmartHandler...");
-      
+
       // ✅ SOLUÇÃO DA DEPENDÊNCIA CIRCULAR:
       // Passamos ApiService.postWithFile como função injetada (Dependency Injection)
       const results = await SmartUploadHandler(
@@ -343,5 +343,79 @@ export const ApiService = {
     });
     return await handleResponse<TResponse>(response, "PUT");
   },
+
+  /**
+   * Abre um canal de escuta HTTP Server-Sent Events (SSE) resiliente.
+   * Herda automaticamente os tokens, bypass de ngrok, tratamento de 401 e logs do MCP.
+   */
+  stream: async (
+    endpoint: string,
+    onMessage: (rawData: string) => void,
+    onError: (error: unknown) => void,
+    signal?: AbortSignal
+  ): Promise<void> => {
+    // 1. Reutiliza os headers globais e injeta a especificação de event-stream
+    const headers = {
+      ...getHeaders(),
+      "Accept": "text/event-stream",
+    };
+
+    try {
+      const fullUrl = `${BASE_URL}${endpoint}`;
+      const response = await fetch(fullUrl, {
+        method: "GET",
+        headers: headers as HeadersInit,
+        signal,
+      });
+
+      // 2. Reporta telemetria para o MCP e intercepta falhas de autenticação de forma idêntica ao REST
+      reportToMcp(response.url, "GET [SSE]", response.status);
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          window.dispatchEvent(new Event("auth:logout"));
+          throw new ApiError(401, "Sessão expirada no canal de atualizações. Faça login novamente.");
+        }
+        throw new ApiError(response.status, `Falha ao conectar no stream: ${response.statusText}`);
+      }
+
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder("utf-8");
+
+      if (!reader) {
+        throw new Error("O corpo da resposta não suporta streaming (ReadableStream nulo).");
+      }
+
+      let buffer = "";
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+
+        buffer = lines.pop() || "";
+
+        for (const line of lines) {
+          const cleanedLine = line.trim();
+
+          if (cleanedLine.startsWith("data:")) {
+            const rawDataString = cleanedLine.replace(/^data:\s*/, "");
+
+            if (rawDataString === "[DONE]") return; // Fim do ciclo de vida planejado pelo bot
+
+            // Repassa apenas a string limpa para a feature tratar seu próprio DTO
+            onMessage(rawDataString);
+          }
+        }
+      }
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") {
+        return; // Desconexão intencional (unmount ou troca de tela)
+      }
+      onError(error);
+    }
+  }
 };
 

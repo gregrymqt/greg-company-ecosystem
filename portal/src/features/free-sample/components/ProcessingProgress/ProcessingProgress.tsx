@@ -58,7 +58,7 @@ export function ProcessingProgress({ products }: ProcessingProgressProps) {
                 <div className={styles.urlBlock}>
                   <i className={`fas ${isDone ? 'fa-check-circle' : isFailed ? 'fa-exclamation-triangle' : 'fa-link'}`} />
                   <span className={styles.urlText} title={product.url}>
-                    {formatUrlDisplay(product.url)}
+                    {product.enhanced?.seoTitle || product.original?.title || formatUrlDisplay(product.url)}
                   </span>
                 </div>
                 <div className={styles.percentage}>

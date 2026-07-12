@@ -17,7 +17,11 @@ export const FreeSamplePage: React.FC = () => {
     } = useFreeSample();
 
     // Verifica se houve erro de limite pelo status ou mensagem
-    const isLimitReached = globalError?.includes('limite') || false;
+    const limitKeywords = ['limite', 'limit', '429'];
+    const isLimitReached =
+        limitKeywords.some(keyword => globalError?.toLowerCase().includes(keyword)) ||
+        products.some(p => p.status === 'failed' && limitKeywords.some(keyword => p.error?.toLowerCase().includes(keyword)));
+
     const navigate = useNavigate();
 
     return (
@@ -37,8 +41,8 @@ export const FreeSamplePage: React.FC = () => {
                 <ComparisonPanel products={products} />
 
                 {/* 4. Gatilhos de Conversão (CTA): 
-            Aparece se terminar com sucesso ou se o Rate Limiter barrar o usuário 
-        */}
+                    Aparece se terminar com sucesso ou se o Rate Limiter barrar o usuário 
+                */}
                 {(isLimitReached) && (
                     <ConversionCTA
                         reason="limit_reached"
@@ -53,7 +57,7 @@ export const FreeSamplePage: React.FC = () => {
                         </button>
                         <ConversionCTA
                             reason="success"
-                            onUpgrade={() => navigate('/plans')}
+                            onUpgrade={() => navigate('/plans?type=ecommerce')}
                         />
                     </div>
                 )}

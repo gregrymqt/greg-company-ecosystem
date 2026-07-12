@@ -1,15 +1,18 @@
 import { Card } from '../../../../components/Card/Card';
 import styles from './ConversionCTA.module.scss';
+import { useNavigate } from 'react-router-dom';
 
 interface ConversionCTAProps {
   /** Indica se o componente aparece por sucesso na demo ou por bloqueio de limite */
   reason: 'success' | 'limit_reached';
   /** Callback para levar ao checkout ou contato comercial */
   onUpgrade: () => void;
+  onCancel?: () => void;
 }
 
-export function ConversionCTA({ reason, onUpgrade }: ConversionCTAProps) {
+export function ConversionCTA({ reason, onUpgrade, onCancel }: ConversionCTAProps) {
   const isLimit = reason === 'limit_reached';
+  const navigate = useNavigate();
 
   return (
     <section className={styles.ctaWrapper}>
@@ -33,7 +36,7 @@ export function ConversionCTA({ reason, onUpgrade }: ConversionCTAProps) {
         </Card.Body>
 
         <Card.Actions>
-          <button className={styles.secondaryBtn} onClick={() => window.location.href = '/'}>
+          <button className={styles.secondaryBtn} onClick={onCancel ? onCancel : () => navigate('/')}>
             Voltar ao Início
           </button>
           <button className={styles.primaryBtn} onClick={onUpgrade}>

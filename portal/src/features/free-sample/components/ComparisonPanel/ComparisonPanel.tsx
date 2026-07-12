@@ -9,7 +9,7 @@ interface ComparisonPanelProps {
 
 export function ComparisonPanel({ products }: ComparisonPanelProps) {
   // Filtra apenas os produtos que completaram com sucesso o pipeline do nosso bot Python
-  const completedProducts = products.filter((p) => p.status === 'completed' && p.enhanced);
+  const completedProducts = products.filter((p) => p.status === 'completed');
 
   if (completedProducts.length === 0) return null;
 
@@ -74,7 +74,7 @@ export function ComparisonPanel({ products }: ComparisonPanelProps) {
                   
                   {/* Container que preserva as quebras de linha e parágrafos estruturados do LLMService */}
                   <div className={styles.copyContainer}>
-                    {product.enhanced?.copywriting.split('\n\n').map((paragraph, pIdx) => (
+                    {(product.enhanced?.copywriting || 'Copywriting indisponível.').split('\n\n').map((paragraph, pIdx) => (
                       <p key={pIdx}>{paragraph}</p>
                     ))}
                   </div>
@@ -82,7 +82,7 @@ export function ComparisonPanel({ products }: ComparisonPanelProps) {
                   <div className={styles.tagSection}>
                     <h4>Tags de Busca e Tráfego Pago:</h4>
                     <div className={styles.tagCloud}>
-                      {product.enhanced?.tags.map((tag, tagIdx) => (
+                      {(product.enhanced?.tags || []).map((tag, tagIdx) => (
                         <span key={tagIdx} className={styles.tagBadge}>
                           #{tag.toLowerCase().replace(/\s+/g, '')}
                         </span>
