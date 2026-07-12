@@ -21,6 +21,9 @@ public class Users : AspNetCore.Identity.Mongo.Model.MongoUser<string>
     public string? GoogleId { get; set; }
     public string? CustomerId { get; set; }
 
+    // --- MULTI-TENANCY (CENÁRIO B - AGÊNCIA) ---
+    public List<string> Tenants { get; set; } = new List<string>();
+
     // --- Relacionamentos ---
     public virtual Subscription? Subscription { get; set; }
     public virtual ICollection<Payments> Payments { get; set; } = new List<Payments>();

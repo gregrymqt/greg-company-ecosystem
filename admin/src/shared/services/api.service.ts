@@ -93,7 +93,7 @@ const reportToMcp = (url: string, method: string, status: number) => {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ source: "Front", url, method, status }),
-  }).catch(() => {}); // Ignora se o MCP estiver desligado
+  }).catch(() => { }); // Ignora se o MCP estiver desligado
 };
 
 
@@ -225,6 +225,24 @@ export const ApiService = {
     return await handleResponse<T>(response, "DELETE");
   },
 
+  // Adicione este método dentro do objeto exportado "export const ApiService = { ... }"
+  patch: async <TResponse, TBody = unknown>(
+    endpoint: string,
+    body: TBody,
+    options?: RequestInit
+  ): Promise<TResponse> => {
+    const headers = {
+      ...getHeaders(),
+      ...((options?.headers as Record<string, string>) || {}),
+    };
+    const response = await fetch(`${BASE_URL}${endpoint}`, {
+      method: "PATCH",
+      headers: headers as HeadersInit,
+      body: JSON.stringify(body),
+    });
+    return await handleResponse<TResponse>(response, "PATCH");
+  },
+
   /**
    * Envia DTO + Arquivos.
    * - Se for 1 arquivo pequeno: Envia direto.
@@ -254,7 +272,7 @@ export const ApiService = {
 
     if (!bypassSmartLogic && isComplexUpload) {
       console.log("Detectado upload complexo. Usando SmartHandler...");
-      
+
       // ✅ SOLUÇÃO DA DEPENDÊNCIA CIRCULAR:
       // Passamos ApiService.postWithFile como função injetada (Dependency Injection)
       const results = await SmartUploadHandler(

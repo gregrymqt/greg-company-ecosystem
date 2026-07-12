@@ -125,6 +125,7 @@ namespace MeuCrudCsharp.Features.Auth.Application.Services
                 HasPaymentHistory = paymentTask.Result,
                 HasActiveSubscription = subTask.Result,
                 Roles = rolesTask.Result ?? new List<string>(),
+                Tenants = user.Tenants ?? new List<string>(),
             };
         }
 

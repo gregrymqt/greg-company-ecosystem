@@ -51,6 +51,14 @@ public class JwtService : IJwtService
             claims.Add(new Claim(ClaimTypes.Role, role));
         }
 
+        if (user.Tenants != null && user.Tenants.Any())
+        {
+            foreach (var tenant in user.Tenants)
+            {
+                claims.Add(new Claim("tenants", tenant));
+            }
+        }
+
         if (string.IsNullOrEmpty(_jwtSettings.Key))
             throw new InvalidOperationException(
                 "A chave JWT (JwtSettings.Key) não foi configurada."
@@ -86,6 +94,14 @@ public class JwtService : IJwtService
         foreach (var role in userRoles)
         {
             claims.Add(new Claim(ClaimTypes.Role, role));
+        }
+
+        if (user.Tenants != null && user.Tenants.Any())
+        {
+            foreach (var tenant in user.Tenants)
+            {
+                claims.Add(new Claim("tenants", tenant));
+            }
         }
 
         if (string.IsNullOrEmpty(_jwtSettings.Key))
