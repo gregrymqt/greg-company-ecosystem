@@ -1,10 +1,8 @@
 // src/features/Plan/Public/services/publicPlans.service.ts
 import { ApiService } from "@/shared/services/api.service";
+import type { PagedResult, PlanPublic } from "../types/plan.types";
 
-import type { 
-  PagedResult, 
-  PlanPublic
-} from "../types";
+
 
 const PUBLIC_ENDPOINT = '/public/plans';
 

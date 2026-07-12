@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-export const useScrollOpacity = (fadeHeightVh = 80) => {
+export const useScrollOpacity = (fadeHeightVh = 100) => {
   const [opacity, setOpacity] = useState(1);
 
   useEffect(() => {
