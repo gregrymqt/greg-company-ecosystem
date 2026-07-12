@@ -8,8 +8,13 @@ from app.config.database import db
 from app.utils.crypto import decrypt_api_key
 from app.exporters.csv_exporter import CsvExportService
 from app.models.shopify_models import ShopifyProductSetInput
+from app.dependencies.auth import get_current_tenant_user
 
-router = APIRouter(prefix="/api/shopify", tags=["Shopify GraphQL Integration"])
+router = APIRouter(
+    prefix="/api/shopify", 
+    tags=["Shopify GraphQL Integration"],
+    dependencies=[Depends(get_current_tenant_user)]
+)
 
 async def get_shopify_service(x_tenant_id: str = Header(..., alias="X-Tenant-ID")) -> ShopifyService:
     """
