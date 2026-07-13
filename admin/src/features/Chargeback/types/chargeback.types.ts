@@ -39,7 +39,7 @@ export interface ChargebackSummary {
 export interface ChargebackPaginatedResponse {
   chargebacks: ChargebackSummary[];
   searchTerm?: string;
-  statusFilter?: string;
+  statusFilter?: keyof typeof ChargebackStatusEnum | "";
   currentPage: number;
   totalPages: number;
   hasPreviousPage: boolean;

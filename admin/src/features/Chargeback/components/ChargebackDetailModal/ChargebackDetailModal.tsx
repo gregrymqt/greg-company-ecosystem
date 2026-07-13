@@ -9,6 +9,15 @@ interface Props {
   isLoading: boolean;
 }
 
+const getFileIcon = (fileType: string, fileName: string) => {
+  const type = (fileType || '').toLowerCase();
+  const name = (fileName || '').toLowerCase();
+  
+  if (type.includes('pdf') || name.includes('.pdf')) return 'fas fa-file-pdf';
+  if (type.includes('image') || name.includes('.png') || name.includes('.jpg') || name.includes('.jpeg')) return 'fas fa-file-image';
+  return 'fas fa-file-alt';
+};
+
 export const ChargebackDetailModal = ({ isOpen, onClose, data, isLoading }: Props) => {
   
   // Conteúdo do Rodapé do Modal
@@ -69,7 +78,7 @@ export const ChargebackDetailModal = ({ isOpen, onClose, data, isLoading }: Prop
               <ul>
                 {data.arquivosEnviados.map((file, idx) => (
                   <li key={idx}>
-                    <i className="fas fa-file-pdf" />
+                    <i className={getFileIcon(file.tipo, file.nomeArquivo)} />
                     <a href={file.url} target="_blank" rel="noreferrer">
                       {file.nomeArquivo || `Arquivo ${idx + 1}`} ({file.tipo})
                     </a>

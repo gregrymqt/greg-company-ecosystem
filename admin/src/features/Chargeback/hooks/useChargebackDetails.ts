@@ -8,7 +8,7 @@ export const useChargebackDetails = (chargebackId: string | null) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchDetails = useCallback(async () => {
+  const fetchDetails = useCallback(async (isCurrentCheck: () => boolean = () => true) => {
     if (!chargebackId) return; // Não busca se não tiver ID
 
     setLoading(true);
@@ -17,29 +17,33 @@ export const useChargebackDetails = (chargebackId: string | null) => {
 
     try {
       const data = await ChargebackService.getById(chargebackId);
-      setDetails(data);
+      if (isCurrentCheck()) setDetails(data);
     } catch (err) {
-      if (err instanceof ApiError) {
+      if (isCurrentCheck() && err instanceof ApiError) {
         console.error(err);
         setError(err.message);
       }
     } finally {
-      setLoading(false);
+      if (isCurrentCheck()) setLoading(false);
     }
   }, [chargebackId]);
 
   useEffect(() => {
+    let isCurrent = true;
     if (chargebackId) {
-      fetchDetails();
+      fetchDetails(() => isCurrent);
     } else {
       setDetails(null); // Reseta se fechar o modal (id virar null)
     }
+    return () => {
+      isCurrent = false;
+    };
   }, [fetchDetails, chargebackId]);
 
   return {
     details,
     loading,
     error,
-    retry: fetchDetails,
+    retry: () => fetchDetails(() => true),
   };
 };

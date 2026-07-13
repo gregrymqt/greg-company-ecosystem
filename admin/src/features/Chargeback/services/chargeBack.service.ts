@@ -18,12 +18,14 @@ export const ChargebackService = {
     const params = new URLSearchParams();
     params.append('page', page.toString());
     
-    if (searchTerm) {
-      params.append('searchTerm', searchTerm);
+    const cleanSearch = searchTerm?.trim();
+    if (cleanSearch) {
+      params.append('searchTerm', cleanSearch);
     }
     
-    if (statusFilter) {
-      params.append('statusFilter', statusFilter);
+    const cleanStatus = statusFilter?.trim();
+    if (cleanStatus) {
+      params.append('statusFilter', cleanStatus);
     }
 
     // Chama o seu ApiService.get passando o tipo esperado <T>

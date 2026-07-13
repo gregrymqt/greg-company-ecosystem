@@ -55,7 +55,7 @@ export const ChargebackList = () => {
       render: (item) => {
         // Exemplo simples de classe baseada no texto do status
         const statusClass = item.status.toLowerCase().includes('novo') ? 'novo' : 'aguardando';
-        return <span className={`${styles['status-badge']} ${styles[statusClass]}`}>{item.status}</span>;
+        return <span className={`${styles.statusBadge} ${styles[statusClass] || ''}`}>{item.status}</span>;
       },
       width: '20%'
     },
@@ -63,7 +63,7 @@ export const ChargebackList = () => {
       header: 'Ações',
       render: (item) => (
         <button 
-            className={styles['btn-details']} 
+            className={styles.btnDetails} 
             onClick={() => openModal(item.id)}
         >
           Ver Detalhes
@@ -74,7 +74,7 @@ export const ChargebackList = () => {
   ];
 
   return (
-    <div className={styles['chargeback-page']}>
+    <div className={styles.chargebackPage}>
       <header>
         <h1>Contestações (Chargebacks)</h1>
         <p>Gerencie disputas e envie evidências para o Mercado Pago.</p>
@@ -93,7 +93,7 @@ export const ChargebackList = () => {
       />
 
       {/* Paginação Simples */}
-      <div className={styles['pagination-controls']}>
+      <div className={styles.paginationControls}>
         <button 
           disabled={!pagination.hasPreviousPage} 
           onClick={() => setPage(pagination.currentPage - 1)}
@@ -113,7 +113,7 @@ export const ChargebackList = () => {
       <ChargebackDetailModal 
         isOpen={!!selectedId}
         onClose={closeModal}
-        data={details}
+        data={details && details.chargebackId === selectedId ? details : null}
         isLoading={detailsLoading}
       />
     </div>

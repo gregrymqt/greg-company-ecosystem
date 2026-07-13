@@ -10,7 +10,7 @@ interface Props {
 export const ChargebackFilter = ({ onFilter, isLoading }: Props) => {
   
   return (
-    <div className={styles['chargeback-filter']}>
+    <div className={styles.chargebackFilter}>
       <Form<FilterFormData>
         onSubmit={onFilter}
       >
@@ -27,8 +27,9 @@ export const ChargebackFilter = ({ onFilter, isLoading }: Props) => {
             { label: 'Todos', value: '' },
             { label: 'Novo', value: 'Novo' },
             { label: 'Aguardando Evidências', value: 'AguardandoEvidencias' },
-            { label: 'Em Análise', value: 'EmAnalise' },
-            { label: 'Finalizado', value: 'Finalizado' }
+            { label: 'Evidências Enviadas', value: 'EvidenciasEnviadas' },
+            { label: 'Ganhamos', value: 'Ganhamos' },
+            { label: 'Perdemos', value: 'Perdemos' }
           ]} 
           colSpan={4} 
         />

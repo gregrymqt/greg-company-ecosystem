@@ -1,4 +1,4 @@
-.chargeback-page {
+.chargebackPage {
   padding: 1rem;
 
   header {
@@ -14,7 +14,7 @@
   }
 
   // Estilização específica para badges dentro da tabela
-  .status-badge {
+  .statusBadge {
     padding: 0.25rem 0.5rem;
     border-radius: 12px;
     font-size: 0.75rem;
@@ -27,7 +27,7 @@
   }
 
   // Botão de ação na tabela
-  .btn-details {
+  .btnDetails {
     background-color: transparent;
     border: 1px solid $primary-color;
     color: $primary-color;
@@ -43,7 +43,7 @@
     }
   }
 
-  .pagination-controls {
+  .paginationControls {
     display: flex;
     justify-content: center;
     align-items: center;
