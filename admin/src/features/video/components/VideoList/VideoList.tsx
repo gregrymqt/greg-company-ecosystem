@@ -9,7 +9,7 @@ export interface VideoListProps {
   onNewClick: () => void;
   
 }
-import styles from '../styles/VideoList.module.scss';
+import styles from './VideoList.module.scss';
 import { ActionMenu } from "@/components/ActionMenu/ActionMenu";
 import { type TableColumn, Table } from "@/components/Table/Table";
 

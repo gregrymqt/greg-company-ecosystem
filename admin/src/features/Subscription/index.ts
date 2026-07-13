@@ -1,5 +1,5 @@
 // Admin - Subscription Feature (Admin only)
-export { AdminSubscriptionList } from './components/AdminSubscriptionList';
+export { AdminSubscriptionList } from './components/AdminSubscriptionList/AdminSubscriptionList';
 export { useAdminSubscription } from './hooks/useAdminSubscription';
 export { adminSubscriptionService } from './services/adminSubscription.service';
 

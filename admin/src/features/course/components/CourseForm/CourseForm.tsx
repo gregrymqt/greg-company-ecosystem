@@ -1,6 +1,6 @@
 import React from 'react';
 import type { CourseFormData, CourseFormProps } from '@/features/course/types/admin-course.types';
-import styles from '../styles/CourseForm.module.scss';
+import styles from './CourseForm.module.scss';
 import { Form } from '@/components/Form';
 
 export const CourseForm: React.FC<CourseFormProps> = ({ 

@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 
-import styles from '../styles/AdminSubscriptionList.module.scss';
-import { useAdminSubscription } from "../hooks/useAdminSubscription";
+import styles from './AdminSubscriptionList.module.scss';
+import { useAdminSubscription } from '../../hooks/useAdminSubscription';
 import { type TableColumn, Table } from "@/components/Table/Table";
-import type { AdminSubscriptionDetail } from "../types/subscriptions.types";
+import type { AdminSubscriptionDetail } from '../../types/subscriptions.types';
 
 export const AdminSubscriptionList: React.FC = () => {
   // Estado local para o input de busca

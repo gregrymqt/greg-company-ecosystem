@@ -2,15 +2,14 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { ProtectedRoute } from "@/routes/ProtectedRoute";
 import { AppRoles } from "@/types/models";
 import { AccessDenied } from "@/pages/AccessDenied/AccessDenied";
-import { LoginPage } from "@/pages/Auth";
+import { LoginPage } from '@/features/auth/pages';
 import { AdminProfile } from "@/pages/Admin/AdminProfile";
-import { AdminCourseManager } from "@/pages/Courses/AdminCourseManager";
-import { PlansAdmin } from "@/pages/Plans/PlansAdmin";
-import { AdminClaimsPage } from "@/pages/Claims/AdminClaimsPage";
-import { ChargebackManager } from "@/pages/ChargeBack/ChargebackManager";
-import { SupportAdminPage } from "@/pages/Support/SupportAdminPage";
-import { AdminHomePage } from "@/pages/Home/AdminHomePage";
-import { AnalyticsPage } from "@/pages/Analytics/AnalyticsPage";
+import { AdminCourseManager } from '@/features/course/pages/AdminCourseManager';
+import { PlansAdmin } from '@/features/plan/pages/PlansAdmin';
+import { AdminClaimsPage } from '@/features/claim/pages/AdminClaimsPage';
+import { ChargebackManager } from '@/features/chargeback/pages/ChargebackManager';
+import { SupportAdminPage } from '@/features/support/pages/SupportAdminPage';
+import { AdminHomePage } from '@/features/home/pages/AdminHomePage';
 import { MainLayout } from "@/components/layout/components/MainLayout";
 
 export const AppRoutes = () => {
@@ -31,7 +30,6 @@ export const AppRoutes = () => {
           <Route path="/suporte" element={<SupportAdminPage />} />
           <Route path="/home" element={<AdminHomePage />} />
           <Route path="/planos" element={<PlansAdmin />} />
-          <Route path="/analytics" element={<AnalyticsPage />} />
         </Route>
 
         {/* Nível: Manager OU Admin */}

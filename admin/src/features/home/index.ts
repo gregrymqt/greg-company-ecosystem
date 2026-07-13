@@ -1,10 +1,10 @@
 // Admin - Home Feature (Admin only)
 
 // Components
-export { HeroForm } from './components/HeroForm';
-export { HeroList } from './components/HeroList';
-export { ServiceList } from './components/ServiceList';
-export { ServiceForm } from './components/ServiceForm';
+export { HeroForm } from './components/HeroForm/HeroForm';
+export { HeroList } from './components/HeroList/HeroList';
+export { ServiceList } from './components/ServiceList/ServiceList';
+export { ServiceForm } from './components/ServiceForm/ServiceForm';
 
 // Hooks
 export { useAdminHero } from './hooks/useAdminHero';

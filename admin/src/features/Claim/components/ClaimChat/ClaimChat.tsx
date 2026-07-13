@@ -1,14 +1,14 @@
 import React, { useRef, useEffect } from "react";
-import styles from '../styles/ClaimChat.module.scss';
+import styles from './ClaimChat.module.scss';
 import { Form } from "@/components/Form";
-import { useClaimChatLogic } from '../hooks/useClaimChatLogic';
+import { useClaimChatLogic } from '../../hooks/useClaimChatLogic';
 
 interface Props {
   claimId: number;
   role: "admin" | "user";
 }
 
-import type { ReplyFormData } from "../types/claim.dtos";
+import type { ReplyFormData } from '../../types/claim.dtos';
 
 export const ClaimChat: React.FC<Props> = ({ claimId, role }) => {
   const { messages, handleSendResponse, isLoading } = useClaimChatLogic({

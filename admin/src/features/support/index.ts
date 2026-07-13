@@ -17,4 +17,4 @@ export type {
 // Admin (Support Management)
 export { adminSupportService } from './services/support-admin.service';
 export { useAdminSupport } from './hooks/useAdminSupport';
-export { SupportTicketList } from './components/SupportTicketList';
+export { SupportTicketList } from './components/SupportTicketList/SupportTicketList';

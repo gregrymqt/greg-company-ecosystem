@@ -1,6 +1,6 @@
 import { Form } from '@/components/Form';
-import styles from '../styles/ChargebackFilter.module.scss';
-import type { FilterFormData } from '../types/chargeback.dtos';
+import styles from './ChargebackFilter.module.scss';
+import type { FilterFormData } from '../../types/chargeback.dtos';
 
 interface Props {
   onFilter: (data: FilterFormData) => void;

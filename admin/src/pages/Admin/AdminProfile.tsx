@@ -5,7 +5,7 @@ import { Sidebar } from '@/components/SideBar';
 import type { SidebarItem } from '@/components/SideBar/types/sidebar.types';
 // A feature de profile foi movida para o Portal. Substitua pelos contextos locais.
 // 1. IMPORT NOVO: Importamos a lista de tickets
-import { SupportTicketList } from '@/features/support/components/SupportTicketList'; 
+import { SupportTicketList } from '@/features/support/components/SupportTicketList/SupportTicketList'; 
 
 export const AdminProfile: React.FC = () => {
     const [activeTab, setActiveTab] = useState<string>('profile');

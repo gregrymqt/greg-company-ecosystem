@@ -2,9 +2,9 @@ import React, { useEffect, useState, useMemo } from "react";
 
 import { ActionMenu } from "@/components/ActionMenu/ActionMenu";
 import { type TableColumn, Table } from "@/components/Table/Table";
-import { useAdminPlans } from "../hooks/useAdminPlans";
-import styles from "../styles/PlanList.module.scss";
-import type { PlanAdminSummary, PlanAdminDetail } from "../types";
+import { useAdminPlans } from '../../hooks/useAdminPlans';
+import styles from './PlanList.module.scss';
+import type { PlanAdminSummary, PlanAdminDetail } from '../../types';
 
 interface PlanListProps {
   onEditRequest: (id: string) => void; // Callback para o pai abrir o Form

@@ -2,7 +2,7 @@
 import { type FC } from 'react';
 import { useForm } from 'react-hook-form';
 import * as yup from 'yup';
-import styles from '../styles/LoginForm.module.scss';
+import styles from './LoginForm.module.scss';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Form } from '@/components/Form';
 

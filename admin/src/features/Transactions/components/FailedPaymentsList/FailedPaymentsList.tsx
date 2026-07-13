@@ -1,8 +1,8 @@
 // src/features/Transactions/Admin/components/FailedPaymentsList.tsx
 import React, { useState, useMemo } from 'react';
 const usePaymentHistory = () => ({ payments: [], loading: false, error: null, refetch: () => {} }) as any;
-import type { PaymentItems } from '../types/transactions.types';
-import styles from '../styles/FailedPaymentsList.module.scss';
+import type { PaymentItems } from '../../types/transactions.types';
+import styles from './FailedPaymentsList.module.scss';
 import { type TableColumn, Table } from '@/components/Table/Table';
 
 export const FailedPaymentsList: React.FC = () => {

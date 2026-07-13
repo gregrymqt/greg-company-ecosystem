@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from '../styles/VideoCard.module.scss';
+import styles from './VideoCard.module.scss';
 import type { VideoCardUI } from '@/features/course/types/course.types';
 
 interface VideoCardProps {

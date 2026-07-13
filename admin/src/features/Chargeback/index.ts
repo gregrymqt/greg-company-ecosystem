@@ -1,1 +1,1 @@
-export { ChargebackList } from './components/ChargebackList';
+export { ChargebackList } from './components/ChargebackList/ChargebackList';

@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from '../styles/HomeForms.module.scss';
+import styles from './HomeForms.module.scss';
 import { Form } from '@/components/Form';
 import type { HeroSlideDto, HeroFormValues } from '@/features/home/types/home.types';
 
