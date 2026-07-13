@@ -1,1 +1,1 @@
-export { AppHubsCSharp, AppHubsBIFastAPI, type AnyAppHub } from "./hub.enums";
+export { AppHubsCSharp, type AnyAppHub } from "./hub.enums";
