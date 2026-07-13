@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useState, useEffect } from 'react';
 import { Sidebar } from '@/components/SideBar';
 import type { SidebarItem } from '@/components/SideBar/types/sidebar.types';
@@ -40,8 +39,7 @@ export const AdminCourseManager: React.FC = () => {
   // --- Handlers ---
 
   const handleTabChange = (item: SidebarItem) => {
-    if (item.id === 'list') setEditingCourse(null);
-    if (item.id === 'form') setEditingCourse(null);
+    setEditingCourse(null);
     setActiveTab(item.id as AdminTab);
   };
 
@@ -50,19 +48,14 @@ export const AdminCourseManager: React.FC = () => {
     setActiveTab('form');
   };
 
-  const handleEdit = (course: Course) => {
+  const handleEdit = (course: CourseDto) => {
     setEditingCourse(course);
     setActiveTab('form');
   };
 
   // [CORREÇÃO] Usando a função do hook (o AlertService já está dentro do hook)
   const handleDelete = async (id: string) => {
-    const success = await deleteCourse(id);
-    if (success) {
-      // Se deletou com sucesso, recarrega a lista para garantir sincronia
-      // (Opcional se o hook já atualiza o estado localmente)
-      fetchCourses();
-    }
+    await deleteCourse(id);
   };
 
   // [CORREÇÃO] Lógica de Submit conectada ao Hook

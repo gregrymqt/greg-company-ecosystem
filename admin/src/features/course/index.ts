@@ -3,7 +3,6 @@
 // Components
 export { CourseForm } from './components/CourseForm/CourseForm';
 export { CourseList } from './components/CourseList/CourseList';
-export { CourseRow } from './components/CourseRow/CourseRow';
 
 // Hooks
 export { useAdminCourses } from './hooks/useAdminCourses';
