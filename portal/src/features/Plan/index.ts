@@ -10,4 +10,8 @@ export { PublicPlansService } from './services/publicPlans.service';
 export { PlanPage } from './pages/PlanPage';
 
 // Types
-export * from './types/plan.types';
+export type { PlanPublic, PagedResult } from './types/plan.types';
+
+// Components
+export { PlanFeed } from './components/PlanFeed/PlanFeed';
+export { PlanSelection } from './components/PlanSelection/PlanSelection';

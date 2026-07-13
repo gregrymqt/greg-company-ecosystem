@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import styles from '../styles/VideoPlayerFrame.module.scss';
+import styles from './VideoPlayerFrame.module.scss';
 import { useVideoProgress } from '../../hooks/useVideoProgress';
 import type { PlayerVideoDto } from '../../types/video.types';
 

@@ -1,11 +1,11 @@
 import React from 'react';
-import styles from '../styles/PaymentHistory.module.scss';
+import styles from './PaymentHistory.module.scss';
 import { type TableColumn, Table } from '@/components/Table/Table';
 import { ActionMenu } from '@/components/ActionMenu/ActionMenu';
-import { usePaymentHistory } from '@/features/Transactions/hooks/usePaymentHistory';
-import { useRefund } from '@/features/Transactions/hooks/useRefund';
-import { useRefundNotification } from '@/features/Transactions/hooks/useRefundNotification';
-import type { PaymentItems } from '@/features/Transactions/types/transactions.types';
+import { usePaymentHistory } from '../../hooks/usePaymentHistory';
+import { useRefund } from '../../hooks/useRefund';
+import { useRefundNotification } from '../../hooks/useRefundNotification';
+import type { PaymentItems } from '../../types/transactions.types';
 
 export const PaymentHistory: React.FC = () => {
     const { payments, loading, error, refetch } = usePaymentHistory();

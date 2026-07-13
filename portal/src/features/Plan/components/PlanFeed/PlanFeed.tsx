@@ -2,7 +2,7 @@ import { useEffect, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Check, Star, ArrowLeft } from 'lucide-react';
 import styles from './PlanFeed.module.scss';
-import { usePublicPlans } from '@/features/Plan';
+import { usePublicPlans } from '../../hooks/usePublicPlans';
 import { Card } from '@/components/Card/Card';
 
 export interface PlanFeedProps {

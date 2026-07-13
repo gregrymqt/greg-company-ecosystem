@@ -4,10 +4,11 @@ import { useParams } from "react-router-dom";
 import styles from "./PaymentLayout.module.scss";
 
 import type { SidebarItem } from "@/components/SideBar/types/sidebar.types";
-import { CreditCardPayment, PixPayment } from "@/features/Payment";
-import type { PaymentMethodId } from "@/features/Payment";
+import { CreditCardPayment } from '../components/CreditCard/CreditCardPayment';
+import { PixPayment } from '../components/Pix/PixPayment';
+import type { PaymentMethodId } from '../types';
 import { Sidebar } from "@/components/SideBar/Sidebar";
-import { usePaymentCheckout } from "@/features/Payment/hooks/usePaymentCheckout";
+import { usePaymentCheckout } from '../hooks/usePaymentCheckout';
 import { useAuth } from "@/features/auth/hooks/useAuth";
 
 export const PaymentLayout: React.FC = () => {

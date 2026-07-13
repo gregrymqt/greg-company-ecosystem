@@ -4,13 +4,14 @@ import React from "react";
 import styles from "./styles/AboutPage.module.scss";
 
 // Componentes
-import { AboutHeroSection, AboutTeamSection } from "@/features/about";
+import { AboutHeroSection } from "../components/AboutHeroSection/AboutHeroSection";
+import { AboutTeamSection } from "../components/TeamMemberSection/TeamMemberSection";
 
 // Hook (CORREÇÃO: Usar o hook de leitura criado anteriormente)
-import { useAboutData } from "@/features/about/hooks/useAboutData";
+import { useAboutData } from "../hooks/useAboutData";
 
 // Tipos (CORREÇÃO: Importar, não redefinir)
-import type { AboutTeamData } from "@/features/about/types/about.types";
+import type { AboutTeamData } from "../types/about.types";
 
 export const AboutPage: React.FC = () => {
   // CORREÇÃO: Usando o hook correto que retorna sections e teamMembers separados

@@ -21,3 +21,6 @@ export { useAboutData } from './hooks/useAboutData';
 // Components (Public display)
 export { AboutTeamSection } from './components/TeamMemberSection/TeamMemberSection';
 export { AboutHeroSection } from './components/AboutHeroSection/AboutHeroSection';
+
+// Pages
+export { AboutPage } from './pages/AboutPage';

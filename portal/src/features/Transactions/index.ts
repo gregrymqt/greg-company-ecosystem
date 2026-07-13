@@ -1,9 +1,20 @@
-// src/features/Transactions/Public/index.ts
-export * from './components';
-export * from './hooks';
-export * from './services';
+/**
+ * Barrel exports para Transactions Feature (Portal)
+ */
 
-// src/features/Transactions/shared/index.ts
-// Barrel Export: Single Source of Truth para Tipos de Transactions
+// Types
 export * from './types/transactions.types';
 
+// Components
+export { PaymentHistory } from './components/PaymentHistory/PaymentHistory';
+
+// Hooks
+export { usePaymentHistory } from './hooks/usePaymentHistory';
+export { useRefund } from './hooks/useRefund';
+export { useRefundNotification } from './hooks/useRefundNotification';
+
+// Services
+export { UserTransactionsService } from './services/userTransactions.service';
+
+// Pages
+export { TransactionsPage } from './pages/TransactionsPage';

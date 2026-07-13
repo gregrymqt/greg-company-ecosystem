@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './CreateSupportPage.module.scss';
-import { SupportCreateForm } from '@/features/support';
+import { SupportCreateForm } from '../components/SupportCreateForm/SupportCreateForm';
 
 export const CreateSupportPage: React.FC = () => {
   const navigate = useNavigate();

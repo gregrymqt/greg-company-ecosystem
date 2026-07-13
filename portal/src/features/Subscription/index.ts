@@ -5,3 +5,4 @@ export { userSubscriptionService } from './services/userSubscription.service';
 
 export * from './types/subscriptions.types';
 
+export { SubscriptionPage } from './pages/SubscriptionPage';

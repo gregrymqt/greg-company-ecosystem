@@ -1,11 +1,11 @@
 import React, { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './styles/CourseFeed.module.scss';
-import { CourseRow } from '@/features/course/components/CourseRow/CourseRow';
-import { CourseSkeleton } from '@/features/course/components/CourseSkeleton/CourseSkeleton';
-import { usePublicCourses } from '@/features/course/hooks/usePublicCourses';
-import type { VideoCardUI, CourseRowUI } from '@/features/course/types/course.types';
-import { CourseDetailModal } from '@/features/course/components/CourseDetailModal/CourseDetailModal';
+import { CourseRow } from '../components/CourseRow/CourseRow';
+import { CourseSkeleton } from '../components/CourseSkeleton/CourseSkeleton';
+import { usePublicCourses } from '../hooks/usePublicCourses';
+import type { VideoCardUI, CourseRowUI } from '../types/course.types';
+import { CourseDetailModal } from '../components/CourseDetailModal/CourseDetailModal';
 
 export const CourseFeed: React.FC = () => {
   const navigate = useNavigate();

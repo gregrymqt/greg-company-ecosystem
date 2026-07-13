@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from './styles/AvatarUploadForm.module.scss';
+import styles from './AvatarUploadForm.module.scss';
 import { Form } from '@/components/Form';
 import { useAvatarUpdate } from '../../hooks/useAvatarUpdate';
 

@@ -1,6 +1,6 @@
 import React, { useCallback, useState, useEffect } from 'react';
 
-import styles from '../styles/AddCardForm.module.scss';
+import styles from './AddCardForm.module.scss';
 
 
 import { useWallet } from '../../hooks/useWallet';

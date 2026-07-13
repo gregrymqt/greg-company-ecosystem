@@ -1,26 +1,20 @@
 /**
  * Barrel exports para Video Feature (Portal)
- * Siga o padrão: import { useVideoPlayer, VideoDto } from '@/features/video'
  */
 
-// Shared Types
-export type {
-  VideoStatus,
-  VideoDto,
-  CreateVideoDto,
-  UpdateVideoDto,
-  PaginatedVideoResult,
-  VideoFilters,
-  VideoFormData,
-  PlayerVideoDto
-} from './shared';
+// Types
+export * from './types/video.types';
 
-export { getManifestUrl } from './shared';
+// Services
+export * from './services/video-public.service';
 
-// Public (Video Player)
-export {
-  publicVideoService,
-  useVideoPlayer,
-  VideoPlayerFrame,
-  VideoMetadata
-} from './Public';
+// Hooks
+export * from './hooks/useVideoPlayer';
+export * from './hooks/useVideoProgress';
+
+// Components
+export * from './components/VideoMetadata/VideoMetadata';
+export * from './components/VideoPlayerFrame/VideoPlayerFrame';
+
+// Pages
+export { PlayerScreen } from './pages/PlayerScreen';

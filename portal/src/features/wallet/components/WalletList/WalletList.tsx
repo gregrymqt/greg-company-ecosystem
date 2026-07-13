@@ -1,10 +1,10 @@
 import React, { useMemo } from 'react';
 
-import styles from '../styles/WalletList.module.scss';
+import styles from './WalletList.module.scss';
 import { ActionMenu } from '@/components/ActionMenu/ActionMenu';
 import { type TableColumn, Table } from '@/components/Table/Table';
 import { useWallet } from '../../hooks/useWallet';
-import type { WalletCard } from '../..';
+import type { WalletCard } from '../../types/wallet.types';
 
 export const WalletList: React.FC = () => {
   const { cards, loading, removeCard } = useWallet();

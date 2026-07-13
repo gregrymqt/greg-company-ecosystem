@@ -1,6 +1,6 @@
 import { useSearchParams } from 'react-router-dom';
-import { PlanFeed } from '@/features/Plan/components/PlanFeed/PlanFeed';
-import { PlanSelection } from '@/features/Plan/components/PlanSelection/PlanSelection';
+import { PlanFeed } from '../components/PlanFeed/PlanFeed';
+import { PlanSelection } from '../components/PlanSelection/PlanSelection';
 
 export const PlanPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();

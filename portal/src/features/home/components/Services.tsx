@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import styles from '../../../pages/Home/styles/Home.module.scss';
-import type { ServiceDto } from '@/features/home/types/home.types';
+import styles from '../pages/Home.module.scss';
+import type { ServiceDto } from '../types/home.types';
 
 interface ServicesProps {
   data: ServiceDto[];

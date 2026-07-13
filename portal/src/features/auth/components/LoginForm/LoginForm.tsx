@@ -1,5 +1,5 @@
 import { Form } from '@/components/Form/Form';
-import { useLoginForm } from '@/features/auth/hooks/useLoginForm';
+import { useLoginForm } from '../../hooks/useLoginForm';
 import styles from '../styles/LoginForm.module.scss';
 
 export const LoginForm = () => {

@@ -1,7 +1,7 @@
 import React from 'react';
-import styles from '../../../pages/Home/styles/Home.module.scss';
-import { useScrollOpacity } from '@/features/home/hooks/useScrollOpacity';
-import type { HeroSlideDto } from '@/features/home/types/home.types';
+import styles from '../pages/Home.module.scss';
+import { useScrollOpacity } from '../hooks/useScrollOpacity';
+import type { HeroSlideDto } from '../types/home.types';
 
 interface HeroProps {
   slides: HeroSlideDto[];

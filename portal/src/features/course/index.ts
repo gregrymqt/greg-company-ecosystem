@@ -1,11 +1,21 @@
-// Portal - Course Feature (Public only)
+/**
+ * Barrel exports para Course Feature (Portal)
+ */
 
-// Components
-export { CourseSkeleton } from './components/CourseSkeleton/CourseSkeleton';
-export { CourseRow } from './components/CourseRow/CourseRow';
+// Types
+export type { CourseRowUI, VideoCardUI, CourseFilters, CourseDto } from './types/course.types';
+
+// Services
+export { publicCourseService } from './services/publicCourse.service';
 
 // Hooks
 export { usePublicCourses } from './hooks/usePublicCourses';
 
-// Services
-export { publicCourseService } from './services/publicCourse.service';
+// Components
+export { CourseSkeleton } from './components/CourseSkeleton/CourseSkeleton';
+export { CourseRow } from './components/CourseRow/CourseRow';
+export { CourseDetailModal } from './components/CourseDetailModal/CourseDetailModal';
+export { VideoCard } from './components/VideoCard/VideoCard';
+
+// Pages
+export { CourseFeed } from './pages/CourseFeed';

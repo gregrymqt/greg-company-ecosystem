@@ -1,5 +1,5 @@
 import { Form } from '@/components/Form/Form';
-import { useRegisterForm } from '@/features/auth/hooks/useRegisterForm';
+import { useRegisterForm } from '../../hooks/useRegisterForm';
 import styles from '../styles/RegisterForm.module.scss';
 
 export const RegisterForm = () => {

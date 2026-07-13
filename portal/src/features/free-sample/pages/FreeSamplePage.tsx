@@ -2,10 +2,10 @@ import React from 'react';
 import { useFreeSample } from '../hooks/useFreeSample';
 import { useNavigate } from 'react-router-dom';
 import styles from './FreeSamplePage.module.scss';
-import { ComparisonPanel } from '@/features/free-sample/components/ComparisonPanel/ComparisonPanel';
-import { ConversionCTA } from '@/features/free-sample/components/ConversionCTA/ConversionCTA';
-import { ProcessingProgress } from '@/features/free-sample/components/ProcessingProgress/ProcessingProgress';
-import { UrlInputForm } from '@/features/free-sample/components/UrlInputForm/UrlInputForm';
+import { ComparisonPanel } from '../components/ComparisonPanel/ComparisonPanel';
+import { ConversionCTA } from '../components/ConversionCTA/ConversionCTA';
+import { ProcessingProgress } from '../components/ProcessingProgress/ProcessingProgress';
+import { UrlInputForm } from '../components/UrlInputForm/UrlInputForm';
 
 export const FreeSamplePage: React.FC = () => {
     const {

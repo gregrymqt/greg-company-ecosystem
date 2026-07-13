@@ -1,5 +1,5 @@
 import React from 'react';
-import type { CourseRowUI, VideoCardUI } from '@/features/course/types/course.types';
+import type { CourseRowUI, VideoCardUI } from '../../types/course.types';
 import styles from './CourseDetailModal.module.scss';
 
 interface CourseDetailModalProps {

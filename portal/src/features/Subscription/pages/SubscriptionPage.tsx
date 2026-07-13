@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 // Imports dos componentes de Subscription (Public)
-import { UserSubscriptionActions, UserSubscriptionInfo, useUserSubscription } from '@/features/Subscription';
+import { UserSubscriptionActions } from '../components/UserSubscriptionActions/UserSubscriptionActions';
+import { UserSubscriptionInfo } from '../components/UserSubscriptionInfo/UserSubscriptionInfo';
+import { useUserSubscription } from '../hooks/useUserSubscription';
 // Imports da Sidebar Genérica
 import type { SidebarItem } from '@/components/SideBar/types/sidebar.types';
 // Estilos
