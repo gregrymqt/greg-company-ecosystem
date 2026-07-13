@@ -1,9 +1,9 @@
 // @ts-nocheck
 import React, { useState, useEffect, useCallback } from "react";
 import styles from "./styles/ClaimsLayout.module.scss";
-import { ClaimChat, ClaimsList } from "@/features/Claim";
-import { AdminClaimService } from "@/features/Claim";
-import type { ClaimSummary } from "@/features/Claim";
+import { ClaimChat, ClaimsList } from "@/features/claim";
+import { AdminClaimService } from "@/features/claim";
+import type { ClaimSummary } from "@/features/claim";
 import { Modal } from "@/components/Modal/Modal";
 import type { SidebarItem } from "@/components/SideBar/types/sidebar.types";
 import { Sidebar } from "@/components/SideBar";

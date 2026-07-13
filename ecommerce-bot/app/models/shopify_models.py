@@ -211,4 +211,38 @@ class ShopifyProductListRequest(BaseModel):
       }
     }
     """
-    variables: dict    
+    variables: dict
+
+
+
+
+class ShopifyMediaInput(BaseModel):
+      originalSource: str = Field(..., description="URL pública da imagem hospedada.")
+      alt: Optional[str] = Field(None, description="Texto alternativo gerado pela IA para SEO.")
+      mediaContentType: str = "IMAGE"
+
+class ShopifyCreateMediaVariables(BaseModel):
+      productId: str
+      media: List[ShopifyMediaInput]
+
+class ShopifyCreateMediaRequest(BaseModel):
+      query: str = """
+      mutation productCreateMedia($media: [CreateMediaInput!]!, $productId: ID!) {
+        productCreateMedia(media: $media, productId: $productId) {
+          media {
+            alt
+            mediaContentType
+            status
+          }
+          mediaUserErrors {
+            field
+            message
+          }
+          product {
+            id
+            title
+          }
+        }
+      }
+      """
+      variables: ShopifyCreateMediaVariables

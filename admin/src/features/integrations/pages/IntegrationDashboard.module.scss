@@ -1,0 +1,152 @@
+.container {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.header {
+  h1 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--text-color, #333);
+  }
+  p {
+    color: var(--text-muted, #666);
+    font-size: 0.95rem;
+  }
+}
+
+.tabs {
+  display: flex;
+  gap: 16px;
+  border-bottom: 1px solid var(--border-color, #e0e0e0);
+  padding-bottom: 8px;
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  padding: 8px 16px;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-muted, #666);
+  cursor: pointer;
+  border-radius: 6px 6px 0 0;
+  transition: all 0.2s ease;
+  position: relative;
+
+  &:hover {
+    background-color: var(--hover-bg, #f5f5f5);
+  }
+
+  &.active {
+    color: var(--primary-color, #0a1f44);
+    font-weight: 600;
+    
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: -9px; // Account for the padding + border
+      left: 0;
+      right: 0;
+      height: 3px;
+      background-color: var(--primary-color, #0a1f44);
+      border-radius: 3px 3px 0 0;
+    }
+  }
+}
+
+.fallbackBanner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeeba;
+  padding: 16px 24px;
+  border-radius: 8px;
+  gap: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.bannerContent {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+
+  i {
+    font-size: 1.5rem;
+  }
+
+  strong {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 1.05rem;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.9rem;
+    opacity: 0.9;
+  }
+}
+
+.bannerActions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.downloadBtn {
+  background-color: #ffc107;
+  color: #212529;
+  text-decoration: none;
+  padding: 8px 20px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: background-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  &:hover {
+    background-color: #e0a800;
+    color: #212529;
+  }
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  font-size: 1.75rem;
+  line-height: 1;
+  color: #856404;
+  cursor: pointer;
+  padding: 0 4px;
+  opacity: 0.6;
+  transition: opacity 0.2s ease;
+
+  &:hover {
+    opacity: 1;
+  }
+}
+
+.tableArea {
+  min-height: 400px;
+  border: 2px dashed var(--border-color, #e0e0e0);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted, #999);
+  background-color: var(--bg-light, #fafafa);
+  font-style: italic;
+}
