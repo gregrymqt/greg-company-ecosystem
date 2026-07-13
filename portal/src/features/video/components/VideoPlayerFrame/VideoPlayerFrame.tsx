@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import styles from '../styles/VideoPlayerFrame.module.scss';
-import type { PlayerVideoDto } from '../../shared';
-import { useVideoProgress } from '../hooks/useVideoProgress';
+import type { PlayerVideoDto } from '../../../shared';
+import { useVideoProgress } from '../../hooks/useVideoProgress';
 
 interface VideoPlayerFrameProps {
   video: PlayerVideoDto;
@@ -31,9 +31,9 @@ export const VideoPlayerFrame: React.FC<VideoPlayerFrameProps> = ({
     <div className={styles.playerWrapper}>
       <div className={styles.aspectRatioBox}>
         {isProcessing ? (
-          <div className={styles.posterContainer} style={{ 
-            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', 
-            height: '100%', backgroundColor: '#111', color: '#fff', textAlign: 'center' 
+          <div className={styles.posterContainer} style={{
+            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+            height: '100%', backgroundColor: '#111', color: '#fff', textAlign: 'center'
           }}>
             <h3 style={{ marginBottom: '8px' }}>Este vídeo está sendo otimizado para a sua conexão...</h3>
             <p style={{ marginBottom: '16px' }}>Progresso: {Math.floor(progress)}%</p>

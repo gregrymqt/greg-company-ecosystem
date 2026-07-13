@@ -1,24 +1,24 @@
 import React, { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './styles/CourseFeed.module.scss';
-import { CourseRow } from '@/features/course/components/CourseRow';
-import { CourseSkeleton } from '@/features/course/components/CourseSkeleton';
+import { CourseRow } from '@/features/course/components/CourseRow/CourseRow';
+import { CourseSkeleton } from '@/features/course/components/CourseSkeleton/CourseSkeleton';
 import { usePublicCourses } from '@/features/course/hooks/usePublicCourses';
 import type { VideoCardUI, CourseRowUI } from '@/features/course/types/course.types';
-import { CourseDetailModal } from '@/features/course/components/CourseDetailModal';
+import { CourseDetailModal } from '@/features/course/components/CourseDetailModal/CourseDetailModal';
 
 export const CourseFeed: React.FC = () => {
   const navigate = useNavigate();
   const [infoCourse, setInfoCourse] = useState<CourseRowUI | null>(null);
 
   // Consumindo o Hook refatorado
-  const { 
-    courses, 
-    isLoading, 
-    error, 
+  const {
+    courses,
+    isLoading,
+    error,
     refresh,
-    sentinelRef 
-  } = usePublicCourses(); 
+    sentinelRef
+  } = usePublicCourses();
 
   // 2. A única responsabilidade sobre o vídeo aqui é o redirecionamento
   const handleVideoClick = useCallback((video: VideoCardUI) => {
@@ -47,10 +47,10 @@ export const CourseFeed: React.FC = () => {
         <div className={styles.rowsList}>
           {/* Renderiza as Categorias (Rows) */}
           {courses.map((category) => (
-            <CourseRow 
-              key={category.id} 
-              data={category} 
-              onVideoClick={handleVideoClick} 
+            <CourseRow
+              key={category.id}
+              data={category}
+              onVideoClick={handleVideoClick}
               onInfoClick={setInfoCourse}
             />
           ))}
@@ -61,15 +61,15 @@ export const CourseFeed: React.FC = () => {
           Quando essa div invisível entra na tela, o Hook carrega mais. */}
       <div ref={sentinelRef} className={styles.infiniteScrollTrigger}>
         {isLoading && courses.length > 0 && (
-           <span className={styles.loadingMore}>Carregando mais cursos...</span>
+          <span className={styles.loadingMore}>Carregando mais cursos...</span>
         )}
       </div>
 
       {infoCourse && (
-        <CourseDetailModal 
-          course={infoCourse} 
-          onClose={() => setInfoCourse(null)} 
-          onVideoClick={handleVideoClick} 
+        <CourseDetailModal
+          course={infoCourse}
+          onClose={() => setInfoCourse(null)}
+          onVideoClick={handleVideoClick}
         />
       )}
     </main>
