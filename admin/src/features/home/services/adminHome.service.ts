@@ -11,7 +11,7 @@ import type {
   ServiceFormValues
 } from '@/features/home/types/home.types';
 
-const BASE_ENDPOINT = '/Home';
+const BASE_ENDPOINT = '/admin/home';
 
 export const adminHomeService = {
   // =================================================================
@@ -23,8 +23,8 @@ export const adminHomeService = {
    * GET: /api/Home
    */
   getHomeContent: async (): Promise<{ hero: HeroSlideDto[]; services: ServiceDto[] }> => {
-    // Usamos a rota pública ou a rota de listagem base para obter os dados
-    return await ApiService.get<{ hero: HeroSlideDto[]; services: ServiceDto[] }>(`${BASE_ENDPOINT}/public/data`);
+    // Usamos a rota raiz para obter os dados administrativos
+    return await ApiService.get<{ hero: HeroSlideDto[]; services: ServiceDto[] }>(BASE_ENDPOINT);
   },
 
   /**

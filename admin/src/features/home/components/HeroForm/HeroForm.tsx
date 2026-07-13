@@ -7,13 +7,14 @@ interface HeroFormProps {
   initialData?: HeroSlideDto;
   onSubmit: (data: HeroFormValues) => void;
   isLoading?: boolean;
-  onCancel?: () => void;
+  onCancel: () => void;
 }
 
 export const HeroForm: React.FC<HeroFormProps> = ({ 
   initialData, 
   onSubmit, 
-  isLoading 
+  isLoading,
+  onCancel
 }) => {
   
   const isEditing = !!initialData;
@@ -90,6 +91,14 @@ export const HeroForm: React.FC<HeroFormProps> = ({
         />
 
         <Form.Actions>
+          <button 
+            type="button" 
+            className={styles.cancelBtn} 
+            onClick={onCancel}
+            disabled={isLoading}
+          >
+            Cancelar
+          </button>
           <Form.Submit isLoading={isLoading}>
             {isEditing ? "Salvar Alterações" : "Criar Slide"}
           </Form.Submit>

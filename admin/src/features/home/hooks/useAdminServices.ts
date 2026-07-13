@@ -7,6 +7,7 @@ import { useState, useCallback } from 'react';
 import { adminHomeService } from '@/features/home/services/adminHome.service';
 import type { ServiceFormValues } from '@/features/home/types/home.types';
 import { AlertService } from '@/shared/services/alert.service';
+import { ApiError } from '@/shared/services/api.service';
 
 export const useAdminServices = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -22,7 +23,11 @@ export const useAdminServices = () => {
         await AlertService.success('Serviço Criado!', 'O novo card de serviço já está visível.');
         if (onSuccess) onSuccess();
       } catch (error) {
-        AlertService.error('Atenção', 'Erro ao criar o serviço.');
+        if (error instanceof ApiError) {
+          AlertService.error('Atenção', error.message);
+        } else {
+          AlertService.error('Atenção', 'Erro ao criar o serviço.');
+        }
         console.error(error);
       } finally {
         setIsLoading(false);
@@ -39,10 +44,14 @@ export const useAdminServices = () => {
       setIsLoading(true);
       try {
         await adminHomeService.updateService(id, data);
-        AlertService.notify('Serviço Atualizado', 'Dados salvos.', 'success');
+        AlertService.success('Serviço Atualizado', 'Dados salvos.');
         if (onSuccess) onSuccess();
       } catch (error) {
-        AlertService.error('Erro', 'Falha ao salvar as alterações.');
+        if (error instanceof ApiError) {
+          AlertService.error('Erro', error.message);
+        } else {
+          AlertService.error('Erro', 'Falha ao salvar as alterações.');
+        }
         console.error(error);
       } finally {
         setIsLoading(false);
@@ -67,10 +76,14 @@ export const useAdminServices = () => {
       setIsLoading(true);
       try {
         await adminHomeService.deleteService(id);
-        AlertService.notify('Excluído', 'Serviço removido.', 'info');
+        AlertService.success('Excluído', 'Serviço removido.');
         if (onSuccess) onSuccess();
       } catch (error) {
-        AlertService.error('Erro', 'Não foi possível excluir o serviço.');
+        if (error instanceof ApiError) {
+          AlertService.error('Erro', error.message);
+        } else {
+          AlertService.error('Erro', 'Não foi possível excluir o serviço.');
+        }
         console.error(error);
       } finally {
         setIsLoading(false);

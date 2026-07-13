@@ -7,6 +7,7 @@ import { useState, useCallback } from 'react';
 import { adminHomeService } from '@/features/home/services/adminHome.service';
 import type { HeroFormValues } from '@/features/home/types/home.types';
 import { AlertService } from '@/shared/services/alert.service';
+import { ApiError } from '@/shared/services/api.service';
 
 export const useAdminHero = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -22,7 +23,11 @@ export const useAdminHero = () => {
         await AlertService.success('Sucesso!', 'Novo slide adicionado ao Hero.');
         if (onSuccess) onSuccess();
       } catch (error) {
-        AlertService.error('Erro ao criar', 'Não foi possível salvar o slide. Verifique os dados.');
+        if (error instanceof ApiError) {
+          AlertService.error('Erro ao criar', error.message);
+        } else {
+          AlertService.error('Erro ao criar', 'Não foi possível salvar o slide. Verifique os dados.');
+        }
         console.error(error);
       } finally {
         setIsLoading(false);
@@ -39,10 +44,14 @@ export const useAdminHero = () => {
       setIsLoading(true);
       try {
         await adminHomeService.updateHero(id, data);
-        AlertService.notify('Atualizado', 'As alterações no slide foram salvas.', 'success');
+        AlertService.success('Atualizado', 'As alterações no slide foram salvas.');
         if (onSuccess) onSuccess();
       } catch (error) {
-        AlertService.error('Erro', 'Falha ao atualizar o slide.');
+        if (error instanceof ApiError) {
+          AlertService.error('Erro', error.message);
+        } else {
+          AlertService.error('Erro', 'Falha ao atualizar o slide.');
+        }
         console.error(error);
       } finally {
         setIsLoading(false);
@@ -66,10 +75,14 @@ export const useAdminHero = () => {
     setIsLoading(true);
     try {
       await adminHomeService.deleteHero(id);
-      AlertService.notify('Removido', 'Slide removido com sucesso.', 'info');
+      AlertService.success('Removido', 'Slide removido com sucesso.');
       if (onSuccess) onSuccess();
     } catch (error) {
-      AlertService.error('Erro', 'Não foi possível remover este item.');
+      if (error instanceof ApiError) {
+        AlertService.error('Erro', error.message);
+      } else {
+        AlertService.error('Erro', 'Não foi possível remover este item.');
+      }
       console.error(error);
     } finally {
       setIsLoading(false);

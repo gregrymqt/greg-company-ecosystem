@@ -7,12 +7,14 @@ interface ServiceFormProps {
   initialData?: ServiceDto;
   onSubmit: (data: ServiceFormValues) => void;
   isLoading?: boolean;
+  onCancel: () => void;
 }
 
 export const ServiceForm: React.FC<ServiceFormProps> = ({ 
   initialData, 
   onSubmit, 
-  isLoading 
+  isLoading,
+  onCancel
 }) => {
   const isEditing = !!initialData;
 
@@ -76,6 +78,14 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
         />
 
         <Form.Actions>
+          <button 
+            type="button" 
+            className={styles.cancelBtn} 
+            onClick={onCancel}
+            disabled={isLoading}
+          >
+            Cancelar
+          </button>
           <Form.Submit isLoading={isLoading}>
             {isEditing ? "Salvar Alterações" : "Criar Serviço"}
           </Form.Submit>

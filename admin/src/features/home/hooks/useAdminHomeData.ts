@@ -14,25 +14,44 @@ export const useAdminHomeData = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchData = useCallback(async () => {
+  const fetchData = useCallback(async (signal?: AbortSignal, isCurrent?: () => boolean) => {
     setIsLoading(true);
     setError(null);
     try {
       const data = await adminHomeService.getHomeContent();
+      if (signal?.aborted || (isCurrent && !isCurrent())) return;
+      
       setHeroSlides(data.hero || []);
       setServices(data.services || []);
     } catch (err) {
-      const msg = err instanceof ApiError ? err.message : 'Erro ao carregar dados da Home.';
-      setError(msg);
-      console.error(msg);
+      if (signal?.aborted || (isCurrent && !isCurrent())) return;
+      
+      if (err instanceof ApiError) {
+        setError(err.message);
+        console.error(err.message);
+      } else {
+        const fallbackMsg = 'Erro inesperado ao carregar dados da Home.';
+        setError(fallbackMsg);
+        console.error(fallbackMsg, err);
+      }
     } finally {
-      setIsLoading(false);
+      if (!isCurrent || isCurrent()) {
+        setIsLoading(false);
+      }
     }
   }, []);
 
-  // Busca automática ao montar o componente
+  // Busca automática ao montar o componente com proteção contra Race Conditions
   useEffect(() => {
-    fetchData();
+    const controller = new AbortController();
+    let isCurrent = true;
+
+    fetchData(controller.signal, () => isCurrent);
+
+    return () => {
+      isCurrent = false;
+      controller.abort();
+    };
   }, [fetchData]);
 
   return {
@@ -40,6 +59,6 @@ export const useAdminHomeData = () => {
     services,
     isLoading,
     error,
-    refreshData: fetchData
+    refreshData: () => fetchData()
   };
 };

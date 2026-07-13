@@ -80,6 +80,13 @@ export const AdminHomePage: React.FC = () => {
     setActiveSidebarId("list"); // Volta para a visualização
   };
 
+  // --- HANDLER DE CANCELAMENTO ---
+  const handleCancel = () => {
+    setEditingHero(undefined);
+    setEditingService(undefined);
+    setActiveSidebarId("list");
+  };
+
   // --- RENDERIZAÇÃO CONDICIONAL ---
   const renderContent = () => {
     const isFormsMode = activeSidebarId === "forms";
@@ -98,6 +105,7 @@ export const AdminHomePage: React.FC = () => {
               }
             }}
             isLoading={loadingHero}
+            onCancel={handleCancel}
           />
         );
       } else {
@@ -112,6 +120,7 @@ export const AdminHomePage: React.FC = () => {
               }
             }}
             isLoading={loadingService}
+            onCancel={handleCancel}
           />
         );
       }
@@ -183,7 +192,11 @@ export const AdminHomePage: React.FC = () => {
             className={`${styles.tabButton} ${
               activeTab === "hero" ? styles.active : ""
             }`}
-            onClick={() => setActiveTab("hero")}
+            onClick={() => {
+              setActiveTab("hero");
+              setEditingHero(undefined);
+              setEditingService(undefined);
+            }}
           >
             <i className="fas fa-images" style={{ marginRight: 8 }}></i>
             Hero (Carrossel)
@@ -193,7 +206,11 @@ export const AdminHomePage: React.FC = () => {
             className={`${styles.tabButton} ${
               activeTab === "services" ? styles.active : ""
             }`}
-            onClick={() => setActiveTab("services")}
+            onClick={() => {
+              setActiveTab("services");
+              setEditingHero(undefined);
+              setEditingService(undefined);
+            }}
           >
             <i className="fas fa-concierge-bell" style={{ marginRight: 8 }}></i>
             Serviços
