@@ -37,14 +37,6 @@ export interface CreateSupportTicketDto {
   explanation: string;
 }
 
-/**
- * Payload para atualizar status (Admin only)
- * Baseado em UpdateSupportTicketDto.cs
- */
-export interface UpdateSupportTicketDto {
-  status: SupportTicketStatus;
-}
-
 // =================================================================
 // API RESPONSES
 // =================================================================
@@ -56,25 +48,4 @@ export interface SupportApiResponse<T> {
   success: boolean;
   message?: string;
   data?: T;
-}
-
-/**
- * Resultado paginado de tickets
- */
-export interface PaginatedSupportResult {
-  items: SupportTicketDto[];
-  totalCount: number;
-  currentPage: number;
-  pageSize: number;
-  totalPages: number;
-}
-
-/**
- * Filtros para listagem de tickets (Admin)
- */
-export interface SupportFilters {
-  page: number;
-  pageSize: number;
-  status?: SupportTicketStatus;
-  searchTerm?: string;
 }

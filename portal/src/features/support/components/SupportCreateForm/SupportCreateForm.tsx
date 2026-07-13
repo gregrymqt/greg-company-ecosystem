@@ -6,7 +6,7 @@ import React from 'react';
 import { useUserSupport } from '../../hooks/useUserSupport';
 import type { CreateSupportTicketDto } from '../../types/support.types';
 import { Form } from '@/components/Form';
-import styles from '../styles/SupportCreateForm.module.scss';
+import styles from './SupportCreateForm.module.scss';
 
 export const SupportCreateForm: React.FC = () => {
   const { createTicket, loading } = useUserSupport();
@@ -33,12 +33,12 @@ export const SupportCreateForm: React.FC = () => {
         </Form.Actions>
       </Form>
 
-      <div className={styles.helpText}>
-        <i className="fas fa-info-circle"></i>
-        <span>
-          Você receberá um retorno em até 24 horas úteis.
-          Verifique também sua caixa de spam.
-        </span>
+      <div className={styles.tips}>
+        <h4><i className="fas fa-info-circle"></i> Informações Úteis</h4>
+        <ul>
+          <li>Você receberá um retorno em até 24 horas úteis.</li>
+          <li>Verifique também sua caixa de spam.</li>
+        </ul>
       </div>
     </div>
   );

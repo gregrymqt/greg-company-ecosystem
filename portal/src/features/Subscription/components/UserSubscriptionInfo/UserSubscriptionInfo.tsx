@@ -18,6 +18,7 @@ export const UserSubscriptionInfo: React.FC<UserSubscriptionInfoProps> = ({ data
     const translateStatus = (status: string | null) => {
         const map: Record<string, string> = {
             authorized: 'Ativa',
+            active: 'Ativa',
             paused: 'Pausada',
             cancelled: 'Cancelada'
         };
@@ -37,7 +38,7 @@ export const UserSubscriptionInfo: React.FC<UserSubscriptionInfoProps> = ({ data
 
                     <div className={styles.dataItem}>
                         <label>Status</label>
-                        <span className={`${styles.badge} ${styles[data.status || '']}`}>
+                        <span className={`${styles.badge} ${styles[data.status === 'active' ? 'authorized' : (data.status || '')]}`}>
                             {translateStatus(data.status)}
                         </span>
                     </div>

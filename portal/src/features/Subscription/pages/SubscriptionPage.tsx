@@ -6,8 +6,10 @@ import type { SidebarItem } from '@/components/SideBar/types/sidebar.types';
 // Estilos
 import styles from './SubscriptionPage.module.scss';
 import { Sidebar } from '@/components/SideBar';
+import { useAuth } from '@/features/auth/hooks/useAuth';
 
 export const SubscriptionPage: React.FC = () => {
+    const { logout } = useAuth();
     // 1. Estado para controlar a aba ativa da Sidebar
     const [activeTab, setActiveTab] = useState<string | number>('subscription');
 
@@ -52,7 +54,7 @@ export const SubscriptionPage: React.FC = () => {
                     logo={<h4>Portal do Cliente</h4>} // [cite: 28]
                 >
                     {/* Footer da Sidebar (Logout) [cite: 24, 29] */}
-                    <button className={styles.logoutBtn}>
+                    <button className={styles.logoutBtn} onClick={logout}>
                         <i className="fas fa-sign-out-alt"></i> Sair
                     </button>
                 </Sidebar>

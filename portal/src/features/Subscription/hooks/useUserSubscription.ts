@@ -17,8 +17,6 @@ export const useUserSubscription = () => {
             setSubscription(data);
         } catch (error) {
             const msg = error instanceof ApiError ? error.message : 'Não foi possível carregar sua assinatura.';
-            // Não bloqueamos com AlertService.error aqui para não ser intrusivo no load inicial,
-            // mas você pode descomentar se preferir um popup.
             console.error(msg);
         } finally {
             setIsLoading(false);
