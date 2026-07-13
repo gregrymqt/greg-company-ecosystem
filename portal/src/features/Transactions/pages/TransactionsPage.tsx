@@ -3,7 +3,7 @@ import styles from './TransactionsPage.module.scss';
 
 import { Sidebar } from '@/components/SideBar';
 import type { SidebarItem } from '@/components/SideBar/types/sidebar.types';
-import { PaymentHistory } from '@/features/Transactions';
+import { PaymentHistory } from '../components/PaymentHistory/PaymentHistory';
 
 // Definição dos itens do menu lateral
 const MENU_ITEMS: SidebarItem[] = [
@@ -69,7 +69,7 @@ export const TransactionsPage: React.FC = () => {
                 activeItemId={activeView}
                 onItemClick={handleNavigation} // [cite: 4]
                 logo={
-                    <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#007bff' }}>
+                    <div className={styles.sidebarLogo}>
                         <i className="fas fa-wallet"></i> Financeiro
                     </div>
                 }

@@ -1,10 +1,10 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 
 import styles from '../styles/AddCardForm.module.scss';
 
 
 import { useWallet } from '../../hooks/useWallet';
-import { usePreference, MercadoPagoBrick } from '@/features/Payment';
+import {  MercadoPagoBrick, PreferenceService } from '@/features/Payment';
 import type { BrickPaymentData } from '@/features/Payment';
 
 interface AddCardFormProps {
@@ -15,9 +15,25 @@ interface AddCardFormProps {
 export const AddCardForm: React.FC<AddCardFormProps> = ({ onSuccess, onCancel }) => {
   const { addCard } = useWallet();
 
-  // 1. Geramos uma preferência dummy apenas para carregar o Brick visualmente.
-  // O valor 1.00 é simbólico para inicializar o form, mas não vamos processar esse pagamento no onSubmit.
-  const { preferenceId, loading: prefLoading, error: prefError } = usePreference(1, true);
+  const [preferenceId, setPreferenceId] = useState<string | null>(null);
+  const [prefLoading, setPrefLoading] = useState<boolean>(true);
+  const [prefError, setPrefError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchPreference = async () => {
+      try {
+        // Geramos uma preferência dummy apenas para carregar o Brick visualmente.
+        const id = await PreferenceService.createPreference('1', crypto.randomUUID());
+        setPreferenceId(id);
+      } catch (error) {
+        console.error("Erro ao gerar preferenceId:", error);
+        setPrefError("Erro ao iniciar conexão segura.");
+      } finally {
+        setPrefLoading(false);
+      }
+    };
+    fetchPreference();
+  }, []);
 
   // 2. Função disparada quando o usuário clica no botão de ação do Brick
   const handleBrickSubmit = useCallback(async (data: BrickPaymentData) => {

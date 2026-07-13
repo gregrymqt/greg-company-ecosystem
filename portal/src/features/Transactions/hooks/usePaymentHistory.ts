@@ -1,8 +1,7 @@
-// src/features/Transactions/Public/hooks/usePaymentHistory.ts
 import { useState, useEffect, useCallback } from "react";
 import { ApiError } from "@/shared/services/api.service";
 import { UserTransactionsService } from "../services/userTransactions.service";
-import type { PaymentItems } from "..";
+import type { PaymentItems } from "../types/transactions.types";
 
 export const usePaymentHistory = () => {
   const [payments, setPayments] = useState<PaymentItems[]>([]);

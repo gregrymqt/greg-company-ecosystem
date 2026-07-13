@@ -1,4 +1,3 @@
-// src/features/Transactions/shared/types/transactions.types.ts
 
 export interface PaymentItems {
   id: string;

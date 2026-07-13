@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 
 import styles from './WalletPage.module.scss';
-import { AddCardForm, WalletList } from '@/features/Wallet';
+import { AddCardForm, WalletList } from '@/features/wallet';
 import { Sidebar } from '@/components/SideBar';
 import type { SidebarItem } from '@/components/SideBar/types/sidebar.types';
 

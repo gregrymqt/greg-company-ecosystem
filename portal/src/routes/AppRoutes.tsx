@@ -6,7 +6,7 @@ import { Home } from "@/features/home/pages/Home";
 import { CourseFeed } from "@/features/course/pages/CourseFeed";
 import { PlayerScreen } from "@/features/video/pages/PlayerScreen";
 import { UserClaimsPage } from "@/features/Claim/pages/UserClaimsPage";
-import { WalletPage } from "@/features/Wallet/pages/WalletPage";
+import { WalletPage } from "@/features/wallet/pages/WalletPage";
 import { TransactionsPage } from "@/features/Transactions/pages/TransactionsPage";
 import { SubscriptionPage } from "@/features/Subscription/pages/SubscriptionPage";
 import { ProfileDashboard } from "@/features/profile/pages/ProfileDashboard";

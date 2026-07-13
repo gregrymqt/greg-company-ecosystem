@@ -1,6 +1,5 @@
-// src/features/Transactions/Public/services/userTransactions.service.ts
 import { ApiService } from "@/shared/services/api.service";
-import type { PaymentItems } from "..";
+import type { PaymentItems } from "../types/transactions.types";
 
 /**
  * UserTransactionsService - Área do Cliente
