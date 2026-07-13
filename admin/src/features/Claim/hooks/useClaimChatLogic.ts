@@ -6,13 +6,16 @@ import type { ReplyFormData } from '../types/claim.dtos';
 import { AlertService } from "@/shared/services/alert.service";
 import { ApiError } from "@/shared/services/api.service";
 
+// Socket Hooks
+import { useSocketListener } from "@/shared/hooks/useSocket";
+import { AppHubsCSharp } from "@/shared/enums/hub/hub.enums";
+
 // Props para saber quem está usando o hook
 interface UseClaimChatProps {
   claimId: number;
-  role: "admin" | "user";
 }
 
-export const useClaimChatLogic = ({ claimId, role }: UseClaimChatProps) => {
+export const useClaimChatLogic = ({ claimId }: UseClaimChatProps) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSending, setIsSending] = useState(false);
@@ -21,10 +24,7 @@ export const useClaimChatLogic = ({ claimId, role }: UseClaimChatProps) => {
   const fetchMessages = useCallback(async () => {
     try {
       setIsLoading(true);
-      let data;
-
-      // Decide qual service chamar baseado na role
-      data = await AdminClaimService.getDetails(claimId);
+      const data = await AdminClaimService.getDetails(claimId);
 
       if (data && data.messages) {
         setMessages(data.messages);
@@ -34,34 +34,38 @@ export const useClaimChatLogic = ({ claimId, role }: UseClaimChatProps) => {
     } finally {
       setIsLoading(false);
     }
-  }, [claimId, role]);
+  }, [claimId]);
 
-  // 2. Polling e Carga Inicial
+  // Carga inicial
   useEffect(() => {
-    fetchMessages(); // Carga inicial
+    fetchMessages();
+  }, [fetchMessages]);
 
-    // Polling a cada 30 segundos para simular tempo real
-    const interval = setInterval(() => {
-      // Chamada silenciosa (sem setar isLoading global para não piscar a tela)
-      const silentUpdate = async () => {
-        try {
-          const data =
-            await AdminClaimService.getDetails(claimId);
-          if (data?.messages) setMessages(data.messages);
-        } catch (e) {
-          console.error("Erro ao buscar mensagens", e);
-        }
-      };
-      silentUpdate();
-    }, 30000);
-
-    return () => clearInterval(interval);
-  }, [fetchMessages, claimId, role]);
+  // 2. Ouvinte de Socket em Tempo Real
+  // O backend deve enviar um payload contendo o claimId e o objeto da nova mensagem
+  useSocketListener<{ claimId: number; message: ChatMessage }>(
+    AppHubsCSharp.GlobalRealtime,
+    "ReceiveClaimMessage",
+    (payload) => {
+      // Se a mensagem for deste claim específico, adiciona à lista
+      if (payload.claimId === claimId) {
+        setMessages((prev) => [...prev, payload.message]);
+      }
+    }
+  );
 
   // 3. Função de Envio (Conectada ao GenericForm)
   const handleSendResponse = async (formData: ReplyFormData) => {
     // Validação básica
     if (!formData.message) return;
+
+    if (formData.attachments && formData.attachments.length > 0) {
+      AlertService.error(
+        "Aviso",
+        "O envio de arquivos anexos via painel de mediação está temporariamente indisponível. Remova os arquivos e envie apenas texto."
+      );
+      return false;
+    }
 
     setIsSending(true);
     try {

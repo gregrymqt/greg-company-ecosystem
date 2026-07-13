@@ -1,4 +1,4 @@
-﻿using MeuCrudCsharp.Features.Caching.Application.Interfaces;
+using MeuCrudCsharp.Features.Caching.Application.Interfaces;
 using MeuCrudCsharp.Features.Exceptions;
 using MeuCrudCsharp.Features.MercadoPago.Claims.Application.Interfaces;
 using MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Interfaces;
@@ -96,16 +96,17 @@ public class AdminClaimService(
             InternalId = localClaim.Id,
             MpClaimId = localClaim.MpClaimId,
             Status = localClaim.Status.ToString(),
-            Messages = messages
-                .Select(m => new ClaimMessageViewModel
+            Messages =
+            [
+                .. messages.Select(m => new ClaimMessageViewModel
                 {
                     MessageId = m.Id,
                     SenderRole = m.SenderRole,
                     Content = m.Message,
                     DateCreated = m.DateCreated,
-                    Attachments = m.Attachments?.Select(a => a.Filename).ToList() ?? [],
+                    Attachments = [.. m.Attachments?.Select(a => a.Filename) ?? []],
                 })
-                .ToList(),
+            ],
         };
     }
 
