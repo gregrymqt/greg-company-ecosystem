@@ -9,7 +9,6 @@ import { PlansAdmin } from "@/pages/Plans/PlansAdmin";
 import { AdminClaimsPage } from "@/pages/Claims/AdminClaimsPage";
 import { ChargebackManager } from "@/pages/ChargeBack/ChargebackManager";
 import { SupportAdminPage } from "@/pages/Support/SupportAdminPage";
-import { AdminAboutPage } from "@/pages/About/AdminAboutPage";
 import { AdminHomePage } from "@/pages/Home/AdminHomePage";
 import { AnalyticsPage } from "@/pages/Analytics/AnalyticsPage";
 import { MainLayout } from "@/components/layout/components/MainLayout";
@@ -30,7 +29,6 @@ export const AppRoutes = () => {
           <Route path="/reclamacoes" element={<AdminClaimsPage />} />
           <Route path="/contestacoes" element={<ChargebackManager />} />
           <Route path="/suporte" element={<SupportAdminPage />} />
-          <Route path="/about" element={<AdminAboutPage />} />
           <Route path="/home" element={<AdminHomePage />} />
           <Route path="/planos" element={<PlansAdmin />} />
           <Route path="/analytics" element={<AnalyticsPage />} />

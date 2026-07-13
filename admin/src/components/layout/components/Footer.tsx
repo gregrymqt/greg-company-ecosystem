@@ -21,7 +21,6 @@ export const Footer = () => {
           <h4>Navegação</h4>
           <ul>
             <li><Link to="/cursos">Cursos</Link></li>
-            <li><Link to="/sobre">Sobre Nós</Link></li>
             <li><Link to="/contato">Contato</Link></li>
             <li><Link to="/faq">FAQ</Link></li>
           </ul>

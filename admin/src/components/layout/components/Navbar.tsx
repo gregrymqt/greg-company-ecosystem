@@ -11,7 +11,6 @@ export const Navbar = () => {
   const navLinks = [
     { path: '/', label: 'Home', icon: 'fas fa-home' },
     { path: '/cursos', label: 'Cursos', icon: 'fas fa-graduation-cap' },
-    { path: '/sobre', label: 'Sobre', icon: 'fas fa-info-circle' },
     { path: '/contato', label: 'Contato', icon: 'fas fa-envelope' },
   ];
 
