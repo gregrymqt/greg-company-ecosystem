@@ -8,6 +8,7 @@ import Hls from 'hls.js';
 import { publicVideoService } from '../services/video-public.service';
 import { useVideoProgress } from './useVideoProgress';
 import type { PlayerVideoDto, VideoDto } from '..';
+import { StorageService, STORAGE_KEYS } from '../../../shared/services/storage.service';
 
 export const useVideoPlayer = (publicId: string | undefined) => {
   const [video, setVideo] = useState<PlayerVideoDto | null>(null);
@@ -92,7 +93,7 @@ export const useVideoPlayer = (publicId: string | undefined) => {
 
     if (internalData) {
       const courseIdToSave = internalData.courseId || internalData.id;
-      const cacheKey = `@GregCompany:LastWatched:Course:${courseIdToSave}`;
+      const cacheKey = `${STORAGE_KEYS.LAST_WATCHED_COURSE}${courseIdToSave}`;
       const historyPayload = {
         videoId: internalData.id,
         title: internalData.title,
@@ -102,7 +103,7 @@ export const useVideoPlayer = (publicId: string | undefined) => {
         courseName: internalData.courseName,
         lastWatchedAt: new Date().toISOString()
       };
-      localStorage.setItem(cacheKey, JSON.stringify(historyPayload));
+      StorageService.setItem(cacheKey, historyPayload);
     }
   }, [internalData]);
 

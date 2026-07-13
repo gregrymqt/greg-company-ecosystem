@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 
 // Estilos
 import styles from "./styles/AboutPage.module.scss";
@@ -14,18 +14,22 @@ import type { AboutTeamData } from "@/features/about/types/about.types";
 
 export const AboutPage: React.FC = () => {
   // CORREÇÃO: Usando o hook correto que retorna sections e teamMembers separados
-  const { sections, teamMembers, isLoading, refreshData } = useAboutData();
-
-  // Busca os dados ao montar a página
-  useEffect(() => {
-    refreshData();
-  }, [refreshData]);
+  const { sections, teamMembers, isLoading, error } = useAboutData();
 
   // Loading UI
   if (isLoading) {
     return (
       <div className={styles.loadingContainer}>
         <p>Carregando nossa história...</p>
+      </div>
+    );
+  }
+
+  // Error UI
+  if (error) {
+    return (
+      <div className={styles.emptyState}>
+        <p style={{ color: 'var(--color-danger, red)' }}>{error}</p>
       </div>
     );
   }

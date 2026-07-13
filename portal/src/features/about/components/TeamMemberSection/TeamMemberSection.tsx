@@ -9,10 +9,6 @@ interface AboutTeamSectionProps {
 
 export const AboutTeamSection: React.FC<AboutTeamSectionProps> = ({ data }) => {
 
-    // Tratamento de clique no card (ex: abrir modal ou ir para perfil)
-    const handleCardClick = (member: TeamMember) => {
-        console.log('Clicou no membro:', member.name);
-    };
 
     if (!data || !data.members.length) return null;
 
@@ -29,7 +25,6 @@ export const AboutTeamSection: React.FC<AboutTeamSectionProps> = ({ data }) => {
                         key={member.id}
                         data={member}
                         className={styles.teamCard} // Classe customizada para sobrescrever estilos se precisar
-                        onClick={handleCardClick}
                     >
                         {/* 1. Imagem do Card */}
                         <Card.Image

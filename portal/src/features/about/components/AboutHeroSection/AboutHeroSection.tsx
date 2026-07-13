@@ -21,18 +21,15 @@ export const AboutHeroSection: React.FC<AboutHeroSectionProps> = ({ data }) => {
                     <div className={styles.description}>
                         <p>{data.description}</p>
                     </div>
-                    
-                    {/* Botão de ação opcional (CTA) - Bom para UX */}
-                    <button className={styles.ctaButton}>
-                        Saiba mais
-                    </button>
+
+
                 </div>
 
                 {/* Lado Direito: Imagem */}
                 <div className={styles.imageWrapper}>
-                    <img 
-                        src={data.imageUrl} 
-                        alt={data.imageAlt || data.title} 
+                    <img
+                        src={data.imageUrl}
+                        alt={data.imageAlt || data.title}
                         className={styles.image}
                         loading="lazy" // Performance: Lazy load nativo
                     />

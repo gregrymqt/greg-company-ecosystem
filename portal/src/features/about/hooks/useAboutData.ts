@@ -36,6 +36,5 @@ export const useAboutData = () => {
     teamMembers,
     isLoading,
     error,
-    refreshData: fetchData, // Exportamos a função para permitir recarregamento manual (ex: após um CRUD)
   };
 };

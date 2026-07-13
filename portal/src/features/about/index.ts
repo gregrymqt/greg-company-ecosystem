@@ -10,8 +10,6 @@ export type {
   AboutTeamData,
   AboutPageResponse,
   AboutSectionContent,
-  AboutSectionFormValues,
-  TeamMemberFormValues
 } from './types/about.types';
 
 // Services
@@ -21,5 +19,5 @@ export { AboutService } from './services/about.service';
 export { useAboutData } from './hooks/useAboutData';
 
 // Components (Public display)
-export { AboutTeamSection } from './components/TeamMemberSection';
-export { AboutHeroSection } from './components/AboutHeroSection';
+export { AboutTeamSection } from './components/TeamMemberSection/TeamMemberSection';
+export { AboutHeroSection } from './components/AboutHeroSection/AboutHeroSection';

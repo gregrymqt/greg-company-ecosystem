@@ -33,13 +33,4 @@ export interface AboutPageResponse {
 }
 
 export type AboutSectionContent = AboutSectionData | AboutTeamData;
-
-// --- TIPOS ESPECÍFICOS PARA OS FORMULÁRIOS ---
-
-export interface AboutSectionFormValues extends Omit<AboutSectionData, 'id' | 'contentType' | 'imageUrl'> {
-  newImage?: FileList; 
-}
-
-export interface TeamMemberFormValues extends Omit<TeamMember, 'id' | 'photoUrl'> {
-  newPhoto?: FileList;
-}
+
