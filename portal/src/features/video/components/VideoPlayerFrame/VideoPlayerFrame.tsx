@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import styles from '../styles/VideoPlayerFrame.module.scss';
-import type { PlayerVideoDto } from '../../../shared';
 import { useVideoProgress } from '../../hooks/useVideoProgress';
+import type { PlayerVideoDto } from '../../types/video.types';
 
 interface VideoPlayerFrameProps {
   video: PlayerVideoDto;

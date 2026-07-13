@@ -27,31 +27,13 @@ export interface VideoDto {
   uploadDate: string; // ISO 8601 date string
   duration: string; // TimeSpan como string (ex: "00:12:30")
   status: VideoStatus;
+  courseId?: number;
   courseName?: string;
   thumbnailUrl?: string;
+  nextVideoId?: string;
+  prevVideoId?: string;
 }
 
-/**
- * Payload para criar vídeo (Admin)
- * Baseado em CreateVideoDto.cs
- */
-export interface CreateVideoDto {
-  title: string;
-  description: string;
-  courseId: number;
-  videoFile: File; // IFormFile obrigatório
-  thumbnailFile?: File; // IFormFile opcional
-}
-
-/**
- * Payload para atualizar vídeo (Admin)
- * Baseado em UpdateVideoDto.cs
- */
-export interface UpdateVideoDto {
-  title: string;
-  description?: string;
-  thumbnailFile?: File; // IFormFile opcional
-}
 
 // =================================================================
 // PAGINAÇÃO
@@ -68,30 +50,6 @@ export interface PaginatedVideoResult {
   pageSize: number;
 }
 
-/**
- * Filtros para listagem de vídeos (Admin)
- */
-export interface VideoFilters {
-  page: number;
-  pageSize: number;
-  courseId?: number;
-  status?: VideoStatus;
-}
-
-// =================================================================
-// UI HELPERS - Para componentes de formulário
-// =================================================================
-
-/**
- * Dados do formulário de vídeo (compatível com React Hook Form)
- */
-export interface VideoFormData {
-  title: string;
-  description: string;
-  courseId: string; // Como string para compatibilidade com select
-  videoFile?: FileList;
-  thumbnailFile?: FileList;
-}
 
 /**
  * Interface para Player (Public)
@@ -106,6 +64,8 @@ export interface PlayerVideoDto {
   courseTitle?: string;
   storageIdentifier: string; // Para construir URL do manifest
   status: VideoStatus; // Para acompanhar o processamento
+  nextVideoId?: string;
+  prevVideoId?: string;
 }
 
 /**

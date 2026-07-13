@@ -5,7 +5,7 @@
  */
 
 import { ApiService } from '@/shared/services/api.service';
-import type { VideoDto, PlayerVideoDto } from '../../shared';
+import type { PlayerVideoDto, VideoDto } from '../types/video.types';
 
 class PublicVideoService {
   private readonly BASE_PATH = '/videos';
@@ -38,7 +38,9 @@ class PublicVideoService {
       durationFormatted: this.formatDuration(video.duration),
       courseTitle: video.courseName,
       storageIdentifier: video.storageIdentifier,
-      status: video.status
+      status: video.status,
+      nextVideoId: video.nextVideoId,
+      prevVideoId: video.prevVideoId
     };
   }
 

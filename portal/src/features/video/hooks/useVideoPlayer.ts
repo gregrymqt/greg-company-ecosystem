@@ -6,7 +6,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Hls from 'hls.js';
 import { publicVideoService } from '../services/video-public.service';
-import type { PlayerVideoDto, VideoDto } from '../../shared';
+import { useVideoProgress } from './useVideoProgress';
+import type { PlayerVideoDto, VideoDto } from '..';
 
 export const useVideoPlayer = (publicId: string | undefined) => {
   const [video, setVideo] = useState<PlayerVideoDto | null>(null);
@@ -17,6 +18,8 @@ export const useVideoPlayer = (publicId: string | undefined) => {
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const hlsRef = useRef<Hls | null>(null);
+
+  const { progress: conversionProgress, status: conversionStatus } = useVideoProgress(internalData?.storageIdentifier || null);
 
   // Busca metadados do vídeo
   const refreshVideo = useCallback(async () => {
@@ -40,7 +43,8 @@ export const useVideoPlayer = (publicId: string | undefined) => {
 
   // Lógica de streaming HLS
   useEffect(() => {
-    if (!isPlaying || !videoRef.current || !internalData) return;
+    const isAvailable = internalData?.status === 'Available' || conversionStatus === 'SUCCESS';
+    if (!isPlaying || !videoRef.current || !internalData || !isAvailable) return;
 
     const videoElement = videoRef.current;
     const manifestUrl = publicVideoService.getManifestUrl(internalData.storageIdentifier);
@@ -81,11 +85,26 @@ export const useVideoPlayer = (publicId: string | undefined) => {
         hlsRef.current.destroy();
       }
     };
-  }, [isPlaying, internalData]);
+  }, [isPlaying, internalData, conversionStatus]);
 
   const handleStart = useCallback(() => {
     setIsPlaying(true);
-  }, []);
+
+    if (internalData) {
+      const courseIdToSave = internalData.courseId || internalData.id;
+      const cacheKey = `@GregCompany:LastWatched:Course:${courseIdToSave}`;
+      const historyPayload = {
+        videoId: internalData.id,
+        title: internalData.title,
+        thumbnailUrl: internalData.thumbnailUrl,
+        durationFormatted: internalData.duration,
+        courseId: internalData.courseId,
+        courseName: internalData.courseName,
+        lastWatchedAt: new Date().toISOString()
+      };
+      localStorage.setItem(cacheKey, JSON.stringify(historyPayload));
+    }
+  }, [internalData]);
 
   const handlePause = useCallback(() => {
     if (videoRef.current) {
@@ -108,6 +127,8 @@ export const useVideoPlayer = (publicId: string | undefined) => {
     handleStart,
     handlePause,
     handleResume,
-    refreshVideo
+    refreshVideo,
+    conversionProgress,
+    conversionStatus
   };
 };

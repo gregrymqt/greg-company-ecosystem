@@ -59,8 +59,8 @@ export const PlayerScreen: React.FC = () => {
       <section className={styles.infoSection}>
         <VideoMetadata 
           data={video}
-          onNext={() => console.log('Lógica de Próxima Aula')}
-          onPrev={undefined} 
+          onNext={video.nextVideoId ? () => navigate(`/player/${video.nextVideoId}`) : undefined}
+          onPrev={video.prevVideoId ? () => navigate(`/player/${video.prevVideoId}`) : undefined} 
         />
       </section>
     </main>
