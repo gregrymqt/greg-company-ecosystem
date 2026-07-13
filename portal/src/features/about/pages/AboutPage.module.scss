@@ -1,42 +1,120 @@
-// Container principal da página
 .pageContainer {
   width: 100%;
-  min-height: 100vh; // Garante que o footer vá para baixo se houver pouco conteúdo
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background-color: $bg-grey; // Fundo base da página
+  background-color: var(--bg-grey, #f4f6f8);
 }
 
-// Wrapper para cada seção renderizada dinamicamente
-.sectionWrapper {
-  width: 100%;
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.heroSection {
+  background-color: var(--primary-color, #0a1f44);
+  color: #ffffff;
+  padding: 80px 0;
+  text-align: center;
+}
+
+.title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 24px;
+}
+
+.description {
+  font-size: 1.125rem;
+  line-height: 1.6;
+  max-width: 800px;
+  margin: 0 auto;
+  opacity: 0.9;
+}
+
+.devSection {
+  padding: 80px 0;
+  background-color: var(--bg-white, #ffffff);
+}
+
+.sectionTitle {
+  font-size: 2rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 48px;
+  color: var(--text-dark, #333333);
+}
+
+.devCard {
+  background-color: var(--bg-white, #ffffff);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  padding: 40px;
+  max-width: 800px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  transition: transform 0.3s ease;
+
+  &:hover {
+    transform: translateY(-5px);
+  }
+}
+
+.devName {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--primary-color, #0a1f44);
+  margin-bottom: 8px;
+}
+
+.devRole {
+  font-size: 1.125rem;
+  color: var(--secondary-color, #666666);
+  font-weight: 500;
+  margin-bottom: 24px;
+}
+
+.devBio {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--text-muted, #555555);
+  margin-bottom: 32px;
+}
+
+.socialLinks {
+  display: flex;
+  gap: 16px;
+}
+
+.socialLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
   
-  // Estratégia de separação visual:
-  // Se for a última seção, remove margem extra para colar no footer
-  &:last-child {
-    margin-bottom: 0;
+  &:first-child {
+    background-color: #0077b5;
+    color: white;
+    
+    &:hover {
+      background-color: darken(#0077b5, 10%);
+    }
   }
 
-  // Alternância visual (Opcional, mas muito bom para UI):
-  // Seções pares e ímpares podem ter comportamentos diferentes se desejar.
-  // Como seus componentes já definem suas cores de fundo,
-  // aqui focamos apenas no fluxo.
-}
-
-// Loading State
-.loadingContainer {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 50vh;
-  color: $primary-color;
-  font-size: $font-size-lg;
-  font-weight: 600;
-}
-
-// Empty State (Caso a API não retorne nada)
-.emptyState {
-  text-align: center;
-  padding: $spacing-xxl;
-  color: $text-muted;
+  &:last-child {
+    background-color: #24292e;
+    color: white;
+    
+    &:hover {
+      background-color: darken(#24292e, 10%);
+    }
+  }
 }
