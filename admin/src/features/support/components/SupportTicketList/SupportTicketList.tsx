@@ -3,7 +3,7 @@
  * Com funcionalidades de filtro e atualização de status
  */
 
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useAdminSupport } from '../../hooks/useAdminSupport';
 import type { SupportTicketDto, SupportTicketStatus } from '../../types/support.types';
 import { ActionMenu } from '@/components/ActionMenu/ActionMenu';
@@ -15,19 +15,33 @@ export const SupportTicketList: React.FC = () => {
     tickets,
     loading,
     hasMore,
+    filters,
     fetchTickets,
+    fetchTicketById,
+    currentTicket,
     updateStatus,
+    updateFilters,
     loadMore
   } = useAdminSupport();
 
   const observerTarget = useRef<HTMLDivElement>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [localSearch, setLocalSearch] = useState(filters.searchTerm || '');
+
+  // Debounce para busca
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      if (localSearch !== filters.searchTerm) {
+        updateFilters({ searchTerm: localSearch || undefined });
+      }
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [localSearch, filters.searchTerm, updateFilters]);
 
   // Carrega tickets ao montar
   useEffect(() => {
-    if (tickets.length === 0) {
-      fetchTickets(true);
-    }
-  }, [fetchTickets, tickets.length]);
+    fetchTickets(true);
+  }, [fetchTickets]);
 
   // Scroll infinito
   useEffect(() => {
@@ -95,6 +109,16 @@ export const SupportTicketList: React.FC = () => {
       width: '100px',
       render: (item) => (
         <ActionMenu>
+          <button
+            className={styles.actionItem}
+            onClick={() => {
+              fetchTicketById(item.id);
+              setIsModalOpen(true);
+            }}
+          >
+            <i className="fas fa-eye"></i> Visualizar Detalhes
+          </button>
+
           {item.status === 'Open' && (
             <button
               className={`${styles.actionItem} ${styles.warning}`}
@@ -136,14 +160,33 @@ export const SupportTicketList: React.FC = () => {
           </small>
         </div>
 
-        <button
-          className={styles.refreshBtn}
-          onClick={() => fetchTickets(true)}
-          disabled={loading}
-        >
-          <i className={`fas fa-sync-alt ${loading ? 'fa-spin' : ''}`}></i>
-          Atualizar
-        </button>
+        <div className={styles.filterBar}>
+          <input
+            type="text"
+            className={styles.searchInput}
+            placeholder="Buscar assunto..."
+            value={localSearch}
+            onChange={(e) => setLocalSearch(e.target.value)}
+          />
+          <select
+            className={styles.statusSelect}
+            value={filters.status || ''}
+            onChange={(e) => updateFilters({ status: (e.target.value as SupportTicketStatus) || undefined })}
+          >
+            <option value="">Todos os Status</option>
+            <option value="Open">Aberto</option>
+            <option value="InProgress">Em Andamento</option>
+            <option value="Closed">Fechado</option>
+          </select>
+          <button
+            className={styles.refreshBtn}
+            onClick={() => fetchTickets(true)}
+            disabled={loading}
+          >
+            <i className={`fas fa-sync-alt ${loading ? 'fa-spin' : ''}`}></i>
+            Atualizar
+          </button>
+        </div>
       </header>
 
       <Table<SupportTicketDto>
@@ -158,6 +201,28 @@ export const SupportTicketList: React.FC = () => {
       {hasMore && !loading && (
         <div ref={observerTarget} className={styles.loadMoreTrigger}>
           Carregando mais...
+        </div>
+      )}
+
+      {/* Modal de Detalhes */}
+      {isModalOpen && currentTicket && (
+        <div className={styles.modalOverlay} onClick={() => setIsModalOpen(false)}>
+          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <h3>Detalhes do Ticket</h3>
+            <p><strong>ID:</strong> {currentTicket.id}</p>
+            <p><strong>ID do Usuário:</strong> {currentTicket.userId}</p>
+            <p><strong>Contexto:</strong> {currentTicket.context}</p>
+            <p><strong>Data de Criação:</strong> {new Date(currentTicket.createdAt).toLocaleString('pt-BR')}</p>
+            
+            <div className={styles.explanationBox}>
+              <strong>Explicação:</strong>
+              <p>{currentTicket.explanation}</p>
+            </div>
+            
+            <button className={styles.closeBtn} onClick={() => setIsModalOpen(false)}>
+              Fechar
+            </button>
+          </div>
         </div>
       )}
     </div>

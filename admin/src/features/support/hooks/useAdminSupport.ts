@@ -3,7 +3,7 @@
  * Usa adminSupportService
  */
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { adminSupportService } from '../services/support-admin.service';
 import type {
   SupportTicketDto,
@@ -28,20 +28,30 @@ export const useAdminSupport = () => {
   
   // Previne chamadas duplicadas
   const loadingRef = useRef(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   /**
    * Busca tickets paginados
    */
   const fetchTickets = useCallback(async (reset = false) => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      loadingRef.current = false;
+    }
+    
+    abortControllerRef.current = new AbortController();
+
     if (loadingRef.current) return;
 
     loadingRef.current = true;
     setLoading(true);
 
     try {
-      const response = await adminSupportService.getAllTickets(
-        reset ? { ...filters, page: 1 } : filters
-      );
+      // Injeta o signal nos filtros mantendo o desacoplamento
+      const activeFilters: any = reset ? { ...filters, page: 1 } : { ...filters };
+      activeFilters.signal = abortControllerRef.current.signal;
+
+      const response = await adminSupportService.getAllTickets(activeFilters);
 
       if (response.success && response.data) {
         const { items, totalPages, currentPage } = response.data;
@@ -51,11 +61,16 @@ export const useAdminSupport = () => {
         setHasMore(currentPage < totalPages);
       }
     } catch (err) {
+      if ((err as Error).name === 'AbortError' || (err as Error).name === 'CanceledError') {
+        return; // Ignora erros de cancelamento
+      }
       const errorMessage = (err as Error).message || 'Erro ao carregar tickets.';
       AlertService.error('Erro', errorMessage);
     } finally {
-      setLoading(false);
-      loadingRef.current = false;
+      if (!abortControllerRef.current?.signal.aborted) {
+        setLoading(false);
+        loadingRef.current = false;
+      }
     }
   }, [filters]);
 
@@ -121,9 +136,18 @@ export const useAdminSupport = () => {
    * Carrega próxima página
    */
   const loadMore = useCallback(() => {
-    if (!hasMore || loading) return;
+    if (!hasMore || loadingRef.current) return;
     setFilters(prev => ({ ...prev, page: prev.page + 1 }));
-  }, [hasMore, loading]);
+  }, [hasMore]);
+
+  // Limpeza no desmonte do componente
+  useEffect(() => {
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, []);
 
   return {
     tickets,
