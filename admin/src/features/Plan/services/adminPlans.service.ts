@@ -21,8 +21,11 @@ export const AdminPlansService = {
    * Retorna a lista administrativa dos planos com paginação
    */
   getAdminPlans: async (page = 1, pageSize = 10): Promise<PagedResult<PlanAdminSummary>> => {
-    const query = `?page=${page}&pageSize=${pageSize}`;
-    return await ApiService.get<PagedResult<PlanAdminSummary>>(`${ADMIN_ENDPOINT}${query}`);
+    const params = new URLSearchParams({
+      page: page.toString(),
+      pageSize: pageSize.toString(),
+    });
+    return await ApiService.get<PagedResult<PlanAdminSummary>>(`${ADMIN_ENDPOINT}?${params.toString()}`);
   },
 
   /**

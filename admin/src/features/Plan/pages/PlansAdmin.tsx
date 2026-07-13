@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 
 import styles from './styles/PlansPage.module.scss';
-import { PlanForm, PlanList, useAdminPlans } from '@/features/plan';
+import { PlanForm, PlanList } from '@/features/plan';
 import type { SidebarItem } from '@/components/SideBar/types/sidebar.types';
 import type { PlanAdminDetail } from '@/features/plan';
 import { Sidebar } from '@/components/SideBar/Sidebar';
@@ -20,8 +20,7 @@ export const PlansAdmin: React.FC = () => {
     // Estado para Edição (Dados do plano selecionado)
     const [editingPlan, setEditingPlan] = useState<PlanAdminDetail | null>(null);
 
-    // Hook de lógica (precisamos do getPlanById aqui para preparar a edição)
-    const { getPlanById } = useAdminPlans();
+    // Sem necessidade do hook useAdminPlans aqui, a edição recebe o detalhe já resolvido
 
     // --- Handlers de Navegação ---
 
@@ -33,15 +32,10 @@ export const PlansAdmin: React.FC = () => {
         setActiveView(item.id.toString());
     };
 
-    const handleEditRequest = useCallback(async (id: string) => {
-        // 1. Busca os dados completos do plano
-        const planDetail = await getPlanById(id);
-
-        if (planDetail) {
-            setEditingPlan(planDetail);
-            setActiveView('create'); // Reutilizamos a view de form ('create') para edição
-        }
-    }, [getPlanById]);
+    const handleEditRequest = useCallback((planDetail: PlanAdminDetail) => {
+        setEditingPlan(planDetail);
+        setActiveView('create'); // Reutilizamos a view de form ('create') para edição
+    }, []);
 
     const handleFormSuccess = () => {
         // Ao salvar com sucesso, volta para a lista e limpa edição

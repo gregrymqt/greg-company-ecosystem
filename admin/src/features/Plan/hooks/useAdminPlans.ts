@@ -108,11 +108,16 @@ export const useAdminPlans = () => {
         loading,
         plans,
         currentPlan,
-        pagination,
         fetchAdminPlans,
         getPlanById,
         createPlan,
         updatePlan,
-        deletePlan
+        deletePlan,
+        pagination: {
+            currentPage: pagination?.currentPage ?? 1,
+            totalPages: pagination?.totalPages ?? 0,
+            totalCount: pagination?.totalCount ?? 0,
+            pageSize: pagination?.pageSize ?? 10
+        }
     };
 };

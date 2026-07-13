@@ -7,7 +7,7 @@ import styles from './PlanList.module.scss';
 import type { PlanAdminSummary, PlanAdminDetail } from '../../types';
 
 interface PlanListProps {
-  onEditRequest: (id: string) => void; // Callback para o pai abrir o Form
+  onEditRequest: (plan: PlanAdminDetail) => void; // Callback para o pai abrir o Form
 }
 
 export const PlanList: React.FC<PlanListProps> = ({ onEditRequest }) => {
@@ -44,6 +44,11 @@ export const PlanList: React.FC<PlanListProps> = ({ onEditRequest }) => {
     e.preventDefault();
     if (!searchId.trim()) return;
     await getPlanById(searchId);
+  };
+
+  const handleEditGeneralList = async (id: string) => {
+    const detail = await getPlanById(id);
+    if (detail) onEditRequest(detail);
   };
 
   // --- Colunas da Tabela ---
@@ -84,7 +89,7 @@ export const PlanList: React.FC<PlanListProps> = ({ onEditRequest }) => {
         width: "15%",
         render: (item) => (
           <span
-            className={`badge ${item.status === "active" ? "active" : "inactive"}`}
+            className={`${styles.badge} ${item.status === "active" ? styles.active : styles.inactive}`}
           >
             {item.status === "active" ? "Ativo" : "Inativo"}
           </span>
@@ -95,12 +100,8 @@ export const PlanList: React.FC<PlanListProps> = ({ onEditRequest }) => {
         width: "100px",
         render: (item) => (
           <ActionMenu
-            onEdit={() => onEditRequest(item.id)}
-            onDelete={() =>
-              deletePlan(item.id).then((success) => {
-                if (success) fetchAdminPlans(pagination?.currentPage || 1);
-              })
-            }
+            onEdit={() => handleEditGeneralList(item.id)}
+            onDelete={() => deletePlan(item.id)}
           />
         ),
       },
@@ -133,12 +134,8 @@ export const PlanList: React.FC<PlanListProps> = ({ onEditRequest }) => {
         width: "100px",
         render: (item) => (
           <ActionMenu
-            onEdit={() => onEditRequest(item.publicId)}
-            onDelete={() =>
-              deletePlan(item.publicId).then((success) => {
-                if (success) setSearchId("");
-              })
-            }
+            onEdit={() => currentPlan && onEditRequest(currentPlan)}
+            onDelete={() => deletePlan(item.publicId)}
           />
         ),
       },
@@ -189,13 +186,13 @@ export const PlanList: React.FC<PlanListProps> = ({ onEditRequest }) => {
               </span>
               <div>
                 <button
-                  disabled={!pagination.hasPreviousPage || loading}
+                  disabled={pagination.currentPage <= 1 || loading}
                   onClick={() => handlePageChange(pagination.currentPage - 1)}
                 >
                   &lt; Anterior
                 </button>
                 <button
-                  disabled={!pagination.hasNextPage || loading}
+                  disabled={pagination.currentPage >= pagination.totalPages || loading}
                   onClick={() => handlePageChange(pagination.currentPage + 1)}
                   style={{ marginLeft: "0.5rem" }}
                 >
