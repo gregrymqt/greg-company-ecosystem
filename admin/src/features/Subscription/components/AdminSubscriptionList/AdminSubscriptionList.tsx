@@ -1,21 +1,24 @@
 import React, { useState } from "react";
 
 import styles from './AdminSubscriptionList.module.scss';
-import { useAdminSubscription } from '../../hooks/useAdminSubscription';
 import { type TableColumn, Table } from "@/components/Table/Table";
 import type { AdminSubscriptionDetail } from '../../types/subscriptions.types';
 
-export const AdminSubscriptionList: React.FC = () => {
+interface AdminSubscriptionListProps {
+  subscription: AdminSubscriptionDetail | null;
+  loading: boolean;
+  onSearch: (query: string) => void;
+  onManageClick: (subscription: AdminSubscriptionDetail) => void;
+}
+
+export const AdminSubscriptionList: React.FC<AdminSubscriptionListProps> = ({
+  subscription,
+  loading,
+  onSearch,
+  onManageClick
+}) => {
   // Estado local para o input de busca
   const [queryInput, setQueryInput] = useState("");
-
-  // Hook customizado
-  const {
-    subscription,
-    loading,
-    searchSubscription,
-    // error pode ser tratado exibindo um Toast ou alert
-  } = useAdminSubscription();
 
   // --- HELPERS DE FORMATAÇÃO (UX) ---
 
@@ -96,7 +99,7 @@ export const AdminSubscriptionList: React.FC = () => {
       width: "15%",
       render: (item) => (
         <div className={styles.actions}>
-          <button onClick={() => console.log("Editar", item.id)}>
+          <button onClick={() => onManageClick(item)}>
             Gerenciar
           </button>
         </div>
@@ -109,7 +112,7 @@ export const AdminSubscriptionList: React.FC = () => {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (queryInput.trim()) {
-      searchSubscription(queryInput);
+      onSearch(queryInput);
     }
   };
 

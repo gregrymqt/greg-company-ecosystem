@@ -13,10 +13,8 @@ export const adminSubscriptionService = {
   searchSubscription: async (
     query: string
   ): Promise<AdminSubscriptionDetail> => {
-    // Nota: Seu controller espera ?query=Valor
-    return await ApiService.get<AdminSubscriptionDetail>(
-      `/admin/subscriptions/search?query=${encodeURIComponent(query)}`
-    );
+    const params = new URLSearchParams({ query });
+    return await ApiService.get<AdminSubscriptionDetail>(`/admin/subscriptions/search?${params.toString()}`);
   },
 
   /**
