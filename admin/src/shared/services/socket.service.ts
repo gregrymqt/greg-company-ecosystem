@@ -10,7 +10,7 @@ class WebSocketService {
    * Identifica qual a Base URL correta para o Hub solicitado
    */
   private getBaseUrlForHub(_hubPath: string): string {
-    return import.meta.env.VITE_GENERAL__BASEURL || "https://localhost:5045"; // Porta do seu C#
+    return import.meta.env.VITE_GENERAL_BASEURL || "https://localhost:5045"; // Porta do seu C#
   }
 
   public async connect(hubPath: AnyAppHub): Promise<void> {
@@ -58,13 +58,13 @@ class WebSocketService {
     this.connections.get(hubPath)?.off(methodName);
   }
 
-  public async invoke<T>(hubPath: AnyAppHub, methodName: string, ...args: T[]): Promise<void> {
+  public async invoke<TResponse, TArgs = any>(hubPath: AnyAppHub, methodName: string, ...args: TArgs[]): Promise<TResponse | undefined> {
     const connection = this.connections.get(hubPath);
     if (!connection || connection.state !== HubConnectionState.Connected) {
       await this.connect(hubPath);
     }
     try {
-      await this.connections.get(hubPath)?.invoke(methodName, ...args);
+      return await this.connections.get(hubPath)?.invoke(methodName, ...args);
     } catch (err) {
       console.error(`❌ Erro ao invocar ${methodName}:`, err);
     }

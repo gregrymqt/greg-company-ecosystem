@@ -2,13 +2,13 @@ import Swal, { type SweetAlertIcon, type SweetAlertOptions } from 'sweetalert2';
 
 // Cores do seu Sistema (SCSS Variables)
 const COLORS = {
-  primary: '#007bff',
-  success: '#28a745',
-  danger: '#dc3545',
-  warning: '#ffc107',
-  info: '#17a2b8',
-  text: '#212529',
-  bg: '#ffffff'
+  primary: 'var(--primary, #007bff)',
+  success: 'var(--success, #28a745)',
+  danger: 'var(--danger, #dc3545)',
+  warning: 'var(--warning, #ffc107)',
+  info: 'var(--info, #17a2b8)',
+  text: 'var(--text-main, #212529)',
+  bg: 'var(--bg-surface, #ffffff)'
 };
 
 /**

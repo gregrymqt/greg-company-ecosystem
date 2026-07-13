@@ -1,5 +1,6 @@
 import { StorageService, STORAGE_KEYS } from "./storage.service";
 import { SmartUploadHandler } from "../utils/upload.utils"; // <-- Importe o arquivo criado acima
+import type { UserSession } from "@/features/auth/types/auth.types";
 
 // --- INTERFACES AUXILIARES ---
 interface ApiErrorResponse {
@@ -85,7 +86,7 @@ const getHeaders = (isFormData = false): HeadersInit => {
   }
 
   // Isolamento de Tenant (Code Review Fix)
-  const tenantId = StorageService.getItem<string>(STORAGE_KEYS.TENANT_ID) || StorageService.getItem<any>(STORAGE_KEYS.USER_SESSION)?.tenant_id;
+  const tenantId = StorageService.getItem<string>(STORAGE_KEYS.TENANT_ID) || StorageService.getItem<UserSession>(STORAGE_KEYS.USER_SESSION)?.tenantId;
   if (tenantId) {
     headers["X-Tenant-ID"] = tenantId;
   }
@@ -336,16 +337,7 @@ export const ApiService = {
     if (!bypassSmartLogic && isComplexUpload) {
       // ✅ Injeta ApiService.putWithFile no SmartHandler (mesmo padrão do POST)
       const results = await SmartUploadHandler(
-        // Adaptador: SmartHandler espera postWithFile, mas aqui usamos PUT
-        // Criamos uma arrow function que chama putWithFile recursivamente
-        <TResponse>(
-          endpoint: string,
-          data: Record<string, unknown>,
-          file: File,
-          fileKey: string,
-          options?: RequestInit,
-          bypass?: boolean
-        ) => ApiService.putWithFile<TResponse, typeof data>(endpoint, data, file, fileKey, options, bypass),
+        ApiService.putWithFile.bind(ApiService),
         endpoint,
         data,
         fileArray,
