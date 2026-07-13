@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
 import { UserClaimService } from '../services/userClaim.service';
-import { AdminClaimService } from '../services/adminClaim.service';
 import type { ChatMessage } from '../types/claims.types';
 import type { ReplyFormData } from '../types/claim.dtos';
 import { AlertService } from "@/shared/services/alert.service";
@@ -9,10 +8,9 @@ import { ApiError } from "@/shared/services/api.service";
 // Props para saber quem está usando o hook
 interface UseClaimChatProps {
   claimId: number;
-  role: "admin" | "user";
 }
 
-export const useClaimChatLogic = ({ claimId, role }: UseClaimChatProps) => {
+export const useClaimChatLogic = ({ claimId }: UseClaimChatProps) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSending, setIsSending] = useState(false);
@@ -21,14 +19,8 @@ export const useClaimChatLogic = ({ claimId, role }: UseClaimChatProps) => {
   const fetchMessages = useCallback(async () => {
     try {
       setIsLoading(true);
-      let data;
-
-      // Decide qual service chamar baseado na role
-      if (role === "admin") {
-        data = await AdminClaimService.getDetails(claimId);
-      } else {
-        data = await UserClaimService.getMyDetails(claimId);
-      }
+      
+      const data = await UserClaimService.getMyDetails(claimId);
 
       if (data && data.messages) {
         setMessages(data.messages);
@@ -38,7 +30,7 @@ export const useClaimChatLogic = ({ claimId, role }: UseClaimChatProps) => {
     } finally {
       setIsLoading(false);
     }
-  }, [claimId, role]);
+  }, [claimId]);
 
   // 2. Polling e Carga Inicial
   useEffect(() => {
@@ -49,10 +41,7 @@ export const useClaimChatLogic = ({ claimId, role }: UseClaimChatProps) => {
       // Chamada silenciosa (sem setar isLoading global para não piscar a tela)
       const silentUpdate = async () => {
         try {
-          const data =
-            role === "admin"
-              ? await AdminClaimService.getDetails(claimId)
-              : await UserClaimService.getMyDetails(claimId);
+          const data = await UserClaimService.getMyDetails(claimId);
           if (data?.messages) setMessages(data.messages);
         } catch (e) {
           console.error("Erro ao buscar mensagens", e);
@@ -62,7 +51,7 @@ export const useClaimChatLogic = ({ claimId, role }: UseClaimChatProps) => {
     }, 30000);
 
     return () => clearInterval(interval);
-  }, [fetchMessages, claimId, role]);
+  }, [fetchMessages, claimId]);
 
   // 3. Função de Envio (Conectada ao GenericForm)
   const handleSendResponse = async (formData: ReplyFormData) => {
@@ -71,11 +60,7 @@ export const useClaimChatLogic = ({ claimId, role }: UseClaimChatProps) => {
 
     setIsSending(true);
     try {
-      if (role === "admin") {
-        await AdminClaimService.reply(claimId, formData.message);
-      } else {
-        await UserClaimService.reply(claimId, formData.message);
-      }
+      await UserClaimService.reply(claimId, formData.message);
 
       // Feedback visual e atualização
       AlertService.notify("Sucesso", "Mensagem enviada.", "success");
@@ -97,8 +82,6 @@ export const useClaimChatLogic = ({ claimId, role }: UseClaimChatProps) => {
 
   // 4. Função Extra para User: Escalar Mediação
   const handleRequestMediation = async () => {
-    if (role !== "user") return;
-
     const { isConfirmed } = await AlertService.confirm(
       "Tem certeza?",
       "Isso envolverá o Mercado Pago para julgar o caso.",

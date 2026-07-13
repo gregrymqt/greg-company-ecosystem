@@ -5,15 +5,13 @@ import { useClaimChatLogic } from '../../hooks/useClaimChatLogic';
 
 interface Props {
   claimId: number;
-  role: "admin" | "user";
 }
 
 import type { ReplyFormData } from "../../types/claim.dtos";
 
-export const ClaimChat: React.FC<Props> = ({ claimId, role }) => {
-  const { messages, handleSendResponse, isLoading } = useClaimChatLogic({
+export const ClaimChat: React.FC<Props> = ({ claimId }) => {
+  const { messages, handleSendResponse, isSending } = useClaimChatLogic({
     claimId,
-    role,
   });
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -84,8 +82,8 @@ export const ClaimChat: React.FC<Props> = ({ claimId, role }) => {
           <Form.Input name="attachments" label="Anexar Comprovantes" type="file" accept="image/*, .pdf" multiple colSpan={12} />
 
           <Form.Actions>
-            <Form.Submit isLoading={isLoading}>
-              {isLoading ? "Enviando..." : "Enviar Resposta"}
+            <Form.Submit isLoading={isSending}>
+              {isSending ? "Enviando..." : "Enviar Resposta"}
             </Form.Submit>
           </Form.Actions>
         </Form>

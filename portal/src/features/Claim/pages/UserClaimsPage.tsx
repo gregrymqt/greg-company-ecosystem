@@ -56,7 +56,6 @@ export const UserClaimsPage: React.FC = () => {
           <ClaimsList
             data={claims} // CORREÇÃO: Passa direto, sem 'as any'
             isLoading={isLoading}
-            userRole="admin"
             // CORREÇÃO: O objeto agora é garantidamente um ClaimSummary, então tem internalId
             onViewDetails={(claim) => setSelectedClaimId(claim.internalId)}
           />
@@ -77,7 +76,7 @@ export const UserClaimsPage: React.FC = () => {
         title="Conversa com o Suporte"
         size="large"
       >
-        {selectedClaimId && <ClaimChat claimId={selectedClaimId} role="user" />}
+        {selectedClaimId && <ClaimChat claimId={selectedClaimId} />}
       </Modal>
     </div>
   );

@@ -2,7 +2,6 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { ProtectedRoute } from "@/routes/ProtectedRoute";
 import { SubscriptionRoute } from "@/routes/SubscriptionRoute";
 import { AccessDenied } from "@/pages/AccessDenied/AccessDenied";
-import { GoogleCallbackPage, LoginPage } from "@/pages/Auth";
 import { Home } from "@/features/home/pages/Home";
 import { CourseFeed } from "@/features/course/pages/CourseFeed";
 import { PlayerScreen } from "@/features/video/pages/PlayerScreen";
@@ -17,6 +16,8 @@ import { MainLayout } from "@/components/layout/components/MainLayout";
 import { PlanPage } from "@/features/Plan/pages/PlanPage";
 import { FreeSamplePage } from "@/features/free-sample/pages/FreeSamplePage";
 import { PaymentLayout } from "@/features/Payment/pages/PaymentLayout";
+import { GoogleCallbackPage } from "@/features/auth/pages/GoogleCallbackPage/GoogleCallbackPage";
+import { LoginPage } from "@/features/auth/pages/LoginPage/LoginPage";
 
 export const AppRoutes = () => {
   return (

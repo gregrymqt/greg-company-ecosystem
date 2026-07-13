@@ -45,13 +45,6 @@ export interface ReplyFormData extends FieldValues {
   attachments?: FileList; // GenericForm retorna FileList
 }
 
-// Payload JSON esperado pelo Backend (Admin)
-export interface ReplyClaimPayload {
-  internalId: number;
-  message: string;
-  // Nota: Backend atual espera JSON. Upload de arquivo requer endpoint separado ou FormData.
-}
-
 // Payload JSON esperado pelo Backend (User)
 export interface ReplyUserPayload {
   message: string;

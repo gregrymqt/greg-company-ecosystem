@@ -11,7 +11,6 @@ interface ClaimsListProps {
   data: ClaimSummary[];
   isLoading: boolean;
   onViewDetails: (claim: ClaimSummary) => void;
-  userRole: 'admin' | 'user';
 }
 
 export const ClaimsList: React.FC<ClaimsListProps> = ({
