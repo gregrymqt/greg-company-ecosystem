@@ -7,6 +7,7 @@ export const STORAGE_KEYS = {
   THEME: '@GregCompany:Theme',
   CSRF_TOKEN: '@GregCompany:Csrf',
   OAUTH_REDIRECT: '@GregCompany:OAuthRedirect',
+  LAST_WATCHED_COURSE: '@GregCompany:LastWatched:Course:',
 };
 
 /**

@@ -1,15 +1,15 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './styles/CourseFeed.module.scss';
 import { CourseRow } from '@/features/course/components/CourseRow';
 import { CourseSkeleton } from '@/features/course/components/CourseSkeleton';
 import { usePublicCourses } from '@/features/course/hooks/usePublicCourses';
-import type { VideoCardUI } from '@/features/course/types/course.types';
-
-
+import type { VideoCardUI, CourseRowUI } from '@/features/course/types/course.types';
+import { CourseDetailModal } from '@/features/course/components/CourseDetailModal';
 
 export const CourseFeed: React.FC = () => {
   const navigate = useNavigate();
+  const [infoCourse, setInfoCourse] = useState<CourseRowUI | null>(null);
 
   // Consumindo o Hook refatorado
   const { 
@@ -51,6 +51,7 @@ export const CourseFeed: React.FC = () => {
               key={category.id} 
               data={category} 
               onVideoClick={handleVideoClick} 
+              onInfoClick={setInfoCourse}
             />
           ))}
         </div>
@@ -63,6 +64,14 @@ export const CourseFeed: React.FC = () => {
            <span className={styles.loadingMore}>Carregando mais cursos...</span>
         )}
       </div>
+
+      {infoCourse && (
+        <CourseDetailModal 
+          course={infoCourse} 
+          onClose={() => setInfoCourse(null)} 
+          onVideoClick={handleVideoClick} 
+        />
+      )}
     </main>
   );
 };

@@ -14,6 +14,8 @@ export interface VideoDto {
     totalSeconds: number;
   };
   courseId: number;
+  status: VideoProcessingStatus;
+  description?: string;
 }
 
 /**
@@ -24,24 +26,12 @@ export interface CourseDto {
   publicId: string;  // Guid no backend
   name: string;
   description: string;
+  year?: string;
+  creator?: string;
   videos?: VideoDto[];  // Opcional na listagem, presente no detalhe
 }
 
-/**
- * Dados para criar um novo curso (CreateUpdateCourseDto do backend)
- */
-export interface CreateCourseData {
-  name: string;
-  description?: string;
-}
-
-/**
- * Dados para atualizar um curso existente (CreateUpdateCourseDto do backend)
- */
-export interface UpdateCourseData {
-  name: string;
-  description?: string;
-}
+export type VideoProcessingStatus = "Pending" | "Processing" | "Completed" | "Failed";
 
 /**
  * Interface genérica de paginação (alinhada com PaginatedResultDto do backend)
@@ -75,11 +65,17 @@ export interface VideoCardUI {
   durationFormatted: string; // Já formatado (ex: "12m")
   courseId: number;
   isNew?: boolean;         // Badge "Novo"
+  status: VideoProcessingStatus;
+  description?: string;
 }
 
 // Modelo visual para a Fileira (Categoria)
 export interface CourseRowUI {
   id: string;              // publicId
   categoryName: string;    // Nome do curso
+  description: string;
+  year: string;
+  creator: string;
+  lastWatchedVideo: VideoCardUI | null;
   videos: VideoCardUI[];
 }
