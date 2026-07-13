@@ -1,9 +1,11 @@
 import { useForm } from 'react-hook-form';
+import { useNavigate } from 'react-router-dom';
 import { authService } from '@/features/auth/services/auth.service';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import type { LoginFormData } from '@/features/auth/types/auth.dtos';
 
 export const useLoginForm = () => {
+  const navigate = useNavigate();
   const formMethods = useForm<LoginFormData>({
     defaultValues: {
       email: '',
@@ -25,7 +27,7 @@ export const useLoginForm = () => {
       });
 
       // Redireciona para a home ou dashboard
-      window.location.href = '/';
+      navigate('/', { replace: true });
     } catch (error) {
       console.error('Erro ao fazer login:', error);
       formMethods.setError('root', {

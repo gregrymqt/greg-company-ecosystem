@@ -6,6 +6,7 @@ export interface UserSessionDto {
   email: string;
   avatarUrl: string;
   roles: string[];
+  tenantId?: string;
   hasActiveSubscription: boolean; // 
   hasPaymentHistory: boolean;     // [cite: 5]
 }
