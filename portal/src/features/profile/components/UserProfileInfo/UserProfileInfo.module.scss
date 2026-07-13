@@ -1,0 +1,99 @@
+// Mobile-first approach
+
+.card {
+  width: 100%;
+  border-radius: 12px;
+  background-color: $bg-light;
+  box-shadow: $shadow;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: box-shadow $transition-speed ease;
+
+  &:hover {
+    box-shadow: $shadow-lg;
+  }
+}
+
+.tabs {
+  display: flex;
+  width: 100%;
+  border-bottom: 1px solid $border-color;
+  background-color: $bg-grey;
+}
+
+.tabBtn {
+  flex: 1;
+  padding: $spacing-md $spacing-sm;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: $text-muted;
+  font-weight: 600;
+  font-size: $font-size-md;
+  cursor: pointer;
+  transition: all $transition-speed ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  // Ícone espaçado do texto
+  i {
+    margin-right: $spacing-sm;
+  }
+
+  &:hover {
+    color: $primary-hover;
+    background-color: rgba($primary-color, 0.05);
+  }
+
+  &.active {
+    color: $primary-color;
+    border-bottom-color: $primary-color;
+    background-color: $bg-light;
+  }
+}
+
+.avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid $bg-light;
+  box-shadow: $shadow;
+  margin-bottom: $spacing-md;
+  transition: transform $transition-speed ease;
+
+  &:hover {
+    transform: scale(1.05);
+  }
+
+  &.avatarSmall {
+    width: 80px;
+    height: 80px;
+    border-width: 2px;
+  }
+}
+
+// Tablet and Desktop enhancements
+@media (min-width: $breakpoint-md) {
+  .tabs {
+    justify-content: flex-start;
+  }
+  
+  .tabBtn {
+    flex: none;
+    min-width: 150px;
+    padding: $spacing-md $spacing-lg;
+  }
+
+  .avatar {
+    width: 150px;
+    height: 150px;
+
+    &.avatarSmall {
+      width: 100px;
+      height: 100px;
+    }
+  }
+}

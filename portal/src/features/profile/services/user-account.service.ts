@@ -5,7 +5,7 @@
  */
 
 import { ApiService } from '@/shared/services/api.service';
-import type { UserProfileDto, AvatarUpdateResponse } from '../types';
+import type { UserProfileDto, AvatarUpdateResponse } from '../types/profile.types';
 
 class UserAccountService {
   private readonly BASE_PATH = '/user-account';
@@ -29,7 +29,7 @@ class UserAccountService {
       file,
       'avatar',
       undefined,
-      true // bypass smart logic - é só 1 arquivo de imagem
+      true // bypass smart logic
     );
   }
 }

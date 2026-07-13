@@ -4,6 +4,8 @@ import type { ChatMessage } from '../types/claims.types';
 import type { ReplyFormData } from '../types/claim.dtos';
 import { AlertService } from "@/shared/services/alert.service";
 import { ApiError } from "@/shared/services/api.service";
+import { useSocketListener } from "@/shared/hooks/useSocket";
+import { AppHubsCSharp } from "@/shared/enums/hub/hub.enums";
 
 // Props para saber quem está usando o hook
 interface UseClaimChatProps {
@@ -16,9 +18,9 @@ export const useClaimChatLogic = ({ claimId }: UseClaimChatProps) => {
   const [isSending, setIsSending] = useState(false);
 
   // 1. Função de Busca (Memoizada para usar no useEffect)
-  const fetchMessages = useCallback(async () => {
+  const fetchMessages = useCallback(async (silent = false) => {
     try {
-      setIsLoading(true);
+      if (!silent) setIsLoading(true);
       
       const data = await UserClaimService.getMyDetails(claimId);
 
@@ -28,30 +30,20 @@ export const useClaimChatLogic = ({ claimId }: UseClaimChatProps) => {
     } catch (error) {
       console.error("Erro ao buscar mensagens", error);
     } finally {
-      setIsLoading(false);
+      if (!silent) setIsLoading(false);
     }
   }, [claimId]);
 
-  // 2. Polling e Carga Inicial
+  // 2. Carga Inicial
   useEffect(() => {
     fetchMessages(); // Carga inicial
+  }, [fetchMessages]);
 
-    // Polling a cada 30 segundos para simular tempo real
-    const interval = setInterval(() => {
-      // Chamada silenciosa (sem setar isLoading global para não piscar a tela)
-      const silentUpdate = async () => {
-        try {
-          const data = await UserClaimService.getMyDetails(claimId);
-          if (data?.messages) setMessages(data.messages);
-        } catch (e) {
-          console.error("Erro ao buscar mensagens", e);
-        }
-      };
-      silentUpdate();
-    }, 30000);
-
-    return () => clearInterval(interval);
-  }, [fetchMessages, claimId]);
+  // 3. Listener do WebSockets (Substituindo o Polling)
+  useSocketListener(AppHubsCSharp.GlobalRealtime, "ReceiveMessage", () => {
+    // Atualização silenciosa quando chega mensagem via SignalR
+    fetchMessages(true);
+  });
 
   // 3. Função de Envio (Conectada ao GenericForm)
   const handleSendResponse = async (formData: ReplyFormData) => {

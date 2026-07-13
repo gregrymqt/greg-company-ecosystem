@@ -1,33 +1,28 @@
-/**
- * Hook para atualização de avatar
- * Usa userAccountService (UserAccountController)
- */
-
 import { useState } from 'react';
 import { userAccountService } from '../services/user-account.service';
-import type { AvatarUpdateResponse } from '../types';
 import { AlertService } from '@/shared/services/alert.service';
+import { useAuth } from '@/features/auth/hooks/useAuth';
 
 export const useAvatarUpdate = () => {
-  const [uploading, setUploading] = useState<boolean>(false);
+  const [uploading, setUploading] = useState(false);
+  const { refreshSession } = useAuth(); // Para forçar o reload da sessão no top level e refletir a nova foto no header
 
-  const updateAvatar = async (file: File): Promise<AvatarUpdateResponse | null> => {
+  const updateAvatar = async (file: File) => {
     setUploading(true);
     try {
-      const response = await userAccountService.updateAvatar(file);
-      AlertService.success(response.message || 'Avatar atualizado com sucesso!');
-      return response;
-    } catch (err) {
-      const errorMessage = (err as Error).message || 'Erro ao atualizar avatar';
-      AlertService.error(errorMessage);
-      return null;
+      await userAccountService.updateAvatar(file);
+      AlertService.success('Sucesso', 'Foto atualizada com sucesso!');
+      await refreshSession(); // Atualiza a sessão que vai jogar a nova imagem na store da aplicação
+    } catch (error) {
+      console.error(error);
+      AlertService.error('Erro', 'Não foi possível atualizar a foto.');
     } finally {
       setUploading(false);
     }
   };
 
   return {
-    updateAvatar,
-    uploading
+    uploading,
+    updateAvatar
   };
 };

@@ -5,8 +5,8 @@ import styles from "./ProfileDashboard.module.scss";
 import { Sidebar } from "@/components/SideBar";
 import type { SidebarItem } from "@/components/SideBar/types/sidebar.types";
 import { useAuth } from "@/features/auth/hooks/useAuth";
-import { UserProfileInfo } from "@/features/profile";
 import { getProfileSidebarItems } from "@/features/profile/config/sidebarConfig";
+import { UserProfileInfo } from "../components/UserProfileInfo/UserProfileInfo";
 
 export const ProfileDashboard: React.FC = () => {
   const { user } = useAuth();
