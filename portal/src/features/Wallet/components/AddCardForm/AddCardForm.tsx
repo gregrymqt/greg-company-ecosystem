@@ -3,7 +3,7 @@ import React, { useCallback } from 'react';
 import styles from '../styles/AddCardForm.module.scss';
 
 
-import { useWallet } from '../hooks/useWallet';
+import { useWallet } from '../../hooks/useWallet';
 import { usePreference, MercadoPagoBrick } from '@/features/Payment';
 import type { BrickPaymentData } from '@/features/Payment';
 
@@ -14,7 +14,7 @@ interface AddCardFormProps {
 
 export const AddCardForm: React.FC<AddCardFormProps> = ({ onSuccess, onCancel }) => {
   const { addCard } = useWallet();
-  
+
   // 1. Geramos uma preferência dummy apenas para carregar o Brick visualmente.
   // O valor 1.00 é simbólico para inicializar o form, mas não vamos processar esse pagamento no onSubmit.
   const { preferenceId, loading: prefLoading, error: prefError } = usePreference(1, true);
@@ -25,7 +25,7 @@ export const AddCardForm: React.FC<AddCardFormProps> = ({ onSuccess, onCancel })
     // O Brick devolve os dados, incluindo o 'token'.
     // Nós pegamos esse token e enviamos para nossa API de Wallet (Salvar Cartão)
     // ignorando a transação de pagamento do MP neste momento.
-    
+
     if (!data.token) {
       console.error('Token não gerado pelo Brick');
       return;

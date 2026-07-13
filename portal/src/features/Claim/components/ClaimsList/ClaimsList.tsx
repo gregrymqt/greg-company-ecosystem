@@ -1,8 +1,8 @@
 // src/features/Claim/components/ClaimsList.tsx
 
 import React from 'react';
-import { ClaimStatusBadge } from './ClaimStatusBadge';
-import { type ClaimSummary } from '../types/claims.types';
+import { ClaimStatusBadge } from '../ClaimStatusBadge/ClaimStatusBadge';
+import { type ClaimSummary } from '../../types/claims.types';
 import styles from '../styles/ClaimsList.module.scss';
 import type { ClaimStatus } from '@/types/models';
 import { type TableColumn, Table } from '@/components/Table/Table';
@@ -14,12 +14,12 @@ interface ClaimsListProps {
   userRole: 'admin' | 'user';
 }
 
-export const ClaimsList: React.FC<ClaimsListProps> = ({ 
-  data, 
-  isLoading, 
+export const ClaimsList: React.FC<ClaimsListProps> = ({
+  data,
+  isLoading,
   onViewDetails
 }) => {
-  
+
   const columns: TableColumn<ClaimSummary>[] = [
     {
       header: 'ID MP',
@@ -30,7 +30,7 @@ export const ClaimsList: React.FC<ClaimsListProps> = ({
     {
       header: 'Data',
       width: '150px',
-      render: (item) => new Date(item.dateCreated).toLocaleDateString('pt-BR') 
+      render: (item) => new Date(item.dateCreated).toLocaleDateString('pt-BR')
     },
     {
       header: 'Tipo',
@@ -41,14 +41,14 @@ export const ClaimsList: React.FC<ClaimsListProps> = ({
     {
       header: 'Status',
       width: '150px',
-      render: (item) => <ClaimStatusBadge status={item.status as unknown as ClaimStatus} /> 
+      render: (item) => <ClaimStatusBadge status={item.status as unknown as ClaimStatus} />
     },
     {
       header: 'Ações',
       width: '100px',
       render: (item) => (
-        <button 
-          className={styles.actionBtn} 
+        <button
+          className={styles.actionBtn}
           onClick={() => onViewDetails(item)}
           aria-label="Ver detalhes"
         >
@@ -65,10 +65,10 @@ export const ClaimsList: React.FC<ClaimsListProps> = ({
       </div>
 
       <div className={styles.tableWrapper}>
-        <Table<ClaimSummary> 
+        <Table<ClaimSummary>
           data={data}
           columns={columns}
-          keyExtractor={(item) => item.internalId} 
+          keyExtractor={(item) => item.internalId}
           isLoading={isLoading}
           emptyMessage="Nenhuma reclamação encontrada."
         />

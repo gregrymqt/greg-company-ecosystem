@@ -3,20 +3,20 @@ import { ProtectedRoute } from "@/routes/ProtectedRoute";
 import { SubscriptionRoute } from "@/routes/SubscriptionRoute";
 import { AccessDenied } from "@/pages/AccessDenied/AccessDenied";
 import { GoogleCallbackPage, LoginPage } from "@/pages/Auth";
-import { Home } from "@/pages/Home/Home";
-import { CourseFeed } from "@/pages/Courses/CourseFeed";
-import { PlayerScreen } from "@/pages/Player/PlayerScreen";
-import { UserClaimsPage } from "@/pages/Claims/UserClaimsPage";
-import { WalletPage } from "@/pages/Wallet/WalletPage";
-import { TransactionsPage } from "@/pages/Transactions/TransactionsPage";
-import { SubscriptionPage } from "@/pages/Subscription/SubscriptionPage";
-import { ProfileDashboard } from "@/pages/Profile/ProfileDashboard";
-import { CreateSupportPage } from "@/pages/Support/CreateSupportPage";
-import { AboutPage } from "@/pages/About/AboutPage";
+import { Home } from "@/features/home/pages/Home";
+import { CourseFeed } from "@/features/course/pages/CourseFeed";
+import { PlayerScreen } from "@/features/video/pages/PlayerScreen";
+import { UserClaimsPage } from "@/features/Claim/pages/UserClaimsPage";
+import { WalletPage } from "@/features/Wallet/pages/WalletPage";
+import { TransactionsPage } from "@/features/Transactions/pages/TransactionsPage";
+import { SubscriptionPage } from "@/features/Subscription/pages/SubscriptionPage";
+import { ProfileDashboard } from "@/features/profile/pages/ProfileDashboard";
+import { CreateSupportPage } from "@/features/support/pages/CreateSupportPage";
+import { AboutPage } from "@/features/about/pages/AboutPage";
 import { MainLayout } from "@/components/layout/components/MainLayout";
-import { PlanPage } from "@/pages/Plans/PlanPage";
-import { FreeSamplePage } from "@/pages/FreeSample/FreeSamplePage";
-import { PaymentLayout } from "@/pages/Payment/PaymentLayout";
+import { PlanPage } from "@/features/Plan/pages/PlanPage";
+import { FreeSamplePage } from "@/features/free-sample/pages/FreeSamplePage";
+import { PaymentLayout } from "@/features/Payment/pages/PaymentLayout";
 
 export const AppRoutes = () => {
   return (

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import styles from '../styles/AdminProfileInfo.module.scss';
-import { AvatarUploadForm } from "./AvatarUploadForm"; 
+import { AvatarUploadForm } from "../AvatarUploadForm/AvatarUploadForm";
 import { Card } from "@/components/Card/Card";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 

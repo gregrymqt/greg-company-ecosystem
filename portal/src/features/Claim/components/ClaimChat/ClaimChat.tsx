@@ -1,14 +1,14 @@
 import React, { useRef, useEffect } from "react";
 import styles from '../styles/ClaimChat.module.scss';
 import { Form } from "@/components/Form";
-import { useClaimChatLogic } from '../hooks/useClaimChatLogic';
+import { useClaimChatLogic } from '../../hooks/useClaimChatLogic';
 
 interface Props {
   claimId: number;
   role: "admin" | "user";
 }
 
-import type { ReplyFormData } from "../types/claim.dtos";
+import type { ReplyFormData } from "../../types/claim.dtos";
 
 export const ClaimChat: React.FC<Props> = ({ claimId, role }) => {
   const { messages, handleSendResponse, isLoading } = useClaimChatLogic({
@@ -35,9 +35,8 @@ export const ClaimChat: React.FC<Props> = ({ claimId, role }) => {
         {messages.map((msg) => (
           <div
             key={msg.messageId}
-            className={`${styles.bubbleWrapper} ${
-              msg.isMe ? styles.me : styles.them
-            }`}
+            className={`${styles.bubbleWrapper} ${msg.isMe ? styles.me : styles.them
+              }`}
           >
             <div className={styles.bubble}>
               <div className={styles.header}>
@@ -45,8 +44,8 @@ export const ClaimChat: React.FC<Props> = ({ claimId, role }) => {
                   {msg.senderRole === "mediator"
                     ? "Mediação MP"
                     : msg.isMe
-                    ? "Você"
-                    : "Outro lado"}
+                      ? "Você"
+                      : "Outro lado"}
                 </span>
                 <span className={styles.date}>
                   {new Date(msg.dateCreated).toLocaleDateString()}
@@ -83,7 +82,7 @@ export const ClaimChat: React.FC<Props> = ({ claimId, role }) => {
         >
           <Form.Textarea name="message" label="Sua Resposta" placeholder="Descreva sua resposta ou solução..." validation={{ required: "A mensagem é obrigatória" }} colSpan={12} />
           <Form.Input name="attachments" label="Anexar Comprovantes" type="file" accept="image/*, .pdf" multiple colSpan={12} />
-          
+
           <Form.Actions>
             <Form.Submit isLoading={isLoading}>
               {isLoading ? "Enviando..." : "Enviar Resposta"}

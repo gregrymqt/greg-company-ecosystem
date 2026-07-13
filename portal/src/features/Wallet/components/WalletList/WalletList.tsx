@@ -3,8 +3,8 @@ import React, { useMemo } from 'react';
 import styles from '../styles/WalletList.module.scss';
 import { ActionMenu } from '@/components/ActionMenu/ActionMenu';
 import { type TableColumn, Table } from '@/components/Table/Table';
-import { useWallet } from '../hooks/useWallet';
-import type { WalletCard } from '..';
+import { useWallet } from '../../hooks/useWallet';
+import type { WalletCard } from '../..';
 
 export const WalletList: React.FC = () => {
   const { cards, loading, removeCard } = useWallet();
@@ -47,13 +47,13 @@ export const WalletList: React.FC = () => {
           // Como é um CRD, a edição não foi solicitada, mas o componente exige a prop.
           // Podemos deixar um console.log ou futuramente implementar "Tornar Principal" aqui.
           onEdit={() => console.log('Feature futura: Tornar cartão principal', card.id)}
-          
+
           // A lógica de bloqueio de deleção já está dentro do removeCard (useWallet),
           // então podemos chamar direto.
           onDelete={() => removeCard(card.id)}
-          
-          // Opcional: Se quiser desabilitar o menu visualmente quando for o principal
-          // disabled={card.isSubscriptionActiveCard} 
+
+        // Opcional: Se quiser desabilitar o menu visualmente quando for o principal
+        // disabled={card.isSubscriptionActiveCard} 
         />
       )
     }

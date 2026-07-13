@@ -3,8 +3,8 @@
  */
 
 import React from 'react';
-import { useUserSupport } from '../hooks/useUserSupport';
-import type { CreateSupportTicketDto } from '../types/support.types';
+import { useUserSupport } from '../../hooks/useUserSupport';
+import type { CreateSupportTicketDto } from '../../types/support.types';
 import { Form } from '@/components/Form';
 import styles from '../styles/SupportCreateForm.module.scss';
 
@@ -36,7 +36,7 @@ export const SupportCreateForm: React.FC = () => {
       <div className={styles.helpText}>
         <i className="fas fa-info-circle"></i>
         <span>
-          Você receberá um retorno em até 24 horas úteis. 
+          Você receberá um retorno em até 24 horas úteis.
           Verifique também sua caixa de spam.
         </span>
       </div>

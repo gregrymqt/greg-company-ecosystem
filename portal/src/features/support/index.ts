@@ -17,4 +17,4 @@ export type {
 // Public (User Support)
 export { userSupportService } from './services/support-user.service';
 export { useUserSupport } from './hooks/useUserSupport';
-export { SupportCreateForm } from './components/SupportCreateForm';
+export { SupportCreateForm } from './components/SupportCreateForm/SupportCreateForm';

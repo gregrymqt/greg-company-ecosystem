@@ -1,6 +1,6 @@
 // Barrel Export: Public Area - User Wallet
-export { WalletList } from './components/WalletList';
-export { AddCardForm } from './components/AddCardForm';
+export { WalletList } from './components/WalletList/WalletList';
+export { AddCardForm } from './components/AddCardForm/AddCardForm';
 export { useWallet } from './hooks/useWallet';
 
 // Barrel Export: Single Source of Truth para Tipos de Wallet

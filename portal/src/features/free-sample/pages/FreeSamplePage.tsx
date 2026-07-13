@@ -1,5 +1,5 @@
 import React from 'react';
-import { useFreeSample } from '../../features/free-sample/hooks/useFreeSample';
+import { useFreeSample } from '../hooks/useFreeSample';
 import { useNavigate } from 'react-router-dom';
 import styles from './FreeSamplePage.module.scss';
 import { ComparisonPanel } from '@/features/free-sample/components/ComparisonPanel/ComparisonPanel';
