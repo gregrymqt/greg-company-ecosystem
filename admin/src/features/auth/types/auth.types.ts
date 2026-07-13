@@ -17,3 +17,12 @@ export interface UserSession extends UserSessionDto {
   expiration?: string; // Data de expiração do token
   tenant_id?: string;
 }
+
+export const AppRoles = {
+  Admin: "Admin",
+  User: "User",
+  Manager: "Manager",
+  CourseAdmin: "CourseAdmin",
+  EcommerceAdmin: "EcommerceAdmin" // Administra ecommerce
+} as const;
+export type AppRoles = typeof AppRoles[keyof typeof AppRoles];

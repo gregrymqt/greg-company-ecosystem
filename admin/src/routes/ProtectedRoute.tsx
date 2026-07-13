@@ -1,6 +1,6 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '@/features/auth/hooks/useAuth';
-import { AppRoles } from '@/types/models'; // Ajuste o caminho se necessário
+import { AppRoles } from '@/features/auth/types/auth.types';
 
 // --- PROTECTED ROUTE (Baseada em Autenticação e Roles) ---
 interface ProtectedRouteProps {
@@ -17,7 +17,6 @@ export const ProtectedRoute = ({ allowedRoles }: ProtectedRouteProps) => {
   }
 
   // 2. Verificação de Permissão (Roles)
-  // Agora acessamos user.roles, que deve ser adicionado ao DTO
   if (allowedRoles && allowedRoles.length > 0) {
     // Se o usuário não tiver roles ou não tiver a role necessária
     const hasPermission = user?.roles?.some(role => allowedRoles.includes(role as AppRoles));
