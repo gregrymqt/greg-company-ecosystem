@@ -84,6 +84,12 @@ const getHeaders = (isFormData = false): HeadersInit => {
     headers["X-CSRF-TOKEN"] = csrfToken;
   }
 
+  // Isolamento de Tenant (Code Review Fix)
+  const tenantId = StorageService.getItem<string>(STORAGE_KEYS.TENANT_ID) || StorageService.getItem<any>(STORAGE_KEYS.USER_SESSION)?.tenant_id;
+  if (tenantId) {
+    headers["X-Tenant-ID"] = tenantId;
+  }
+
   return headers;
 };
 

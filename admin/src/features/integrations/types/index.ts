@@ -3,3 +3,4 @@
 export * from "./shared.types";
 export * from "./nuvemshop.types";
 export * from "./shopify.types";
+export * from "./ai-scrapper.type";

@@ -5,7 +5,8 @@ export const STORAGE_KEYS = {
   USER_SESSION: '@GregCompany:User',
   TOKEN: '@GregCompany:Token',
   THEME: '@GregCompany:Theme',
-  CSRF_TOKEN: '@GregCompany:Csrf'
+  CSRF_TOKEN: '@GregCompany:Csrf',
+  TENANT_ID: '@GregCompany:Tenant'
 };
 
 /**

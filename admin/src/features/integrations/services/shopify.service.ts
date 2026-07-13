@@ -1,7 +1,7 @@
 // admin/src/features/integrations/services/shopify.service.ts
 
 import { ApiService } from "@/shared/services/api.service"; // Ajuste o path conforme seu projeto
-import type { ShopifyPageInfo } from "../types";
+import type { ShopifyPageInfo, ShopifyProductSetInput, ShopifyProductUpdateInput } from "../types";
 
 // Interface para mapear o retorno estruturado da listagem GraphQL da Shopify
 export interface ShopifyListProductsResponse {
@@ -33,26 +33,26 @@ export const ShopifyService = {
   /**
    * Dispara a mutação declarativa productSet enviando o payload bruto para o Shopify.
    */
-  syncProduct: async (productData: Record<string, any>): Promise<any> => {
-    return await ApiService.post<any, Record<string, any>>("/shopify/products", productData);
+  syncProduct: async (productData: ShopifyProductSetInput): Promise<unknown> => {
+    return await ApiService.post<unknown, ShopifyProductSetInput>("/shopify/products", productData);
   },
 
   /**
    * Injeta novas imagens otimizadas para SEO e acessibilidade diretamente no GID do produto.
    */
-  addProductMedia: async (productId: string, imageUrls: string[], altText?: string): Promise<any> => {
+  addProductMedia: async (productId: string, imageUrls: string[], altText?: string): Promise<unknown> => {
     const payload = { image_urls: imageUrls, alt_text: altText };
     // O ID global da Shopify vem como 'gid://shopify/Product/12345', precisamos encodar para rotas URL de forma segura
     const encodedId = encodeURIComponent(productId);
-    return await ApiService.post<any, typeof payload>(`/shopify/products/${encodedId}/media`, payload);
+    return await ApiService.post<unknown, typeof payload>(`/shopify/products/${encodedId}/media`, payload);
   },
 
   /**
    * Atualiza síncronamente o copywriting (SEO, tags) e anexa mídias adicionais ao produto.
    */
-  updateProduct: async (productId: string, updatePayload: Record<string, any>): Promise<any> => {
+  updateProduct: async (productId: string, updatePayload: ShopifyProductUpdateInput): Promise<unknown> => {
     const encodedId = encodeURIComponent(productId);
-    return await ApiService.put<any, Record<string, any>>(`/shopify/products/${encodedId}`, updatePayload);
+    return await ApiService.put<unknown, ShopifyProductUpdateInput>(`/shopify/products/${encodedId}`, updatePayload);
   },
 
   /**
