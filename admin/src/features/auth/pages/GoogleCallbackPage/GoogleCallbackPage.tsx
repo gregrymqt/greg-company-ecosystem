@@ -33,10 +33,10 @@ export const GoogleCallbackPage = () => {
   }, [handleGoogleCallback, navigate]);
 
   return (
-    <div className={styles["google-callback-page"]}>
-      <div className={styles["callback-content"]}>
+    <div className={styles.googleCallbackPage}>
+      <div className={styles.callbackContent}>
         <h2>Autenticando...</h2>
-        <div className={styles["spinner"]}></div>
+        <div className={styles.spinner}></div>
       </div>  
     </div>
   );

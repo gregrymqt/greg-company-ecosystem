@@ -2,8 +2,10 @@ import { useForm } from 'react-hook-form';
 import { authService } from '@/features/auth/services/auth.service';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import type { RegisterFormData } from '@/features/auth/types/auth.dtos';
+import { useNavigate } from 'react-router-dom';
 
 export const useRegisterForm = () => {
+  const navigate = useNavigate();
   const formMethods = useForm<RegisterFormData>({
     defaultValues: {
       name: '',
@@ -27,7 +29,7 @@ export const useRegisterForm = () => {
       });
 
       // Redireciona para a home ou dashboard
-      window.location.href = '/';
+      navigate('/', { replace: true });
     } catch (error) {
       console.error('Erro ao fazer registro:', error);
       formMethods.setError('root', {

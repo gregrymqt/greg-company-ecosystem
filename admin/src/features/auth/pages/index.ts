@@ -1,2 +1,2 @@
-export { GoogleCallbackPage } from './GoogleCallbackPage';
-export { LoginPage } from './LoginPage';
+export { GoogleCallbackPage } from './GoogleCallbackPage/GoogleCallbackPage';
+export { LoginPage } from './LoginPage/LoginPage';

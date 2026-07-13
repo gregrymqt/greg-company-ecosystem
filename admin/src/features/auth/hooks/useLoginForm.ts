@@ -5,6 +5,7 @@ import * as yup from 'yup';
 import { authService } from '@/features/auth/services/auth.service';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import type { LoginFormData } from '@/features/auth/types/auth.dtos';
+import { useNavigate } from 'react-router-dom';
 
 const loginSchema = yup.object().shape({
   email: yup.string().email('Email inválido').required('Email é obrigatório'),
@@ -13,6 +14,7 @@ const loginSchema = yup.object().shape({
 
 export const useLoginForm = () => {
   const { setSession } = useAuth();
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
 
   const toggleShowPassword = () => setShowPassword((prev) => !prev);
@@ -44,7 +46,7 @@ export const useLoginForm = () => {
       });
 
       // Redireciona para a home ou dashboard
-      window.location.href = '/';
+      navigate('/', { replace: true });
     } catch (error) {
       console.error('Erro ao fazer login:', error);
       formMethods.setError('root', {

@@ -15,13 +15,6 @@ export const RegisterForm = () => {
           label="Nome Completo"
           type="text"
           placeholder="João Silva"
-          rules={{
-            required: 'Nome é obrigatório',
-            minLength: {
-              value: 3,
-              message: 'Nome deve ter no mínimo 3 caracteres'
-            }
-          }}
         />
 
         <Form.Input
@@ -29,13 +22,6 @@ export const RegisterForm = () => {
           label="Email"
           type="email"
           placeholder="seu@email.com"
-          rules={{
-            required: 'Email é obrigatório',
-            pattern: {
-              value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-              message: 'Email inválido'
-            }
-          }}
         />
 
         <Form.Input
@@ -43,13 +29,6 @@ export const RegisterForm = () => {
           label="Senha"
           type="password"
           placeholder="••••••••"
-          rules={{
-            required: 'Senha é obrigatória',
-            minLength: {
-              value: 6,
-              message: 'Senha deve ter no mínimo 6 caracteres'
-            }
-          }}
         />
 
         <Form.Input
@@ -57,13 +36,6 @@ export const RegisterForm = () => {
           label="Confirmar Senha"
           type="password"
           placeholder="••••••••"
-          rules={{
-            required: 'Confirmação de senha é obrigatória',
-            validate: (value) => {
-              const password = formMethods.getValues('password');
-              return value === password || 'As senhas não coincidem';
-            }
-          }}
         />
 
         {formMethods.formState.errors.root && (

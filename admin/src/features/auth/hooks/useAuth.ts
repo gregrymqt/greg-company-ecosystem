@@ -94,7 +94,10 @@ export const useAuth = () => {
       console.error("Erro no logout:", error);
       // Ignora erro de rede no logout
     } finally {
-      StorageService.clear();
+      StorageService.removeItem(STORAGE_KEYS.TOKEN);
+      StorageService.removeItem(STORAGE_KEYS.USER_SESSION);
+      StorageService.removeItem(STORAGE_KEYS.CSRF_TOKEN);
+      StorageService.removeItem(STORAGE_KEYS.TENANT_ID);
       window.dispatchEvent(new Event(AUTH_EVENT_NAME));
       navigate("/login");
     }

@@ -1,4 +1,4 @@
-.google-callback-page {
+.googleCallbackPage {
   height: 100vh;
   display: flex;
   justify-content: center;
@@ -6,7 +6,7 @@
   background-color: $bg-grey;
   padding: 1rem; // Garante espaçamento em telas muito pequenas (Mobile First)
 
-  .callback-content {
+  .callbackContent {
     text-align: center;
     width: 100%;
     max-width: 400px; // Limita a largura em telas grandes para melhor UX

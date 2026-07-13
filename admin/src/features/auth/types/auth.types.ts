@@ -15,5 +15,5 @@ export interface UserSession extends UserSessionDto {
   token?: string; // Mantemos opcional pois o token pode estar apenas no Storage separado
   refreshToken?: string; // Token para renovação de sessão
   expiration?: string; // Data de expiração do token
-  tenantId?: string; // [cite: 14]
+  tenant_id?: string;
 }
