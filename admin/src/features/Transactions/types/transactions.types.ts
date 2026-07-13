@@ -13,3 +13,9 @@ export interface RefundStatusData {
   status: 'pending' | 'completed' | 'failed';
   message?: string;
 }
+
+export interface TransactionFilters {
+  status?: string;
+  page?: number;
+  pageSize?: number;
+}

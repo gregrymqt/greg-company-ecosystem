@@ -1,6 +1,5 @@
-// src/features/Transactions/Admin/services/adminTransactions.service.ts
 import { ApiService } from "@/shared/services/api.service";
-import type { PaymentItems } from '../types/transactions.types';
+import type { PaymentItems, TransactionFilters } from '../types/transactions.types';
 
 /**
  * AdminTransactionsService - Área Administrativa
@@ -9,24 +8,32 @@ import type { PaymentItems } from '../types/transactions.types';
 export const AdminTransactionsService = {
   /**
    * Busca todos os pagamentos (incluindo falhados) para análise administrativa
-   * Endpoint: GET /admin/transactions ou /payments/history (dependendo do backend)
+   * Endpoint: GET /payments/history
    */
-  getAllTransactions: async (): Promise<PaymentItems[]> => {
-    // Por enquanto reutiliza o mesmo endpoint, mas em produção deveria ter um endpoint admin específico
-    // Exemplo: return await ApiService.get<PaymentItems[]>('/admin/transactions');
-    return await ApiService.get<PaymentItems[]>('/payments/history');
+  getAllTransactions: async (filters?: TransactionFilters): Promise<PaymentItems[]> => {
+    let url = '/payments/history';
+    
+    if (filters) {
+      const params = new URLSearchParams();
+      if (filters.status) params.append('status', filters.status);
+      if (filters.page) params.append('page', filters.page.toString());
+      if (filters.pageSize) params.append('pageSize', filters.pageSize.toString());
+      
+      const queryString = params.toString();
+      if (queryString) {
+        url += `?${queryString}`;
+      }
+    }
+
+    return await ApiService.get<PaymentItems[]>(url);
   },
 
   /**
-   * Busca apenas pagamentos falhados (rejected/cancelled)
+   * Busca apenas pagamentos falhados (rejected)
    * Útil para dashboards de monitoramento
    */
   getFailedPayments: async (): Promise<PaymentItems[]> => {
-    const allPayments = await AdminTransactionsService.getAllTransactions();
-    return allPayments.filter(payment => {
-      const status = payment.status?.toLowerCase() || '';
-      return status === 'rejected' || status === 'cancelled' || status === 'failed';
-    });
+    return await AdminTransactionsService.getAllTransactions({ status: 'rejected' });
   },
 
   /**
@@ -34,10 +41,6 @@ export const AdminTransactionsService = {
    * Útil para relatórios de chargebacks
    */
   getRefundedPayments: async (): Promise<PaymentItems[]> => {
-    const allPayments = await AdminTransactionsService.getAllTransactions();
-    return allPayments.filter(payment => {
-      const status = payment.status?.toLowerCase() || '';
-      return status === 'refunded' || status === 'partially_refunded';
-    });
+    return await AdminTransactionsService.getAllTransactions({ status: 'refunded' });
   }
 };
