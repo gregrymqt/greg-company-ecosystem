@@ -37,8 +37,7 @@ export interface CreatePixDTO {
 export interface PixResponse {
   qrCode: string;       // O código "copia e cola"
   qrCodeBase64: string; // A imagem em base64
-  paymentId: string;    // ID para monitorar via SignalR
-  expirationDate?: string;
+  id: number;           // ID para monitorar via SignalR
 }
 
 // Estados da UI do PIX

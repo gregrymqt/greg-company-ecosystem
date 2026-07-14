@@ -40,6 +40,7 @@ public class HomeService(
                                 ImageUrl = h.ImageUrl,
                                 ActionText = h.ActionText,
                                 ActionUrl = h.ActionUrl,
+                                Audience = h.Audience,
                             })
                             .ToList(),
 
@@ -52,6 +53,7 @@ public class HomeService(
                                 IconClass = s.IconClass,
                                 ActionText = s.ActionText,
                                 ActionUrl = s.ActionUrl,
+                                Audience = s.Audience,
                             })
                             .ToList(),
                     };
@@ -103,6 +105,7 @@ public class HomeService(
             FileId = fileId,
             ActionText = dto.ActionText,
             ActionUrl = dto.ActionUrl,
+            Audience = dto.Audience,
         };
 
         await repository.AddHeroAsync(entity);
@@ -117,6 +120,7 @@ public class HomeService(
             ImageUrl = entity.ImageUrl,
             ActionText = entity.ActionText,
             ActionUrl = entity.ActionUrl,
+            Audience = entity.Audience,
         };
     }
 
@@ -188,6 +192,7 @@ public class HomeService(
         entity.Subtitle = dto.Subtitle;
         entity.ActionText = dto.ActionText;
         entity.ActionUrl = dto.ActionUrl;
+        entity.Audience = dto.Audience;
 
         await repository.UpdateHeroAsync(entity);
         await unitOfWork.CommitAsync();
@@ -221,6 +226,7 @@ public class HomeService(
             IconClass = dto.IconClass,
             ActionText = dto.ActionText,
             ActionUrl = dto.ActionUrl,
+            Audience = dto.Audience,
         };
 
         await repository.AddServiceAsync(entity);
@@ -235,6 +241,7 @@ public class HomeService(
             IconClass = entity.IconClass,
             ActionText = entity.ActionText,
             ActionUrl = entity.ActionUrl,
+            Audience = entity.Audience,
         };
     }
 
@@ -249,6 +256,7 @@ public class HomeService(
         entity.IconClass = dto.IconClass;
         entity.ActionText = dto.ActionText;
         entity.ActionUrl = dto.ActionUrl;
+        entity.Audience = dto.Audience;
 
         await repository.UpdateServiceAsync(entity);
         await unitOfWork.CommitAsync();

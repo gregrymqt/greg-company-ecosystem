@@ -15,5 +15,5 @@ export interface PaymentSocketMessage {
   message: string;      // "Pagamento processado com sucesso!", "A processar..."
   status: 'processing' | 'approved' | 'failed' | 'error';
   isCompleted: boolean; // Indica se o fluxo terminou
-  paymentId?: string;
+  paymentId?: number;
 }

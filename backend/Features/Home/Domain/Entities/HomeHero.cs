@@ -24,6 +24,8 @@ public class HomeHero : IMongoDocument
     public string ActionText { get; set; } = string.Empty;
 
     public string ActionUrl { get; set; } = string.Empty;
+
+    public string? Audience { get; set; }
 }
 
 

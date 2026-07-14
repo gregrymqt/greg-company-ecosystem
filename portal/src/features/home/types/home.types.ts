@@ -14,7 +14,7 @@
  * Baseado em HeroSlideDto.cs
  */
 export interface HeroSlideDto {
-  id: number;
+  id: string;
   imageUrl: string;
   title: string;
   subtitle: string;
@@ -28,7 +28,7 @@ export interface HeroSlideDto {
  * Baseado em ServiceDto.cs
  */
 export interface ServiceDto {
-  id: number;
+  id: string;
   iconClass: string;
   title: string;
   description: string;

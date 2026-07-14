@@ -1,4 +1,4 @@
-using MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Interfaces;
+Ôªøusing MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Interfaces;
 using MercadoPago.Client;
 using MercadoPago.Client.Preference;
 using Microsoft.Extensions.Options;
@@ -24,6 +24,7 @@ public class PreferencePaymentService(
     IUserContext userContext,
     IPaymentRepository paymentRepository,
     IUnitOfWork unitOfWork,
+    MeuCrudCsharp.Features.MercadoPago.Plans.Domain.Interfaces.IPlanRepository planRepository,
     IUserRepository userRepository)
     : IPreferencePaymentService
 {
@@ -36,9 +37,26 @@ public class PreferencePaymentService(
         var user = await userRepository.GetByIdAsync(userId);
         
         if (userId == null)
-            throw new UnauthorizedAccessException("Usu·rio n„o encontrado.");
+            throw new UnauthorizedAccessException("Usu√°rio n√£o encontrado.");
 
-        if (model.Amount <= 0)
+        Plan? plan = null;
+        if (Guid.TryParse(model.PlanId, out var publicId))
+        {
+            plan = await planRepository.GetByPublicIdAsync(publicId, true);
+        }
+        if (plan == null)
+        {
+            plan = await planRepository.GetActiveByExternalIdAsync(model.PlanId);
+        }
+
+        if (plan == null)
+            throw new ArgumentException("Plano n√£o encontrado.");
+
+        var amount = plan.TransactionAmount;
+        var title = plan.Name;
+        var description = plan.Description ?? plan.Name;
+
+        if (amount <= 0)
             throw new ArgumentException("O valor deve ser maior que zero.");
 
         var externalReference = Guid.NewGuid().ToString();
@@ -49,7 +67,7 @@ public class PreferencePaymentService(
             {
                 UserId = user.Id,
                 Status = "pending",
-                Amount = model.Amount,
+                Amount = amount,
                 Method = "preference_checkout",
                 ExternalId = externalReference,
                 PayerEmail = user.Email,
@@ -70,11 +88,11 @@ public class PreferencePaymentService(
                 [
                     new PreferenceItemRequest
                     {
-                        Id = "CURSO-V1",
-                        Title = model.Title,
-                        Description = model.Description,
+                        Id = model.PlanId,
+                        Title = title,
+                        Description = description,
                         Quantity = 1,
-                        UnitPrice = model.Amount,
+                        UnitPrice = amount,
                         CurrencyId = "BRL",
                     },
                 ],
@@ -100,7 +118,7 @@ public class PreferencePaymentService(
             await unitOfWork.CommitAsync();
 
             logger.LogInformation(
-                "PreferÍncia criada com sucesso: {PrefId} | ExternalRef: {Ref} | UserId: {UserId}",
+                "Prefer√™ncia criada com sucesso: {PrefId} | ExternalRef: {Ref} | UserId: {UserId}",
                 preference.Id,
                 externalReference,
                 userId
@@ -112,7 +130,7 @@ public class PreferencePaymentService(
         {
             logger.LogError(
                 ex,
-                "Erro ao criar preferÍncia de pagamento para o usu·rio {UserId}.",
+                "Erro ao criar prefer√™ncia de pagamento para o usu√°rio {UserId}.",
                 userId
             );
 
@@ -120,6 +138,3 @@ public class PreferencePaymentService(
         }
     }
 }
-
-
-

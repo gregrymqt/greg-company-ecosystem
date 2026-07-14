@@ -57,6 +57,6 @@ export interface CreditCardPaymentRequestDto {
 // Resposta unificada do Backend
 export interface PaymentResponse {
   status: string;
-  id?: string;
+  id?: number;
   message?: string;
 }

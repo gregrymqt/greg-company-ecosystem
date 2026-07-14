@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Text.Json.Serialization;
 using MeuCrudCsharp.Features.Files.Application.DTOs;
 using Microsoft.AspNetCore.Http;
@@ -22,6 +22,7 @@ public class HeroSlideDto
     public string Subtitle { get; set; } = string.Empty;
     public string ActionText { get; set; } = string.Empty;
     public string ActionUrl { get; set; } = string.Empty;
+    public string? Audience { get; set; }
 }
 
 public class ServiceDto
@@ -32,6 +33,7 @@ public class ServiceDto
     public string Description { get; set; } = string.Empty;
     public string ActionText { get; set; } = string.Empty;
     public string ActionUrl { get; set; } = string.Empty;
+    public string? Audience { get; set; }
 }
 
 public class CreateUpdateHeroDto : BaseUploadDto
@@ -40,6 +42,7 @@ public class CreateUpdateHeroDto : BaseUploadDto
     public string Subtitle { get; set; } = string.Empty;
     public string ActionText { get; set; } = string.Empty;
     public string ActionUrl { get; set; } = string.Empty;
+    public string? Audience { get; set; }
 }
 
 public class CreateUpdateServiceDto
@@ -49,6 +52,7 @@ public class CreateUpdateServiceDto
     public string Description { get; set; } = string.Empty;
     public string ActionText { get; set; } = string.Empty;
     public string ActionUrl { get; set; } = string.Empty;
+    public string? Audience { get; set; }
 }
 
 

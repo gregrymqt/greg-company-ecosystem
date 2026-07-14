@@ -6,6 +6,8 @@ namespace MeuCrudCsharp.Features.MercadoPago.Payments.Application.DTOs;
 public record CreatePixPaymentRequest(
     string? Description,
     decimal TransactionAmount,
+    string? PaymentMethodId,
+    string? PlanExternalId,
     PayerRequestDto? Payer
 );
 
@@ -46,9 +48,7 @@ public record PaymentResponseDto(
 );
 
 public record CreatePreferenceDto(
-    decimal Amount,
-    string Title,
-    string Description
+    string PlanId
 );
 
 public class PaymentHistoryDto
