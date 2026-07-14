@@ -17,15 +17,16 @@ export interface PagedResult<T> {
 // Usado na tela de preços/assinatura pública
 export interface PlanPublic {
   publicId: string;
-  name: string;
-  slug: string;
+  name?: string;
+  slug?: string;
   amount: number; // Necessário para os payloads e UI do front
-  priceDisplay: string;
-  billingInfo: string;
+  priceDisplay?: string;
+  billingInfo?: string;
   features: string[]; // Lista de benefícios
   isRecommended: boolean;
   isActive: boolean;
   frequency: number; // 1 = mensal, 12 = anual, etc.
+  frequencyType: string;
   category: 'course' | 'ecommerce';
 }
 

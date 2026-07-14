@@ -6,13 +6,7 @@ using MeuCrudCsharp.Features.MercadoPago.Plans.Application.Interfaces;
 using MeuCrudCsharp.Features.MercadoPago.Plans.Application.Mappers;
 using MeuCrudCsharp.Features.MercadoPago.Plans.Application.Utils;
 using MeuCrudCsharp.Features.Shared.Domain.Interfaces;
-using MeuCrudCsharp.Features.Shared.Infrastructure.Persistence;
-using MeuCrudCsharp.Features.MercadoPago.Chargebacks.Domain.Entities;
-using MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities;
-using MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities;
 using MeuCrudCsharp.Features.MercadoPago.Plans.Domain.Entities;
-using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Entities;
-using MeuCrudCsharp.Features.Shared.Domain.Entities;
 using Microsoft.Extensions.Options;
 
 namespace MeuCrudCsharp.Features.MercadoPago.Plans.Application.Services
@@ -60,6 +54,16 @@ namespace MeuCrudCsharp.Features.MercadoPago.Plans.Application.Services
                 ) ?? throw new InvalidOperationException();
         }
 
+        public async Task<PlanDto> GetPlanDtoByIdAsync(Guid publicId)
+        {
+            var plan = await _planRepository.GetByPublicIdAsync(publicId, asNoTracking: true);
+            if (plan == null || !plan.IsActive)
+            {
+                throw new ResourceNotFoundException($"Plano com ID {publicId} nÃ£o encontrado ou inativo.");
+            }
+            return PlanMapper.MapDbPlanToDto(plan);
+        }
+
         public async Task<PlanDto> CreatePlanAsync(CreatePlanDto createDto)
         {
             if (
@@ -71,7 +75,7 @@ namespace MeuCrudCsharp.Features.MercadoPago.Plans.Application.Services
             )
             {
                 throw new ArgumentException(
-                    $"Valor de frequência inválido: '{createDto.AutoRecurring.FrequencyType}'."
+                    $"Valor de frequï¿½ncia invï¿½lido: '{createDto.AutoRecurring.FrequencyType}'."
                 );
             }
 
@@ -122,12 +126,12 @@ namespace MeuCrudCsharp.Features.MercadoPago.Plans.Application.Services
             {
                 _logger.LogError(
                     ex,
-                    "Erro na API externa ao criar plano '{PlanName}'. Rollback automático.",
+                    "Erro na API externa ao criar plano '{PlanName}'. Rollback automï¿½tico.",
                     createDto.Reason
                 );
 
                 _logger.LogInformation(
-                    "Rollback automático concluído. Plano '{PlanName}' NÃO foi persistido.",
+                    "Rollback automï¿½tico concluï¿½do. Plano '{PlanName}' Nï¿½O foi persistido.",
                     createDto.Reason
                 );
 
@@ -139,7 +143,7 @@ namespace MeuCrudCsharp.Features.MercadoPago.Plans.Application.Services
         {
             var localPlan =
                 await _planRepository.GetByPublicIdAsync(publicId, asNoTracking: false)
-                ?? throw new ResourceNotFoundException($"Plano com ID {publicId} não encontrado.");
+                ?? throw new ResourceNotFoundException($"Plano com ID {publicId} nï¿½o encontrado.");
 
             var originalName = localPlan.Name;
             var originalTransactionAmount = localPlan.TransactionAmount;
@@ -178,7 +182,7 @@ namespace MeuCrudCsharp.Features.MercadoPago.Plans.Application.Services
             {
                 _logger.LogError(
                     ex,
-                    "Erro na API externa ao atualizar plano '{PlanName}'. Rollback automático.",
+                    "Erro na API externa ao atualizar plano '{PlanName}'. Rollback automï¿½tico.",
                     localPlan.Name
                 );
 
@@ -188,7 +192,7 @@ namespace MeuCrudCsharp.Features.MercadoPago.Plans.Application.Services
                 localPlan.FrequencyType = originalFrequencyType;
                 localPlan.Description = originalDescription;
                 _logger.LogInformation(
-                    "Rollback concluído. Alterações locais no plano '{PlanName}' foram desfeitas.",
+                    "Rollback concluï¿½do. Alteraï¿½ï¿½es locais no plano '{PlanName}' foram desfeitas.",
                     localPlan.Name
                 );
 
@@ -200,12 +204,12 @@ namespace MeuCrudCsharp.Features.MercadoPago.Plans.Application.Services
         {
             var localPlan =
                 await _planRepository.GetByPublicIdAsync(publicId, asNoTracking: false)
-                ?? throw new ResourceNotFoundException($"Plano com ID {publicId} não encontrado.");
+                ?? throw new ResourceNotFoundException($"Plano com ID {publicId} nï¿½o encontrado.");
 
             if (!localPlan.IsActive)
             {
                 _logger.LogWarning(
-                    "Tentativa de desativar o plano {PlanId} que já está inativo.",
+                    "Tentativa de desativar o plano {PlanId} que jï¿½ estï¿½ inativo.",
                     localPlan.ExternalPlanId
                 );
                 return;
@@ -231,14 +235,14 @@ namespace MeuCrudCsharp.Features.MercadoPago.Plans.Application.Services
             {
                 _logger.LogError(
                     ex,
-                    "Erro na API externa ao desativar plano '{PlanName}'. Rollback automático.",
+                    "Erro na API externa ao desativar plano '{PlanName}'. Rollback automï¿½tico.",
                     localPlan.Name
                 );
 
                 localPlan.IsActive = true;
 
                 _logger.LogInformation(
-                    "Rollback concluído. Plano '{PlanName}' permanece ativo localmente.",
+                    "Rollback concluï¿½do. Plano '{PlanName}' permanece ativo localmente.",
                     localPlan.Name
                 );
 
@@ -255,7 +259,7 @@ namespace MeuCrudCsharp.Features.MercadoPago.Plans.Application.Services
             var criteria = "asc";
 
             _logger.LogInformation(
-                "Buscando página {Page} de planos da API do Mercado Pago.",
+                "Buscando pï¿½gina {Page} de planos da API do Mercado Pago.",
                 page
             );
             var activePlansFromApi = await _mercadoPagoPlanService.SearchActivePlansAsync(
@@ -288,7 +292,7 @@ namespace MeuCrudCsharp.Features.MercadoPago.Plans.Application.Services
                 else
                 {
                     _logger.LogWarning(
-                        "Plano '{ExternalId}' existe no MP mas não localmente.",
+                        "Plano '{ExternalId}' existe no MP mas nï¿½o localmente.",
                         apiPlan.Id
                     );
                 }
@@ -335,8 +339,8 @@ namespace MeuCrudCsharp.Features.MercadoPago.Plans.Application.Services
             }
             catch (Exception dbEx)
             {
-                _logger.LogError(dbEx, "Falha ao buscar planos paginados do repositório.");
-                throw new AppServiceException("Não foi possível carregar os planos.", dbEx);
+                _logger.LogError(dbEx, "Falha ao buscar planos paginados do repositï¿½rio.");
+                throw new AppServiceException("Nï¿½o foi possï¿½vel carregar os planos.", dbEx);
             }
         }
     }

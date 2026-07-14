@@ -30,5 +30,19 @@ namespace MeuCrudCsharp.Features.MercadoPago.Plans.Presentation.Controllers
                 return HandleException(ex, "An error occurred while fetching public plans.");
             }
         }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetPlanById(Guid id)
+        {
+            try
+            {
+                var plan = await _planService.GetPlanDtoByIdAsync(id);
+                return Ok(plan);
+            }
+            catch (Exception ex)
+            {
+                return HandleException(ex, "An error occurred while fetching the public plan.");
+            }
+        }
     }
 }

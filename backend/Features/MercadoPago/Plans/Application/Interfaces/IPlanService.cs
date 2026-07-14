@@ -12,6 +12,8 @@ public interface IPlanService
 {
     Task<PagedResultDto<PlanDto>> GetActiveDbPlansAsync(int page, int pageSize);
 
+    Task<PlanDto> GetPlanDtoByIdAsync(Guid publicId);
+
     Task<PlanEditDto> GetPlanEditDtoByIdAsync(Guid publicId);
 
     Task<PlanDto> CreatePlanAsync(CreatePlanDto createDto);
@@ -22,4 +24,3 @@ public interface IPlanService
 
     Task<PagedResultDto<PlanDto>> GetActiveApiPlansAsync(int page, int pageSize);
 }
-

@@ -23,13 +23,16 @@ namespace MeuCrudCsharp.Features.MercadoPago.Plans.Application.Mappers
             return new PlanDto(
                 dbPlan.PublicId.ToString(),
                 dbPlan.Name,
-                planType,
+                dbPlan.Name?.ToLower().Replace(" ", "-"),
                 PlanUtils.FormatPriceDisplay(dbPlan.TransactionAmount, dbPlan.FrequencyInterval),
                 PlanUtils.FormatBillingInfo(dbPlan.TransactionAmount, dbPlan.FrequencyInterval),
                 PlanUtils.GetDefaultFeatures(),
                 isAnnual,
                 dbPlan.IsActive,
-                dbPlan.FrequencyInterval
+                dbPlan.FrequencyInterval,
+                dbPlan.TransactionAmount,
+                dbPlan.FrequencyType.ToString(),
+                dbPlan.Category
             );
         }
 
@@ -59,7 +62,7 @@ namespace MeuCrudCsharp.Features.MercadoPago.Plans.Application.Mappers
             return new PlanDto(
                 localPlan.PublicId.ToString(),
                 apiPlan.Reason,
-                planType,
+                apiPlan.Reason?.ToLower().Replace(" ", "-"),
                 PlanUtils.FormatPriceDisplay(
                     apiPlan.AutoRecurring.TransactionAmount,
                     apiPlan.AutoRecurring.Frequency
@@ -71,7 +74,10 @@ namespace MeuCrudCsharp.Features.MercadoPago.Plans.Application.Mappers
                 PlanUtils.GetDefaultFeatures(),
                 isRecommended,
                 isActive,
-                apiPlan.AutoRecurring.Frequency
+                apiPlan.AutoRecurring.Frequency,
+                apiPlan.AutoRecurring.TransactionAmount,
+                frequencyTypeEnum.ToString(),
+                localPlan.Category
             );
         }
 

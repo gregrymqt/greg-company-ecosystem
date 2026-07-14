@@ -42,6 +42,8 @@ namespace MeuCrudCsharp.Features.MercadoPago.Plans.Domain.Entities
         public required string Name { get; set; }
 
         public string? Description { get; set; }
+        
+        public string Category { get; set; } = "course";
 
         /// <summary>
         /// Valor da transação/cobrança. Mapeia para "transaction_amount" na API.
@@ -70,6 +72,3 @@ namespace MeuCrudCsharp.Features.MercadoPago.Plans.Domain.Entities
         public bool IsActive { get; set; } = false;
     }
 }
-
-
-

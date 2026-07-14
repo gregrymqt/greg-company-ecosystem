@@ -32,7 +32,10 @@ public record PlanDto(
     List<string> Features,
     bool IsRecommended,
     bool IsActive,
-    int Frequency
+    int Frequency,
+    decimal Amount,
+    string FrequencyType,
+    string Category
 );
 
 public record PlanEditDto(
