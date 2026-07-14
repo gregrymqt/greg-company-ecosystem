@@ -1,4 +1,4 @@
-using MeuCrudCsharp.Features.Caching.Application.Interfaces;
+﻿using MeuCrudCsharp.Features.Caching.Application.Interfaces;
 using MeuCrudCsharp.Features.Courses.Application.DTOs;
 using MeuCrudCsharp.Features.Courses.Application.Interfaces;
 using MeuCrudCsharp.Features.Courses.Domain.Interfaces;
@@ -31,11 +31,12 @@ namespace MeuCrudCsharp.Features.Courses.Application.Services
 
         public async Task<PaginatedResultDto<CourseDto>> GetCoursesWithVideosPaginatedAsync(
             int pageNumber,
-            int pageSize
+            int pageSize,
+            string? name = null
         )
         {
             var cacheVersion = await GetCacheVersionAsync();
-            var cacheKey = $"Courses_v{cacheVersion}_Page{pageNumber}_Size{pageSize}";
+            var cacheKey = $"Courses_v{cacheVersion}_Page{pageNumber}_Size{pageSize}_Name{name ?? "none"}";
 
             return await cacheService.GetOrCreateAsync(
                     cacheKey,
@@ -45,7 +46,8 @@ namespace MeuCrudCsharp.Features.Courses.Application.Services
 
                         var (items, totalCount) = await repository.GetPaginatedWithVideosAsync(
                             pageNumber,
-                            pageSize
+                            pageSize,
+                            name
                         );
 
                         var dtos = items.Select(CourseMapper.ToDtoWithVideos).ToList();
@@ -65,7 +67,7 @@ namespace MeuCrudCsharp.Features.Courses.Application.Services
         {
             if (await repository.ExistsByNameAsync(createDto.Name!))
             {
-                throw new AppServiceException("Já existe um curso com este nome.");
+                throw new AppServiceException("Ja existe um curso com este nome.");
             }
 
             var newCourse = new Course
@@ -79,11 +81,9 @@ namespace MeuCrudCsharp.Features.Courses.Application.Services
             session.StartTransaction();
             try
             {
-                // 1. Grava o Dado Principal
                 var coursesCollection = mongoContext.GetCollection<Course>("Courses");
                 await coursesCollection.InsertOneAsync(session, newCourse);
 
-                // 2. Grava no Outbox
                 var outboxEvent = new OutboxEvent
                 {
                     EventType = "CourseCreated",
@@ -91,7 +91,6 @@ namespace MeuCrudCsharp.Features.Courses.Application.Services
                 };
                 await mongoContext.GetCollection<OutboxEvent>("OutboxEvents").InsertOneAsync(session, outboxEvent);
 
-                // 3. Commit de forma atômica
                 await session.CommitTransactionAsync();
             }
             catch (Exception ex)
@@ -101,7 +100,6 @@ namespace MeuCrudCsharp.Features.Courses.Application.Services
                 throw;
             }
 
-            // Invalida cache e loga
             await cacheService.InvalidateCacheByKeyAsync(CoursesCacheVersionKey);
             logger.LogInformation("Novo curso '{CourseName}' criado e evento enviado ao Outbox.", newCourse.Name);
 
@@ -130,12 +128,12 @@ namespace MeuCrudCsharp.Features.Courses.Application.Services
         public async Task DeleteCourseAsync(Guid publicId)
         {
             var course = await repository.GetByPublicIdWithVideosAsync(publicId)
-                ?? throw new ResourceNotFoundException($"Curso com ID {publicId} não encontrado.");
+                ?? throw new ResourceNotFoundException($"Curso com ID {publicId} nao encontrado.");
 
             if (course.Videos.Count != 0)
             {
                 throw new AppServiceException(
-                    "Não é possível deletar um curso que possui vídeos associados."
+                    "Nao e possivel deletar um curso que possui videos associados."
                 );
             }
 
@@ -151,7 +149,7 @@ namespace MeuCrudCsharp.Features.Courses.Application.Services
         {
             var course = await repository.GetByPublicIdAsync(publicId)
                 ?? throw new ResourceNotFoundException(
-                    $"Curso com o PublicId {publicId} não encontrado."
+                    $"Curso com o PublicId {publicId} nao encontrado."
                 );
 
             return course;

@@ -28,7 +28,7 @@ export interface CourseDto {
   description: string;
   year?: string;
   creator?: string;
-  videos?: VideoDto[];  // Opcional na listagem, presente no detalhe
+  videos: VideoDto[];  // Opcional na listagem, presente no detalhe
 }
 
 export type VideoProcessingStatus = "Pending" | "Processing" | "Completed" | "Failed";

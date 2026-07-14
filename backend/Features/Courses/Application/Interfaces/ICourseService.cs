@@ -17,7 +17,7 @@ namespace MeuCrudCsharp.Features.Courses.Application.Interfaces
     {
         Task<PaginatedResultDto<CourseDto>> GetCoursesWithVideosPaginatedAsync(
             int pageNumber,
-            int pageSize
+            int pageSize, string? name = null
         );
 
         Task<IEnumerable<CourseDto>> SearchCoursesByNameAsync(string name);

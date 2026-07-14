@@ -1,4 +1,4 @@
-using MeuCrudCsharp.Features.Courses.Application.DTOs;
+﻿using MeuCrudCsharp.Features.Courses.Application.DTOs;
 using MeuCrudCsharp.Features.Courses.Domain.Entities;
 using MeuCrudCsharp.Features.Videos.Application.DTOs;
 using MeuCrudCsharp.Features.Videos.Application.Utils;
@@ -14,6 +14,8 @@ namespace MeuCrudCsharp.Features.Courses.Application.Mappers
                 PublicId = course.PublicId,
                 Name = course.Name,
                 Description = course.Description,
+                Year = course.Year,
+                Creator = course.Creator,
                 Videos = course.Videos?.Select(VideoMapper.ToDto).ToList() ?? new List<VideoDto>(),
             };
         }
@@ -25,6 +27,8 @@ namespace MeuCrudCsharp.Features.Courses.Application.Mappers
                 PublicId = course.PublicId,
                 Name = course.Name,
                 Description = course.Description,
+                Year = course.Year,
+                Creator = course.Creator,
             };
         }
     }

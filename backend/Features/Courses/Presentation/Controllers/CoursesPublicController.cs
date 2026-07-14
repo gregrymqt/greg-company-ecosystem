@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Threading.Tasks;
 using MeuCrudCsharp.Features.Base;
 using MeuCrudCsharp.Features.Courses.Application.Interfaces;
@@ -27,20 +27,22 @@ namespace MeuCrudCsharp.Features.Courses.Presentation.Controllers
         [HttpGet("paginated")]
         public async Task<IActionResult> GetCoursesPaginated(
             [FromQuery] int pageNumber = 1,
-            [FromQuery] int pageSize = 5
+            [FromQuery] int pageSize = 5,
+            [FromQuery] string? name = null
         )
         {
             try
             {
                 var paginatedResult = await _courseService.GetCoursesWithVideosPaginatedAsync(
                     pageNumber,
-                    pageSize
+                    pageSize,
+                    name
                 );
                 return Ok(paginatedResult);
             }
             catch (Exception ex)
             {
-                return HandleException(ex, "Não foi possível carregar os cursos no momento.");
+                return HandleException(ex, "Nao foi possivel carregar os cursos no momento.");
             }
         }
     }

@@ -1,4 +1,4 @@
-using MeuCrudCsharp.Features.MercadoPago.Chargebacks.Domain.Entities;
+﻿using MeuCrudCsharp.Features.MercadoPago.Chargebacks.Domain.Entities;
 using MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities;
 using MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities;
 using MeuCrudCsharp.Features.MercadoPago.Plans.Domain.Entities;
@@ -18,7 +18,8 @@ namespace MeuCrudCsharp.Features.Courses.Domain.Interfaces
 
         Task<(IEnumerable<Course> Items, int TotalCount)> GetPaginatedWithVideosAsync(
             int pageNumber,
-            int pageSize
+            int pageSize,
+            string? name = null
         );
 
         Task AddAsync(Course course);
@@ -26,4 +27,3 @@ namespace MeuCrudCsharp.Features.Courses.Domain.Interfaces
         void Delete(Course course);
     }
 }
-

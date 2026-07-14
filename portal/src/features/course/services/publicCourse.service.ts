@@ -28,8 +28,8 @@ export const publicCourseService = {
    * Busca cursos paginados e transforma para UI
    * GET: /api/public/courses/paginated
    */
-  getAllPaginated: async (pageNumber: number, pageSize: number = 5) => {
-    const endpoint = `${BASE_ENDPOINT}/paginated?pageNumber=${pageNumber}&pageSize=${pageSize}`;
+  getAllPaginated: async (pageNumber: number, pageSize: number = 5, name?: string) => {
+    const endpoint = `${BASE_ENDPOINT}/paginated?pageNumber=${pageNumber}&pageSize=${pageSize}${name ? `&name=${name}` : ''}`;
     const response = await ApiService.get<PaginatedResponse<CourseDto>>(endpoint);
 
     // Adapter Pattern: Transforma DTO (Backend) em UI Model (Frontend)
@@ -47,7 +47,7 @@ export const publicCourseService = {
         year: course.year || '',
         creator: course.creator || '',
         lastWatchedVideo,
-        videos: (course.videos || []).map((video): VideoCardUI => ({
+        videos: course.videos.map((video): VideoCardUI => ({
           id: video.publicId,
           title: video.title,
           description: video.description,

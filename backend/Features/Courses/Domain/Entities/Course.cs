@@ -23,6 +23,10 @@ public class Course : IMongoDocument
 
     public string Description { get; set; } = string.Empty;
 
+    public string? Year { get; set; }
+
+    public string? Creator { get; set; }
+
     // Propriedade de navegação para a lista de vídeos que pertencem a este curso
     [BsonIgnore]
     public virtual ICollection<Video> Videos { get; set; } = new List<Video>();

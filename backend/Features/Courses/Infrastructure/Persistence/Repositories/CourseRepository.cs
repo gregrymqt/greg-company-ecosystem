@@ -1,4 +1,4 @@
-using MeuCrudCsharp.Data;
+﻿using MeuCrudCsharp.Data;
 using MeuCrudCsharp.Features.Courses.Domain.Entities;
 using MeuCrudCsharp.Features.Courses.Domain.Interfaces;
 using MongoDB.Driver;
@@ -43,12 +43,17 @@ namespace MeuCrudCsharp.Features.Courses.Infrastructure.Persistence.Repositories
 
         public async Task<(IEnumerable<Course> Items, int TotalCount)> GetPaginatedWithVideosAsync(
             int pageNumber,
-            int pageSize
+            int pageSize,
+            string? name = null
         )
         {
-            var totalCount = (int)await _courses.CountDocumentsAsync(FilterDefinition<Course>.Empty);
+            var filter = string.IsNullOrWhiteSpace(name) 
+                ? FilterDefinition<Course>.Empty 
+                : Builders<Course>.Filter.Regex(c => c.Name, new MongoDB.Bson.BsonRegularExpression(name, "i"));
 
-            var items = await _courses.Find(FilterDefinition<Course>.Empty)
+            var totalCount = (int)await _courses.CountDocumentsAsync(filter);
+
+            var items = await _courses.Find(filter)
                 .SortBy(c => c.Name)
                 .Skip((pageNumber - 1) * pageSize)
                 .Limit(pageSize)

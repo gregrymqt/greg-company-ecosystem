@@ -19,11 +19,11 @@ export const usePublicCourses = (pageSize: number = 5) => {
   const sentinelRef = useRef<HTMLDivElement>(null);
 
   // Função que busca dados (memoizada)
-  const fetchCourses = useCallback(async (pageNum: number, isRefresh = false) => {
+  const fetchCourses = useCallback(async (pageNum: number, isRefresh = false, name?: string) => {
     setIsLoading(true);
     setError(null);
     try {
-      const { data, totalPages } = await publicCourseService.getAllPaginated(pageNum, pageSize);
+      const { data, totalPages } = await publicCourseService.getAllPaginated(pageNum, pageSize, name);
       
       setCourses(prev => isRefresh ? data : [...prev, ...data]);
       setHasMore(pageNum < totalPages);
@@ -66,6 +66,7 @@ export const usePublicCourses = (pageSize: number = 5) => {
     isLoading,
     error,
     refresh: () => fetchCourses(1, true),
+    search: (name: string) => fetchCourses(1, true, name),
     sentinelRef
   };
 };
