@@ -5,6 +5,7 @@ using MeuCrudCsharp.Features.Products.Infrastructure.Persistence;
 using MeuCrudCsharp.Features.Shared.Domain.Entities;
 using MeuCrudCsharp.Features.Shared.Domain.Interfaces;
 using MongoDB.Driver;
+using MeuCrudCsharp.Features.Products.Domain.Enums;
 
 namespace MeuCrudCsharp.Features.Products.ImportProduct;
 
@@ -33,7 +34,7 @@ public class ImportProductFromScraperCommandHandler
             var product = new Product
             {
                 TenantId = command.TenantId,
-                Status = "Raw",
+                Status = ProductStatus.Raw,
                 Metadata = new Product.ScraperMetadata
                 {
                     SourceUrl = command.TargetUrl

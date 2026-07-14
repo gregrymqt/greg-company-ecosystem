@@ -3,7 +3,7 @@
  * CRUD completo + paginação
  */
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { adminVideoService } from '../services/video-admin.service';
 import type {
   VideoDto,
@@ -24,22 +24,43 @@ export const useAdminVideos = () => {
   const [videos, setVideos] = useState<PaginatedVideoResult | null>(null);
   const [filters, setFilters] = useState<VideoFilters>(DEFAULT_FILTERS);
 
+  const loadingRef = useRef(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
+
   /**
    * Busca vídeos com paginação
    */
   const fetchVideos = useCallback(async (customFilters?: Partial<VideoFilters>) => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    abortControllerRef.current = new AbortController();
+
+    if (loadingRef.current) return;
+    loadingRef.current = true;
+
     const appliedFilters = { ...filters, ...customFilters };
     setLoading(true);
 
     try {
       const response = await adminVideoService.getAll(appliedFilters);
-      setVideos(response);
-      setFilters(appliedFilters);
+      
+      if (!abortControllerRef.current?.signal.aborted) {
+        setVideos(response);
+        setFilters(appliedFilters);
+      }
     } catch (err) {
+      const errorName = (err as Error).name;
+      if (errorName === 'AbortError' || errorName === 'CanceledError') {
+        return;
+      }
       const errorMessage = (err as Error).message || 'Erro ao carregar vídeos.';
       AlertService.error('Erro', errorMessage);
     } finally {
-      setLoading(false);
+      if (!abortControllerRef.current?.signal.aborted) {
+        setLoading(false);
+        loadingRef.current = false;
+      }
     }
   }, [filters]);
 
@@ -134,6 +155,14 @@ export const useAdminVideos = () => {
    */
   const updateFilters = useCallback((newFilters: Partial<VideoFilters>) => {
     setFilters((prev: VideoFilters) => ({ ...prev, ...newFilters }));
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
   }, []);
 
   return {

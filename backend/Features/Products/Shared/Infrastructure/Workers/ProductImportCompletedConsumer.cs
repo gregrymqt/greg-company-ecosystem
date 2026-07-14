@@ -7,6 +7,8 @@ using MeuCrudCsharp.Features.Base.Workers;
 using MeuCrudCsharp.Features.Products.Infrastructure.Persistence;
 using MeuCrudCsharp.Features.Shared.Infrastructure.Hubs;
 using Microsoft.AspNetCore.SignalR;
+using MeuCrudCsharp.Features.Products.Domain.Enums;
+
 
 namespace MeuCrudCsharp.Features.Products.Shared.Infrastructure.Workers;
 
@@ -63,12 +65,12 @@ public class ProductImportCompletedConsumer : RabbitMqConsumerBase
                 }
             }
 
-            product.Status = "Active";
+            product.Status = ProductStatus.Processed;
             _logger.LogInformation("Product {ProductId} imported successfully and activated.", product.Id);
         }
         else
         {
-            product.Status = "Failed";
+            product.Status = ProductStatus.Failed;
             product.Metadata ??= new Domain.Entities.Product.ScraperMetadata();
             product.Attributes["LastError"] = payload.Error ?? "Unknown error during import.";
             

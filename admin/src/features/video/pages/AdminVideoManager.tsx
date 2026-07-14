@@ -1,18 +1,24 @@
-// @ts-nocheck
 import React, { useState, useEffect, useMemo } from "react";
 
 // Styles
 import styles from "./AdminVideoManager.module.scss";
+import { useCourses } from "@/features/course/hooks/useCourses";
 import { Sidebar } from "@/components/SideBar";
 import type { SidebarItem } from "@/components/SideBar/types/sidebar.types";
-import { VideoForm } from "@/features/video/Admin/components/VideoForm";
-import { VideoList } from "@/features/video/Admin/components/VideoList";
-import { VideoPlayer } from "@/features/video/Admin/components/VideoPlayer";
-import { useAdminVideos } from "@/features/video";
-import type { VideoTab, VideoFormData } from "@/features/video";
-import { useCourses } from "@/features/course";
 import { AlertService } from "@/shared/services/alert.service";
-import type { Video, Course } from "@/types/models";
+import { VideoForm } from "../components/VideoForm/VideoForm";
+import { VideoList } from "../components/VideoList/VideoList";
+import { useAdminVideos } from "../hooks/useAdminVideos";
+import type { VideoDto, VideoFormData } from "../types/video.types";
+
+type VideoTab = "list" | "form" | "player";
+
+const VideoPlayer: React.FC<{ video: VideoDto | null, onBack: () => void }> = ({ onBack }) => (
+  <div style={{ padding: '20px', color: 'white' }}>
+    <h3>Visualizador Temporariamente Indisponível</h3>
+    <button onClick={onBack} style={{ padding: '10px' }}>Voltar</button>
+  </div>
+);
 
 
 
@@ -28,11 +34,11 @@ export const AdminVideoManager: React.FC = () => {
   } = useAdminVideos();
 
   // Precisamos dos cursos para preencher o <select> do formulário
-  const { courses, refresh: refreshCourses } = useCourses();
+  const { courses, fetchCourses: refreshCourses } = useCourses();
 
   // Converter CourseRowUI para Course para compatibilidade com VideoForm
-  const coursesForForm = useMemo<Course[]>(() => {
-    return courses.map(courseRow => ({
+  const coursesForForm = useMemo<{ id: number; name: string; publicId: string; description: string; videos: any[] }[]>(() => {
+    return courses.map((courseRow: any) => ({
       id: courseRow.id,
       publicId: String(courseRow.id), // CourseRowUI não tem publicId, usando id como fallback
       name: courseRow.categoryName,
@@ -43,8 +49,8 @@ export const AdminVideoManager: React.FC = () => {
 
   // 2. Estados de UI (Controle de Abas e Seleção)
   const [activeTab, setActiveTab] = useState<VideoTab>("list");
-  const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
-  const [videoToWatch, setVideoToWatch] = useState<Video | null>(null);
+  const [selectedVideo, setSelectedVideo] = useState<VideoDto | null>(null);
+  const [videoToWatch, setVideoToWatch] = useState<VideoDto | null>(null);
 
   // 3. Carregar dados iniciais
   useEffect(() => {
@@ -70,19 +76,19 @@ export const AdminVideoManager: React.FC = () => {
     setActiveTab(tabId);
   };
 
-  const handleEdit = (video: Video) => {
+  const handleEdit = (video: VideoDto) => {
     setSelectedVideo(video);
     setActiveTab("form");
   };
 
-  const handleWatch = (video: Video) => {
+  const handleWatch = (video: VideoDto) => {
     setVideoToWatch(video);
     setActiveTab("player");
   };
 
-  const handleDelete = async (publicId: string) => {
+  const handleDelete = async (id: string) => {
     // O hook já gerencia o AlertService.confirm internamente
-    const success = await deleteVideo(publicId);
+    const success = await deleteVideo(id);
     if (success) {
       fetchVideos(); // Garante sincronia
     }
@@ -93,8 +99,8 @@ export const AdminVideoManager: React.FC = () => {
 
     // 1. Extraindo os Arquivos corretamente (sem usar 'any')
     const thumbnailFile =
-      data.thumbnail && data.thumbnail.length > 0
-        ? data.thumbnail[0]
+      data.thumbnailFile && data.thumbnailFile.length > 0
+        ? data.thumbnailFile[0]
         : undefined;
 
     // [CORREÇÃO] Agora o TypeScript reconhece 'videoFile' direto no objeto 'data'
@@ -106,7 +112,7 @@ export const AdminVideoManager: React.FC = () => {
     if (selectedVideo) {
       // --- UPDATE (Edição) ---
       // Na edição, geralmente não obrigamos reenviar o vídeo, apenas atualizamos dados
-      success = await updateVideo(selectedVideo.publicId, {
+      success = await updateVideo(selectedVideo.id, {
         title: data.title,
         description: data.description,
         thumbnailFile: thumbnailFile,
@@ -116,11 +122,10 @@ export const AdminVideoManager: React.FC = () => {
 
       // [EXPLICAÇÃO DA LÓGICA]
       // Esta validação garante que o usuário enviou ALGUMA fonte de vídeo.
-      // Se ele não preencheu a URL E também não selecionou um arquivo, mostramos erro.
-      if (!videoFile && !data.videoUrl) {
+      if (!videoFile) {
         AlertService.error(
           "Atenção",
-          "Para criar um vídeo, você deve fornecer uma URL (Youtube) OU fazer upload de um arquivo."
+          "Para criar um vídeo, você deve fazer upload de um arquivo."
         );
         return; // Interrompe a função aqui, não chama o backend
       }
@@ -129,7 +134,7 @@ export const AdminVideoManager: React.FC = () => {
       success = await createVideo({
         title: data.title,
         description: data.description,
-        courseId: data.courseId,
+        courseId: Number(data.courseId),
         videoFile: videoFile as File, // Casting seguro pois validamos acima
         thumbnailFile: thumbnailFile,
       });
@@ -155,7 +160,7 @@ export const AdminVideoManager: React.FC = () => {
         <div className={styles.contentWrapper}>
           {activeTab === "list" && (
             <VideoList
-              videos={videos}
+              videos={videos?.items || []}
               isLoading={loadingVideos}
               onEdit={handleEdit}
               onDelete={handleDelete}
@@ -164,13 +169,12 @@ export const AdminVideoManager: React.FC = () => {
                 setSelectedVideo(null);
                 setActiveTab("form");
               }}
-              onRefresh={() => fetchVideos()}
             />
           )}
 
           {activeTab === "form" && (
             <VideoForm
-              initialData={selectedVideo}
+              initialData={selectedVideo || undefined}
               courses={coursesForForm} // Usando cursos convertidos
               isLoading={loadingVideos}
               onSubmit={handleFormSubmit}

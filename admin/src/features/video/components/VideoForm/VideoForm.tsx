@@ -24,7 +24,9 @@ export const VideoForm: React.FC<VideoFormProps> = ({
   const defaultValues = initialData ? {
     title: initialData.title,
     description: initialData.description || '',
-    courseId: initialData.courseName ? String(initialData.courseName) : '', // Convert or map appropriately
+    courseId: initialData.courseName 
+      ? courses.find(c => c.name === initialData.courseName)?.publicId || ''
+      : '',
   } : {};
 
   return (

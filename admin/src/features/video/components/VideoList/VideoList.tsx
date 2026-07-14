@@ -1,17 +1,17 @@
 import React from "react";
-import { type Video, VideoStatus } from "@/types/models";
 export interface VideoListProps {
-  videos: Video[];
+  videos: VideoDto[];
   isLoading: boolean;
-  onEdit: (video: Video) => void;
+  onEdit: (video: VideoDto) => void;
   onDelete: (id: string) => void;
-  onWatch: (video: Video) => void;
+  onWatch: (video: VideoDto) => void;
   onNewClick: () => void;
   
 }
 import styles from './VideoList.module.scss';
 import { ActionMenu } from "@/components/ActionMenu/ActionMenu";
 import { type TableColumn, Table } from "@/components/Table/Table";
+import type { VideoDto, VideoStatus } from "../..";
 
 export const VideoList: React.FC<VideoListProps> = ({
   videos,
@@ -23,21 +23,21 @@ export const VideoList: React.FC<VideoListProps> = ({
 }) => {
   
   // Função auxiliar para status simples (Agora será utilizada)
-  const getStatusBadge = (status: number) => {
+  const getStatusBadge = (status: VideoStatus) => {
     switch (status) {
-      case VideoStatus.Available:
+      case 'Available':
         return (
           <span className={`${styles.statusBadge} ${styles.available}`}>
             Disponível
           </span>
         );
-      case VideoStatus.Processing:
+      case 'Processing':
         return (
           <span className={`${styles.statusBadge} ${styles.processing}`}>
             Processando
           </span>
         );
-      case VideoStatus.Error:
+      case 'Error':
         return (
           <span className={`${styles.statusBadge} ${styles.error}`}>Erro</span>
         );
@@ -46,11 +46,11 @@ export const VideoList: React.FC<VideoListProps> = ({
     }
   };
 
-  const columns: TableColumn<Video>[] = [
+  const columns: TableColumn<VideoDto>[] = [
     {
       header: "Preview",
       width: "80px",
-      render: (video: Video) => (
+      render: (video: VideoDto) => (
         <button
           className={styles.playBtn}
           onClick={() => onWatch(video)}
@@ -64,13 +64,13 @@ export const VideoList: React.FC<VideoListProps> = ({
     {
       header: "Curso",
       width: "25%",
-      render: (video: Video) => video.course?.name || "Sem Curso",
+      render: (video: VideoDto) => video.courseName || "Sem Curso",
     },
     { header: "Duração", accessor: "duration", width: "15%" },
     {
       header: "Status",
       width: "20%",
-      render: (video: Video) => {
+      render: (video: VideoDto) => {
         // Usa a função auxiliar para retornar o status em texto/badge
         return getStatusBadge(video.status);
       },
@@ -78,10 +78,10 @@ export const VideoList: React.FC<VideoListProps> = ({
     {
       header: "Ações",
       width: "10%",
-      render: (video: Video) => (
+      render: (video: VideoDto) => (
         <ActionMenu
           onEdit={() => onEdit(video)}
-          onDelete={() => onDelete(video.publicId)}
+          onDelete={() => onDelete(video.id)}
         />
       ),
     },
@@ -99,7 +99,7 @@ export const VideoList: React.FC<VideoListProps> = ({
       <Table
         data={videos}
         columns={columns}
-        keyExtractor={(v: Video) => v.publicId}
+        keyExtractor={(v: VideoDto) => v.id}
         isLoading={isLoading}
         emptyMessage="Nenhum vídeo encontrado."
       />
