@@ -1,4 +1,6 @@
 using MeuCrudCsharp.Features.Caching.Application.Interfaces;
+using MeuCrudCsharp.Features.Hubs.Presentation.Hubs;
+using Microsoft.AspNetCore.SignalR;
 using MeuCrudCsharp.Features.Exceptions;
 using MeuCrudCsharp.Features.MercadoPago.Claims.Application.Interfaces;
 using MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Interfaces;
@@ -11,7 +13,8 @@ public class AdminClaimService(
     IClaimRepository claimRepository,
     IMercadoPagoIntegrationService mpService,
     ICacheService cacheService,
-    ILogger<AdminClaimService> logger)
+    ILogger<AdminClaimService> logger,
+    IHubContext<GlobalRealtimeHub> hubContext)
     : IAdminClaimService
 {
     private const int PageSize = 10;
@@ -120,6 +123,11 @@ public class AdminClaimService(
             throw new ResourceNotFoundException("ReclamaÃ§Ã£o nÃ£o encontrada.");
 
         await mpService.SendMessageAsync(localClaim.MpClaimId, messageText);
+
+        if (!string.IsNullOrEmpty(localClaim.UserId))
+        {
+            await hubContext.Clients.User(localClaim.UserId).SendAsync("ReceiveMessage", new { claimId = localClaim.Id });
+        }
 
         logger.LogInformation("Resposta enviada para a claim MP {MpId}", localClaim.MpClaimId);
     }

@@ -16,14 +16,14 @@ export const UserClaimService = {
   /**
    * Detalhes de uma claim específica do usuário (com chat)
    */
-  getMyDetails: async (internalId: number) => {
+  getMyDetails: async (internalId: string) => {
     return await ApiService.get<ClaimDetail>(`/user/claims/${internalId}`);
   },
 
   /**
    * Enviar resposta como Usuário
    */
-  reply: async (internalId: number, message: string) => {
+  reply: async (internalId: string, message: string) => {
     const payload = { message };
     return await ApiService.post(`/user/claims/${internalId}/reply`, payload);
   },
@@ -31,7 +31,7 @@ export const UserClaimService = {
   /**
    * Solicitar mediação do Mercado Pago (escalar a disputa)
    */
-  requestMediation: async (internalId: number) => {
+  requestMediation: async (internalId: string) => {
     return await ApiService.post(`/user/claims/${internalId}/mediation`, {});
   },
 };

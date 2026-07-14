@@ -1,4 +1,6 @@
 using MeuCrudCsharp.Features.Auth.Domain.Interfaces;
+using MeuCrudCsharp.Features.Hubs.Presentation.Hubs;
+using Microsoft.AspNetCore.SignalR;
 using MeuCrudCsharp.Features.Auth.Application.Interfaces;
 using MeuCrudCsharp.Features.MercadoPago.Claims.Application.Interfaces;
 using MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Interfaces;
@@ -15,7 +17,8 @@ namespace MeuCrudCsharp.Features.MercadoPago.Claims.Application.Services;
 public class UserClaimService(
     IClaimRepository claimRepository,
     IMercadoPagoIntegrationService mpService,
-    IUserContext userContext)
+    IUserContext userContext,
+    IHubContext<GlobalRealtimeHub> hubContext)
     : IUserClaimService
 {
     public async Task<List<ClaimSummaryViewModel>> GetMyClaimsAsync()
@@ -79,6 +82,8 @@ public class UserClaimService(
             throw new UnauthorizedAccessException("Ação não permitida.");
 
         await mpService.SendMessageAsync(claim.MpClaimId, message);
+
+        await hubContext.Clients.User(userId).SendAsync("ReceiveMessage", new { claimId = claim.Id });
     }
 
     public async Task RequestMediationAsync(string internalId)
@@ -90,7 +95,7 @@ public class UserClaimService(
             throw new UnauthorizedAccessException("Ação não permitida.");
 
         await mpService.EscalateToMediationAsync(claim.MpClaimId);
+
+        await hubContext.Clients.User(userId).SendAsync("ReceiveMessage", new { claimId = claim.Id });
     }
 }
-
-

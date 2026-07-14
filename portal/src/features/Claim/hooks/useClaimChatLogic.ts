@@ -9,7 +9,7 @@ import { AppHubsCSharp } from "@/shared/enums/hub/hub.enums";
 
 // Props para saber quem está usando o hook
 interface UseClaimChatProps {
-  claimId: number;
+  claimId: string;
 }
 
 export const useClaimChatLogic = ({ claimId }: UseClaimChatProps) => {

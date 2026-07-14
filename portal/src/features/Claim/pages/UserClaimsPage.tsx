@@ -17,7 +17,7 @@ export const UserClaimsPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState("my-claims");
   const [claims, setClaims] = useState<ClaimSummary[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedClaimId, setSelectedClaimId] = useState<number | null>(null);
+  const [selectedClaimId, setSelectedClaimId] = useState<string | null>(null);
 
   const loadMyClaims = useCallback(async () => {
     setIsLoading(true);
