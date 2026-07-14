@@ -6,8 +6,8 @@ namespace MeuCrudCsharp.Features.Auth.Application.DTOs
         public string Name { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public string AvatarUrl { get; set; } = string.Empty;
-        public List<string> Roles { get; set; } = new();
-        public List<string> Tenants { get; set; } = new();
+        public List<string> Roles { get; set; } = [];
+        public List<string> Tenants { get; set; } = [];
 
         // Novos campos booleanos leves (substituindo os objetos completos)
         public bool HasActiveSubscription { get; set; }

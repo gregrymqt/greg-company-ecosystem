@@ -17,22 +17,36 @@ public class UserAccountController : ApiControllerBase
 
     [HttpPost("avatar")]
     [AllowLargeFile(20)]
-    public async Task<IActionResult> UploadProfilePicture([FromForm] IFormFile file)
+    public async Task<IActionResult> UploadProfilePicture([FromForm] IFormFile avatar)
     {
-        if (file == null || file.Length == 0)
+        if (avatar == null || avatar.Length == 0)
         {
             return BadRequest(new { message = "Nenhum arquivo enviado." });
         }
 
         try
         {
-            var result = await _userAccountService.UpdateProfilePictureAsync(file);
+            var result = await _userAccountService.UpdateProfilePictureAsync(avatar);
 
             return Ok(result);
         }
         catch (Exception ex)
         {
             return HandleException(ex, "Erro ao atualizar avatar.");
+        }
+    }
+
+    [HttpGet("profile")]
+    public async Task<IActionResult> GetProfile()
+    {
+        try
+        {
+            var result = await _userAccountService.GetProfileAsync();
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            return HandleException(ex, "Erro ao buscar perfil do usuário.");
         }
     }
 }

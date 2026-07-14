@@ -1,4 +1,4 @@
-﻿using MeuCrudCsharp.Features.Profiles.UserAccount.Domain.Interfaces;
+using MeuCrudCsharp.Features.Profiles.UserAccount.Domain.Interfaces;
 using MeuCrudCsharp.Features.Auth.Domain.Interfaces;
 using MeuCrudCsharp.Features.Auth.Application.Interfaces;
 using MeuCrudCsharp.Features.Files.Application.Interfaces;
@@ -64,6 +64,7 @@ public class UserAccountService : IUserAccountService
         }
 
         user.AvatarFileId = novoIdArquivo;
+        user.AvatarUrl = urlFinal;
 
         await _unitOfWork.CommitAsync();
 
@@ -73,6 +74,24 @@ public class UserAccountService : IUserAccountService
         {
             AvatarUrl = urlFinal,
             Message = "Foto de perfil atualizada com sucesso!",
+        };
+    }
+
+    public async Task<UserProfileDto> GetProfileAsync()
+    {
+        var userId = _userContext.GetCurrentUserId().ToString();
+        if (string.IsNullOrEmpty(userId))
+            throw new UnauthorizedAccessException("Usuário não identificado.");
+
+        var user = await _repository.GetUserByIdAsync(userId);
+        if (user == null)
+            throw new Exception("Usuário não encontrado.");
+
+        return new UserProfileDto
+        {
+            Name = user.Name ?? string.Empty,
+            Email = user.Email ?? string.Empty,
+            AvatarUrl = user.AvatarUrl ?? string.Empty
         };
     }
 }
