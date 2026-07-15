@@ -22,6 +22,7 @@ export interface NuvemshopImageRequest {
 }
 
 export interface NuvemshopProductRequest {
+  tenant_id: string;
   handle: NuvemshopLocalizedString; // Slug único da URL
   name: NuvemshopLocalizedString;
   description: NuvemshopLocalizedString;

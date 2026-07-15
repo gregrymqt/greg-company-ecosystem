@@ -27,6 +27,7 @@ class ShopifyProductSetInput(BaseModel):
     Input principal para a mutação productSet (Stable 2024-04).
     Ideal para sincronização externa (ERP/Bot).
     """
+    tenant_id: str
     title: str
     descriptionHtml: str
     vendor: str
@@ -45,6 +46,7 @@ class ShopifyProductSetInput(BaseModel):
         tags_str = ",".join(tags) if isinstance(tags, list) else str(tags)
         
         return cls(
+            tenant_id=data.get("tenant_id", ""),
             title=data.get("title", ""),
             descriptionHtml=data.get("description", ""),
             vendor=data.get("vendor", "Default Vendor"),
@@ -103,6 +105,7 @@ class ShopifyProductUpdateInput(BaseModel):
     """
     Propriedades passíveis de modificação pela IA no ciclo de atualização.
     """
+    tenant_id: str = Field(..., description="ID do tenant")
     id: str = Field(..., description="GID do Produto, ex: 'gid://shopify/Product/108828309'")
     title: Optional[str] = None
     handle: Optional[str] = None

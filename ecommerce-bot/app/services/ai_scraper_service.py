@@ -42,7 +42,7 @@ class AIScraperService:
         return {"status": "success", "message": "Credencial salva e criptografada com sucesso."}
 
     @staticmethod
-    async def enqueue_extraction_task(tenant_id: str, target_url: str):
+    async def enqueue_extraction_task(tenant_id: str, target_url: str, plan: str = "free"):
         # Geramos um ID temporário único para rastrear a solicitação de importação
         generated_product_id = f"req_{uuid.uuid4().hex[:12]}"
         
@@ -62,14 +62,17 @@ class AIScraperService:
                 # Convertemos o payload respeitando os Aliases
                 message_body = json.dumps(message_model.model_dump(by_alias=True)).encode()
                 
-                # Publica na fila padrão ('ecommerce_prod')
+                # Define a routing key baseada no plano
+                routing_key = "ecommerce_prod" if plan in ["premium", "pro", "enterprise"] else "ecommerce_demo"
+                
+                # Publica na fila correspondente
                 await channel.default_exchange.publish(
                     aio_pika.Message(
                         body=message_body,
                         content_type="application/json",
                         delivery_mode=aio_pika.DeliveryMode.PERSISTENT
                     ),
-                    routing_key="ecommerce_prod"
+                    routing_key=routing_key
                 )
                 
             logger.info(f"Solicitação de scraping enviada ao RabbitMQ para o Tenant {tenant_id}. URL: {target_url}")

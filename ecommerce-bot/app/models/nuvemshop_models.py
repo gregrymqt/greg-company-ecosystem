@@ -34,6 +34,9 @@ class NuvemshopProductRequest(BaseModel):
     Model principal para criação de produto via API Nuvemshop.
     Alinhada com os headers do seu CsvExportService.
     """
+    # Tenant Isolation
+    tenant_id: str = Field(...)
+
     # Identificador URL (Slug)
     handle: NuvemshopLocalizedString = Field(..., alias="handle")
     
@@ -73,6 +76,7 @@ class NuvemshopProductRequest(BaseModel):
         para o formato de internacionalização da Nuvemshop.
         """
         return cls(
+            tenant_id=data.get("tenant_id", ""),
             handle={"pt": data.get("slug", "")},
             name={"pt": data.get("title", "")},
             description={"pt": data.get("description", "")},

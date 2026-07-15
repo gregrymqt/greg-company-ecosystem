@@ -27,6 +27,7 @@ export interface ShopifyProductOptionInput {
 
 // Input para criação global (productSet - Stable 2024-04)
 export interface ShopifyProductSetInput {
+  tenant_id: string;
   title: string;
   descriptionHtml: string;
   vendor: string;
@@ -47,6 +48,7 @@ export interface ShopifySEOInput {
 }
 
 export interface ShopifyProductUpdateInput {
+  tenant_id: string;
   id: string; // GID do Produto (ex: gid://shopify/Product/123456)
   title?: string;
   handle?: string;

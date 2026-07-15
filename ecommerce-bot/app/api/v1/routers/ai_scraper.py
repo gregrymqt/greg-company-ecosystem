@@ -46,8 +46,12 @@ async def start_extraction(
     Dispara o processo assíncrono de Web Scraping publicando uma mensagem no RabbitMQ.
     O ScraperWorker irá consumir esta mensagem em background.
     """
+    # Extrai o plano do usuário, assumindo fallback seguro caso não exista no dict
+    user_plan = current_user.get("plan", "free").lower()
+    
     # Delega a lógica de enfileiramento e mensageria para o Service
     return await AIScraperService.enqueue_extraction_task(
         tenant_id=x_tenant_id,
-        target_url=str(payload.url)
+        target_url=str(payload.url),
+        plan=user_plan
     )
