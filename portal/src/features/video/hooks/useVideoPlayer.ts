@@ -44,7 +44,7 @@ export const useVideoPlayer = (publicId: string | undefined) => {
 
   // Lógica de streaming HLS
   useEffect(() => {
-    const isAvailable = internalData?.status === 'Available' || conversionStatus === 'SUCCESS';
+    const isAvailable = internalData?.status === 'Available' || conversionStatus === 'Available';
     if (!isPlaying || !videoRef.current || !internalData || !isAvailable) return;
 
     const videoElement = videoRef.current;
@@ -110,8 +110,18 @@ export const useVideoPlayer = (publicId: string | undefined) => {
   const handlePause = useCallback(() => {
     if (videoRef.current) {
       videoRef.current.pause();
+      
+      // Save progress to API based on current time
+      if (internalData) {
+        const currentTime = videoRef.current.currentTime;
+        const totalTime = videoRef.current.duration || 1;
+        const percentage = Math.round((currentTime / totalTime) * 100);
+        publicVideoService.saveProgress(internalData.id, percentage).catch(err => {
+          console.error('Falha ao salvar progresso na API', err);
+        });
+      }
     }
-  }, []);
+  }, [internalData]);
 
   const handleResume = useCallback(() => {
     if (videoRef.current) {

@@ -27,6 +27,17 @@ class PublicVideoService {
   }
 
   /**
+   * Salva o progresso atual do vídeo
+   * POST /videos/{publicId}/progress
+   */
+  async saveProgress(publicId: string, percentage: number): Promise<void> {
+    await ApiService.post(`${this.BASE_PATH}/${publicId}/progress`, {
+      percentage,
+      lastWatchedAt: new Date().toISOString()
+    });
+  }
+
+  /**
    * Transforma VideoDto em PlayerVideoDto para UI
    */
   toPlayerDto(video: VideoDto): PlayerVideoDto {

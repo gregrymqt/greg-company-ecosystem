@@ -80,17 +80,17 @@ public class AdminVideoService : IAdminVideoService
                     CatVideo
                 );
 
-                var localFilePath = System.IO.Path.Combine(_env.WebRootPath, videoSalvo.CaminhoRelativo.TrimStart('/'));
+                var localFilePath = Path.Combine(_env.WebRootPath, videoSalvo.CaminhoRelativo.TrimStart('/'));
                 storageIdentifier = await _supabaseStorageService.UploadRawVideoAsync(localFilePath, fileName, "greg-videos-raw");
                 await _fileService.DeletarArquivoAsync(videoSalvo.Id);
                 fileId = "";
             }
             else if (dto.File != null)
             {
-                var fileName = dto.FileName ?? $"{Guid.NewGuid()}{System.IO.Path.GetExtension(dto.File.FileName)}";
+                var fileName = dto.FileName ?? $"{Guid.NewGuid()}{Path.GetExtension(dto.File.FileName)}";
                 var videoSalvo = await _fileService.SalvarArquivoAsync(dto.File, CatVideo);
 
-                var localFilePath = System.IO.Path.Combine(_env.WebRootPath, videoSalvo.CaminhoRelativo.TrimStart('/'));
+                var localFilePath = Path.Combine(_env.WebRootPath, videoSalvo.CaminhoRelativo.TrimStart('/'));
                 storageIdentifier = await _supabaseStorageService.UploadRawVideoAsync(localFilePath, fileName, "greg-videos-raw");
                 await _fileService.DeletarArquivoAsync(videoSalvo.Id);
                 fileId = "";
@@ -152,7 +152,7 @@ public class AdminVideoService : IAdminVideoService
                 Id = entity.PublicId,
                 Title = entity.Title,
                 Status = entity.Status.ToString(),
-
+                CourseId = entity.CourseId,
                 ThumbnailUrl = entity.ThumbnailUrl ?? string.Empty,
             };
         }
@@ -191,6 +191,7 @@ public class AdminVideoService : IAdminVideoService
                         ThumbnailUrl = v.ThumbnailUrl ?? string.Empty,
                         Status = v.Status.ToString(),
                         UploadDate = v.UploadDate,
+                        CourseId = v.CourseId,
                     })
                     .ToList();
 

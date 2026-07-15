@@ -27,11 +27,17 @@ export interface VideoDto {
   uploadDate: string; // ISO 8601 date string
   duration: string; // TimeSpan como string (ex: "00:12:30")
   status: VideoStatus;
-  courseId?: number;
+  courseId?: string;
   courseName?: string;
   thumbnailUrl?: string;
   nextVideoId?: string;
   prevVideoId?: string;
+}
+
+export interface VideoProcessingUpdatedPayload {
+  videoId: string;
+  status: VideoStatus;
+  duration: number;
 }
 
 

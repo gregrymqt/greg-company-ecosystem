@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel.DataAnnotations;
 using MeuCrudCsharp.Features.Files.Application.DTOs;
 
@@ -13,6 +13,7 @@ namespace MeuCrudCsharp.Features.Videos.Application.DTOs
         public DateTime UploadDate { get; set; }
         public TimeSpan Duration { get; set; }
         public string? Status { get; set; }
+        public string? CourseId { get; set; }
         public string? CourseName { get; set; }
         public string? ThumbnailUrl { get; set; }
     }

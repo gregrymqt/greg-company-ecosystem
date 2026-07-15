@@ -3,26 +3,24 @@ import { socketService } from "@/shared/services/socket.service"; // Ajuste o pa
 import { AppHubsCSharp } from "@/shared/enums/hub/hub.enums";     // Ajuste o path conforme seu projeto
 import { useSocketListener } from "@/shared/hooks/useSocket";
 
-interface VideoProgressPayload {
-  percentage: number;
-  status: "PROCESSING" | "SUCCESS" | "FAILED";
-  message?: string;
-}
+import type { VideoProcessingUpdatedPayload } from "../types/video.types";
 
 export function useVideoProgress(storageIdentifier: string | null) {
   const [progress, setProgress] = useState<number>(0);
   const [status, setStatus] = useState<string>("IDLE");
   const [error, setError] = useState<string | null>(null);
 
-  // 1. Escuta o evento vindo do Backend (Tratado automaticamente pelo seu useSocketListener)
+  // 1. Escuta o evento vindo do Backend
   useSocketListener(
     AppHubsCSharp.GlobalRealtime,
-    "ReceiveVideoProgress",
-    (data: VideoProgressPayload) => {
-      setProgress(data.percentage);
+    "VideoProcessingStatusUpdated",
+    (data: VideoProcessingUpdatedPayload) => {
+      if (data.status === "Available") {
+        setProgress(100);
+      }
       setStatus(data.status);
-      if (data.status === "FAILED") {
-        setError(data.message || "Erro ao processar o vídeo.");
+      if (data.status === "Error") {
+        setError("Erro ao processar o vídeo.");
       }
     }
   );
@@ -40,7 +38,7 @@ export function useVideoProgress(storageIdentifier: string | null) {
           "SubscribeToJobProgress",
           storageIdentifier
         );
-        setStatus("PROCESSING");
+        setStatus("Processing");
       } catch (err) {
         console.error("Erro ao se inscrever no grupo de realtime do vídeo:", err);
         setError("Não foi possível conectar ao rastreamento do vídeo.");
