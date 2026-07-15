@@ -27,7 +27,12 @@ public class Course : IMongoDocument
 
     public string? Creator { get; set; }
 
-    // Propriedade de navegação para a lista de vídeos que pertencem a este curso
-    [BsonIgnore]
-    public virtual ICollection<Video> Videos { get; set; } = new List<Video>();
+    [BsonRepresentation(BsonType.Decimal128)]
+    public decimal Price { get; set; } = 0;
+
+    public bool IsPublished { get; set; } = false;
+
+    public string? ThumbnailUrl { get; set; }
+
+    public List<Module> Modules { get; set; } = new();
 }

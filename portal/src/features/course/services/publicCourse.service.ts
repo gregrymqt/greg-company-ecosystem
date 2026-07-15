@@ -47,15 +47,15 @@ export const publicCourseService = {
         year: course.year || '',
         creator: course.creator || '',
         lastWatchedVideo,
-        videos: course.videos.map((video): VideoCardUI => ({
-          id: video.publicId,
-          title: video.title,
-          description: video.description,
-          thumbnailUrl: video.thumbnailUrl || '/assets/placeholder.jpg',
-          durationFormatted: formatDuration(video.duration?.totalSeconds || 0),
-          courseId: video.courseId,
+        videos: (course.modules || []).flatMap(m => m.lessons).map((lesson): VideoCardUI => ({
+          id: lesson.videoPublicId,
+          title: lesson.title,
+          description: '',
+          thumbnailUrl: course.thumbnailUrl || '/assets/placeholder.jpg',
+          durationFormatted: '',
+          courseId: 0,
           isNew: false,
-          status: video.status || "Pending"
+          status: "Completed"
         }))
       };
     });

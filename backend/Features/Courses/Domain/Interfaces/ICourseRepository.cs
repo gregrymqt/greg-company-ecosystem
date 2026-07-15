@@ -1,4 +1,4 @@
-﻿using MeuCrudCsharp.Features.MercadoPago.Chargebacks.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Chargebacks.Domain.Entities;
 using MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities;
 using MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities;
 using MeuCrudCsharp.Features.MercadoPago.Plans.Domain.Entities;
@@ -11,15 +11,16 @@ namespace MeuCrudCsharp.Features.Courses.Domain.Interfaces
     public interface ICourseRepository
     {
         Task<Course?> GetByPublicIdAsync(Guid publicId);
-        Task<Course?> GetByPublicIdWithVideosAsync(Guid publicId);
+        Task<Course?> GetByPublicIdWithModulesAsync(Guid publicId);
         Task<Course?> GetByNameAsync(string name);
         Task<IEnumerable<Course>> SearchByNameAsync(string name);
         Task<bool> ExistsByNameAsync(string name);
 
-        Task<(IEnumerable<Course> Items, int TotalCount)> GetPaginatedWithVideosAsync(
+        Task<(IEnumerable<Course> Items, int TotalCount)> GetPaginatedWithModulesAsync(
             int pageNumber,
             int pageSize,
-            string? name = null
+            string? name = null,
+            bool onlyPublished = false
         );
 
         Task AddAsync(Course course);

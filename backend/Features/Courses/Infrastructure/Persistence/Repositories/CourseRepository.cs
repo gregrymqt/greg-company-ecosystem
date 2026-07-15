@@ -1,4 +1,4 @@
-﻿using MeuCrudCsharp.Data;
+using MeuCrudCsharp.Data;
 using MeuCrudCsharp.Features.Courses.Domain.Entities;
 using MeuCrudCsharp.Features.Courses.Domain.Interfaces;
 using MongoDB.Driver;
@@ -20,7 +20,7 @@ namespace MeuCrudCsharp.Features.Courses.Infrastructure.Persistence.Repositories
             return await _courses.Find(c => c.PublicId == publicId).FirstOrDefaultAsync();
         }
 
-        public async Task<Course?> GetByPublicIdWithVideosAsync(Guid publicId)
+        public async Task<Course?> GetByPublicIdWithModulesAsync(Guid publicId)
         {
             return await GetByPublicIdAsync(publicId);
         }
@@ -41,15 +41,25 @@ namespace MeuCrudCsharp.Features.Courses.Infrastructure.Persistence.Repositories
             return count > 0;
         }
 
-        public async Task<(IEnumerable<Course> Items, int TotalCount)> GetPaginatedWithVideosAsync(
+        public async Task<(IEnumerable<Course> Items, int TotalCount)> GetPaginatedWithModulesAsync(
             int pageNumber,
             int pageSize,
-            string? name = null
+            string? name = null,
+            bool onlyPublished = false
         )
         {
-            var filter = string.IsNullOrWhiteSpace(name) 
-                ? FilterDefinition<Course>.Empty 
-                : Builders<Course>.Filter.Regex(c => c.Name, new MongoDB.Bson.BsonRegularExpression(name, "i"));
+            var filters = new List<FilterDefinition<Course>>();
+            
+            if (!string.IsNullOrWhiteSpace(name))
+            {
+                filters.Add(Builders<Course>.Filter.Regex(c => c.Name, new MongoDB.Bson.BsonRegularExpression(name, "i")));
+            }
+            if (onlyPublished)
+            {
+                filters.Add(Builders<Course>.Filter.Eq(c => c.IsPublished, true));
+            }
+
+            var filter = filters.Count > 0 ? Builders<Course>.Filter.And(filters) : FilterDefinition<Course>.Empty;
 
             var totalCount = (int)await _courses.CountDocumentsAsync(filter);
 

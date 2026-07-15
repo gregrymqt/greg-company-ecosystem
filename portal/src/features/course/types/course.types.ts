@@ -18,6 +18,21 @@ export interface VideoDto {
   description?: string;
 }
 
+export interface LessonDto {
+  publicId: string;
+  title: string;
+  order: number;
+  videoPublicId: string;
+  videoTitle: string;
+}
+
+export interface ModuleDto {
+  publicId: string;
+  title: string;
+  order: number;
+  lessons: LessonDto[];
+}
+
 /**
  * Interface baseada em CourseDto.cs
  * Representa um curso retornado pela API
@@ -28,7 +43,10 @@ export interface CourseDto {
   description: string;
   year?: string;
   creator?: string;
-  videos: VideoDto[];  // Opcional na listagem, presente no detalhe
+  price: number;
+  isPublished: boolean;
+  thumbnailUrl?: string;
+  modules: ModuleDto[];
 }
 
 export type VideoProcessingStatus = "Pending" | "Processing" | "Completed" | "Failed";

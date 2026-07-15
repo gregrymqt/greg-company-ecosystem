@@ -16,6 +16,21 @@ export interface VideoDto {
   courseId: number;
 }
 
+export interface LessonDto {
+  publicId: string;
+  title: string;
+  order: number;
+  videoPublicId: string;
+  videoTitle: string;
+}
+
+export interface ModuleDto {
+  publicId: string;
+  title: string;
+  order: number;
+  lessons: LessonDto[];
+}
+
 /**
  * Interface baseada em CourseDto.cs
  * Representa um curso retornado pela API
@@ -24,7 +39,23 @@ export interface CourseDto {
   publicId: string;  // Guid no backend
   name: string;
   description: string;
-  videos?: VideoDto[];  // Opcional na listagem, presente no detalhe
+  price: number;
+  isPublished: boolean;
+  thumbnailUrl?: string;
+  modules?: ModuleDto[];  // Opcional na listagem, presente no detalhe
+}
+
+export interface CreateLessonData {
+  title: string;
+  order: number;
+  videoPublicId: string;
+  videoTitle: string;
+}
+
+export interface CreateModuleData {
+  title: string;
+  order: number;
+  lessons: CreateLessonData[];
 }
 
 /**
@@ -33,6 +64,10 @@ export interface CourseDto {
 export interface CreateCourseData {
   name: string;
   description?: string;
+  price: number;
+  isPublished: boolean;
+  thumbnailUrl?: string;
+  modules?: CreateModuleData[];
 }
 
 /**
@@ -41,6 +76,10 @@ export interface CreateCourseData {
 export interface UpdateCourseData {
   name: string;
   description?: string;
+  price: number;
+  isPublished: boolean;
+  thumbnailUrl?: string;
+  modules?: CreateModuleData[];
 }
 
 /**

@@ -23,7 +23,7 @@ namespace MeuCrudCsharp.Features.Courses.Presentation.Controllers
         {
             try
             {
-                var paginatedResult = await courseService.GetCoursesWithVideosPaginatedAsync(
+                var paginatedResult = await courseService.GetCoursesWithModulesPaginatedAsync(
                     pageNumber,
                     pageSize
                 );
@@ -50,14 +50,22 @@ namespace MeuCrudCsharp.Features.Courses.Presentation.Controllers
                 PublicId = course.PublicId,
                 Name = course.Name,
                 Description = course.Description,
-                Videos =
+                Modules =
                     course
-                        .Videos?.Select(v => new VideoDto
+                        .Modules?.Select(m => new ModuleDto
                         {
-                            Id = v.PublicId,
-                            Title = v.Title,
-                        })
-                        .ToList() ?? [],
+                            PublicId = m.PublicId,
+                            Title = m.Title,
+                            Order = m.Order,
+                            Lessons = m.Lessons?.Select(l => new LessonDto
+                            {
+                                PublicId = l.PublicId,
+                                Title = l.Title,
+                                Order = l.Order,
+                                VideoPublicId = l.VideoPublicId,
+                                VideoTitle = l.VideoTitle
+                            }).ToList() ?? new List<LessonDto>()
+                        }).ToList() ?? new List<ModuleDto>()
             };
 
             return Ok(courseDto);

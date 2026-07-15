@@ -1,4 +1,4 @@
-﻿using MeuCrudCsharp.Features.Caching.Application.Interfaces;
+using MeuCrudCsharp.Features.Caching.Application.Interfaces;
 using MeuCrudCsharp.Features.Courses.Application.DTOs;
 using MeuCrudCsharp.Features.Courses.Application.Interfaces;
 using MeuCrudCsharp.Features.Courses.Domain.Interfaces;
@@ -18,7 +18,8 @@ namespace MeuCrudCsharp.Features.Courses.Application.Services
         ILogger<CourseService> logger,
         ICacheService cacheService,
         IUnitOfWork unitOfWork,
-        IMongoDbContext mongoContext
+        IMongoDbContext mongoContext,
+        Microsoft.Extensions.Configuration.IConfiguration configuration
     ) : ICourseService
     {
         private const string CoursesCacheVersionKey = "courses_cache_version";
@@ -29,14 +30,15 @@ namespace MeuCrudCsharp.Features.Courses.Application.Services
             return courses.Select(CourseMapper.ToDto);
         }
 
-        public async Task<PaginatedResultDto<CourseDto>> GetCoursesWithVideosPaginatedAsync(
+        public async Task<PaginatedResultDto<CourseDto>> GetCoursesWithModulesPaginatedAsync(
             int pageNumber,
             int pageSize,
-            string? name = null
+            string? name = null,
+            bool onlyPublished = false
         )
         {
             var cacheVersion = await GetCacheVersionAsync();
-            var cacheKey = $"Courses_v{cacheVersion}_Page{pageNumber}_Size{pageSize}_Name{name ?? "none"}";
+            var cacheKey = $"Courses_v{cacheVersion}_Page{pageNumber}_Size{pageSize}_Name{name ?? "none"}_Pub{onlyPublished}";
 
             return await cacheService.GetOrCreateAsync(
                     cacheKey,
@@ -44,13 +46,14 @@ namespace MeuCrudCsharp.Features.Courses.Application.Services
                     {
                         logger.LogInformation("Buscando cursos do banco (cache miss)...");
 
-                        var (items, totalCount) = await repository.GetPaginatedWithVideosAsync(
+                        var (items, totalCount) = await repository.GetPaginatedWithModulesAsync(
                             pageNumber,
                             pageSize,
-                            name
+                            name,
+                            onlyPublished
                         );
 
-                        var dtos = items.Select(CourseMapper.ToDtoWithVideos).ToList();
+                        var dtos = items.Select(CourseMapper.ToDtoWithModules).ToList();
 
                         return new PaginatedResultDto<CourseDto>(
                             dtos,
@@ -75,6 +78,21 @@ namespace MeuCrudCsharp.Features.Courses.Application.Services
                 Id = Guid.NewGuid().ToString(),
                 Name = createDto.Name!,
                 Description = createDto.Description ?? string.Empty,
+                Price = createDto.Price,
+                IsPublished = createDto.IsPublished,
+                ThumbnailUrl = createDto.ThumbnailUrl,
+                Modules = createDto.Modules?.Select(m => new Module
+                {
+                    Title = m.Title,
+                    Order = m.Order,
+                    Lessons = m.Lessons?.Select(l => new Lesson
+                    {
+                        Title = l.Title,
+                        Order = l.Order,
+                        VideoPublicId = l.VideoPublicId,
+                        VideoTitle = l.VideoTitle
+                    }).ToList() ?? new List<Lesson>()
+                }).ToList() ?? new List<Module>()
             };
 
             using var session = await mongoContext.StartSessionAsync();
@@ -101,6 +119,10 @@ namespace MeuCrudCsharp.Features.Courses.Application.Services
             }
 
             await cacheService.InvalidateCacheByKeyAsync(CoursesCacheVersionKey);
+            if (configuration["USE_REDIS"] == "true")
+            {
+                await cacheService.InvalidateCacheByKeyAsync("catalog:courses:public");
+            }
             logger.LogInformation("Novo curso '{CourseName}' criado e evento enviado ao Outbox.", newCourse.Name);
 
             return CourseMapper.ToDto(newCourse);
@@ -115,11 +137,30 @@ namespace MeuCrudCsharp.Features.Courses.Application.Services
 
             course.Name = updateDto.Name!;
             course.Description = updateDto.Description ?? string.Empty;
+            course.Price = updateDto.Price;
+            course.IsPublished = updateDto.IsPublished;
+            course.ThumbnailUrl = updateDto.ThumbnailUrl;
+            course.Modules = updateDto.Modules?.Select(m => new Module
+            {
+                Title = m.Title,
+                Order = m.Order,
+                Lessons = m.Lessons?.Select(l => new Lesson
+                {
+                    Title = l.Title,
+                    Order = l.Order,
+                    VideoPublicId = l.VideoPublicId,
+                    VideoTitle = l.VideoTitle
+                }).ToList() ?? new List<Lesson>()
+            }).ToList() ?? new List<Module>();
 
             repository.Update(course);
             await unitOfWork.CommitAsync();
 
             await cacheService.InvalidateCacheByKeyAsync(CoursesCacheVersionKey);
+            if (configuration["USE_REDIS"] == "true")
+            {
+                await cacheService.InvalidateCacheByKeyAsync("catalog:courses:public");
+            }
 
             logger.LogInformation("Curso {CourseId} atualizado.", publicId);
             return CourseMapper.ToDto(course);
@@ -127,13 +168,13 @@ namespace MeuCrudCsharp.Features.Courses.Application.Services
 
         public async Task DeleteCourseAsync(Guid publicId)
         {
-            var course = await repository.GetByPublicIdWithVideosAsync(publicId)
+            var course = await repository.GetByPublicIdWithModulesAsync(publicId)
                 ?? throw new ResourceNotFoundException($"Curso com ID {publicId} nao encontrado.");
 
-            if (course.Videos.Count != 0)
+            if (course.Modules.Count != 0)
             {
                 throw new AppServiceException(
-                    "Nao e possivel deletar um curso que possui videos associados."
+                    "Nao e possivel deletar um curso que possui modulos associados."
                 );
             }
 
@@ -141,6 +182,10 @@ namespace MeuCrudCsharp.Features.Courses.Application.Services
             await unitOfWork.CommitAsync();
 
             await cacheService.InvalidateCacheByKeyAsync(CoursesCacheVersionKey);
+            if (configuration["USE_REDIS"] == "true")
+            {
+                await cacheService.InvalidateCacheByKeyAsync("catalog:courses:public");
+            }
 
             logger.LogInformation("Curso {CourseId} deletado.", publicId);
         }

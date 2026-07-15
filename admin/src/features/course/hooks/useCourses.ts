@@ -88,7 +88,7 @@ export const useCourses = () => {
             if (error instanceof ApiError && error.status === 409) {
                 AlertService.error(
                     'Ação Bloqueada',
-                    'Não é possível deletar este curso pois ele possui vídeos associados.'
+                    'Não é possível deletar este curso pois ele possui módulos associados.'
                 );
             } else {
                 AlertService.error('Erro', 'Falha ao deletar o curso.');

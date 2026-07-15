@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
 using MeuCrudCsharp.Features.Base;
 using MeuCrudCsharp.Features.Courses.Application.Interfaces;
@@ -33,10 +33,11 @@ namespace MeuCrudCsharp.Features.Courses.Presentation.Controllers
         {
             try
             {
-                var paginatedResult = await _courseService.GetCoursesWithVideosPaginatedAsync(
+                var paginatedResult = await _courseService.GetCoursesWithModulesPaginatedAsync(
                     pageNumber,
                     pageSize,
-                    name
+                    name,
+                    onlyPublished: true
                 );
                 return Ok(paginatedResult);
             }
