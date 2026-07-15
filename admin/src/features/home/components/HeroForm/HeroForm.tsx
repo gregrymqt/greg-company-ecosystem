@@ -23,8 +23,9 @@ export const HeroForm: React.FC<HeroFormProps> = ({
   const defaultValues: Partial<HeroFormValues> = initialData ? {
     title: initialData.title,
     subtitle: initialData.subtitle,
-    actionText: initialData.actionText,
-    actionUrl: initialData.actionUrl
+    ctaText: initialData.ctaText,
+    ctaLink: initialData.ctaLink,
+    order: initialData.order
     // newImage começa undefined na edição, o que é permitido pelo Partial
   } : {};
 
@@ -66,7 +67,7 @@ export const HeroForm: React.FC<HeroFormProps> = ({
         />
         
         <Form.Input 
-          name="actionText" 
+          name="ctaText" 
           label="Texto do Botão (CTA)" 
           placeholder="Ex: Saiba Mais" 
           validation={{ required: 'O texto do botão é obrigatório' }} 
@@ -74,7 +75,7 @@ export const HeroForm: React.FC<HeroFormProps> = ({
         />
         
         <Form.Input 
-          name="actionUrl" 
+          name="ctaLink" 
           label="Link do Botão" 
           placeholder="Ex: /servicos ou https://..." 
           validation={{ required: 'O link é obrigatório' }} 

@@ -20,39 +20,43 @@ public class HeroSlideDto
     public string ImageUrl { get; set; } = string.Empty;
     public string Title { get; set; } = string.Empty;
     public string Subtitle { get; set; } = string.Empty;
-    public string ActionText { get; set; } = string.Empty;
-    public string ActionUrl { get; set; } = string.Empty;
+    public string CtaText { get; set; } = string.Empty;
+    public string CtaLink { get; set; } = string.Empty;
     public string? Audience { get; set; }
+    public int Order { get; set; }
 }
 
 public class ServiceDto
 {
     public string Id { get; set; }
-    public string IconClass { get; set; } = string.Empty;
+    public string Icon { get; set; } = string.Empty;
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
-    public string ActionText { get; set; } = string.Empty;
-    public string ActionUrl { get; set; } = string.Empty;
+    public string CtaText { get; set; } = string.Empty;
+    public string CtaLink { get; set; } = string.Empty;
     public string? Audience { get; set; }
+    public int Order { get; set; }
 }
 
 public class CreateUpdateHeroDto : BaseUploadDto
 {
     public string Title { get; set; } = string.Empty;
     public string Subtitle { get; set; } = string.Empty;
-    public string ActionText { get; set; } = string.Empty;
-    public string ActionUrl { get; set; } = string.Empty;
+    public string CtaText { get; set; } = string.Empty;
+    public string CtaLink { get; set; } = string.Empty;
     public string? Audience { get; set; }
+    public int Order { get; set; }
 }
 
 public class CreateUpdateServiceDto
 {
-    public string IconClass { get; set; } = string.Empty;
+    public string Icon { get; set; } = string.Empty;
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
-    public string ActionText { get; set; } = string.Empty;
-    public string ActionUrl { get; set; } = string.Empty;
+    public string CtaText { get; set; } = string.Empty;
+    public string CtaLink { get; set; } = string.Empty;
     public string? Audience { get; set; }
+    public int Order { get; set; }
 }
 
 

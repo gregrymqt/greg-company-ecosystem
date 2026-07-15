@@ -18,8 +18,9 @@ export interface HeroSlideDto {
   imageUrl: string;
   title: string;
   subtitle: string;
-  actionText: string;
-  actionUrl: string;
+  ctaText: string;
+  ctaLink: string;
+  order: number;
 }
 
 /**
@@ -28,11 +29,12 @@ export interface HeroSlideDto {
  */
 export interface ServiceDto {
   id: number;
-  iconClass: string;
+  icon: string;
   title: string;
   description: string;
-  actionText: string;
-  actionUrl: string;
+  ctaText: string;
+  ctaLink: string;
+  order: number;
 }
 
 /**
@@ -55,8 +57,9 @@ export interface HomeContentDto {
 export interface CreateUpdateHeroData {
   title: string;
   subtitle: string;
-  actionText: string;
-  actionUrl: string;
+  ctaText: string;
+  ctaLink: string;
+  order: number;
 }
 
 /**
@@ -64,11 +67,12 @@ export interface CreateUpdateHeroData {
  * Baseado em CreateUpdateServiceDto.cs
  */
 export interface CreateUpdateServiceData {
-  iconClass: string;
+  icon: string;
   title: string;
   description: string;
-  actionText: string;
-  actionUrl: string;
+  ctaText: string;
+  ctaLink: string;
+  order: number;
 }
 
 // =================================================================

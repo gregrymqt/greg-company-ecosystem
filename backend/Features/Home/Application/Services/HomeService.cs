@@ -32,28 +32,32 @@ public class HomeService(
                     return new HomeContentDto
                     {
                         Hero = heroes
+                            .OrderBy(h => h.Order)
                             .Select(h => new HeroSlideDto
                             {
                                 Id = h.Id,
                                 Title = h.Title,
                                 Subtitle = h.Subtitle,
                                 ImageUrl = h.ImageUrl,
-                                ActionText = h.ActionText,
-                                ActionUrl = h.ActionUrl,
+                                CtaText = h.CtaText,
+                                CtaLink = h.CtaLink,
                                 Audience = h.Audience,
+                                Order = h.Order,
                             })
                             .ToList(),
 
                         Services = services
+                            .OrderBy(s => s.Order)
                             .Select(s => new ServiceDto
                             {
                                 Id = s.Id,
                                 Title = s.Title,
                                 Description = s.Description,
-                                IconClass = s.IconClass,
-                                ActionText = s.ActionText,
-                                ActionUrl = s.ActionUrl,
+                                Icon = s.Icon,
+                                CtaText = s.CtaText,
+                                CtaLink = s.CtaLink,
                                 Audience = s.Audience,
+                                Order = s.Order,
                             })
                             .ToList(),
                     };
@@ -103,9 +107,10 @@ public class HomeService(
             Subtitle = dto.Subtitle,
             ImageUrl = imageUrl,
             FileId = fileId,
-            ActionText = dto.ActionText,
-            ActionUrl = dto.ActionUrl,
+            CtaText = dto.CtaText,
+            CtaLink = dto.CtaLink,
             Audience = dto.Audience,
+            Order = dto.Order,
         };
 
         await repository.AddHeroAsync(entity);
@@ -118,9 +123,10 @@ public class HomeService(
             Title = entity.Title,
             Subtitle = entity.Subtitle,
             ImageUrl = entity.ImageUrl,
-            ActionText = entity.ActionText,
-            ActionUrl = entity.ActionUrl,
+            CtaText = entity.CtaText,
+            CtaLink = entity.CtaLink,
             Audience = entity.Audience,
+            Order = entity.Order,
         };
     }
 
@@ -190,9 +196,10 @@ public class HomeService(
 
         entity.Title = dto.Title;
         entity.Subtitle = dto.Subtitle;
-        entity.ActionText = dto.ActionText;
-        entity.ActionUrl = dto.ActionUrl;
+        entity.CtaText = dto.CtaText;
+        entity.CtaLink = dto.CtaLink;
         entity.Audience = dto.Audience;
+        entity.Order = dto.Order;
 
         await repository.UpdateHeroAsync(entity);
         await unitOfWork.CommitAsync();
@@ -223,10 +230,11 @@ public class HomeService(
         {
             Title = dto.Title,
             Description = dto.Description,
-            IconClass = dto.IconClass,
-            ActionText = dto.ActionText,
-            ActionUrl = dto.ActionUrl,
+            Icon = dto.Icon,
+            CtaText = dto.CtaText,
+            CtaLink = dto.CtaLink,
             Audience = dto.Audience,
+            Order = dto.Order,
         };
 
         await repository.AddServiceAsync(entity);
@@ -238,10 +246,11 @@ public class HomeService(
             Id = entity.Id,
             Title = entity.Title,
             Description = entity.Description,
-            IconClass = entity.IconClass,
-            ActionText = entity.ActionText,
-            ActionUrl = entity.ActionUrl,
+            Icon = entity.Icon,
+            CtaText = entity.CtaText,
+            CtaLink = entity.CtaLink,
             Audience = entity.Audience,
+            Order = entity.Order,
         };
     }
 
@@ -253,10 +262,11 @@ public class HomeService(
 
         entity.Title = dto.Title;
         entity.Description = dto.Description;
-        entity.IconClass = dto.IconClass;
-        entity.ActionText = dto.ActionText;
-        entity.ActionUrl = dto.ActionUrl;
+        entity.Icon = dto.Icon;
+        entity.CtaText = dto.CtaText;
+        entity.CtaLink = dto.CtaLink;
         entity.Audience = dto.Audience;
+        entity.Order = dto.Order;
 
         await repository.UpdateServiceAsync(entity);
         await unitOfWork.CommitAsync();

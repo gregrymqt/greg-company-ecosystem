@@ -21,9 +21,10 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
   const defaultValues: Partial<ServiceFormValues> = initialData ? {
     title: initialData.title,
     description: initialData.description,
-    iconClass: initialData.iconClass,
-    actionText: initialData.actionText,
-    actionUrl: initialData.actionUrl
+    icon: initialData.icon,
+    ctaText: initialData.ctaText,
+    ctaLink: initialData.ctaLink,
+    order: initialData.order
   } : {};
 
   return (
@@ -54,7 +55,7 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
         />
 
         <Form.Input 
-          name="iconClass" 
+          name="icon" 
           label="Classe do Ícone (FontAwesome)" 
           placeholder="Ex: fas fa-check" 
           validation={{ required: 'A classe do ícone é obrigatória' }} 
@@ -62,7 +63,7 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
         />
 
         <Form.Input 
-          name="actionText" 
+          name="ctaText" 
           label="Texto do Botão" 
           placeholder="Ex: Saber mais" 
           validation={{ required: 'O texto do botão é obrigatório' }} 
@@ -70,7 +71,7 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
         />
 
         <Form.Input 
-          name="actionUrl" 
+          name="ctaLink" 
           label="Link do Botão" 
           placeholder="Ex: /servicos" 
           validation={{ required: 'O link do botão é obrigatório' }} 

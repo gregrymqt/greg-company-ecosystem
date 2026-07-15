@@ -50,7 +50,7 @@ export const HeroList: React.FC<HeroListProps> = ({
     },
     {
       header: "Call to Action",
-      accessor: "actionText",
+      accessor: "ctaText",
       width: "15%",
     },
     {

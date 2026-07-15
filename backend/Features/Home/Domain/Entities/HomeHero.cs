@@ -21,11 +21,13 @@ public class HomeHero : IMongoDocument
 
     public string? FileId { get; set; }
 
-    public string ActionText { get; set; } = string.Empty;
+    public string CtaText { get; set; } = string.Empty;
 
-    public string ActionUrl { get; set; } = string.Empty;
+    public string CtaLink { get; set; } = string.Empty;
 
     public string? Audience { get; set; }
+
+    public int Order { get; set; }
 }
 
 

@@ -24,9 +24,9 @@ export const ServiceList: React.FC<ServiceListProps> = ({
       header: 'Ícone',
       width: '70px',
       render: (item) => (
-        <div className={styles.serviceIconWrapper} title={item.iconClass}>
+        <div className={styles.serviceIconWrapper} title={item.icon}>
           {/* Renderiza a classe do ícone (ex: 'fas fa-code') */}
-          <i className={item.iconClass}></i>
+          <i className={item.icon}></i>
         </div>
       )
     },
@@ -45,7 +45,7 @@ export const ServiceList: React.FC<ServiceListProps> = ({
     },
     {
       header: 'Botão',
-      accessor: 'actionText',
+      accessor: 'ctaText',
       width: '15%'
     },
     {
