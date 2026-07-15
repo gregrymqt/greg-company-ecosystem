@@ -47,17 +47,17 @@ public class Chargeback : IMongoDocument
     public string Id { get; set; }
 
     /// <summary>
-    /// ID do chargeback no Mercado Pago (vem de `data.id`).
+    /// ID do chargeback no Mercado Pago.
     /// </summary>
-    public long ChargebackId { get; set; }
+    public string MercadoPagoChargebackId { get; set; } = string.Empty;
 
     /// <summary>
-    /// ID do pagamento associado ao chargeback (vem de `data.payment_id`).
+    /// ID do pagamento associado ao chargeback.
     /// </summary>
-    public long PaymentId { get; set; }
+    public string PaymentId { get; set; } = string.Empty;
 
     /// <summary>
-    /// FK para o usuÃ¡rio que realizou o pagamento original.
+    /// FK para o usuário que realizou o pagamento original.
     /// </summary>
     public string? UserId { get; set; }
 
@@ -65,14 +65,34 @@ public class Chargeback : IMongoDocument
     public virtual Users? User { get; set; }
 
     /// <summary>
-    /// Status interno para acompanhamento da equipe.
+    /// Status do chargeback no MercadoPago (ex: 'in_process', 'settled', 'reimbursed').
     /// </summary>
-    public ChargebackStatus Status { get; set; } = ChargebackStatus.Novo;
+    public string Status { get; set; } = string.Empty;
 
     /// <summary>
-    /// Valor do chargeback. Este campo precisarÃ¡ ser preenchido consultando a API do MP.
+    /// Valor do chargeback. Este campo precisará ser preenchido consultando a API do MP.
     /// </summary>
     public decimal Amount { get; set; }
+
+    /// <summary>
+    /// Indica se o chargeback é elegível para o Programa de Proteção ao Vendedor.
+    /// </summary>
+    public bool CoverageEligible { get; set; }
+
+    /// <summary>
+    /// Indica se é necessário o envio de documentação.
+    /// </summary>
+    public bool DocumentationRequired { get; set; }
+
+    /// <summary>
+    /// Prazo limite estipulado pelo Mercado Pago para o envio das evidências.
+    /// </summary>
+    public DateTime? ExpirationDate { get; set; }
+
+    /// <summary>
+    /// Data de abertura do chargeback no MercadoPago.
+    /// </summary>
+    public DateTime DateCreated { get; set; }
 
     /// <summary>
     /// Data em que o registro foi criado no banco de dados.

@@ -41,5 +41,22 @@ export const ChargebackService = {
     return await ApiService.get<ChargebackDetail>(
       `${ENDPOINT_BASE}/${id}/details`
     );
+  },
+
+  /**
+   * Envia documentação de defesa para o chargeback especificado.
+   */
+  uploadDefenseDocuments: async (id: string, files: FileList | File[]): Promise<void> => {
+    const formData = new FormData();
+    for (let i = 0; i < files.length; i++) {
+      formData.append('files', files[i]);
+    }
+
+    return await ApiService.post<void>(
+      `${ENDPOINT_BASE}/${id}/documentation`,
+      formData
+      // ApiService takes care of the headers (removing Content-Type to let browser set boundary if needed, 
+      // or we just pass the FormData as the body and fetch/axios handles it).
+    );
   }
 };

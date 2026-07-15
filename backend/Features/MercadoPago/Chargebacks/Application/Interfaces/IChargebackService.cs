@@ -13,6 +13,8 @@ public interface IChargebackService
     );
 
     Task<ChargebackDetailViewModel> GetChargebackDetailAsync(string chargebackId);
+
+    Task UploadDocumentationAsync(string chargebackId, Microsoft.AspNetCore.Http.IFormFileCollection files);
 }
 
 

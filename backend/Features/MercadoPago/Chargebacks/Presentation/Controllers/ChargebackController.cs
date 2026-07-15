@@ -49,6 +49,29 @@ public class ChargebackController : MercadoPagoApiControllerBase
             return HandleException(ex, "Erro ao obter detalhes do chargeback.");
         }
     }
+
+    [HttpPost("{id}/documentation")]
+    [Consumes("multipart/form-data")]
+    [ProducesResponseType(204)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(500)]
+    public async Task<IActionResult> UploadDocumentation(string id)
+    {
+        try
+        {
+            var files = Request.Form.Files;
+            
+            if (files == null || files.Count == 0)
+                return BadRequest(new { Message = "Nenhum arquivo recebido." });
+                
+            await _chargebackService.UploadDocumentationAsync(id, files);
+            return NoContent();
+        }
+        catch (Exception ex)
+        {
+            return HandleException(ex, "Erro ao enviar documentação de defesa.");
+        }
+    }
 }
 
 

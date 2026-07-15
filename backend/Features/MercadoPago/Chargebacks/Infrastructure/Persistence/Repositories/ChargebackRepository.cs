@@ -35,25 +35,18 @@ public class ChargebackRepository : IChargebackRepository
 
         if (!string.IsNullOrEmpty(searchTerm))
         {
-            if (long.TryParse(searchTerm, out var idSearch))
-            {
-                filter &= builder.Eq(c => c.ChargebackId, idSearch);
-            }
-            else
-            {
-                // This would be expensive, let's just do a manual lookup for user IDs that match
-                var userFilter = Builders<Users>.Filter.Regex(u => u.Name, new MongoDB.Bson.BsonRegularExpression(searchTerm, "i"));
-                var userIds = await _users.Find(userFilter).Project(u => u.Id).ToListAsync();
-                filter &= builder.In(c => c.UserId, userIds);
-            }
+            var searchRegex = new MongoDB.Bson.BsonRegularExpression(searchTerm, "i");
+            var idFilter = builder.Regex(c => c.MercadoPagoChargebackId, searchRegex);
+            
+            var userFilter = Builders<Users>.Filter.Regex(u => u.Name, searchRegex);
+            var userIds = await _users.Find(userFilter).Project(u => u.Id).ToListAsync();
+            
+            filter &= builder.Or(idFilter, builder.In(c => c.UserId, userIds));
         }
 
-        if (
-            !string.IsNullOrEmpty(statusFilter)
-            && Enum.TryParse<ChargebackStatus>(statusFilter, true, out var statusEnum)
-        )
+        if (!string.IsNullOrEmpty(statusFilter))
         {
-            filter &= builder.Eq(c => c.Status, statusEnum);
+            filter &= builder.Eq(c => c.Status, statusFilter);
         }
 
         var totalCount = (int)await _chargebacks.CountDocumentsAsync(filter);
@@ -80,14 +73,14 @@ public class ChargebackRepository : IChargebackRepository
         return (chargebacks, totalCount);
     }
 
-    public async Task<bool> ExistsByExternalIdAsync(long chargebackId)
+    public async Task<bool> ExistsByExternalIdAsync(string chargebackId)
     {
-        return await _chargebacks.Find(c => c.ChargebackId == chargebackId).AnyAsync();
+        return await _chargebacks.Find(c => c.MercadoPagoChargebackId == chargebackId).AnyAsync();
     }
 
-    public async Task<Chargeback?> GetByExternalIdAsync(long chargebackId)
+    public async Task<Chargeback?> GetByExternalIdAsync(string chargebackId)
     {
-        return await _chargebacks.Find(c => c.ChargebackId == chargebackId).FirstOrDefaultAsync();
+        return await _chargebacks.Find(c => c.MercadoPagoChargebackId == chargebackId).FirstOrDefaultAsync();
     }
 
     public async Task AddAsync(Chargeback chargeback)

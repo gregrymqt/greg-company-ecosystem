@@ -32,7 +32,7 @@ export interface ChargebackSummary {
   customer: string;       // Mapeia ViewModel.Customer
   amount: number;         // Mapeia ViewModel.Amount
   date: string;           // Mapeia ViewModel.Date (ISO Date String)
-  status: string;         // Mapeia ViewModel.Status (Texto formatado)
+  status: number;         // Mapeia ViewModel.Status (Numérico/Enum)
   mercadoPagoUrl: string; // Mapeia ViewModel.MercadoPagoUrl
 }
 
