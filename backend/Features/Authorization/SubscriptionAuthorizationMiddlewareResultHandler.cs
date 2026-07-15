@@ -9,6 +9,8 @@ public class SubscriptionAuthorizationMiddlewareResultHandler
     public readonly IAuthorizationMiddlewareResultHandler _defaultHandler =
         new AuthorizationMiddlewareResultHandler();
 
+    private const string PaymentRedirectUrl = "/plans";
+
     public async Task HandleAsync(
         RequestDelegate next,
         HttpContext context,
@@ -24,25 +26,24 @@ public class SubscriptionAuthorizationMiddlewareResultHandler
                 )
             )
             {
-                var isApiCall = context
-                    .Request.Headers.Accept.ToString()
-                    .Contains("application/json");
+                var isApiCall = context.Request.Path.StartsWithSegments("/api") ||
+                                context.Request.Headers.Accept.ToString().Contains("application/json");
 
                 if (isApiCall)
                 {
-                    context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                    context.Response.StatusCode = StatusCodes.Status402PaymentRequired;
                     await context.Response.WriteAsJsonAsync(
                         new
                         {
                             error = "active_subscription_required",
                             message = "Uma assinatura ativa é necessária para acessar este recurso.",
-                            redirectUrl = "/Payment/CreditCard",
+                            redirectUrl = PaymentRedirectUrl,
                         }
                     );
                 }
                 else
                 {
-                    context.Response.Redirect("/Payment/CreditCard");
+                    context.Response.Redirect(PaymentRedirectUrl);
                 }
 
                 return;

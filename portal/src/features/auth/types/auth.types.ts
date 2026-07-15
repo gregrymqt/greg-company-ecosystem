@@ -9,6 +9,7 @@ export interface UserSessionDto {
   tenants: string[];
   hasActiveSubscription: boolean; // 
   hasPaymentHistory: boolean;     // [cite: 5]
+  isCourseAdmin?: boolean;        // Indicador de Admin de Curso
 }
 
 // Interface usada no Front (pode incluir token se você mesclar no login)

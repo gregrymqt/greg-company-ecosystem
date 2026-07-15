@@ -30,12 +30,13 @@ export const SubscriptionRoute = () => {
 
   // 1. Admin sempre passa (Regra VIP)
   const isAdmin = user?.roles?.includes(AppRoles.Admin);
+  const isCourseAdmin = user?.isCourseAdmin;
 
   // 2. Verificação Otimizada
   const hasAccess = user?.hasActiveSubscription;
 
-  // Lógica: Admin OU Assinante Ativo
-  if (isAdmin || hasAccess) {
+  // Lógica: Admin, Admin de Curso OU Assinante Ativo
+  if (isAdmin || isCourseAdmin || hasAccess) {
     return <Outlet />;
   }
 
