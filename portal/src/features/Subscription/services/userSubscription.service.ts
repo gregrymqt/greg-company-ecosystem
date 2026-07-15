@@ -1,5 +1,5 @@
 import { ApiService } from "@/shared/services/api.service";
-import type { SubscriptionDetailsDto, SubscriptionResponseDto } from "../types/subscriptions.types";
+import type { SubscriptionDetailsDto, UpdateSubscriptionStatusDto, SubscriptionStatusType } from "../types/subscriptions.types";
 
 export const userSubscriptionService = {
 
@@ -9,9 +9,9 @@ export const userSubscriptionService = {
     return await ApiService.get<SubscriptionDetailsDto>('/subscriptions/details'); 
   },
 
-  updateStatus: async (status: string): Promise<void> => {
-    const body: Partial<SubscriptionResponseDto> = {
-      status: status
+  updateStatus: async (status: SubscriptionStatusType): Promise<void> => {
+    const body: UpdateSubscriptionStatusDto = {
+      status: status || ''
     };
     // Controller: [Route("api/subscriptions")] + [HttpPut("status")]
     // URL Final deve ser: /api/subscriptions/status

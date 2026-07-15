@@ -11,7 +11,7 @@ using MeuCrudCsharp.Features.Shared.Domain.Interfaces;
 using MeuCrudCsharp.Features.Shared.Infrastructure.Persistence;
 using Microsoft.Extensions.Logging;
 
-namespace MeuCrudCsharp.Features.MercadoPago.Refunds.Infrastructure.Integration
+namespace MeuCrudCsharp.Features.MercadoPago.Refunds.Application.Services
 {
     public class RefundService(
         IPaymentRepository paymentRepository,

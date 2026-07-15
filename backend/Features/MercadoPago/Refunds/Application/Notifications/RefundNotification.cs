@@ -12,7 +12,7 @@ namespace MeuCrudCsharp.Features.MercadoPago.Refunds.Application.Notifications
 
         public async Task SendRefundStatusUpdate(string userId, string status, string message)
         {
-            await hubContext.Clients.User(userId).SendAsync("ReceiveRefundStatus", new { Status = status, Message = message });
+            await hubContext.Clients.User(userId).SendAsync("ReceiveRefundStatus", new { status, message });
         }
     }
 }

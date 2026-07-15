@@ -2,6 +2,8 @@
 // PUBLIC TYPES (Backend: UserSubscriptionsController)
 // ============================================
 
+export type SubscriptionStatusType = 'pending' | 'authorized' | 'paused' | 'cancelled' | 'unknown';
+
 // Baseado no AutoRecurringDto
 export interface AutoRecurringDto {
   frequency: number;
@@ -15,7 +17,7 @@ export interface AutoRecurringDto {
 // Baseado no SubscriptionResponseDto
 export interface SubscriptionResponseDto {
   id: string | null;
-  status: string | null;
+  status: SubscriptionStatusType | null;
   preapproval_plan_id: string | null;
   payer_id: number | null;
   payer_email: string | null;
@@ -31,8 +33,12 @@ export interface SubscriptionResponseDto {
 export interface SubscriptionDetailsDto {
   subscriptionId: string | null;
   planName: string | null;
-  status: string | null;
+  status: SubscriptionStatusType | null;
   amount: number;
   lastFourCardDigits: string | null;
   nextBillingDate: string | null;
+}
+
+export interface UpdateSubscriptionStatusDto {
+  status: string;
 }

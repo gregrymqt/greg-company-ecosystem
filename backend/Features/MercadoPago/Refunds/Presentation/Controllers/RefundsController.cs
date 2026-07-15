@@ -1,4 +1,5 @@
 using MeuCrudCsharp.Features.Base;
+using MeuCrudCsharp.Features.MercadoPago.Refunds.Application.DTOs;
 using MeuCrudCsharp.Features.MercadoPago.Refunds.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,7 +16,7 @@ namespace MeuCrudCsharp.Features.MercadoPago.Refunds.Presentation.Controllers
         }
 
         [HttpPost("{paymentId}")]
-        public async Task<IActionResult> RequestRefund([FromRoute] string paymentId)
+        public async Task<IActionResult> RequestRefund([FromRoute] string paymentId, [FromBody] RefundRequestDto? request = null)
         {
             try
             {

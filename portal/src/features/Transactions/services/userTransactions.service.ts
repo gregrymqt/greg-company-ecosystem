@@ -1,5 +1,5 @@
 import { ApiService } from "@/shared/services/api.service";
-import type { PaymentItems } from "../types/transactions.types";
+import type { PaymentItems, RefundRequest } from "../types/transactions.types";
 
 /**
  * UserTransactionsService - Área do Cliente
@@ -18,7 +18,7 @@ export const UserTransactionsService = {
    * Solicita reembolso de um pagamento específico
    * Endpoint: POST /refunds/{paymentId}
    */
-  requestRefund: async (paymentId: string): Promise<{ message: string }> => {
-    return await ApiService.post(`/refunds/${paymentId}`, {}); 
+  requestRefund: async (paymentId: string, request?: RefundRequest): Promise<{ message: string }> => {
+    return await ApiService.post(`/refunds/${paymentId}`, request || {}); 
   }
 };
