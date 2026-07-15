@@ -56,7 +56,7 @@ public class ClaimNotificationService(
                 return;
             }
 
-            var claimDetails = await mpIntegrationService.GetClaimByIdAsync(mpClaimId);
+            var claimDetails = await mpIntegrationService.GetClaimByIdAsync(mpClaimId.ToString());
 
             if (claimDetails == null)
             {
@@ -87,19 +87,19 @@ public class ClaimNotificationService(
                 logger.LogWarning("Nenhum usuário encontrado para o Recurso ID '{ResourceId}'.", resourceId);
             }
 
-            var existingClaim = await claimRepository.GetByMpClaimIdAsync(mpClaimId);
+            var existingClaim = await claimRepository.GetByMpClaimIdAsync(mpClaimId.ToString());
 
             if (existingClaim == null)
             {
                 var newClaimRecord = new MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities.Claims
                 {
-                    MpClaimId = mpClaimId,
-                    ResourceId = resourceId,
+                    MercadoPagoClaimId = mpClaimId.ToString(),
+                    PaymentId = resourceId,
                     Type = claimDetails.Type,
                     ResourceType = resourceTypeEnum,
                     UserId = user?.Id.ToString(),
-                    DataCreated = DateTime.UtcNow,
-                    Status = InternalClaimStatus.Novo,
+                    DateCreated = DateTime.UtcNow,
+                    Status = ClaimStatus.Opened,
                     CurrentStage = claimDetails.Stage
                 };
 

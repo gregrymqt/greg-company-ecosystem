@@ -104,18 +104,18 @@ public class ChargeBackNotificationService(
             }
 
             var existingChargeback = await chargebackRepository.GetByExternalIdAsync(
-                mpChargebackId
+                mpChargebackId.ToString()
             );
 
             if (existingChargeback == null)
             {
                 var newChargeback = new Chargeback
                 {
-                    ChargebackId = mpChargebackId,
-                    PaymentId = mpPaymentId, // Usa o long parseado
+                    MercadoPagoChargebackId = mpChargebackId.ToString(),
+                    PaymentId = mpPaymentId.ToString(), // Usa o long parseado
                     UserId = payment?.UserId,
                     Amount = mpDetails.Amount,
-                    Status = ChargebackStatus.Novo,
+                    Status = ChargebackStatus.Novo.ToString(),
                     CreatedAt = DateTime.UtcNow,
                 };
                 await chargebackRepository.AddAsync(newChargeback);
@@ -168,7 +168,7 @@ public class ChargeBackNotificationService(
         {
             to = user.Email,
             subject = $"Notificação de Contestação (ID: {chargebackId})",
-            htmlBody = htmlBody,
+            htmlBody,
             plainTextBody = string.Empty
         };
 
