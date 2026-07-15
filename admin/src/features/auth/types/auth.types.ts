@@ -6,8 +6,10 @@ export interface UserSessionDto {
   email: string;
   avatarUrl: string;
   roles: string[];
+  tenants: string[];
   hasActiveSubscription: boolean; // 
   hasPaymentHistory: boolean;     // [cite: 5]
+  isCourseAdmin: boolean;
 }
 
 // Interface usada no Front (pode incluir token se você mesclar no login)

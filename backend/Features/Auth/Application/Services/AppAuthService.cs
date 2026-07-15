@@ -5,34 +5,26 @@ using MeuCrudCsharp.Features.Auth.Application.DTOs;
 using MeuCrudCsharp.Features.Auth.Domain.Interfaces;
 using MeuCrudCsharp.Features.Auth.Application.Interfaces;
 using MeuCrudCsharp.Features.Exceptions;
-using MeuCrudCsharp.Features.MercadoPago.Payments.Application.Interfaces;
-using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Application.Interfaces;
-using MeuCrudCsharp.Features.MercadoPago.Chargebacks.Domain.Entities;
-using MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities;
-using MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities;
-using MeuCrudCsharp.Features.MercadoPago.Plans.Domain.Entities;
-using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Entities;
-using MeuCrudCsharp.Features.Shared.Domain.Entities;
 using MeuCrudCsharp.Features.Auth.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 
 namespace MeuCrudCsharp.Features.Auth.Application.Services
 {
-    public class AuthService : IAppAuthService
+    public class AppAuthService : IAppAuthService
     {
         private readonly UserManager<Users> _userManager;
         private readonly IUserRepository _userRepository;
         private readonly IUserRoleRepository _userRoleRepository;
         private readonly IJwtService _jwtService;
-        private readonly ILogger<AuthService> _logger;
+        private readonly ILogger<AppAuthService> _logger;
         private readonly IPaymentRepository _paymentRepository;
         private readonly ISubscriptionRepository _subscriptionRepository;
 
-        public AuthService(
+        public AppAuthService(
             UserManager<Users> userManager,
             IUserRepository userRepository,
             IJwtService jwtService,
-            ILogger<AuthService> logger,
+            ILogger<AppAuthService> logger,
             IPaymentRepository paymentRepository,
             ISubscriptionRepository subscriptionRepository,
             IUserRoleRepository userRoleRepository
@@ -126,6 +118,7 @@ namespace MeuCrudCsharp.Features.Auth.Application.Services
                 HasActiveSubscription = subTask.Result,
                 Roles = rolesTask.Result ?? new List<string>(),
                 Tenants = user.Tenants ?? new List<string>(),
+                IsCourseAdmin = rolesTask.Result?.Contains("CourseAdmin") ?? false,
             };
         }
 
@@ -144,7 +137,11 @@ namespace MeuCrudCsharp.Features.Auth.Application.Services
 
         private async Task addRolesToUser(Users user)
         {
-            if (
+            if (IsSupremeAdmin(user.Email))
+            {
+                await AssignSupremeAdminRolesAsync(user);
+            }
+            else if (
                 user.Email != null
                 && user.Email.Equals(
                     "emailGen?ricoAdmin@gmail.com",
@@ -152,11 +149,45 @@ namespace MeuCrudCsharp.Features.Auth.Application.Services
                 )
             )
             {
-                await _userManager.AddToRoleAsync(user, "Admin");
+                await _userManager.AddToRoleAsync(user, AppRoles.Admin);
             }
             else
             {
-                await _userManager.AddToRoleAsync(user, "User");
+                await _userManager.AddToRoleAsync(user, AppRoles.User);
+            }
+        }
+
+        private bool IsSupremeAdmin(string? email)
+        {
+            if (string.IsNullOrEmpty(email)) return false;
+
+            var adminEmailsEnv = Environment.GetEnvironmentVariable("Email_Admin");
+            if (string.IsNullOrEmpty(adminEmailsEnv)) return false;
+
+            var adminEmails = adminEmailsEnv.Split(',')
+                                            .Select(e => e.Trim().ToLower())
+                                            .ToList();
+
+            return adminEmails.Contains(email.ToLower());
+        }
+
+        private async Task AssignSupremeAdminRolesAsync(Users user)
+        {
+            var supremeRoles = new[] 
+            { 
+                AppRoles.Admin, 
+                AppRoles.Manager, 
+                AppRoles.CourseAdmin, 
+                AppRoles.EcommerceAdmin,
+                AppRoles.User 
+            };
+
+            foreach (var role in supremeRoles)
+            {
+                if (!await _userManager.IsInRoleAsync(user, role))
+                {
+                    await _userManager.AddToRoleAsync(user, role);
+                }
             }
         }
 

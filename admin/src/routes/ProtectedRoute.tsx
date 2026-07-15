@@ -18,8 +18,22 @@ export const ProtectedRoute = ({ allowedRoles }: ProtectedRouteProps) => {
 
   // 2. Verificação de Permissão (Roles)
   if (allowedRoles && allowedRoles.length > 0) {
-    // Se o usuário não tiver roles ou não tiver a role necessária
-    const hasPermission = user?.roles?.some(role => allowedRoles.includes(role as AppRoles));
+    // Se o usuário não tiver roles ou não tiver a role necessária (via array de string)
+    let hasPermission = user?.roles?.some(role => allowedRoles.includes(role as AppRoles)) || false;
+    
+    // Verificação extra de segurança para CourseAdmin via flag bool
+    if (!hasPermission && allowedRoles.includes(AppRoles.CourseAdmin)) {
+      if (user?.isCourseAdmin) {
+        hasPermission = true;
+      }
+    }
+
+    // Verificação extra de segurança para EcommerceAdmin via presença de Tenants
+    if (!hasPermission && allowedRoles.includes(AppRoles.EcommerceAdmin)) {
+      if (user?.tenants && user.tenants.length > 0) {
+        hasPermission = true;
+      }
+    }
     
     if (!hasPermission) {
       return <Navigate to="/acesso-negado" replace />;

@@ -5,7 +5,9 @@ using MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities;
 using MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities;
 using MeuCrudCsharp.Features.MercadoPago.Plans.Domain.Entities;
 using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Entities;
-using MeuCrudCsharp.Features.Shared.Domain.Entities; using MeuCrudCsharp.Features.Auth.Domain.Entities; // Substitua pelo seu namespace
+using MeuCrudCsharp.Features.Shared.Domain.Entities;
+using MeuCrudCsharp.Features.Auth.Domain.Entities;
+using Microsoft.AspNetCore.Http;
 
 namespace MeuCrudCsharp.Features.Auth.Application.Interfaces;
 

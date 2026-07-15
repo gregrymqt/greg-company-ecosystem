@@ -37,6 +37,13 @@ export const useLoginForm = () => {
     try {
       const response = await authService.loginWithEmail(data);
       
+      const allowedRoles = ['Admin', 'Manager', 'CourseAdmin', 'EcommerceAdmin'];
+      const hasAccess = response.user.roles?.some(r => allowedRoles.includes(r)) || response.user.isCourseAdmin;
+
+      if (!hasAccess) {
+        throw new Error('access_denied');
+      }
+
       // Salva a sessão do usuário
       setSession({
         ...response.user,
@@ -47,12 +54,20 @@ export const useLoginForm = () => {
 
       // Redireciona para a home ou dashboard
       navigate('/', { replace: true });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao fazer login:', error);
-      formMethods.setError('root', {
-        type: 'manual',
-        message: 'Email ou senha inválidos'
-      });
+      
+      if (error.message === 'access_denied') {
+        formMethods.setError('root', {
+          type: 'manual',
+          message: 'Acesso negado. Área restrita a administradores.'
+        });
+      } else {
+        formMethods.setError('root', {
+          type: 'manual',
+          message: 'Email ou senha inválidos'
+        });
+      }
     }
   };
 

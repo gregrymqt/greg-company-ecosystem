@@ -12,5 +12,8 @@ namespace MeuCrudCsharp.Features.Auth.Application.DTOs
         // Novos campos booleanos leves (substituindo os objetos completos)
         public bool HasActiveSubscription { get; set; }
         public bool HasPaymentHistory { get; set; }
+        
+        // Flag para admin de cursos
+        public bool IsCourseAdmin { get; set; }
     }
 }

@@ -13,6 +13,7 @@ public static class CentralAppExtensions
     {
         // 1. FASE DE INICIALIZAÇÃO (BOOTSTRAPPING)
         await app.InitializeMongoIndexesAsync();
+        await app.InitializeRolesAsync();
 
         // 2. FASE DE MIDDLEWARES (PIPELINE HTTP)
         if (app.Environment.IsDevelopment())

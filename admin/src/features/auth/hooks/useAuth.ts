@@ -50,6 +50,13 @@ export const useAuth = () => {
         // 2. Busca dados otimizados (Agora vem rápido e leve)
         const userDto = await authService.getMe();
 
+        const allowedRoles = ['Admin', 'Manager', 'CourseAdmin', 'EcommerceAdmin'];
+        const hasAccess = userDto.roles?.some(r => allowedRoles.includes(r)) || userDto.isCourseAdmin;
+
+        if (!hasAccess) {
+          throw new Error('access_denied');
+        }
+
         // 3. Monta sessão (Junta DTO + Token se quiser persistir junto)
         const sessionData: UserSession = {
           ...userDto,
@@ -62,9 +69,13 @@ export const useAuth = () => {
         // 5. Notifica app
         window.dispatchEvent(new Event(AUTH_EVENT_NAME));
         navigate("/", { replace: true });
-      } catch (error) {
+      } catch (error: any) {
         console.error("Erro no login Google:", error);
-        navigate("/login?error=google_failed");
+        if (error.message === 'access_denied') {
+          navigate("/login?error=access_denied", { replace: true });
+        } else {
+          navigate("/login?error=google_failed");
+        }
       }
     },
     [navigate],
