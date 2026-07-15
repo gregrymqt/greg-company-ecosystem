@@ -14,24 +14,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities
 {
-    // Seu status interno (Mantido conforme )
-    public enum InternalClaimStatus
-    {
-        [Display(Name = "Novo")]
-        Novo,
 
-        [Display(Name = "Em AnÃƒÂ¡lise")]
-        EmAnalise,
-
-        [Display(Name = "Respondido pelo Vendedor")]
-        RespondidoPeloVendedor,
-
-        [Display(Name = "Resolvido - Ganhamos")]
-        ResolvidoGanhamos,
-
-        [Display(Name = "Resolvido - Perdemos")]
-        ResolvidoPerdemos
-    }
 
     public class Claims : IMongoDocument
     {
@@ -41,13 +24,12 @@ namespace MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities
         [BsonRepresentation(BsonType.ObjectId)]
         public string Id { get; set; } = null!; // ID Interno do Banco [cite: 19]
 
-        // Este ÃƒÂ© o ID real que o MP usa (ex: 5012391221)
+        // Este ÃƒÂ© o ID real que o MP usa (ex: "5012391221")
         [MongoIndex(Unique = true)]
-        public long MpClaimId { get; set; } // Mudei para long pois geralmente ÃƒÂ© numÃƒÂ©rico, mas string tambÃƒÂ©m funciona [cite: 20]
+        public string MercadoPagoClaimId { get; set; } = null!; // Mudado para string conforme instrução
 
-        // ID do pagamento vinculado (Resource ID)
-        // CORREÃƒâ€¡ÃƒÆ’O: De 'ResorceId' para 'ResourceId'
-        public string? ResourceId { get; set; }
+        // ID do pagamento vinculado (Payment ID)
+        public string? PaymentId { get; set; }
 
         // Agora usando o Enum forte em vez de string
         public ClaimType Type { get; set; } // "mediations", "cancel_purchase" etc [cite: 22]
@@ -58,13 +40,16 @@ namespace MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities
         // Novo campo sugerido para guardar o status original do MP (opened/closed) separadamente do seu status interno
         public ClaimStage? CurrentStage { get; set; } // claim, dispute, etc [cite: 4]
 
-        public DateTime DataCreated { get; set; } = DateTime.UtcNow;
+        public DateTime DateCreated { get; set; } = DateTime.UtcNow;
+        public DateTime? LastUpdated { get; set; }
+
+        public string? Resolution { get; set; }
 
         // Seu status interno de controle
-        public InternalClaimStatus Status { get; set; } = InternalClaimStatus.Novo; 
+        public ClaimStatus Status { get; set; } = ClaimStatus.Opened; 
 
         public string? MercadoPagoPanelUrl =>
-            $"https://www.mercadopago.com.br/developers/panel/notifications/claims/{MpClaimId}"; 
+            $"https://www.mercadopago.com.br/developers/panel/notifications/claims/{MercadoPagoClaimId}"; 
 
         public string? UserId { get; set; }
     

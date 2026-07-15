@@ -30,7 +30,7 @@ public class MercadoPagoIntegrationService(
             ?? new MpClaimSearchResponse();
     }
 
-    public async Task<MpClaimItem?> GetClaimByIdAsync(long claimId)
+    public async Task<MpClaimItem?> GetClaimByIdAsync(string claimId)
     {
         var endpoint = $"{BaseEndpoint}/{claimId}";
 
@@ -43,13 +43,13 @@ public class MercadoPagoIntegrationService(
         return JsonSerializer.Deserialize<MpClaimItem>(jsonResponse);
     }
 
-    public async Task EscalateToMediationAsync(long claimId)
+    public async Task EscalateToMediationAsync(string claimId)
     {
         var endpoint = $"{BaseEndpoint}/{claimId}/actions/open-dispute";
         await SendMercadoPagoRequestAsync<object>(HttpMethod.Post, endpoint, null);
     }
 
-    public async Task<List<MpMessageResponse>> GetClaimMessagesAsync(long claimId)
+    public async Task<List<MpMessageResponse>> GetClaimMessagesAsync(string claimId)
     {
         var endpoint = $"{BaseEndpoint}/{claimId}/messages";
 
@@ -64,7 +64,7 @@ public class MercadoPagoIntegrationService(
     }
 
     public async Task SendMessageAsync(
-        long claimId,
+        string claimId,
         string message,
         List<string>? attachments = null,
         string receiverRole = "complainant"

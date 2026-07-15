@@ -19,16 +19,11 @@ public interface IClaimRepository
     );
     
     Task<MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities.Claims?> GetByIdAsync(string id);
-    Task<MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities.Claims?> GetByMpClaimIdAsync(long mpClaimId);
-    Task<bool> ExistsByMpClaimIdAsync(long mpClaimId);
+    Task<MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities.Claims?> GetByMpClaimIdAsync(string mpClaimId);
+    Task<bool> ExistsByMpClaimIdAsync(string mpClaimId);
     Task<List<MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities.Claims>> GetClaimsByUserIdAsync(string userId);
 
     Task AddAsync(MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities.Claims claim);
     void Update(MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities.Claims claim);
-    void UpdateClaimStatus(MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities.Claims claim, InternalClaimStatus newStatus);
+    void UpdateClaimStatus(MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities.Claims claim, ClaimStatus newStatus);
 }
-
-
-
-
-

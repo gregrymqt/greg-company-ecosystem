@@ -1,28 +1,17 @@
 using MeuCrudCsharp.Data;
 using MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Interfaces;
-using MeuCrudCsharp.Features.MercadoPago.Chargebacks.Domain.Entities;
-using MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities;
-using MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities;
-using MeuCrudCsharp.Features.MercadoPago.Plans.Domain.Entities;
-using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Entities;
-using MeuCrudCsharp.Features.Shared.Domain.Entities;
 
 using MeuCrudCsharp.Features.Auth.Domain.Entities;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
+using MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities;
 
 namespace MeuCrudCsharp.Features.MercadoPago.Claims.Infrastructure.Persistence.Repositories;
 
-public class ClaimRepository : IClaimRepository
+public class ClaimRepository(IMongoDbContext context) : IClaimRepository
 {
-    private readonly IMongoCollection<MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities.Claims> _claims;
-    private readonly IMongoCollection<Users> _users;
-
-    public ClaimRepository(IMongoDbContext context)
-    {
-        _claims = context.GetCollection<MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities.Claims>("claims");
-        _users = context.GetCollection<Users>("users");
-    }
+    private readonly IMongoCollection<Domain.Entities.Claims> _claims = context.GetCollection<Domain.Entities.Claims>("claims");
+    private readonly IMongoCollection<Users> _users = context.GetCollection<Users>("users");
 
     public async Task<MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities.Claims?> GetByIdAsync(string id)
     {
@@ -46,9 +35,10 @@ public class ClaimRepository : IClaimRepository
 
         if (!string.IsNullOrEmpty(searchTerm))
         {
-            if (long.TryParse(searchTerm, out var idSearch))
+            // Busca pelo ID da claim
+            if (!string.IsNullOrEmpty(searchTerm) && searchTerm.All(char.IsDigit))
             {
-                filter &= builder.Eq(c => c.MpClaimId, idSearch);
+                filter &= builder.Eq(c => c.MercadoPagoClaimId, searchTerm);
             }
             else
             {
@@ -58,7 +48,7 @@ public class ClaimRepository : IClaimRepository
             }
         }
 
-        if (!string.IsNullOrEmpty(statusFilter) && Enum.TryParse<InternalClaimStatus>(statusFilter, true, out var statusEnum))
+        if (!string.IsNullOrEmpty(statusFilter) && Enum.TryParse<ClaimStatus>(statusFilter, true, out var statusEnum))
         {
             filter &= builder.Eq(c => c.Status, statusEnum);
         }
@@ -66,7 +56,7 @@ public class ClaimRepository : IClaimRepository
         var totalCount = (int)await _claims.CountDocumentsAsync(filter);
 
         var claims = await _claims.Find(filter)
-            .SortByDescending(c => c.DataCreated)
+            .SortByDescending(c => c.DateCreated)
             .Skip((page - 1) * pageSize)
             .Limit(pageSize)
             .ToListAsync();
@@ -87,7 +77,7 @@ public class ClaimRepository : IClaimRepository
         return (claims, totalCount);
     }
 
-    public void UpdateClaimStatus(MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities.Claims claim, InternalClaimStatus newStatus)
+    public void UpdateClaimStatus(MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities.Claims claim, ClaimStatus newStatus)
     {
         claim.Status = newStatus;
         _claims.ReplaceOne(c => c.Id == claim.Id, claim);
@@ -103,20 +93,20 @@ public class ClaimRepository : IClaimRepository
         await _claims.InsertOneAsync(claim);
     }
 
-    public async Task<bool> ExistsByMpClaimIdAsync(long mpClaimId)
+    public async Task<bool> ExistsByMpClaimIdAsync(string mpClaimId)
     {
-        return await _claims.Find(c => c.MpClaimId == mpClaimId).AnyAsync();
+        return await _claims.Find(c => c.MercadoPagoClaimId == mpClaimId).AnyAsync();
     }
 
-    public async Task<MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities.Claims?> GetByMpClaimIdAsync(long mpClaimId)
+    public async Task<MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities.Claims?> GetByMpClaimIdAsync(string mpClaimId)
     {
-        return await _claims.Find(c => c.MpClaimId == mpClaimId).FirstOrDefaultAsync();
+        return await _claims.Find(c => c.MercadoPagoClaimId == mpClaimId).FirstOrDefaultAsync();
     }
 
     public async Task<List<MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities.Claims>> GetClaimsByUserIdAsync(string userId)
     {
         return await _claims.Find(c => c.UserId == userId)
-            .SortByDescending(c => c.DataCreated)
+            .SortByDescending(c => c.DateCreated)
             .ToListAsync();
     }
 }

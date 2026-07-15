@@ -7,8 +7,8 @@ import { type FieldValues } from "react-hook-form";
 
 // Resumo para a lista (Tabela)
 export interface ClaimSummary {
-  internalId: number;   // ID do banco
-  mpClaimId: number;    // ID do Mercado Pago
+  internalId: string;   // ID do banco
+  mpClaimId: string;    // ID do Mercado Pago
   customerName?: string;
   resourceId?: string;
   type: string;
@@ -19,10 +19,11 @@ export interface ClaimSummary {
 
 // Detalhe completo com Chat
 export interface ClaimDetail {
-  internalId: number;
-  mpClaimId: number;
+  internalId: string;
+  mpClaimId: string;
   status: string;
   stage?: string;
+  resolution?: string;
   messages: ChatMessage[];
   canReply?: boolean;
 }
@@ -48,7 +49,7 @@ export interface ReplyFormData extends FieldValues {
 
 // Payload JSON esperado pelo Backend (Admin)
 export interface ReplyClaimPayload {
-  internalId: number;
+  internalId: string;
   message: string;
   // Nota: Backend atual espera JSON. Upload de arquivo requer endpoint separado ou FormData.
 }

@@ -50,10 +50,10 @@ public class AdminClaimService(
                     .Select(c => new ClaimSummaryViewModel
                     {
                         InternalId = c.Id,
-                        MpClaimId = c.MpClaimId,
+                        MpClaimId = c.MercadoPagoClaimId,
                         CustomerName = c.User?.Name ?? "Desconhecido",
                         Status = c.Status.ToString(),
-                        DateCreated = c.DataCreated,
+                        DateCreated = c.DateCreated,
                         Type = c.Type.ToString(),
                     })
                     .ToList();
@@ -73,23 +73,22 @@ public class AdminClaimService(
 
     public async Task<ClaimDetailViewModel> GetClaimDetailsAsync(string localId)
     {
-        var localClaim = await claimRepository.GetByIdAsync(localId);
-        if (localClaim == null)
-            throw new ResourceNotFoundException("ReclamaÃ§Ã£o nÃ£o encontrada.");
+        var localClaim = await claimRepository.GetByIdAsync(localId)
+            ?? throw new ResourceNotFoundException("ReclamaÃ§Ã£o nÃ£o encontrada.");
 
         List<MpMessageResponse> messages;
         try
         {
             logger.LogInformation("Buscando mensagens da claim {MpClaimId} na API do Mercado Pago",
-                localClaim.MpClaimId);
-            messages = await mpService.GetClaimMessagesAsync(localClaim.MpClaimId);
+                localClaim.MercadoPagoClaimId);
+            messages = await mpService.GetClaimMessagesAsync(localClaim.MercadoPagoClaimId);
         }
         catch (Exception ex)
         {
             logger.LogError(
                 ex,
                 "Falha ao buscar mensagens no MP para a claim {ClaimId}",
-                localClaim.MpClaimId
+                localClaim.MercadoPagoClaimId
             );
             messages = [];
         }
@@ -97,7 +96,7 @@ public class AdminClaimService(
         return new ClaimDetailViewModel
         {
             InternalId = localClaim.Id,
-            MpClaimId = localClaim.MpClaimId,
+            MpClaimId = localClaim.MercadoPagoClaimId,
             Status = localClaim.Status.ToString(),
             Messages =
             [
@@ -118,18 +117,17 @@ public class AdminClaimService(
         if (string.IsNullOrWhiteSpace(messageText))
             throw new ArgumentException("Mensagem nÃ£o pode ser vazia.", nameof(messageText));
 
-        var localClaim = await claimRepository.GetByIdAsync(localId);
-        if (localClaim == null)
-            throw new ResourceNotFoundException("ReclamaÃ§Ã£o nÃ£o encontrada.");
+        var localClaim = await claimRepository.GetByIdAsync(localId)
+            ?? throw new ResourceNotFoundException("ReclamaÃ§Ã£o nÃ£o encontrada.");
 
-        await mpService.SendMessageAsync(localClaim.MpClaimId, messageText);
+        await mpService.SendMessageAsync(localClaim.MercadoPagoClaimId, messageText);
 
         if (!string.IsNullOrEmpty(localClaim.UserId))
         {
             await hubContext.Clients.User(localClaim.UserId).SendAsync("ReceiveMessage", new { claimId = localClaim.Id });
         }
 
-        logger.LogInformation("Resposta enviada para a claim MP {MpId}", localClaim.MpClaimId);
+        logger.LogInformation("Resposta enviada para a claim MP {MpId}", localClaim.MercadoPagoClaimId);
     }
 
     private Task<string?> GetCacheVersionAsync()

@@ -12,7 +12,7 @@ import { AppHubsCSharp } from "@/shared/enums/hub/hub.enums";
 
 // Props para saber quem está usando o hook
 interface UseClaimChatProps {
-  claimId: number;
+  claimId: string;
 }
 
 export const useClaimChatLogic = ({ claimId }: UseClaimChatProps) => {
@@ -43,7 +43,7 @@ export const useClaimChatLogic = ({ claimId }: UseClaimChatProps) => {
 
   // 2. Ouvinte de Socket em Tempo Real
   // O backend deve enviar um payload contendo o claimId e o objeto da nova mensagem
-  useSocketListener<{ claimId: number; message: ChatMessage }>(
+  useSocketListener<{ claimId: string; message: ChatMessage }>(
     AppHubsCSharp.GlobalRealtime,
     "ReceiveClaimMessage",
     (payload) => {

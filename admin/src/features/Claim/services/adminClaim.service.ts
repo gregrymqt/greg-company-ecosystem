@@ -24,14 +24,14 @@ export const AdminClaimService = {
   /**
    * Detalhes completos com Chat de uma claim específica
    */
-  getDetails: async (id: number) => {
+  getDetails: async (id: string) => {
     return await ApiService.get<ClaimDetail>(`/admin/claims/${id}`);
   },
 
   /**
    * Enviar resposta ao usuário como Administrador
    */
-  reply: async (internalId: number, message: string) => {
+  reply: async (internalId: string, message: string) => {
     const payload: ReplyClaimPayload = { internalId, message };
     return await ApiService.post("/admin/claims/reply", payload);
   },

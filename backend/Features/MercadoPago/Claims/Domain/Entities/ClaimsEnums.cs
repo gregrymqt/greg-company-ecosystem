@@ -19,6 +19,21 @@ namespace MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities
         Purchase    // "purchase"
     }
 
+    public enum ClaimStatus
+    {
+        [Display(Name = "Aberto")]
+        Opened, // "opened"
+
+        [Display(Name = "Resolvido")]
+        Settled, // "settled"
+
+        [Display(Name = "Fechado sem resolução")]
+        ClosedUnresolved, // "closed_unresolved"
+        
+        [Display(Name = "Fechado")]
+        Closed // "closed"
+    }
+
     // Baseado em 
     public enum ClaimStage
     {

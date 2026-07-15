@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace MeuCrudCsharp.Features.MercadoPago.Claims.Application.ViewModels;
@@ -22,7 +22,7 @@ public class MercadoPagoClaimsViewModels
     {
         public string InternalId { get; set; }
 
-        public long MpClaimId { get; set; }
+        public string MpClaimId { get; set; }
 
         public string CustomerName { get; set; } = string.Empty;
         public string CustomerEmail { get; set; } = string.Empty;
@@ -40,7 +40,7 @@ public class MercadoPagoClaimsViewModels
     public class ClaimDetailViewModel
     {
         public string InternalId { get; set; }
-        public long MpClaimId { get; set; }
+        public string MpClaimId { get; set; }
 
         public string? Status { get; set; }
         public string? Stage { get; set; }

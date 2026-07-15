@@ -32,11 +32,11 @@ public class UserClaimService(
             .Select(c => new ClaimSummaryViewModel
             {
                 InternalId = c.Id,
-                MpClaimId = c.MpClaimId,
+                MpClaimId = c.MercadoPagoClaimId,
                 Status = c.Status.ToString(),
                 Type = c.Type.ToString(),
-                DateCreated = c.DataCreated,
-                IsUrgent = c.Status == InternalClaimStatus.RespondidoPeloVendedor,
+                DateCreated = c.DateCreated,
+                IsUrgent = c.Status == ClaimStatus.Opened,
             })
             .ToList();
     }
@@ -49,12 +49,12 @@ public class UserClaimService(
         if (claim == null || claim.UserId != userId)
             throw new UnauthorizedAccessException("Essa reclamação não é sua.");
 
-        var messages = await mpService.GetClaimMessagesAsync(claim.MpClaimId);
+        var messages = await mpService.GetClaimMessagesAsync(claim.MercadoPagoClaimId);
 
         return new ClaimDetailViewModel
         {
             InternalId = claim.Id,
-            MpClaimId = claim.MpClaimId,
+            MpClaimId = claim.MercadoPagoClaimId,
             Status = claim.Status.ToString(),
             Messages = messages
                 .Select(m => new ClaimMessageViewModel
@@ -63,7 +63,7 @@ public class UserClaimService(
                     SenderRole = m.SenderRole,
                     Content = m.Message,
                     DateCreated = m.DateCreated,
-                    Attachments = m.Attachments?.Select(a => a.Filename).ToList() ?? [],
+                    Attachments = [.. m.Attachments?.Select(a => a.Filename) ?? []],
                     IsMe = m.SenderRole == "complainant",
                 })
                 .ToList(),
@@ -81,7 +81,7 @@ public class UserClaimService(
         if (claim == null || claim.UserId != userId)
             throw new UnauthorizedAccessException("Ação não permitida.");
 
-        await mpService.SendMessageAsync(claim.MpClaimId, message);
+        await mpService.SendMessageAsync(claim.MercadoPagoClaimId, message);
 
         await hubContext.Clients.User(userId).SendAsync("ReceiveMessage", new { claimId = claim.Id });
     }
@@ -94,7 +94,7 @@ public class UserClaimService(
         if (claim == null || claim.UserId != userId)
             throw new UnauthorizedAccessException("Ação não permitida.");
 
-        await mpService.EscalateToMediationAsync(claim.MpClaimId);
+        await mpService.EscalateToMediationAsync(claim.MercadoPagoClaimId);
 
         await hubContext.Clients.User(userId).SendAsync("ReceiveMessage", new { claimId = claim.Id });
     }
