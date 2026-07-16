@@ -4,28 +4,51 @@ namespace MeuCrudCsharp.Features.Support.Application.DTOs
 {
     public class CreateSupportTicketDto
     {
-        [Required(ErrorMessage = "O contexto é obrigatório.")]
-        [MinLength(3, ErrorMessage = "O contexto deve ter no mínimo 3 caracteres.")]
-        public string? Context { get; set; } = string.Empty;
+        [Required(ErrorMessage = "O título é obrigatório.")]
+        public string Title { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "A explicação é obrigatória.")]
-        [MinLength(10, ErrorMessage = "A explicação deve ter no mínimo 10 caracteres.")]
-        public string? Explanation { get; set; } = string.Empty;
+        [Required(ErrorMessage = "A categoria é obrigatória.")]
+        public string Category { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "A prioridade é obrigatória.")]
+        public string Priority { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "A mensagem inicial é obrigatória.")]
+        public string Message { get; set; } = string.Empty;
     }
 
     public class UpdateSupportTicketDto
     {
-        [Required]
         public string? Status { get; set; }
+        public string? Priority { get; set; }
     }
 
     public class SupportTicketResponseDto
     {
         public string? Id { get; set; }
         public string? UserId { get; set; }
-        public string? Context { get; set; }
-        public string? Explanation { get; set; }
+        public string? Title { get; set; }
+        public string? Category { get; set; }
+        public string? Priority { get; set; }
         public string? Status { get; set; }
+        public string? AssignedTo { get; set; }
+        public List<SupportResponseDto> Responses { get; set; } = new();
         public DateTime CreatedAt { get; set; }
+        public DateTime LastUpdated { get; set; }
+    }
+
+    public class SupportResponseDto
+    {
+        public string SenderId { get; set; } = string.Empty;
+        public string SenderRole { get; set; } = string.Empty;
+        public string Message { get; set; } = string.Empty;
+        public DateTime DateCreated { get; set; }
+        
+    }
+
+    public class ReplyToTicketDto
+    {
+        [Required(ErrorMessage = "A mensagem é obrigatória.")]
+        public string Message { get; set; } = string.Empty;
     }
 }

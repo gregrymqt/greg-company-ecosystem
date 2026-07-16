@@ -1,4 +1,4 @@
-﻿using MeuCrudCsharp.Features.Support.Domain.Entities;
+using MeuCrudCsharp.Features.Support.Domain.Entities;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -13,6 +13,7 @@ namespace MeuCrudCsharp.Features.Support.Domain.Interfaces
         Task UpdateAsync(string id, SupportTicket ticket);
         Task DeleteAsync(string id);
         Task<IEnumerable<SupportTicket>> GetByUserIdAsync(string userId);
+        Task AddResponseAsync(string ticketId, SupportResponse response);
     }
 }
 

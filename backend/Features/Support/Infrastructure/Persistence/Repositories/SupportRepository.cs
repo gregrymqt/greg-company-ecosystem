@@ -1,4 +1,4 @@
-﻿using MeuCrudCsharp.Features.Support.Domain.Entities;
+using MeuCrudCsharp.Features.Support.Domain.Entities;
 using MeuCrudCsharp.Features.Support.Domain.Interfaces;
 using MongoDB.Driver;
 using MeuCrudCsharp.Data;
@@ -51,6 +51,15 @@ namespace MeuCrudCsharp.Features.Support.Infrastructure.Persistence.Repositories
         public async Task<IEnumerable<SupportTicket>> GetByUserIdAsync(string userId)
         {
             return await _tickets.Find(t => t.UserId == userId).ToListAsync();
+        }
+
+        public async Task AddResponseAsync(string ticketId, SupportResponse response)
+        {
+            var update = Builders<SupportTicket>.Update
+                .Push(t => t.Responses, response)
+                .Set(t => t.LastUpdated, DateTime.UtcNow);
+
+            await _tickets.UpdateOneAsync(t => t.Id == ticketId, update);
         }
     }
 }

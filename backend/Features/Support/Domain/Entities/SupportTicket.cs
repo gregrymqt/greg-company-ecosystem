@@ -14,9 +14,13 @@ namespace MeuCrudCsharp.Features.Support.Domain.Entities
         [BsonRepresentation(BsonType.ObjectId)]
         public string Id { get; set; } = null!;
         public string UserId { get; set; } = null!;
-        public string Context { get; set; } = null!;
-        public string Explanation { get; set; } = null!;
-        public string Status { get; set; } = "Open";
+        public string Title { get; set; } = null!;
+        public string Category { get; set; } = null!;
+        public string Priority { get; set; } = null!;
+        public string Status { get; set; } = "open";
+        public string? AssignedTo { get; set; }
+        public List<SupportResponse> Responses { get; set; } = new();
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime LastUpdated { get; set; } = DateTime.UtcNow;
     }
 }

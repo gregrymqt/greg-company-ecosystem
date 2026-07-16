@@ -15,7 +15,7 @@ import type {
 } from '../types/support.types';
 
 class AdminSupportService {
-  private readonly BASE_PATH = '/support';
+  private readonly BASE_PATH = '/admin/support/tickets';
 
   /**
    * Lista todos os tickets com paginação
@@ -52,7 +52,7 @@ class AdminSupportService {
 
   /**
    * Atualiza status do ticket
-   * PUT /support/{id}
+   * PUT /admin/support/tickets/{id}/status
    */
   async updateTicketStatus(
     id: string,
@@ -60,8 +60,30 @@ class AdminSupportService {
   ): Promise<SupportApiResponse<void>> {
     const payload: UpdateSupportTicketDto = { status };
     return await ApiService.put<SupportApiResponse<void>>(
-      `${this.BASE_PATH}/${id}`,
+      `${this.BASE_PATH}/${id}/status`,
       payload
+    );
+  }
+
+  /**
+   * Atribui ticket a um admin
+   * PUT /admin/support/tickets/{id}/assign
+   */
+  async assignTicket(id: string): Promise<SupportApiResponse<void>> {
+    return await ApiService.put<SupportApiResponse<void>>(
+      `${this.BASE_PATH}/${id}/assign`,
+      {}
+    );
+  }
+
+  /**
+   * Responde a um ticket
+   * POST /admin/support/tickets/{id}/reply
+   */
+  async replyToTicket(id: string, message: string): Promise<SupportApiResponse<void>> {
+    return await ApiService.post<SupportApiResponse<void>>(
+      `${this.BASE_PATH}/${id}/reply`,
+      { message }
     );
   }
 }

@@ -11,8 +11,11 @@ namespace MeuCrudCsharp.Features.Support.Application.Interfaces
             int pageSize
         );
 
+        Task<IEnumerable<SupportTicketResponseDto>> GetTicketsByUserIdAsync(string userId);
         Task<SupportTicketResponseDto> GetTicketByIdAsync(string id);
 
         Task UpdateTicketStatusAsync(string id, UpdateSupportTicketDto dto);
+        Task AssignTicketAsync(string id, string adminId);
+        Task ReplyToTicketAsync(string id, string senderId, string senderRole, ReplyToTicketDto dto);
     }
 }
