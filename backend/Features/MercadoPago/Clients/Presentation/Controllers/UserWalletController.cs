@@ -24,7 +24,7 @@ public class UserWalletController : MercadoPagoApiControllerBase
     {
         try
         {
-            var userId = await _userContext.GetCurrentUserId();
+            var userId = Guid.Parse(await _userContext.GetCurrentUserId());
             var cards = await _clientService.GetUserWalletAsync(userId);
             return Ok(cards);
         }
@@ -39,7 +39,7 @@ public class UserWalletController : MercadoPagoApiControllerBase
     {
         try
         {
-            var userId = await _userContext.GetCurrentUserId();
+            var userId = Guid.Parse(await _userContext.GetCurrentUserId());
             var newCard = await _clientService.AddCardToWalletAsync(userId, request.CardToken);
             return Created("", newCard);
         }
@@ -54,7 +54,7 @@ public class UserWalletController : MercadoPagoApiControllerBase
     {
         try
         {
-            var userId = await _userContext.GetCurrentUserId();
+            var userId = Guid.Parse(await _userContext.GetCurrentUserId());
             await _clientService.RemoveCardFromWalletAsync(userId, cardId);
             return NoContent();
         }

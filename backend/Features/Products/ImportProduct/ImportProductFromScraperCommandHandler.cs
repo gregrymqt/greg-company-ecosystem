@@ -4,7 +4,6 @@ using MeuCrudCsharp.Features.Products.Domain.Entities;
 using MeuCrudCsharp.Features.Products.Infrastructure.Persistence;
 using MeuCrudCsharp.Features.Shared.Domain.Entities;
 using MeuCrudCsharp.Features.Shared.Domain.Interfaces;
-using MongoDB.Driver;
 using MeuCrudCsharp.Features.Products.Domain.Enums;
 
 namespace MeuCrudCsharp.Features.Products.ImportProduct;
@@ -13,19 +12,19 @@ public class ImportProductFromScraperCommandHandler
 {
     private readonly IProductRepository _productRepository;
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IMongoDbContext _context;
+    private readonly ApplicationDbContext _context;
 
     public ImportProductFromScraperCommandHandler(
-        IProductRepository productRepository, 
-        IUnitOfWork unitOfWork, 
-        IMongoDbContext context)
+        IProductRepository productRepository,
+        IUnitOfWork unitOfWork,
+        ApplicationDbContext context)
     {
         _productRepository = productRepository;
         _unitOfWork = unitOfWork;
         _context = context;
     }
 
-    public async Task<string> Handle(ImportProductFromScraperCommand command, CancellationToken cancellationToken = default)
+    public async Task<Guid> Handle(ImportProductFromScraperCommand command, CancellationToken cancellationToken = default)
     {
         await _unitOfWork.BeginTransactionAsync();
 
@@ -46,24 +45,15 @@ public class ImportProductFromScraperCommandHandler
             var outboxEvent = new OutboxEvent
             {
                 EventType = "product.import.request",
-                Payload = JsonSerializer.Serialize(new 
-                { 
-                    ProductId = product.Id, 
-                    TenantId = command.TenantId, 
-                    TargetUrl = command.TargetUrl 
+                Payload = JsonSerializer.Serialize(new
+                {
+                    ProductId = product.Id,
+                    TenantId = command.TenantId,
+                    TargetUrl = command.TargetUrl
                 })
             };
 
-            var outboxCollection = _context.GetCollection<OutboxEvent>("OutboxEvents");
-            
-            if (_unitOfWork.Session != null)
-            {
-                await outboxCollection.InsertOneAsync(_unitOfWork.Session, outboxEvent, cancellationToken: cancellationToken);
-            }
-            else
-            {
-                await outboxCollection.InsertOneAsync(outboxEvent, cancellationToken: cancellationToken);
-            }
+            await _context.OutboxEvents.AddAsync(outboxEvent, cancellationToken);
 
             await _unitOfWork.CommitAsync();
 

@@ -1,126 +1,100 @@
 using MeuCrudCsharp.Data;
-using MeuCrudCsharp.Features.MercadoPago.Payments.Application.Interfaces;
 using MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Interfaces;
 using MeuCrudCsharp.Features.Auth.Domain.Entities;
-using MeuCrudCsharp.Features.MercadoPago.Chargebacks.Domain.Entities;
-using MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities;
 using MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities;
-using MeuCrudCsharp.Features.MercadoPago.Plans.Domain.Entities;
 using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Entities;
-using MeuCrudCsharp.Features.Shared.Domain.Entities;
-using MongoDB.Driver;
-using MongoDB.Driver.Linq;
+using Microsoft.EntityFrameworkCore;
 
 namespace MeuCrudCsharp.Features.MercadoPago.Payments.Infrastructure.Persistence.Repositories;
 
 public class PaymentRepository : IPaymentRepository
 {
-    private readonly IMongoCollection<MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities.Payments> _payments;
-    private readonly IMongoCollection<Users> _users;
-    private readonly IMongoCollection<Subscription> _subscriptions;
+    private readonly ApplicationDbContext _context;
 
-    public PaymentRepository(IMongoDbContext context)
+    public PaymentRepository(ApplicationDbContext context)
     {
-        _payments = context.GetCollection<MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities.Payments>("payments");
-        _users = context.GetCollection<Users>("users");
-        _subscriptions = context.GetCollection<Subscription>("subscriptions");
+        _context = context;
     }
 
-    public async Task<bool> HasAnyPaymentByUserIdAsync(string userId)
+    public async Task<bool> HasAnyPaymentByUserIdAsync(Guid userId)
     {
-        return await _payments.Find(p => p.UserId == userId).AnyAsync();
+        return await _context.Payments.AnyAsync(p => p.UserId == userId);
     }
 
-    public async Task<List<MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities.Payments>> GetPaymentsByUserIdAndTypeAsync(
-        string userId,
+    public async Task<List<Payment>> GetPaymentsByUserIdAndTypeAsync(
+        Guid userId,
         string? method = null
     )
     {
-        var builder = Builders<MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities.Payments>.Filter;
-        var filter = builder.Eq(p => p.UserId, userId);
+        var query = _context.Payments.Where(p => p.UserId == userId);
 
         if (!string.IsNullOrEmpty(method))
         {
-            filter &= builder.Eq(p => p.Method, method);
+            query = query.Where(p => p.Method == method);
         }
 
-        return await _payments.Find(filter)
-            .SortByDescending(p => p.DateApproved)
-            .ToListAsync();
+        return await query.OrderByDescending(p => p.DateApproved).ToListAsync();
     }
 
-    public async Task<MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities.Payments?> GetByIdWithUserAsync(string paymentId)
+    public async Task<Payment?> GetByIdWithUserAsync(Guid paymentId)
     {
-        var payment = await _payments.Find(p => p.Id == paymentId).FirstOrDefaultAsync();
-        if (payment != null && !string.IsNullOrEmpty(payment.UserId))
-        {
-            payment.User = await _users.Find(u => u.Id == payment.UserId).FirstOrDefaultAsync();
-        }
-        return payment;
+        return await _context.Payments
+            .Include(p => p.User)
+            .FirstOrDefaultAsync(p => p.Id == paymentId);
     }
 
-    public async Task<MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities.Payments?> GetByExternalIdWithUserAsync(string externalPaymentId)
+    public async Task<Payment?> GetByExternalIdWithUserAsync(string externalPaymentId)
     {
-        var payment = await _payments.Find(p => p.ExternalId == externalPaymentId).FirstOrDefaultAsync();
-        if (payment != null && !string.IsNullOrEmpty(payment.UserId))
-        {
-            payment.User = await _users.Find(u => u.Id == payment.UserId).FirstOrDefaultAsync();
-        }
-        return payment;
+        return await _context.Payments
+            .Include(p => p.User)
+            .FirstOrDefaultAsync(p => p.ExternalId == externalPaymentId);
     }
 
-    public async Task<MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities.Payments?> GetByExternalIdWithSubscriptionAsync(string externalId)
+    public async Task<Payment?> GetByExternalIdWithSubscriptionAsync(string externalId)
     {
-        var payment = await _payments.Find(p => p.ExternalId == externalId).FirstOrDefaultAsync();
-        if (payment != null && !string.IsNullOrEmpty(payment.SubscriptionId))
-        {
-            payment.Subscription = await _subscriptions.Find(s => s.Id == payment.SubscriptionId).FirstOrDefaultAsync();
-        }
-        return payment;
+        return await _context.Payments
+            .Include(p => p.Subscription)
+            .FirstOrDefaultAsync(p => p.ExternalId == externalId);
     }
 
-    public void Update(MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities.Payments payment)
+    public void Update(Payment payment)
     {
-        _payments.ReplaceOne(p => p.Id == payment.Id, payment);
+        _context.Payments.Update(payment);
     }
 
-    public async Task AddAsync(MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities.Payments payment)
+    public async Task AddAsync(Payment payment)
     {
-        await _payments.InsertOneAsync(payment);
+        await _context.Payments.AddAsync(payment);
+        await _context.SaveChangesAsync();
     }
 
-    public Task Remove(MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities.Payments payment)
+    public Task Remove(Payment payment)
     {
-        _payments.DeleteOne(p => p.Id == payment.Id);
+        _context.Payments.Remove(payment);
         return Task.CompletedTask;
     }
 
-    public async Task<(List<MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities.Payments> Items, long TotalCount)> GetAdminPaymentsPaginatedAsync(int page, int pageSize, string? status, string? search)
+    public async Task<(List<Payment> Items, long TotalCount)> GetAdminPaymentsPaginatedAsync(int page, int pageSize, string? status, string? search)
     {
-        var builder = Builders<MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities.Payments>.Filter;
-        var filter = builder.Empty;
+        var query = _context.Payments.AsQueryable();
 
         if (!string.IsNullOrEmpty(status))
         {
-            filter &= builder.Eq(p => p.Status, status);
+            query = query.Where(p => p.Status == status);
         }
 
         if (!string.IsNullOrEmpty(search))
         {
-            var searchFilter = builder.Regex(p => p.PayerEmail, new MongoDB.Bson.BsonRegularExpression(search, "i"));
-            filter &= searchFilter;
+            query = query.Where(p => p.PayerEmail != null && p.PayerEmail.ToLower().Contains(search.ToLower()));
         }
 
-        var totalCount = await _payments.CountDocumentsAsync(filter);
-        var items = await _payments.Find(filter)
-            .SortByDescending(p => p.CreatedAt)
+        var totalCount = await query.LongCountAsync();
+        var items = await query
+            .OrderByDescending(p => p.CreatedAt)
             .Skip((page - 1) * pageSize)
-            .Limit(pageSize)
+            .Take(pageSize)
             .ToListAsync();
 
         return (items, totalCount);
     }
 }
-
-
-

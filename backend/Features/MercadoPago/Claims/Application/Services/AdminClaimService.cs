@@ -49,7 +49,7 @@ public class AdminClaimService(
                 var claimSummaries = claims
                     .Select(c => new ClaimSummaryViewModel
                     {
-                        InternalId = c.Id,
+                        InternalId = c.Id.ToString(),
                         MpClaimId = c.MercadoPagoClaimId,
                         CustomerName = c.User?.Name ?? "Desconhecido",
                         Status = c.Status.ToString(),
@@ -73,7 +73,7 @@ public class AdminClaimService(
 
     public async Task<ClaimDetailViewModel> GetClaimDetailsAsync(string localId)
     {
-        var localClaim = await claimRepository.GetByIdAsync(localId)
+        var localClaim = await claimRepository.GetByIdAsync(Guid.Parse(localId))
             ?? throw new ResourceNotFoundException("ReclamaÃ§Ã£o nÃ£o encontrada.");
 
         List<MpMessageResponse> messages;
@@ -95,7 +95,7 @@ public class AdminClaimService(
 
         return new ClaimDetailViewModel
         {
-            InternalId = localClaim.Id,
+            InternalId = localClaim.Id.ToString(),
             MpClaimId = localClaim.MercadoPagoClaimId,
             Status = localClaim.Status.ToString(),
             Messages =
@@ -117,14 +117,14 @@ public class AdminClaimService(
         if (string.IsNullOrWhiteSpace(messageText))
             throw new ArgumentException("Mensagem nÃ£o pode ser vazia.", nameof(messageText));
 
-        var localClaim = await claimRepository.GetByIdAsync(localId)
+        var localClaim = await claimRepository.GetByIdAsync(Guid.Parse(localId))
             ?? throw new ResourceNotFoundException("ReclamaÃ§Ã£o nÃ£o encontrada.");
 
         await mpService.SendMessageAsync(localClaim.MercadoPagoClaimId, messageText);
 
-        if (!string.IsNullOrEmpty(localClaim.UserId))
+        if (!string.IsNullOrEmpty(localClaim.UserId?.ToString()))
         {
-            await hubContext.Clients.User(localClaim.UserId).SendAsync("ReceiveMessage", new { claimId = localClaim.Id });
+            await hubContext.Clients.User(localClaim.UserId.ToString()!).SendAsync("ReceiveMessage", new { claimId = localClaim.Id });
         }
 
         logger.LogInformation("Resposta enviada para a claim MP {MpId}", localClaim.MercadoPagoClaimId);

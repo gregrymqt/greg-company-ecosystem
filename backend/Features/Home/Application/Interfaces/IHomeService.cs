@@ -8,12 +8,12 @@ public interface IHomeService
 
     Task<HeroSlideDto?> CreateHeroAsync(CreateUpdateHeroDto dto);
 
-    Task<bool> UpdateHeroAsync(string id, CreateUpdateHeroDto dto);
+    Task<bool> UpdateHeroAsync(Guid id, CreateUpdateHeroDto dto);
 
-    Task DeleteHeroAsync(string id);
+    Task DeleteHeroAsync(Guid id);
 
     Task<ServiceDto> CreateServiceAsync(CreateUpdateServiceDto dto);
-    Task UpdateServiceAsync(string id, CreateUpdateServiceDto dto);
-    Task DeleteServiceAsync(string id);
+    Task UpdateServiceAsync(Guid id, CreateUpdateServiceDto dto);
+    Task DeleteServiceAsync(Guid id);
 }
 

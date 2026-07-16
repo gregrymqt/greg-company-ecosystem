@@ -5,9 +5,9 @@ using MeuCrudCsharp.Features.Courses.Domain.Interfaces;
 using MeuCrudCsharp.Features.Courses.Application.Mappers;
 using MeuCrudCsharp.Features.Exceptions;
 using MeuCrudCsharp.Features.Shared.Domain.Interfaces;
-using MeuCrudCsharp.Features.Videos.Application.DTOs;
 using MeuCrudCsharp.Features.Shared.Domain.Entities;
 using MeuCrudCsharp.Features.Courses.Domain.Entities;
+using MeuCrudCsharp.Features.Videos.Application.DTOs;
 using MeuCrudCsharp.Data;
 using System.Text.Json;
 
@@ -18,7 +18,7 @@ namespace MeuCrudCsharp.Features.Courses.Application.Services
         ILogger<CourseService> logger,
         ICacheService cacheService,
         IUnitOfWork unitOfWork,
-        IMongoDbContext mongoContext,
+        ApplicationDbContext dbContext,
         Microsoft.Extensions.Configuration.IConfiguration configuration
     ) : ICourseService
     {
@@ -75,7 +75,7 @@ namespace MeuCrudCsharp.Features.Courses.Application.Services
 
             var newCourse = new Course
             {
-                Id = Guid.NewGuid().ToString(),
+                Id = Guid.NewGuid(),
                 Name = createDto.Name!,
                 Description = createDto.Description ?? string.Empty,
                 Price = createDto.Price,
@@ -95,25 +95,23 @@ namespace MeuCrudCsharp.Features.Courses.Application.Services
                 }).ToList() ?? new List<Module>()
             };
 
-            using var session = await mongoContext.StartSessionAsync();
-            session.StartTransaction();
+            await unitOfWork.BeginTransactionAsync();
             try
             {
-                var coursesCollection = mongoContext.GetCollection<Course>("Courses");
-                await coursesCollection.InsertOneAsync(session, newCourse);
+                await dbContext.Courses.AddAsync(newCourse);
 
                 var outboxEvent = new OutboxEvent
                 {
                     EventType = "CourseCreated",
                     Payload = JsonSerializer.Serialize(new { CourseId = newCourse.Id, newCourse.Name })
                 };
-                await mongoContext.GetCollection<OutboxEvent>("OutboxEvents").InsertOneAsync(session, outboxEvent);
+                await dbContext.OutboxEvents.AddAsync(outboxEvent);
 
-                await session.CommitTransactionAsync();
+                await unitOfWork.CommitAsync();
             }
             catch (Exception ex)
             {
-                await session.AbortTransactionAsync();
+                await unitOfWork.RollbackAsync();
                 logger.LogError(ex, "Erro ao criar curso e salvar no Outbox.");
                 throw;
             }

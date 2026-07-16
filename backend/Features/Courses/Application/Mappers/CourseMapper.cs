@@ -1,7 +1,5 @@
 using MeuCrudCsharp.Features.Courses.Application.DTOs;
 using MeuCrudCsharp.Features.Courses.Domain.Entities;
-using MeuCrudCsharp.Features.Videos.Application.DTOs;
-using MeuCrudCsharp.Features.Videos.Application.Utils;
 
 namespace MeuCrudCsharp.Features.Courses.Application.Mappers
 {
@@ -11,7 +9,7 @@ namespace MeuCrudCsharp.Features.Courses.Application.Mappers
         {
             return new CourseDto
             {
-                PublicId = course.PublicId,
+                PublicId = course.Id,
                 Name = course.Name,
                 Description = course.Description,
                 Year = course.Year,
@@ -21,12 +19,12 @@ namespace MeuCrudCsharp.Features.Courses.Application.Mappers
                 ThumbnailUrl = course.ThumbnailUrl,
                 Modules = course.Modules?.Select(m => new ModuleDto
                 {
-                    PublicId = m.PublicId,
+                    PublicId = m.Id,
                     Title = m.Title,
                     Order = m.Order,
                     Lessons = m.Lessons?.Select(l => new LessonDto
                     {
-                        PublicId = l.PublicId,
+                        PublicId = l.Id,
                         Title = l.Title,
                         Order = l.Order,
                         VideoPublicId = l.VideoPublicId,
@@ -40,7 +38,7 @@ namespace MeuCrudCsharp.Features.Courses.Application.Mappers
         {
             return new CourseDto
             {
-                PublicId = course.PublicId,
+                PublicId = course.Id,
                 Name = course.Name,
                 Description = course.Description,
                 Year = course.Year,

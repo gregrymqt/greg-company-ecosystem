@@ -37,15 +37,6 @@ public class GoogleSettings
 }
 
 
-public class MongoDbSettings
-{
-    public const string SectionName = "MongoDb";
-    public string? ConnectionString { get; set; }
-    public string? DatabaseName { get; set; }
-    public string? WriteConcern { get; set; }
-    public bool Journal { get; set; }
-}
-
 public class RabbitMqSettings
 {
     public const string SectionName = "RabbitMq";

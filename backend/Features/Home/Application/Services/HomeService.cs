@@ -90,14 +90,14 @@ public class HomeService(
                     FEATURE_CATEGORY
                 );
                 imageUrl = arquivoSalvo.CaminhoRelativo;
-                fileId = arquivoSalvo.Id;
+                fileId = arquivoSalvo.Id.ToString();
             }
         }
         else if (dto.File != null)
         {
             var arquivoSalvo = await fileService.SalvarArquivoAsync(dto.File, FEATURE_CATEGORY);
             imageUrl = arquivoSalvo.CaminhoRelativo;
-            fileId = arquivoSalvo.Id;
+            fileId = arquivoSalvo.Id.ToString();
         }
 
 
@@ -130,7 +130,7 @@ public class HomeService(
         };
     }
 
-    public async Task<bool> UpdateHeroAsync(string id, CreateUpdateHeroDto dto)
+    public async Task<bool> UpdateHeroAsync(Guid id, CreateUpdateHeroDto dto)
     {
         var entity = await repository.GetHeroByIdAsync(id);
         if (entity == null)
@@ -158,7 +158,7 @@ public class HomeService(
                         dto.FileName
                     );
                     entity.ImageUrl = arquivoAtualizado.CaminhoRelativo;
-                    entity.FileId = arquivoAtualizado.Id;
+                    entity.FileId = arquivoAtualizado.Id.ToString();
                 }
                 else
                 {
@@ -168,7 +168,7 @@ public class HomeService(
                         FEATURE_CATEGORY
                     );
                     entity.ImageUrl = arquivoSalvo.CaminhoRelativo;
-                    entity.FileId = arquivoSalvo.Id;
+                    entity.FileId = arquivoSalvo.Id.ToString();
                 }
             }
         }
@@ -181,7 +181,7 @@ public class HomeService(
                     dto.File
                 );
                 entity.ImageUrl = arquivoAtualizado.CaminhoRelativo;
-                entity.FileId = arquivoAtualizado.Id;
+                entity.FileId = arquivoAtualizado.Id.ToString();
             }
             else
             {
@@ -190,7 +190,7 @@ public class HomeService(
                     FEATURE_CATEGORY
                 );
                 entity.ImageUrl = arquivoSalvo.CaminhoRelativo;
-                entity.FileId = arquivoSalvo.Id;
+                entity.FileId = arquivoSalvo.Id.ToString();
             }
         }
 
@@ -208,7 +208,7 @@ public class HomeService(
         return true;
     }
 
-    public async Task DeleteHeroAsync(string id)
+    public async Task DeleteHeroAsync(Guid id)
     {
         var entity = await repository.GetHeroByIdAsync(id);
         if (entity == null)
@@ -254,7 +254,7 @@ public class HomeService(
         };
     }
 
-    public async Task UpdateServiceAsync(string id, CreateUpdateServiceDto dto)
+    public async Task UpdateServiceAsync(Guid id, CreateUpdateServiceDto dto)
     {
         var entity = await repository.GetServiceByIdAsync(id);
         if (entity == null)
@@ -273,7 +273,7 @@ public class HomeService(
         await cache.RemoveAsync(HOME_CACHE_KEY);
     }
 
-    public async Task DeleteServiceAsync(string id)
+    public async Task DeleteServiceAsync(Guid id)
     {
         var entity = await repository.GetServiceByIdAsync(id);
         if (entity == null)

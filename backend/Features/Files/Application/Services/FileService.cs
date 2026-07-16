@@ -143,7 +143,7 @@ public class FileService(
 
         try
         {
-            var arquivoBanco = await repository.GetByIdAsync(fileId);
+            var arquivoBanco = await repository.GetByIdAsync(Guid.Parse(fileId));
             if (arquivoBanco == null)
                 throw new ResourceNotFoundException($"Arquivo ID {fileId} não encontrado.");
 
@@ -273,7 +273,7 @@ public class FileService(
 
         try
         {
-            var arquivoBanco = await repository.GetByIdAsync(idArquivoAntigo);
+            var arquivoBanco = await repository.GetByIdAsync(Guid.Parse(idArquivoAntigo));
             if (arquivoBanco == null)
                 throw new ResourceNotFoundException("Arquivo antigo não encontrado.");
 
@@ -336,7 +336,7 @@ public class FileService(
 
     public async Task DeletarArquivoAsync(string id)
     {
-        var arquivo = await repository.GetByIdAsync(id);
+        var arquivo = await repository.GetByIdAsync(Guid.Parse(id));
         if (arquivo != null)
         {
             var path = Path.Combine(environment.WebRootPath, arquivo.CaminhoRelativo);

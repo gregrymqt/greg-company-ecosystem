@@ -5,11 +5,6 @@ using MeuCrudCsharp.Features.Exceptions;
 using MeuCrudCsharp.Features.MercadoPago.Notification.Application.Interfaces;
 using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Application.Interfaces;
 using MeuCrudCsharp.Features.Shared.Domain.Interfaces;
-
-using MeuCrudCsharp.Features.Shared.Infrastructure.Persistence;
-using MeuCrudCsharp.Features.MercadoPago.Chargebacks.Domain.Entities;
-using MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities;
-using MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities;
 using MeuCrudCsharp.Features.MercadoPago.Plans.Domain.Entities;
 using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Entities;
 using MeuCrudCsharp.Features.Shared.Domain.Entities;
@@ -23,7 +18,7 @@ public class SubscriptionRenewalNotificationService(
     ILogger<SubscriptionRenewalNotificationService> logger,
     ISubscriptionRepository subscriptionRepository,
     IUnitOfWork unitOfWork,
-    IMongoDbContext mongoContext,
+    ApplicationDbContext dbContext,
     IRazorViewToStringRenderer razorViewToStringRenderer,
     IOptions<GeneralSettings> generalSettings)
     : ISubscriptionNotificationService
@@ -32,44 +27,26 @@ public class SubscriptionRenewalNotificationService(
 
     public async Task ProcessRenewalAsync(string paymentId)
     {
-        logger.LogInformation(
-            "Iniciando processamento de renovação para o pagamento {PaymentId}.",
-            paymentId
-        );
+        logger.LogInformation("Iniciando processamento de renovacao para o pagamento {PaymentId}.", paymentId);
 
         try
         {
-            var subscription = await subscriptionRepository.GetByPaymentIdAsync(
-                paymentId,
-                includePlan: true,
-                includeUser: true
-            );
+            var subscription = await subscriptionRepository.GetByPaymentIdAsync(paymentId, includePlan: true, includeUser: true);
 
             if (subscription == null)
             {
-                logger.LogWarning(
-                    "Nenhuma assinatura encontrada para o PaymentId: {PaymentId}.",
-                    paymentId
-                );
+                logger.LogWarning("Nenhuma assinatura encontrada para o PaymentId: {PaymentId}.", paymentId);
                 return;
             }
 
             if (subscription.CurrentPeriodEndDate > DateTime.UtcNow)
             {
-                logger.LogInformation(
-                    "Assinatura {SubscriptionId} já renovada (Expira: {ExpirationDate}).",
-                    subscription.Id,
-                    subscription.CurrentPeriodEndDate
-                );
+                logger.LogInformation("Assinatura {SubscriptionId} ja renovada (Expira: {ExpirationDate}).", subscription.Id, subscription.CurrentPeriodEndDate);
                 return;
             }
 
             if (subscription.Plan == null)
-            {
-                throw new InvalidOperationException(
-                    $"Assinatura {subscription.Id} sem plano associado."
-                );
-            }
+                throw new InvalidOperationException($"Assinatura {subscription.Id} sem plano associado.");
 
             var planInterval = subscription.Plan.FrequencyInterval;
             var planFrequency = subscription.Plan.FrequencyType;
@@ -86,22 +63,14 @@ public class SubscriptionRenewalNotificationService(
             subscription.Status = "active";
             subscriptionRepository.Update(subscription);
 
-            logger.LogInformation(
-                "Assinatura {SubscriptionId} marcada. Nova data: {NewDate}",
-                subscription.Id,
-                newExpirationDate
-            );
+            logger.LogInformation("Assinatura {SubscriptionId} marcada. Nova data: {NewDate}", subscription.Id, newExpirationDate);
 
             var statusEvent = new OutboxEvent
             {
                 EventType = "subscription.status.changed",
-                Payload = JsonSerializer.Serialize(new { 
-                    userId = subscription.UserId, 
-                    status = "active", 
-                    planName = subscription.Plan?.Name ?? "" 
-                })
+                Payload = JsonSerializer.Serialize(new { userId = subscription.UserId, status = "active", planName = subscription.Plan?.Name ?? "" })
             };
-            await mongoContext.GetCollection<OutboxEvent>("OutboxEvents").InsertOneAsync(unitOfWork.Session, statusEvent);
+            await dbContext.OutboxEvents.AddAsync(statusEvent);
 
             if (subscription.User != null && !string.IsNullOrEmpty(subscription.User.Email))
             {
@@ -109,11 +78,7 @@ public class SubscriptionRenewalNotificationService(
             }
 
             await unitOfWork.CommitAsync();
-
-            logger.LogInformation(
-                "Assinatura {SubscriptionId} renovada com sucesso.",
-                subscription.Id
-            );
+            logger.LogInformation("Assinatura {SubscriptionId} renovada com sucesso.", subscription.Id);
         }
         catch (Exception ex)
         {
@@ -133,49 +98,20 @@ public class SubscriptionRenewalNotificationService(
             supportUrl: $"{_generalSettings.BaseUrl}/Support/Contact/index.cshtml"
         );
 
-        await EnqueueEmailFromTemplateAsync(
-            recipientEmail: subscription.User!.Email!,
-            subject: "Sua assinatura foi renovada com sucesso!",
-            viewPath: "Pages/EmailTemplates/Renewal/index.cshtml",
-            model: viewModel
-        );
+        await EnqueueEmailFromTemplateAsync(subscription.User!.Email!, "Sua assinatura foi renovada com sucesso!", "Pages/EmailTemplates/Renewal/index.cshtml", viewModel);
     }
 
-    private async Task EnqueueEmailFromTemplateAsync<TModel>(
-        string recipientEmail,
-        string subject,
-        string viewPath,
-        TModel model
-    )
+    private async Task EnqueueEmailFromTemplateAsync<TModel>(string recipientEmail, string subject, string viewPath, TModel model)
     {
-        logger.LogInformation(
-            "Iniciando montagem de e-mail a partir do template '{ViewPath}' para {RecipientEmail}.",
-            viewPath,
-            recipientEmail
-        );
-
-        var htmlBody = await razorViewToStringRenderer.RenderViewToStringAsync(
-            viewPath,
-            model
-        );
-
-        var plainTextBody =
-            $"Assunto: {subject}. Para visualizar esta mensagem, utilize um leitor de e-mail compatível com HTML.";
-
-        var emailPayload = new
-        {
-            to = recipientEmail,
-            subject = subject,
-            htmlBody = htmlBody,
-            plainTextBody = plainTextBody
-        };
+        var htmlBody = await razorViewToStringRenderer.RenderViewToStringAsync(viewPath, model);
+        var plainTextBody = $"Assunto: {subject}. Para visualizar esta mensagem, utilize um leitor de e-mail compativel com HTML.";
 
         var outboxEvent = new OutboxEvent
         {
             EventType = "email.send.requested",
-            Payload = JsonSerializer.Serialize(emailPayload)
+            Payload = JsonSerializer.Serialize(new { to = recipientEmail, subject, htmlBody, plainTextBody })
         };
 
-        await mongoContext.GetCollection<OutboxEvent>("OutboxEvents").InsertOneAsync(unitOfWork.Session, outboxEvent);
+        await dbContext.OutboxEvents.AddAsync(outboxEvent);
     }
 }

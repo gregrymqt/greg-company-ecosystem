@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using MeuCrudCsharp.Features.MercadoPago.Chargebacks.Domain.Entities;
 
 namespace MeuCrudCsharp.Features.MercadoPago.Chargebacks.Domain.Interfaces;

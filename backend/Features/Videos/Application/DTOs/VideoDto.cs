@@ -15,7 +15,7 @@ namespace MeuCrudCsharp.Features.Videos.Application.DTOs
         public string? Status { get; set; }
         public string? RawVideoUrl { get; set; }
         public string? StreamingUrl { get; set; }
-        public string? CourseId { get; set; }
+        public Guid? CourseId { get; set; }
         public string? CourseName { get; set; }
         public string? ThumbnailUrl { get; set; }
     }
@@ -40,7 +40,7 @@ namespace MeuCrudCsharp.Features.Videos.Application.DTOs
         public string Description { get; set; } = string.Empty;
 
         [Required]
-        public string CourseId { get; set; }
+        public Guid CourseId { get; set; }
 
         public IFormFile? ThumbnailFile { get; set; }
     }

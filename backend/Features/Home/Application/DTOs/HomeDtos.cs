@@ -16,7 +16,7 @@ public class HomeContentDto
 
 public class HeroSlideDto
 {
-    public string Id { get; set; }
+    public Guid Id { get; set; }
     public string ImageUrl { get; set; } = string.Empty;
     public string Title { get; set; } = string.Empty;
     public string Subtitle { get; set; } = string.Empty;
@@ -28,7 +28,7 @@ public class HeroSlideDto
 
 public class ServiceDto
 {
-    public string Id { get; set; }
+    public Guid Id { get; set; }
     public string Icon { get; set; } = string.Empty;
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;

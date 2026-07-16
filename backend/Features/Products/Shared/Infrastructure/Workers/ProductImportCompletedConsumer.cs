@@ -39,7 +39,7 @@ public class ProductImportCompletedConsumer : RabbitMqConsumerBase
         var repository = scope.ServiceProvider.GetRequiredService<IProductRepository>();
         var cache = scope.ServiceProvider.GetRequiredService<IDistributedCache>();
 
-        var product = await repository.GetByIdAsync(payload.ProductId, cancellationToken);
+        var product = await repository.GetByIdAsync(Guid.Parse(payload.ProductId), cancellationToken);
         
         if (product == null)
         {

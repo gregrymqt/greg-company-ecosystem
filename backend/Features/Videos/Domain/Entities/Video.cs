@@ -1,57 +1,42 @@
-using MeuCrudCsharp.Features.Courses.Domain.Entities;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using MeuCrudCsharp.Features.Files.Domain.Entities;
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
-using MeuCrudCsharp.Data.Configuration.Interfaces;
-using MeuCrudCsharp.Data.Configuration.Attributes;
+using MeuCrudCsharp.Features.Courses.Domain.Entities;
 
 namespace MeuCrudCsharp.Features.Videos.Domain.Entities;
 
-public class Video : IMongoDocument
+public class Video
 {
-    public static string CollectionName => "videos";
-
-    [BsonId]
-    [BsonRepresentation(BsonType.ObjectId)]
-    public string Id { get; set; } = null!;
-
-    [MongoIndex]
-    public Guid PublicId { get; set; } = Guid.NewGuid();
+    [Key]
+    public Guid Id { get; set; } = Guid.NewGuid();
 
     public required string Title { get; set; }
 
     public required string Description { get; set; }
 
-    [MongoIndex]
     public required string StorageIdentifier { get; set; }
 
     public DateTime UploadDate { get; set; }
-    
+
     public DateTime DateCreated { get; set; }
     public DateTime LastUpdated { get; set; }
 
     public TimeSpan Duration { get; set; }
 
     public VideoStatus Status { get; set; }
-    
+
     public string? RawVideoUrl { get; set; }
     public string? StreamingUrl { get; set; }
 
-    // --- RELACIONAMENTOS ---
+    public Guid? CourseId { get; set; }
 
-    // 1. Relacionamento com Curso
-    public string CourseId { get; set; }
-    
-    [BsonIgnore]
+    [ForeignKey(nameof(CourseId))]
     public virtual Course? Course { get; set; }
 
-    // 2. Relacionamento com Arquivo
-    public string FileId { get; set; }
+    public Guid? FileId { get; set; }
 
-    [BsonIgnore]
+    [ForeignKey(nameof(FileId))]
     public virtual EntityFile? File { get; set; }
-
-    // -----------------------
 
     public string? ThumbnailUrl { get; set; }
 
@@ -63,7 +48,3 @@ public class Video : IMongoDocument
         Status = VideoStatus.Pending;
     }
 }
-
-
-
-

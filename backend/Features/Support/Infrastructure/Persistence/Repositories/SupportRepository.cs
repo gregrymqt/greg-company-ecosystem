@@ -1,66 +1,77 @@
 using MeuCrudCsharp.Features.Support.Domain.Entities;
 using MeuCrudCsharp.Features.Support.Domain.Interfaces;
-using MongoDB.Driver;
 using MeuCrudCsharp.Data;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace MeuCrudCsharp.Features.Support.Infrastructure.Persistence.Repositories
 {
     public class SupportRepository : ISupportRepository
     {
-        private readonly IMongoCollection<SupportTicket> _tickets;
+        private readonly ApplicationDbContext _context;
 
-        public SupportRepository(IMongoDbContext context)
+        public SupportRepository(ApplicationDbContext context)
         {
-            _tickets = context.GetCollection<SupportTicket>("support_tickets");
+            _context = context;
         }
 
-        public async Task<SupportTicket?> GetByIdAsync(string id)
+        public async Task<SupportTicket?> GetByIdAsync(Guid id)
         {
-            return await _tickets.Find(t => t.Id == id).FirstOrDefaultAsync();
+            return await _context.SupportTickets.FindAsync(id);
         }
 
         public async Task<IEnumerable<SupportTicket>> GetAllAsync()
         {
-            return await _tickets.Find(_ => true).ToListAsync();
+            return await _context.SupportTickets.ToListAsync();
         }
 
         public async Task<(IEnumerable<SupportTicket> Items, int TotalCount)> GetAllPaginatedAsync(int page, int pageSize)
         {
-            var totalCount = (int)await _tickets.CountDocumentsAsync(Builders<SupportTicket>.Filter.Empty);
-            var items = await _tickets.Find(Builders<SupportTicket>.Filter.Empty).Skip((page - 1) * pageSize).Limit(pageSize).ToListAsync();
+            var totalCount = await _context.SupportTickets.CountAsync();
+            var items = await _context.SupportTickets
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
             return (items, totalCount);
         }
 
         public async Task CreateAsync(SupportTicket ticket)
         {
-            await _tickets.InsertOneAsync(ticket);
+            await _context.SupportTickets.AddAsync(ticket);
+            await _context.SaveChangesAsync();
         }
 
-        public async Task UpdateAsync(string id, SupportTicket ticket)
+        public async Task UpdateAsync(Guid id, SupportTicket ticket)
         {
-            await _tickets.ReplaceOneAsync(t => t.Id == id, ticket);
+            _context.SupportTickets.Update(ticket);
+            await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteAsync(string id)
+        public async Task DeleteAsync(Guid id)
         {
-            await _tickets.DeleteOneAsync(t => t.Id == id);
+            var ticket = await _context.SupportTickets.FindAsync(id);
+            if (ticket != null)
+            {
+                _context.SupportTickets.Remove(ticket);
+                await _context.SaveChangesAsync();
+            }
         }
 
-        public async Task<IEnumerable<SupportTicket>> GetByUserIdAsync(string userId)
+        public async Task<IEnumerable<SupportTicket>> GetByUserIdAsync(Guid userId)
         {
-            return await _tickets.Find(t => t.UserId == userId).ToListAsync();
+            return await _context.SupportTickets
+                .Where(t => t.UserId == userId)
+                .ToListAsync();
         }
 
-        public async Task AddResponseAsync(string ticketId, SupportResponse response)
+        public async Task AddResponseAsync(Guid ticketId, SupportResponse response)
         {
-            var update = Builders<SupportTicket>.Update
-                .Push(t => t.Responses, response)
-                .Set(t => t.LastUpdated, DateTime.UtcNow);
-
-            await _tickets.UpdateOneAsync(t => t.Id == ticketId, update);
+            var ticket = await _context.SupportTickets.FindAsync(ticketId);
+            if (ticket != null)
+            {
+                ticket.Responses.Add(response);
+                ticket.LastUpdated = DateTime.UtcNow;
+                await _context.SaveChangesAsync();
+            }
         }
     }
 }
-

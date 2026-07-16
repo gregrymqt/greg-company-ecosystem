@@ -5,16 +5,9 @@ using MeuCrudCsharp.Features.Emails.Application.ViewModels;
 using MeuCrudCsharp.Features.MercadoPago.Chargebacks.Application.Interfaces;
 using MeuCrudCsharp.Features.MercadoPago.Chargebacks.Domain.Interfaces;
 using MeuCrudCsharp.Features.MercadoPago.Notification.Application.Interfaces;
-using MeuCrudCsharp.Features.MercadoPago.Payments.Application.Interfaces;
-using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Application.Interfaces;
 using MeuCrudCsharp.Features.MercadoPago.Webhooks.Application.DTOs;
 using MeuCrudCsharp.Features.Shared.Domain.Interfaces;
-using MeuCrudCsharp.Features.Shared.Infrastructure.Persistence;
-
 using MeuCrudCsharp.Features.MercadoPago.Chargebacks.Domain.Entities;
-using MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities;
-using MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities;
-using MeuCrudCsharp.Features.MercadoPago.Plans.Domain.Entities;
 using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Entities;
 using MeuCrudCsharp.Features.Shared.Domain.Entities;
 using MeuCrudCsharp.Features.Auth.Domain.Entities;
@@ -30,7 +23,7 @@ public class ChargeBackNotificationService(
     ISubscriptionRepository subscriptionRepository,
     IUnitOfWork unitOfWork,
     ILogger<ChargeBackNotificationService> logger,
-    IMongoDbContext mongoContext,
+    ApplicationDbContext dbContext,
     IRazorViewToStringRenderer razorViewToStringRenderer,
     IOptions<GeneralSettings> generalSettings,
     IMercadoPagoChargebackIntegrationService mpIntegrationService)
@@ -40,10 +33,8 @@ public class ChargeBackNotificationService(
 
     public async Task VerifyAndProcessChargeBackAsync(ChargebackNotificationPayload chargebackData)
     {
-        var mpDetails = await mpIntegrationService.GetChargebackDetailsFromApiAsync(
-            chargebackData.Id
-        ) ?? throw new Exception($"Chargeback {chargebackData.Id} não encontrado na API do Mercado Pago.");
-    
+        var mpDetails = await mpIntegrationService.GetChargebackDetailsFromApiAsync(chargebackData.Id)
+            ?? throw new Exception($"Chargeback {chargebackData.Id} nao encontrado na API do Mercado Pago.");
 
         var paymentIdStr = mpDetails.Payments?.FirstOrDefault()?.Id;
         if (string.IsNullOrEmpty(paymentIdStr))
@@ -57,62 +48,41 @@ public class ChargeBackNotificationService(
 
         try
         {
-            logger.LogInformation(
-                "Processando Chargeback {CId} para Pagamento {PId}",
-                mpChargebackId,
-                mpPaymentId
-            );
+            logger.LogInformation("Processando Chargeback {CId} para Pagamento {PId}", mpChargebackId, mpPaymentId);
 
             var payment = await paymentRepository.GetByExternalIdWithUserAsync(paymentIdStr);
 
-            if (payment == null)
-            {
-                logger.LogWarning("Pagamento {PId} não encontrado na base local.", mpPaymentId);
-            }
-            else
+            if (payment != null)
             {
                 payment.Status = "chargeback";
                 paymentRepository.Update(payment);
 
-                if (!string.IsNullOrEmpty(payment.SubscriptionId))
+                if (payment.SubscriptionId != Guid.Empty)
                 {
-                    var subscription = await subscriptionRepository.GetByIdAsync(
-                        payment.SubscriptionId
-                    );
-
+                    var subscription = await subscriptionRepository.GetByIdAsync(payment.SubscriptionId.ToString());
                     if (subscription != null)
                     {
                         subscription.Status = "cancelled";
                         subscriptionRepository.Update(subscription);
-                        logger.LogInformation(
-                            "Assinatura {SubId} cancelada por chargeback.",
-                            subscription.Id
-                        );
 
                         var outboxEvent = new OutboxEvent
                         {
                             EventType = "subscription.status.changed",
-                            Payload = JsonSerializer.Serialize(new { 
-                                userId = payment.UserId, 
-                                status = "canceled", 
-                                planName = subscription.Plan?.Name ?? "" 
-                            })
+                            Payload = JsonSerializer.Serialize(new { userId = payment.UserId, status = "canceled", planName = subscription.Plan?.Name ?? "" })
                         };
-                        await mongoContext.GetCollection<OutboxEvent>("OutboxEvents").InsertOneAsync(unitOfWork.Session, outboxEvent);
+                        await dbContext.OutboxEvents.AddAsync(outboxEvent);
                     }
                 }
             }
 
-            var existingChargeback = await chargebackRepository.GetByExternalIdAsync(
-                mpChargebackId.ToString()
-            );
+            var existingChargeback = await chargebackRepository.GetByExternalIdAsync(mpChargebackId.ToString());
 
             if (existingChargeback == null)
             {
                 var newChargeback = new Chargeback
                 {
                     MercadoPagoChargebackId = mpChargebackId.ToString(),
-                    PaymentId = mpPaymentId.ToString(), // Usa o long parseado
+                    PaymentId = mpPaymentId.ToString(),
                     UserId = payment?.UserId,
                     Amount = mpDetails.Amount,
                     Status = ChargebackStatus.Novo.ToString(),
@@ -132,7 +102,6 @@ public class ChargeBackNotificationService(
             }
 
             await unitOfWork.CommitAsync();
-
             logger.LogInformation("Chargeback {Id} processado com sucesso.", mpChargebackId);
         }
         catch (Exception ex)
@@ -144,40 +113,17 @@ public class ChargeBackNotificationService(
 
     private async Task EnqueueChargebackReceivedEmailAsync(Users user, long chargebackId)
     {
-        if (string.IsNullOrEmpty(user.Email))
-        {
-            logger.LogWarning(
-                "Usuário {UserId} sem email. Não foi possível enviar notificação de chargeback.",
-                user.Id
-            );
-            return;
-        }
+        if (string.IsNullOrEmpty(user.Email)) return;
 
-        var viewModel = new ChargebackReceivedEmailViewModel(
-            userName: user.Name ?? "Cliente",
-            chargebackId: chargebackId,
-            supportUrl: $"{_generalSettings.BaseUrl}/Support/Contact/index.cshtml"
-        );
-
-        var htmlBody = await razorViewToStringRenderer.RenderViewToStringAsync(
-            "Pages/EmailTemplates/ChargebackReceived/index.cshtml",
-            viewModel
-        );
-
-        var emailPayload = new
-        {
-            to = user.Email,
-            subject = $"Notificação de Contestação (ID: {chargebackId})",
-            htmlBody,
-            plainTextBody = string.Empty
-        };
+        var viewModel = new ChargebackReceivedEmailViewModel(user.Name ?? "Cliente", chargebackId, $"{_generalSettings.BaseUrl}/Support/Contact/index.cshtml");
+        var htmlBody = await razorViewToStringRenderer.RenderViewToStringAsync("Pages/EmailTemplates/ChargebackReceived/index.cshtml", viewModel);
 
         var outboxEvent = new OutboxEvent
         {
             EventType = "email.send.requested",
-            Payload = JsonSerializer.Serialize(emailPayload)
+            Payload = JsonSerializer.Serialize(new { to = user.Email, subject = $"Notificacao de Contestacao (ID: {chargebackId})", htmlBody, plainTextBody = string.Empty })
         };
 
-        await mongoContext.GetCollection<OutboxEvent>("OutboxEvents").InsertOneAsync(unitOfWork.Session, outboxEvent);
+        await dbContext.OutboxEvents.AddAsync(outboxEvent);
     }
 }

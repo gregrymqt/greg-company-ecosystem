@@ -79,11 +79,11 @@ namespace MeuCrudCsharp.Features.Auth.Presentation.Controllers
         {
             try
             {
-                var userId = User.FindFirst(
+                var userIdStr = User.FindFirst(
                     System.Security.Claims.ClaimTypes.NameIdentifier
                 )?.Value;
 
-                if (string.IsNullOrEmpty(userId))
+                if (string.IsNullOrEmpty(userIdStr) || !Guid.TryParse(userIdStr, out var userId))
                     return Unauthorized("Token inválido.");
 
                 var userSession = await authService.GetAuthenticatedUserDataAsync(userId);

@@ -1,25 +1,26 @@
-using MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Interfaces;
+using MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities;
+
 namespace MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Interfaces;
 
 public interface IPaymentRepository
 {
-    Task<bool> HasAnyPaymentByUserIdAsync(string userId);
+    Task<bool> HasAnyPaymentByUserIdAsync(Guid userId);
 
-    Task<List<MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities.Payments>> GetPaymentsByUserIdAndTypeAsync(
-        string userId,
+    Task<List<Payment>> GetPaymentsByUserIdAndTypeAsync(
+        Guid userId,
         string? method = null
     );
 
-    Task<MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities.Payments?> GetByIdWithUserAsync(string paymentId);
-    Task<MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities.Payments?> GetByExternalIdWithUserAsync(string externalPaymentId);
+    Task<Payment?> GetByIdWithUserAsync(Guid paymentId);
+    Task<Payment?> GetByExternalIdWithUserAsync(string externalPaymentId);
 
-    Task<MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities.Payments?> GetByExternalIdWithSubscriptionAsync(string externalId);
+    Task<Payment?> GetByExternalIdWithSubscriptionAsync(string externalId);
 
-    void Update(MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities.Payments payment);
+    void Update(Payment payment);
 
-    Task AddAsync(MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities.Payments payment);
+    Task AddAsync(Payment payment);
 
-    Task Remove(MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities.Payments payment);
+    Task Remove(Payment payment);
 
-    Task<(List<MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities.Payments> Items, long TotalCount)> GetAdminPaymentsPaginatedAsync(int page, int pageSize, string? status, string? search);
+    Task<(List<Payment> Items, long TotalCount)> GetAdminPaymentsPaginatedAsync(int page, int pageSize, string? status, string? search);
 }

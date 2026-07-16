@@ -1,25 +1,18 @@
 using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Interfaces;
 using MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Interfaces;
-using Microsoft.Extensions.Options;
 using MeuCrudCsharp.Features.MercadoPago.Webhooks.Application.DTOs;
 using MeuCrudCsharp.Features.MercadoPago.Claims.Application.Interfaces;
 using MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Interfaces;
 using MeuCrudCsharp.Features.Emails.Application.Interfaces;
 using MeuCrudCsharp.Features.MercadoPago.Notification.Application.Interfaces;
 using MeuCrudCsharp.Features.Emails.Application.ViewModels;
-using MeuCrudCsharp.Features.MercadoPago.Chargebacks.Domain.Entities;
 using MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities;
-using MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities;
-using MeuCrudCsharp.Features.MercadoPago.Plans.Domain.Entities;
 using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Entities;
 using MeuCrudCsharp.Features.Shared.Domain.Entities;
 using MeuCrudCsharp.Features.Auth.Domain.Entities;
-
 using MeuCrudCsharp.Features.Shared.Domain.Interfaces;
-using MeuCrudCsharp.Features.Shared.Infrastructure.Persistence;
-using MeuCrudCsharp.Features.MercadoPago.Payments.Application.Interfaces;
-using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Application.Interfaces;
 using MeuCrudCsharp.Data;
+using Microsoft.Extensions.Options;
 using System.Text.Json;
 
 namespace MeuCrudCsharp.Features.MercadoPago.Notification.Application.Services;
@@ -30,7 +23,7 @@ public class ClaimNotificationService(
     ISubscriptionRepository subscriptionRepository,
     IUnitOfWork unitOfWork,
     ILogger<ClaimNotificationService> logger,
-    IMongoDbContext mongoContext,
+    ApplicationDbContext dbContext,
     IRazorViewToStringRenderer razorViewToStringRenderer,
     IOptions<GeneralSettings> generalSettings,
     IMercadoPagoIntegrationService mpIntegrationService)
@@ -46,28 +39,25 @@ public class ClaimNotificationService(
 
             if (string.IsNullOrWhiteSpace(claimPayload.Id))
             {
-                logger.LogWarning("Id da claim inválido.");
+                logger.LogWarning("Id da claim invalido.");
                 return;
             }
 
             if (!long.TryParse(claimPayload.Id, out var mpClaimId))
             {
-                logger.LogError("ID da Claim não é um número válido: {Id}", claimPayload.Id);
+                logger.LogError("ID da Claim nao e um numero valido: {Id}", claimPayload.Id);
                 return;
             }
 
             var claimDetails = await mpIntegrationService.GetClaimByIdAsync(mpClaimId.ToString());
-
             if (claimDetails == null)
             {
-                logger.LogError("Não foi possível obter detalhes da Claim {Id} na API do MP.", mpClaimId);
+                logger.LogError("Nao foi possivel obter detalhes da Claim {Id} na API do MP.", mpClaimId);
                 return;
             }
 
             var resourceId = claimDetails.ResourceId;
             var resourceTypeEnum = claimDetails.Resource;
-
-            logger.LogInformation("Claim vinculada ao Recurso: {ResourceId}, Tipo: {Type}", resourceId, resourceTypeEnum);
 
             Users? user;
 
@@ -82,33 +72,23 @@ public class ClaimNotificationService(
                 user = subscription?.User;
             }
 
-            if (user == null)
-            {
-                logger.LogWarning("Nenhum usuário encontrado para o Recurso ID '{ResourceId}'.", resourceId);
-            }
-
             var existingClaim = await claimRepository.GetByMpClaimIdAsync(mpClaimId.ToString());
 
             if (existingClaim == null)
             {
-                var newClaimRecord = new MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities.Claims
+                var newClaimRecord = new Claim
                 {
                     MercadoPagoClaimId = mpClaimId.ToString(),
                     PaymentId = resourceId,
                     Type = claimDetails.Type,
                     ResourceType = resourceTypeEnum,
-                    UserId = user?.Id.ToString(),
+                    UserId = user?.Id,
                     DateCreated = DateTime.UtcNow,
                     Status = ClaimStatus.Opened,
                     CurrentStage = claimDetails.Stage
                 };
 
                 await claimRepository.AddAsync(newClaimRecord);
-                logger.LogInformation("Nova Claim ID {ClaimId} marcada para inserção.", mpClaimId);
-            }
-            else
-            {
-                logger.LogInformation("Claim ID {ClaimId} já existe. Verificando atualizações.", mpClaimId);
             }
 
             if (user != null && existingClaim == null)
@@ -117,7 +97,6 @@ public class ClaimNotificationService(
             }
 
             await unitOfWork.CommitAsync();
-
             logger.LogInformation("Claim {Id} processada com sucesso.", mpClaimId);
         }
         catch (Exception ex)
@@ -129,62 +108,23 @@ public class ClaimNotificationService(
 
     private async Task EnqueueClaimReceivedEmailAsync(Users user, long claimId)
     {
-        if (string.IsNullOrEmpty(user.Email))
-        {
-            logger.LogWarning("Email do usuário inválido. Não foi possível enviar email.");
-            return;
-        }
+        if (string.IsNullOrEmpty(user.Email)) return;
 
-        var viewModel = new ClaimReceivedEmailViewModel(
-            userName: user.Name ?? "Cliente",
-            claimId: claimId,
-            accountUrl: $"{_generalSettings.BaseUrl}/Profile/User/index.cshtml",
-            supportUrl: $"{_generalSettings.BaseUrl}/Support/Contact/index.cshtml"
-        );
-
-        await EnqueueEmailFromTemplateAsync(
-            recipientEmail: user.Email,
-            subject: $"Notificação de Reclamação (ID: {claimId})",
-            viewPath: "Pages/EmailTemplates/ClaimReceived/index.cshtml",
-            model: viewModel
-        );
+        var viewModel = new ClaimReceivedEmailViewModel(user.Name ?? "Cliente", claimId, $"{_generalSettings.BaseUrl}/Profile/User/index.cshtml", $"{_generalSettings.BaseUrl}/Support/Contact/index.cshtml");
+        await EnqueueEmailFromTemplateAsync(user.Email, $"Notificacao de Reclamacao (ID: {claimId})", "Pages/EmailTemplates/ClaimReceived/index.cshtml", viewModel);
     }
 
-    private async Task EnqueueEmailFromTemplateAsync<TModel>(
-        string recipientEmail,
-        string subject,
-        string viewPath,
-        TModel model
-    )
+    private async Task EnqueueEmailFromTemplateAsync<TModel>(string recipientEmail, string subject, string viewPath, TModel model)
     {
-        logger.LogInformation(
-            "Iniciando montagem de e-mail a partir do template '{ViewPath}' para {RecipientEmail}.",
-            viewPath,
-            recipientEmail
-        );
-
-        var htmlBody = await razorViewToStringRenderer.RenderViewToStringAsync(
-            viewPath,
-            model
-        );
-
-        var plainTextBody =
-            $"Assunto: {subject}. Para visualizar esta mensagem, utilize um leitor de e-mail compatível com HTML.";
-
-        var emailPayload = new
-        {
-            to = recipientEmail,
-            subject = subject,
-            htmlBody = htmlBody,
-            plainTextBody = plainTextBody
-        };
+        var htmlBody = await razorViewToStringRenderer.RenderViewToStringAsync(viewPath, model);
+        var plainTextBody = $"Assunto: {subject}. Para visualizar esta mensagem, utilize um leitor de e-mail compativel com HTML.";
 
         var outboxEvent = new OutboxEvent
         {
             EventType = "email.send.requested",
-            Payload = JsonSerializer.Serialize(emailPayload)
+            Payload = JsonSerializer.Serialize(new { to = recipientEmail, subject, htmlBody, plainTextBody })
         };
 
-        await mongoContext.GetCollection<OutboxEvent>("OutboxEvents").InsertOneAsync(unitOfWork.Session, outboxEvent);
+        await dbContext.OutboxEvents.AddAsync(outboxEvent);
     }
 }

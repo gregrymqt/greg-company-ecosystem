@@ -1,10 +1,10 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
-using MongoDB.Driver;
 using MeuCrudCsharp.Data;
 using MeuCrudCsharp.Features.Shared.Domain.Entities;
 using MeuCrudCsharp.Features.Shared.Application.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace MeuCrudCsharp.Features.Shared.Infrastructure.Workers;
 
@@ -36,7 +36,6 @@ public class OutboxProcessorWorker : BackgroundService
                 _logger.LogError(ex, "Erro inesperado na varredura do Outbox.");
             }
 
-            // Aguarda 1 segundo antes da próxima varredura
             await Task.Delay(1000, stoppingToken);
         }
 
@@ -45,22 +44,15 @@ public class OutboxProcessorWorker : BackgroundService
 
     private async Task ProcessOutboxMessagesAsync(CancellationToken stoppingToken)
     {
-        // Cria um escopo para resolver serviços scoped (como IMongoDbContext, se for scoped)
         using var scope = _serviceProvider.CreateScope();
-        var mongoContext = scope.ServiceProvider.GetRequiredService<IMongoDbContext>();
-        
-        // Aqui tentamos resolver IRabbitMqPublisher. 
-        // Se ainda não estiver implementado no projeto, usamos o logger como fallback temporário.
+        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
         var rabbitMqPublisher = scope.ServiceProvider.GetService<IRabbitMqPublisher>();
 
-        var outboxCollection = mongoContext.GetCollection<OutboxEvent>("OutboxEvents");
-
-        // Busca apenas os eventos não processados (que não têm erro grave, ou tentar novamente)
-        var filter = Builders<OutboxEvent>.Filter.Eq(x => x.Processed, false);
-        
-        var pendingEvents = await outboxCollection.Find(filter)
-                                                  .Limit(100) // Processa em lotes
-                                                  .ToListAsync(stoppingToken);
+        var pendingEvents = await dbContext.OutboxEvents
+            .Where(x => !x.Processed)
+            .Take(100)
+            .ToListAsync(stoppingToken);
 
         if (pendingEvents.Count == 0)
             return;
@@ -69,39 +61,26 @@ public class OutboxProcessorWorker : BackgroundService
         {
             try
             {
-                // 1. Publica no RabbitMQ
                 if (rabbitMqPublisher != null)
                 {
                     await rabbitMqPublisher.PublishAsync(evt.EventType, evt.Payload);
                 }
                 else
                 {
-                    _logger.LogWarning("IRabbitMqPublisher não registrado. Evento {EventType} ignorado.", evt.EventType);
+                    _logger.LogWarning("IRabbitMqPublisher nao registrado. Evento {EventType} ignorado.", evt.EventType);
                 }
 
-                // 2. Marca como processado
-                var update = Builders<OutboxEvent>.Update
-                                .Set(x => x.Processed, true)
-                                .Set(x => x.Error, null);
-                
-                await outboxCollection.UpdateOneAsync(
-                    x => x.Id == evt.Id, 
-                    update, 
-                    cancellationToken: stoppingToken
-                );
+                evt.Processed = true;
+                evt.Error = null;
+                await dbContext.SaveChangesAsync(stoppingToken);
 
                 _logger.LogInformation("Evento do Outbox {EventId} publicado com sucesso.", evt.Id);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Erro ao publicar evento {EventId}.", evt.Id);
-                
-                var errorUpdate = Builders<OutboxEvent>.Update.Set(x => x.Error, ex.Message);
-                await outboxCollection.UpdateOneAsync(
-                    x => x.Id == evt.Id, 
-                    errorUpdate, 
-                    cancellationToken: stoppingToken
-                );
+                evt.Error = ex.Message;
+                await dbContext.SaveChangesAsync(stoppingToken);
             }
         }
     }

@@ -1,43 +1,35 @@
 using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Interfaces;
 using MeuCrudCsharp.Data;
-using MeuCrudCsharp.Features.MercadoPago.Chargebacks.Domain.Entities;
-using MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities;
-using MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities;
-using MeuCrudCsharp.Features.MercadoPago.Plans.Domain.Entities;
 using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Entities;
-using MeuCrudCsharp.Features.Shared.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Plans.Domain.Entities;
 using MeuCrudCsharp.Features.Auth.Domain.Entities;
-using MongoDB.Driver;
-using MongoDB.Driver.Linq;
+using Microsoft.EntityFrameworkCore;
 
 namespace MeuCrudCsharp.Features.MercadoPago.Subscriptions.Infrastructure.Persistence.Repositories;
 
 public class SubscriptionRepository : ISubscriptionRepository
 {
-    private readonly IMongoCollection<Subscription> _subscriptions;
-    private readonly IMongoCollection<Plan> _plans;
-    private readonly IMongoCollection<Users> _users;
+    private readonly ApplicationDbContext _context;
 
-    public SubscriptionRepository(IMongoDbContext context)
+    public SubscriptionRepository(ApplicationDbContext context)
     {
-        _subscriptions = context.GetCollection<Subscription>("subscriptions");
-        _plans = context.GetCollection<Plan>("plans");
-        _users = context.GetCollection<Users>("users");
+        _context = context;
     }
 
     public async Task AddAsync(Subscription subscription)
     {
-        await _subscriptions.InsertOneAsync(subscription);
+        await _context.Subscriptions.AddAsync(subscription);
+        await _context.SaveChangesAsync();
     }
 
     public void Update(Subscription subscription)
     {
-        _subscriptions.ReplaceOne(s => s.Id == subscription.Id, subscription);
+        _context.Subscriptions.Update(subscription);
     }
 
     public void Remove(Subscription subscription)
     {
-        _subscriptions.DeleteOne(s => s.Id == subscription.Id);
+        _context.Subscriptions.Remove(subscription);
     }
 
     public async Task<Subscription?> GetByExternalIdAsync(
@@ -46,57 +38,33 @@ public class SubscriptionRepository : ISubscriptionRepository
         bool asNoTracking = true
     )
     {
-        var subscription = await _subscriptions.Find(s => s.ExternalId == externalId).FirstOrDefaultAsync();
-        
-        if (subscription != null && includePlan && !string.IsNullOrEmpty(subscription.PlanId))
-        {
-            subscription.Plan = await _plans.Find(p => p.Id == subscription.PlanId).FirstOrDefaultAsync();
-        }
+        var query = _context.Subscriptions.AsQueryable();
+        if (includePlan) query = query.Include(s => s.Plan);
 
-        return subscription;
+        return await query.FirstOrDefaultAsync(s => s.ExternalId == externalId);
     }
 
-    public async Task<Subscription?> GetActiveSubscriptionByUserIdAsync(string userId)
+    public async Task<Subscription?> GetActiveSubscriptionByUserIdAsync(Guid userId)
     {
         var activeStatuses = new[] { "authorized", "pending", "paused" };
 
-        var filter = Builders<Subscription>.Filter.And(
-            Builders<Subscription>.Filter.Eq(s => s.UserId, userId),
-            Builders<Subscription>.Filter.In(s => s.Status, activeStatuses)
-        );
-
-        var subscription = await _subscriptions.Find(filter)
-            .SortByDescending(s => s.CurrentPeriodEndDate)
+        return await _context.Subscriptions
+            .Include(s => s.Plan)
+            .Where(s => s.UserId == userId && activeStatuses.Contains(s.Status))
+            .OrderByDescending(s => s.CurrentPeriodEndDate)
             .FirstOrDefaultAsync();
-
-        if (subscription != null && !string.IsNullOrEmpty(subscription.PlanId))
-        {
-            subscription.Plan = await _plans.Find(p => p.Id == subscription.PlanId).FirstOrDefaultAsync();
-        }
-
-        return subscription;
     }
 
     public async Task<Subscription?> GetActiveSubscriptionByCustomerIdAsync(string customerId)
     {
         var activeStatuses = new[] { "authorized", "pending", "paused" };
 
-        // 1. Fetch the user by customerId
-        var user = await _users.Find(u => u.CustomerId == customerId).FirstOrDefaultAsync();
-        
-        if (user == null)
-        {
-            return null;
-        }
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.CustomerId == customerId);
+        if (user == null) return null;
 
-        // 2. Fetch the active subscription for that user
-        var filter = Builders<Subscription>.Filter.And(
-            Builders<Subscription>.Filter.Eq(s => s.UserId, user.Id),
-            Builders<Subscription>.Filter.In(s => s.Status, activeStatuses)
-        );
-
-        var subscription = await _subscriptions.Find(filter)
-            .SortByDescending(s => s.CurrentPeriodEndDate)
+        var subscription = await _context.Subscriptions
+            .Where(s => s.UserId == user.Id && activeStatuses.Contains(s.Status))
+            .OrderByDescending(s => s.CurrentPeriodEndDate)
             .FirstOrDefaultAsync();
 
         if (subscription != null)
@@ -107,20 +75,19 @@ public class SubscriptionRepository : ISubscriptionRepository
         return subscription;
     }
 
-    public async Task<bool> HasActiveSubscriptionByUserIdAsync(string userId)
+    public async Task<bool> HasActiveSubscriptionByUserIdAsync(Guid userId)
     {
-        var filter = Builders<Subscription>.Filter.And(
-            Builders<Subscription>.Filter.Eq(s => s.UserId, userId),
-            Builders<Subscription>.Filter.Gt(s => s.CurrentPeriodEndDate, DateTime.UtcNow),
-            Builders<Subscription>.Filter.In(s => s.Status, new[] { "paid", "authorized" })
-        );
+        var activeStatuses = new[] { "paid", "authorized" };
 
-        return await _subscriptions.Find(filter).AnyAsync();
+        return await _context.Subscriptions.AnyAsync(s =>
+            s.UserId == userId
+            && s.CurrentPeriodEndDate > DateTime.UtcNow
+            && activeStatuses.Contains(s.Status));
     }
 
     public async Task<Subscription?> GetByIdAsync(string subscriptionId)
     {
-        return await _subscriptions.Find(s => s.ExternalId == subscriptionId).FirstOrDefaultAsync();
+        return await _context.Subscriptions.FirstOrDefaultAsync(s => s.ExternalId == subscriptionId);
     }
 
     public async Task<Subscription?> GetByPaymentIdAsync(
@@ -129,57 +96,42 @@ public class SubscriptionRepository : ISubscriptionRepository
         bool includeUser = false
     )
     {
-        var subscription = await _subscriptions.Find(s => s.PaymentId == paymentId).FirstOrDefaultAsync();
+        var query = _context.Subscriptions.AsQueryable();
+        if (includePlan) query = query.Include(s => s.Plan);
+        if (includeUser) query = query.Include(s => s.User);
 
-        if (subscription != null)
-        {
-            if (includePlan && !string.IsNullOrEmpty(subscription.PlanId))
-            {
-                subscription.Plan = await _plans.Find(p => p.Id == subscription.PlanId).FirstOrDefaultAsync();
-            }
-
-            if (includeUser && !string.IsNullOrEmpty(subscription.UserId))
-            {
-                subscription.User = await _users.Find(u => u.Id == subscription.UserId).FirstOrDefaultAsync();
-            }
-        }
-
-        return subscription;
+        return await query.FirstOrDefaultAsync(s => s.PaymentId == paymentId);
     }
 
     public async Task<(IEnumerable<Subscription> Items, long TotalCount)> GetPaginatedSubscriptionsAsync(
-        int page, 
-        int pageSize, 
-        string? statusFilter = null, 
+        int page,
+        int pageSize,
+        string? statusFilter = null,
         string? searchTerm = null
     )
     {
-        var builder = Builders<Subscription>.Filter;
-        var filter = builder.Empty;
+        var query = _context.Subscriptions.AsQueryable();
 
         if (!string.IsNullOrEmpty(statusFilter))
         {
-            filter &= builder.Eq(s => s.Status, statusFilter);
+            query = query.Where(s => s.Status == statusFilter);
         }
 
         if (!string.IsNullOrEmpty(searchTerm))
         {
-            var searchFilter = builder.Or(
-                builder.Regex(s => s.PayerEmail, new MongoDB.Bson.BsonRegularExpression(searchTerm, "i")),
-                builder.Regex(s => s.UserId, new MongoDB.Bson.BsonRegularExpression(searchTerm, "i"))
-            );
-            filter &= searchFilter;
+            query = query.Where(s =>
+                (s.PayerEmail != null && s.PayerEmail.ToLower().Contains(searchTerm.ToLower()))
+                || s.UserId.ToString().Contains(searchTerm));
         }
 
-        var totalCount = await _subscriptions.CountDocumentsAsync(filter);
+        var totalCount = await query.LongCountAsync();
 
-        var items = await _subscriptions.Find(filter)
-            .SortByDescending(s => s.CreatedAt)
+        var items = await query
+            .OrderByDescending(s => s.CreatedAt)
             .Skip((page - 1) * pageSize)
-            .Limit(pageSize)
+            .Take(pageSize)
             .ToListAsync();
 
         return (items, totalCount);
     }
 }
-

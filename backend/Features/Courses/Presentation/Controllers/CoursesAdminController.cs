@@ -47,19 +47,19 @@ namespace MeuCrudCsharp.Features.Courses.Presentation.Controllers
 
             var courseDto = new CourseDto
             {
-                PublicId = course.PublicId,
+                PublicId = course.Id,
                 Name = course.Name,
                 Description = course.Description,
                 Modules =
                     course
                         .Modules?.Select(m => new ModuleDto
                         {
-                            PublicId = m.PublicId,
+                            PublicId = m.Id,
                             Title = m.Title,
                             Order = m.Order,
                             Lessons = m.Lessons?.Select(l => new LessonDto
                             {
-                                PublicId = l.PublicId,
+                                PublicId = l.Id,
                                 Title = l.Title,
                                 Order = l.Order,
                                 VideoPublicId = l.VideoPublicId,

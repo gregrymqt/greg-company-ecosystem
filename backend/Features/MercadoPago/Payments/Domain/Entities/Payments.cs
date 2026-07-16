@@ -1,21 +1,13 @@
-using MeuCrudCsharp.Features.MercadoPago.Chargebacks.Domain.Entities;
-using MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities;
-using MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities;
-using MeuCrudCsharp.Features.MercadoPago.Plans.Domain.Entities;
-using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Entities;
+using MeuCrudCsharp.Features.Auth.Domain.Entities;
 using MeuCrudCsharp.Features.Shared.Domain.Entities;
-using System;
-using MeuCrudCsharp.Data.Configuration.Interfaces;
-using MeuCrudCsharp.Data.Configuration.Attributes;
-using MongoDB.Bson.Serialization.Attributes;
+using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Entities;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities
 {
-         // A FK já é um Guid (string), então está ok.
-    public class Payments : TransactionBase, IMongoDocument
+    public class Payment : TransactionBase
     {
-        public static string CollectionName => "payments";
-
         public string? Method { get; set; }
 
         public int Installments { get; set; }
@@ -24,7 +16,6 @@ namespace MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities
 
         public string? LastFourDigits { get; set; }
 
-        [MongoIndex]
         public string? CustomerCpf { get; set; }
 
         public decimal Amount { get; set; }
@@ -33,9 +24,9 @@ namespace MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities
 
         public string Description { get; set; } = null!;
 
-        public string SubscriptionId { get; set; } = null!;
+        public Guid SubscriptionId { get; set; }
 
-        [BsonIgnore]
+        [ForeignKey(nameof(SubscriptionId))]
         public virtual Subscription? Subscription { get; set; }
     }
 }

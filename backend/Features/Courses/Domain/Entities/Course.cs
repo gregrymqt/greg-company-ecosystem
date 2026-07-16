@@ -1,24 +1,16 @@
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using MeuCrudCsharp.Features.Videos.Domain.Entities;
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
-using MeuCrudCsharp.Data.Configuration.Interfaces;
-using MeuCrudCsharp.Data.Configuration.Attributes;
 
 namespace MeuCrudCsharp.Features.Courses.Domain.Entities;
 
-public class Course : IMongoDocument
+public class Course
 {
-    public static string CollectionName => "courses";
-
-    [BsonId]
-    [BsonRepresentation(BsonType.ObjectId)]
-    public string Id { get; set; } = null!;
-
-    public Guid PublicId { get; set; } = Guid.NewGuid();
+    [Key]
+    public Guid Id { get; set; } = Guid.NewGuid();
 
     public string Name { get; set; } = string.Empty;
 
-    [MongoIndex(Unique = true)]
     public string Slug { get; set; } = string.Empty;
 
     public string Description { get; set; } = string.Empty;
@@ -27,7 +19,6 @@ public class Course : IMongoDocument
 
     public string? Creator { get; set; }
 
-    [BsonRepresentation(BsonType.Decimal128)]
     public decimal Price { get; set; } = 0;
 
     public bool IsPublished { get; set; } = false;

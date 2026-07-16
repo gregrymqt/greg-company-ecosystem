@@ -19,7 +19,7 @@
     <TypeScriptCompile Remove="Features\Auth\Dtos\**" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="AspNetCore.Identity.Mongo" Version="10.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.7" />
     <PackageReference Include="AWSSDK.S3" Version="4.0.100.2" />
     <PackageReference Include="DotNetEnv" Version="3.1.1" />
     <PackageReference Include="Hangfire.AspNetCore" Version="1.8.20" />

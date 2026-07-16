@@ -1,21 +1,16 @@
 using System.Security.Claims;
 using MeuCrudCsharp.Data;
-using MeuCrudCsharp.Features.MercadoPago.Chargebacks.Domain.Entities;
-using MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities;
-using MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities;
-using MeuCrudCsharp.Features.MercadoPago.Plans.Domain.Entities;
 using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Entities;
-using MeuCrudCsharp.Features.Shared.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
-using MongoDB.Driver;
+using Microsoft.EntityFrameworkCore;
 
 namespace MeuCrudCsharp.Features.Authorization;
 
 public class ActiveSubscriptionHandler : AuthorizationHandler<ActiveSubscriptionRequirement>
 {
-    private readonly IMongoDbContext _dbContext;
+    private readonly ApplicationDbContext _dbContext;
 
-    public ActiveSubscriptionHandler(IMongoDbContext dbContext)
+    public ActiveSubscriptionHandler(ApplicationDbContext dbContext)
     {
         _dbContext = dbContext;
     }
@@ -39,9 +34,14 @@ public class ActiveSubscriptionHandler : AuthorizationHandler<ActiveSubscription
             return;
         }
 
-        var subscriptions = _dbContext.GetCollection<Subscription>("subscriptions");
+        if (!Guid.TryParse(userId, out var userIdGuid))
+        {
+            context.Fail();
+            return;
+        }
 
-        var hasActiveSubscription = await subscriptions.Find(s => s.UserId == userId && s.Status == "ativo").AnyAsync();
+        var hasActiveSubscription = await _dbContext.Subscriptions.AnyAsync(s =>
+            s.UserId == userIdGuid && s.Status == "ativo");
 
         if (hasActiveSubscription)
         {
@@ -53,4 +53,3 @@ public class ActiveSubscriptionHandler : AuthorizationHandler<ActiveSubscription
         }
     }
 }
-

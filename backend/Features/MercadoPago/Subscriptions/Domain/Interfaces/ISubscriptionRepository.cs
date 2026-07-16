@@ -1,10 +1,4 @@
-using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Interfaces;
-using MeuCrudCsharp.Features.MercadoPago.Chargebacks.Domain.Entities;
-using MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities;
-using MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities;
-using MeuCrudCsharp.Features.MercadoPago.Plans.Domain.Entities;
 using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Entities;
-using MeuCrudCsharp.Features.Shared.Domain.Entities;
 
 namespace MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Interfaces;
 
@@ -27,15 +21,15 @@ public interface ISubscriptionRepository
         bool includeUser = false
     );
 
-    Task<Subscription?> GetActiveSubscriptionByUserIdAsync(string userId);
+    Task<Subscription?> GetActiveSubscriptionByUserIdAsync(Guid userId);
     Task<Subscription?> GetActiveSubscriptionByCustomerIdAsync(string customerId);
 
-    Task<bool> HasActiveSubscriptionByUserIdAsync(string userId);
+    Task<bool> HasActiveSubscriptionByUserIdAsync(Guid userId);
 
     Task<(IEnumerable<Subscription> Items, long TotalCount)> GetPaginatedSubscriptionsAsync(
-        int page, 
-        int pageSize, 
-        string? statusFilter = null, 
+        int page,
+        int pageSize,
+        string? statusFilter = null,
         string? searchTerm = null
     );
 }

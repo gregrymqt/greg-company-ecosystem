@@ -47,7 +47,7 @@ public class PixPaymentService(
                 try
                 {
                     var result = await CreatePixPaymentAsync(
-                        await userContext.GetCurrentUserId(),
+                        Guid.Parse(await userContext.GetCurrentUserId()),
                         request,
                         idempotencyKey
                     );
@@ -91,12 +91,12 @@ public class PixPaymentService(
     }
 
     private async Task<PaymentResponseDto> CreatePixPaymentAsync(
-        string userId,
+        Guid userId,
         CreatePixPaymentRequest request,
         string externalReference
     )
     {
-        if (string.IsNullOrEmpty(userId))
+        if (userId == Guid.Empty)
         {
             throw new ArgumentException("userId is required");
         }
@@ -104,11 +104,11 @@ public class PixPaymentService(
         try
         {
             await notificationHub.SendStatusUpdateAsync(
-                userId,
+                userId.ToString(),
                 new PaymentStatusUpdate("A processar o seu pagamento...", "processing", false)
             );
 
-            var novoPixPayment = new MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities.Payments()
+            var novoPixPayment = new MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities.Payment()
             {
                 UserId = userId,
                 Status = "Iniciando",
@@ -129,7 +129,7 @@ public class PixPaymentService(
             );
 
             await notificationHub.SendStatusUpdateAsync(
-                userId,
+                userId.ToString(),
                 new PaymentStatusUpdate(
                     "Comunicando com o provedor de pagamento...",
                     "processing",
@@ -186,7 +186,7 @@ public class PixPaymentService(
             )
             {
                 await notificationHub.SendStatusUpdateAsync(
-                    userId,
+                    userId.ToString(),
                     new PaymentStatusUpdate(
                         "Pagamento processado com sucesso!",
                         "approved",
@@ -198,7 +198,7 @@ public class PixPaymentService(
             else
             {
                 await notificationHub.SendStatusUpdateAsync(
-                    userId,
+                    userId.ToString(),
                     new PaymentStatusUpdate(
                         payment.StatusDetail ?? "O pagamento foi recusado.",
                         "failed",
@@ -246,7 +246,7 @@ public class PixPaymentService(
             );
 
             await notificationHub.SendStatusUpdateAsync(
-                userId,
+                userId.ToString(),
                 new PaymentStatusUpdate(mensagemErro, "error", true)
             );
 

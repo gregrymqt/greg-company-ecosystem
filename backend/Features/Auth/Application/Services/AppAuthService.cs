@@ -95,7 +95,7 @@ namespace MeuCrudCsharp.Features.Auth.Application.Services
             return user;
         }
 
-        public async Task<UserSessionDto> GetAuthenticatedUserDataAsync(string userId)
+        public async Task<UserSessionDto> GetAuthenticatedUserDataAsync(Guid userId)
         {
             var user = await _userRepository.GetByIdAsync(userId);
 

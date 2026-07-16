@@ -4,10 +4,10 @@ namespace MeuCrudCsharp.Features.MercadoPago.Clients.Application.Interfaces
 {
     public interface IClientService
     {
-        Task RemoveCardFromWalletAsync(string userId, string cardId);
-        Task<WalletCardDto> AddCardToWalletAsync(string userId, string cardToken);
+        Task RemoveCardFromWalletAsync(Guid userId, string cardId);
+        Task<WalletCardDto> AddCardToWalletAsync(Guid userId, string cardToken);
 
-        Task<List<WalletCardDto>> GetUserWalletAsync(string userId);
+        Task<List<WalletCardDto>> GetUserWalletAsync(Guid userId);
 
         Task<CustomerWithCardResponseDto> CreateCustomerWithCardAsync(
             string email,

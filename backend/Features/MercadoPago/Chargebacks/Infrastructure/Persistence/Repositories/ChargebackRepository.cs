@@ -1,26 +1,18 @@
 using MeuCrudCsharp.Data;
 using MeuCrudCsharp.Features.MercadoPago.Chargebacks.Domain.Interfaces;
 using MeuCrudCsharp.Features.MercadoPago.Chargebacks.Domain.Entities;
-using MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities;
-using MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities;
-using MeuCrudCsharp.Features.MercadoPago.Plans.Domain.Entities;
-using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Entities;
-using MeuCrudCsharp.Features.Shared.Domain.Entities;
 using MeuCrudCsharp.Features.Auth.Domain.Entities;
-using MongoDB.Driver;
-using MongoDB.Driver.Linq;
+using Microsoft.EntityFrameworkCore;
 
 namespace MeuCrudCsharp.Features.MercadoPago.Chargebacks.Infrastructure.Persistence.Repositories;
 
 public class ChargebackRepository : IChargebackRepository
 {
-    private readonly IMongoCollection<Chargeback> _chargebacks;
-    private readonly IMongoCollection<Users> _users;
+    private readonly ApplicationDbContext _context;
 
-    public ChargebackRepository(IMongoDbContext context)
+    public ChargebackRepository(ApplicationDbContext context)
     {
-        _chargebacks = context.GetCollection<Chargeback>("chargebacks");
-        _users = context.GetCollection<Users>("users");
+        _context = context;
     }
 
     public async Task<(List<Chargeback> Chargebacks, int TotalCount)> GetPaginatedChargebacksAsync(
@@ -30,42 +22,40 @@ public class ChargebackRepository : IChargebackRepository
         int pageSize
     )
     {
-        var builder = Builders<Chargeback>.Filter;
-        var filter = builder.Empty;
+        var query = _context.Chargebacks.AsQueryable();
 
         if (!string.IsNullOrEmpty(searchTerm))
         {
-            var searchRegex = new MongoDB.Bson.BsonRegularExpression(searchTerm, "i");
-            var idFilter = builder.Regex(c => c.MercadoPagoChargebackId, searchRegex);
-            
-            var userFilter = Builders<Users>.Filter.Regex(u => u.Name, searchRegex);
-            var userIds = await _users.Find(userFilter).Project(u => u.Id).ToListAsync();
-            
-            filter &= builder.Or(idFilter, builder.In(c => c.UserId, userIds));
+            var userQuery = _context.Users.Where(u => u.Name != null && u.Name.ToLower().Contains(searchTerm.ToLower()));
+            var userIds = await userQuery.Select(u => u.Id).ToListAsync();
+
+            query = query.Where(c =>
+                c.MercadoPagoChargebackId.Contains(searchTerm)
+                || (c.UserId.HasValue && userIds.Contains(c.UserId.Value)));
         }
 
         if (!string.IsNullOrEmpty(statusFilter))
         {
-            filter &= builder.Eq(c => c.Status, statusFilter);
+            query = query.Where(c => c.Status == statusFilter);
         }
 
-        var totalCount = (int)await _chargebacks.CountDocumentsAsync(filter);
+        var totalCount = await query.CountAsync();
 
-        var chargebacks = await _chargebacks.Find(filter)
-            .SortByDescending(c => c.CreatedAt)
+        var chargebacks = await query
+            .OrderByDescending(c => c.CreatedAt)
             .Skip((page - 1) * pageSize)
-            .Limit(pageSize)
+            .Take(pageSize)
             .ToListAsync();
 
-        var chargebackUserIds = chargebacks.Where(c => !string.IsNullOrEmpty(c.UserId)).Select(c => c.UserId).Distinct().ToList();
+        var chargebackUserIds = chargebacks.Where(c => c.UserId.HasValue).Select(c => c.UserId!.Value).Distinct().ToList();
         if (chargebackUserIds.Any())
         {
-            var users = await _users.Find(u => chargebackUserIds.Contains(u.Id)).ToListAsync();
+            var users = await _context.Users.Where(u => chargebackUserIds.Contains(u.Id)).ToListAsync();
             foreach (var c in chargebacks)
             {
-                if (!string.IsNullOrEmpty(c.UserId))
+                if (c.UserId.HasValue)
                 {
-                    c.User = users.FirstOrDefault(u => u.Id == c.UserId);
+                    c.User = users.FirstOrDefault(u => u.Id == c.UserId.Value);
                 }
             }
         }
@@ -75,22 +65,22 @@ public class ChargebackRepository : IChargebackRepository
 
     public async Task<bool> ExistsByExternalIdAsync(string chargebackId)
     {
-        return await _chargebacks.Find(c => c.MercadoPagoChargebackId == chargebackId).AnyAsync();
+        return await _context.Chargebacks.AnyAsync(c => c.MercadoPagoChargebackId == chargebackId);
     }
 
     public async Task<Chargeback?> GetByExternalIdAsync(string chargebackId)
     {
-        return await _chargebacks.Find(c => c.MercadoPagoChargebackId == chargebackId).FirstOrDefaultAsync();
+        return await _context.Chargebacks.FirstOrDefaultAsync(c => c.MercadoPagoChargebackId == chargebackId);
     }
 
     public async Task AddAsync(Chargeback chargeback)
     {
-        await _chargebacks.InsertOneAsync(chargeback);
+        await _context.Chargebacks.AddAsync(chargeback);
+        await _context.SaveChangesAsync();
     }
 
     public void Update(Chargeback chargeback)
     {
-        _chargebacks.ReplaceOne(c => c.Id == chargeback.Id, chargeback);
+        _context.Chargebacks.Update(chargeback);
     }
 }
-

@@ -22,8 +22,8 @@ namespace MeuCrudCsharp.Features.Support.Presentation.Controllers
         {
             try
             {
-                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                if (string.IsNullOrEmpty(userId))
+                var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (string.IsNullOrEmpty(userIdStr) || !Guid.TryParse(userIdStr, out var userId))
                     return Unauthorized(new { success = false, message = "Usuário não identificado." });
 
                 await _service.CreateTicketAsync(userId, dto);
@@ -40,8 +40,8 @@ namespace MeuCrudCsharp.Features.Support.Presentation.Controllers
         {
             try
             {
-                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                if (string.IsNullOrEmpty(userId))
+                var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (string.IsNullOrEmpty(userIdStr) || !Guid.TryParse(userIdStr, out var userId))
                     return Unauthorized(new { success = false, message = "Usuário não identificado." });
 
                 var tickets = await _service.GetTicketsByUserIdAsync(userId);
@@ -54,16 +54,15 @@ namespace MeuCrudCsharp.Features.Support.Presentation.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(string id)
+        public async Task<IActionResult> GetById(Guid id)
         {
             try
             {
-                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                if (string.IsNullOrEmpty(userId))
+                var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (string.IsNullOrEmpty(userIdStr) || !Guid.TryParse(userIdStr, out var userId))
                     return Unauthorized(new { success = false, message = "Usuário não identificado." });
 
                 var ticket = await _service.GetTicketByIdAsync(id);
-                // Valida se o ticket pertence ao usuário
                 if (ticket.UserId != userId)
                     return Forbid();
 
@@ -76,12 +75,12 @@ namespace MeuCrudCsharp.Features.Support.Presentation.Controllers
         }
 
         [HttpPost("{id}/reply")]
-        public async Task<IActionResult> Reply(string id, [FromBody] ReplyToTicketDto dto)
+        public async Task<IActionResult> Reply(Guid id, [FromBody] ReplyToTicketDto dto)
         {
             try
             {
-                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                if (string.IsNullOrEmpty(userId))
+                var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (string.IsNullOrEmpty(userIdStr) || !Guid.TryParse(userIdStr, out var userId))
                     return Unauthorized(new { success = false, message = "Usuário não identificado." });
 
                 var ticket = await _service.GetTicketByIdAsync(id);

@@ -33,7 +33,7 @@ namespace MeuCrudCsharp.Features.Support.Presentation.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(string id)
+        public async Task<IActionResult> GetById(Guid id)
         {
             try
             {
@@ -47,7 +47,7 @@ namespace MeuCrudCsharp.Features.Support.Presentation.Controllers
         }
 
         [HttpPut("{id}/status")]
-        public async Task<IActionResult> UpdateStatus(string id, [FromBody] UpdateSupportTicketDto dto)
+        public async Task<IActionResult> UpdateStatus(Guid id, [FromBody] UpdateSupportTicketDto dto)
         {
             try
             {
@@ -61,7 +61,7 @@ namespace MeuCrudCsharp.Features.Support.Presentation.Controllers
         }
 
         [HttpPut("{id}/assign")]
-        public async Task<IActionResult> AssignTicket(string id)
+        public async Task<IActionResult> AssignTicket(Guid id)
         {
             try
             {
@@ -79,12 +79,12 @@ namespace MeuCrudCsharp.Features.Support.Presentation.Controllers
         }
 
         [HttpPost("{id}/reply")]
-        public async Task<IActionResult> Reply(string id, [FromBody] ReplyToTicketDto dto)
+        public async Task<IActionResult> Reply(Guid id, [FromBody] ReplyToTicketDto dto)
         {
             try
             {
-                var adminId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                if (string.IsNullOrEmpty(adminId))
+                var adminIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (string.IsNullOrEmpty(adminIdStr) || !Guid.TryParse(adminIdStr, out var adminId))
                     return Unauthorized(new { success = false, message = "Usuário não identificado." });
 
                 await _service.ReplyToTicketAsync(id, adminId, "Admin", dto);

@@ -1,28 +1,27 @@
 namespace MeuCrudCsharp.Features.Auth.Infrastructure.Persistence.Repositories;
 
-using Data;
+using MeuCrudCsharp.Data;
 using MeuCrudCsharp.Features.Auth.Domain.Entities;
 using MeuCrudCsharp.Features.Auth.Domain.Interfaces;
-using MongoDB.Driver;
-using MongoDB.Driver.Linq;
+using Microsoft.EntityFrameworkCore;
 
 public class UserRepository : IUserRepository
 {
-    private readonly IMongoCollection<Users> _users;
+    private readonly ApplicationDbContext _context;
 
-    public UserRepository(IMongoDbContext dbContext)
+    public UserRepository(ApplicationDbContext context)
     {
-        _users = dbContext.GetCollection<Users>("users");
+        _context = context;
     }
 
     public async Task<Users?> FindByGoogleIdAsync(string googleId) =>
-        await _users.Find(u => u.GoogleId == googleId).FirstOrDefaultAsync();
+        await _context.Users.FirstOrDefaultAsync(u => u.GoogleId == googleId);
 
-    public async Task<Users?> GetByIdAsync(string id) =>
-        await _users.Find(u => u.Id == id).FirstOrDefaultAsync();
+    public async Task<Users?> GetByIdAsync(Guid id) =>
+        await _context.Users.FirstOrDefaultAsync(u => u.Id == id);
 
     public void Update(Users user)
     {
-        _users.ReplaceOne(u => u.Id == user.Id, user);
+        _context.Users.Update(user);
     }
 }

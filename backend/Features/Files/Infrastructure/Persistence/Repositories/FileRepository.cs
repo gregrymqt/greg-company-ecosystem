@@ -1,36 +1,37 @@
 using MeuCrudCsharp.Data;
 using MeuCrudCsharp.Features.Files.Domain.Interfaces;
 using MeuCrudCsharp.Features.Files.Domain.Entities;
-using MongoDB.Driver;
-using MongoDB.Driver.Linq;
+using Microsoft.EntityFrameworkCore;
 
 namespace MeuCrudCsharp.Features.Files.Infrastructure.Persistence.Repositories;
 
 public class FileRepository : IFileRepository
 {
-    private readonly IMongoCollection<EntityFile> _files;
+    private readonly ApplicationDbContext _context;
 
-    public FileRepository(IMongoDbContext context)
+    public FileRepository(ApplicationDbContext context)
     {
-        _files = context.GetCollection<EntityFile>("files");
+        _context = context;
     }
 
-    public async Task<EntityFile?> GetByIdAsync(string id)
-        => await _files.Find(f => f.Id == id).FirstOrDefaultAsync();
+    public async Task<EntityFile?> GetByIdAsync(Guid id)
+        => await _context.EntityFiles.FindAsync(id);
 
     public async Task AddAsync(EntityFile arquivo)
     {
-        await _files.InsertOneAsync(arquivo);
+        await _context.EntityFiles.AddAsync(arquivo);
+        await _context.SaveChangesAsync();
     }
 
     public async Task UpdateAsync(EntityFile arquivo)
     {
-        await _files.ReplaceOneAsync(f => f.Id == arquivo.Id, arquivo);
+        _context.EntityFiles.Update(arquivo);
+        await _context.SaveChangesAsync();
     }
 
     public async Task DeleteAsync(EntityFile arquivo)
     {
-        await _files.DeleteOneAsync(f => f.Id == arquivo.Id);
+        _context.EntityFiles.Remove(arquivo);
+        await _context.SaveChangesAsync();
     }
 }
-

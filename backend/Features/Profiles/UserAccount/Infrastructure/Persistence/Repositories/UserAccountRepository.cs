@@ -1,23 +1,21 @@
 using MeuCrudCsharp.Features.Profiles.UserAccount.Domain.Interfaces;
 using MeuCrudCsharp.Data;
-using MeuCrudCsharp.Features.Profiles.UserAccount.Application.Interfaces;
 using MeuCrudCsharp.Features.Auth.Domain.Entities;
-using MongoDB.Driver;
-using MongoDB.Driver.Linq;
+using Microsoft.EntityFrameworkCore;
 
 namespace MeuCrudCsharp.Features.Profiles.UserAccount.Infrastructure.Persistence.Repositories;
 
 public class UserAccountRepository : IUserAccountRepository
 {
-    private readonly IMongoCollection<Users> _users;
+    private readonly ApplicationDbContext _context;
 
-    public UserAccountRepository(IMongoDbContext context)
+    public UserAccountRepository(ApplicationDbContext context)
     {
-        _users = context.GetCollection<Users>("users");
+        _context = context;
     }
 
-    public async Task<Users?> GetUserByIdAsync(string userId)
+    public async Task<Users?> GetUserByIdAsync(Guid userId)
     {
-        return await _users.Find(u => u.Id == userId).FirstOrDefaultAsync();
+        return await _context.Users.FindAsync(userId);
     }
 }

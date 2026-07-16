@@ -7,6 +7,7 @@ using MeuCrudCsharp.Features.Support.Application.Utils;
 using MeuCrudCsharp.Features.Videos.Application.DTOs;
 using MeuCrudCsharp.Data;
 using MeuCrudCsharp.Features.Shared.Domain.Entities;
+using MeuCrudCsharp.Features.Shared.Domain.Interfaces;
 using System.Text.Json;
 
 namespace MeuCrudCsharp.Features.Support.Application.Services
@@ -14,15 +15,17 @@ namespace MeuCrudCsharp.Features.Support.Application.Services
     public class SupportService : ISupportService
     {
         private readonly ISupportRepository _repository;
-        private readonly IMongoDbContext _mongoContext;
+        private readonly ApplicationDbContext _dbContext;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public SupportService(ISupportRepository repository, IMongoDbContext mongoContext)
+        public SupportService(ISupportRepository repository, ApplicationDbContext dbContext, IUnitOfWork unitOfWork)
         {
             _repository = repository;
-            _mongoContext = mongoContext;
+            _dbContext = dbContext;
+            _unitOfWork = unitOfWork;
         }
 
-        public async Task CreateTicketAsync(string userId, CreateSupportTicketDto dto)
+        public async Task CreateTicketAsync(Guid userId, CreateSupportTicketDto dto)
         {
             var document = new SupportTicket
             {
@@ -48,48 +51,30 @@ namespace MeuCrudCsharp.Features.Support.Application.Services
             await _repository.CreateAsync(document);
         }
 
-        public async Task<SupportTicketResponseDto> GetTicketByIdAsync(string id)
+        public async Task<SupportTicketResponseDto> GetTicketByIdAsync(Guid id)
         {
             var ticket = await _repository.GetByIdAsync(id);
-
-            if (ticket == null)
-            {
-                throw new ResourceNotFoundException("Ticket de suporte não encontrado.");
-            }
-
+            if (ticket == null) throw new ResourceNotFoundException("Ticket de suporte nao encontrado.");
             return SupportMapper.ToDto(ticket)!;
         }
 
-        public async Task<IEnumerable<SupportTicketResponseDto>> GetTicketsByUserIdAsync(string userId)
+        public async Task<IEnumerable<SupportTicketResponseDto>> GetTicketsByUserIdAsync(Guid userId)
         {
             var tickets = await _repository.GetByUserIdAsync(userId);
             return SupportMapper.ToDtoList(tickets);
         }
 
-        public async Task<PaginatedResultDto<SupportTicketResponseDto>> GetAllTicketsPaginatedAsync(
-            int page,
-            int pageSize
-        )
+        public async Task<PaginatedResultDto<SupportTicketResponseDto>> GetAllTicketsPaginatedAsync(int page, int pageSize)
         {
             var (documents, total) = await _repository.GetAllPaginatedAsync(page, pageSize);
-
             var itemsDto = SupportMapper.ToDtoList(documents);
-
-            return new PaginatedResultDto<SupportTicketResponseDto>(
-                itemsDto,
-                (int)total,
-                page,
-                pageSize
-            );
+            return new PaginatedResultDto<SupportTicketResponseDto>(itemsDto, (int)total, page, pageSize);
         }
 
-        public async Task UpdateTicketStatusAsync(string id, UpdateSupportTicketDto dto)
+        public async Task UpdateTicketStatusAsync(Guid id, UpdateSupportTicketDto dto)
         {
             var ticket = await _repository.GetByIdAsync(id);
-            if (ticket == null)
-            {
-                throw new ResourceNotFoundException("Ticket de suporte não encontrado.");
-            }
+            if (ticket == null) throw new ResourceNotFoundException("Ticket de suporte nao encontrado.");
 
             if (!string.IsNullOrEmpty(dto.Status)) ticket.Status = dto.Status;
             if (!string.IsNullOrEmpty(dto.Priority)) ticket.Priority = dto.Priority;
@@ -98,26 +83,20 @@ namespace MeuCrudCsharp.Features.Support.Application.Services
             await _repository.UpdateAsync(id, ticket);
         }
 
-        public async Task AssignTicketAsync(string id, string adminId)
+        public async Task AssignTicketAsync(Guid id, string adminId)
         {
             var ticket = await _repository.GetByIdAsync(id);
-            if (ticket == null)
-            {
-                throw new ResourceNotFoundException("Ticket de suporte não encontrado.");
-            }
+            if (ticket == null) throw new ResourceNotFoundException("Ticket de suporte nao encontrado.");
 
             ticket.AssignedTo = adminId;
             ticket.LastUpdated = DateTime.UtcNow;
             await _repository.UpdateAsync(id, ticket);
         }
 
-        public async Task ReplyToTicketAsync(string id, string senderId, string senderRole, ReplyToTicketDto dto)
+        public async Task ReplyToTicketAsync(Guid id, Guid senderId, string senderRole, ReplyToTicketDto dto)
         {
             var ticket = await _repository.GetByIdAsync(id);
-            if (ticket == null)
-            {
-                throw new ResourceNotFoundException("Ticket de suporte não encontrado.");
-            }
+            if (ticket == null) throw new ResourceNotFoundException("Ticket de suporte nao encontrado.");
 
             var response = new SupportResponse
             {
@@ -127,11 +106,9 @@ namespace MeuCrudCsharp.Features.Support.Application.Services
                 DateCreated = DateTime.UtcNow
             };
 
-            // Se for admin respondendo, gerar evento Outbox para notificação por e-mail
             if (senderRole == "Admin")
             {
-                using var session = await _mongoContext.StartSessionAsync();
-                session.StartTransaction();
+                await _unitOfWork.BeginTransactionAsync();
                 try
                 {
                     await _repository.AddResponseAsync(id, response);
@@ -144,13 +121,13 @@ namespace MeuCrudCsharp.Features.Support.Application.Services
                         Processed = false
                     };
 
-                    await _mongoContext.GetCollection<OutboxEvent>("OutboxEvents").InsertOneAsync(session, outboxEvent);
+                    await _dbContext.OutboxEvents.AddAsync(outboxEvent);
 
-                    await session.CommitTransactionAsync();
+                    await _unitOfWork.CommitAsync();
                 }
                 catch
                 {
-                    await session.AbortTransactionAsync();
+                    await _unitOfWork.RollbackAsync();
                     throw;
                 }
             }

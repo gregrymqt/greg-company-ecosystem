@@ -24,11 +24,6 @@ public static class AppSettingsServicesExtensions
             builder.Configuration.GetSection(JwtSettings.SectionName)
         );
 
-
-        builder.Services.Configure<MongoDbSettings>(
-            builder.Configuration.GetSection(MongoDbSettings.SectionName)
-        );
-
         builder.Services.Configure<RabbitMqSettings>(
             builder.Configuration.GetSection(RabbitMqSettings.SectionName)
         );

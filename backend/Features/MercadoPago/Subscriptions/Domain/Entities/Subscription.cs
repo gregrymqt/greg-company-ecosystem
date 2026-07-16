@@ -1,41 +1,33 @@
-using MeuCrudCsharp.Features.MercadoPago.Chargebacks.Domain.Entities;
-using MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities;
-using MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities;
-using MeuCrudCsharp.Features.MercadoPago.Plans.Domain.Entities;
-using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Entities;
+using MeuCrudCsharp.Features.Auth.Domain.Entities;
 using MeuCrudCsharp.Features.Shared.Domain.Entities;
-using MeuCrudCsharp.Data.Configuration.Interfaces;
-using MeuCrudCsharp.Data.Configuration.Attributes;
-using MongoDB.Bson.Serialization.Attributes;
+using MeuCrudCsharp.Features.MercadoPago.Plans.Domain.Entities;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Entities
 {
-    // <-- NOVO: Indexar a data de expiração é ótimo para performance
-    public class Subscription : TransactionBase, IMongoDocument
+    public class Subscription : TransactionBase
     {
-        public static string CollectionName => "subscriptions";
+        public Guid PlanId { get; set; }
 
-        // --- RELACIONAMENTO COM PLAN ---
-        public string PlanId { get; set; }
-
-        [BsonIgnore]
-        public string? MercadoPagoPreapprovalId 
-        { 
-            get => ExternalId; 
-            set => ExternalId = value; 
+        [NotMapped]
+        public string? MercadoPagoPreapprovalId
+        {
+            get => ExternalId;
+            set => ExternalId = value;
         }
 
-        [BsonIgnore]
+        [NotMapped]
         public SubscriptionStatus SubscriptionStatus
         {
             get => Status != null ? SubscriptionStatusExtensions.FromMpString(Status) : SubscriptionStatus.Unknown;
             set => Status = value.ToMpString();
         }
 
-        [BsonIgnore]
+        [ForeignKey(nameof(PlanId))]
         public virtual Plan? Plan { get; set; }
 
-        [BsonIgnore]
+        [NotMapped]
         public Guid PlanPublicId { get; set; }
 
         public string? LastFourCardDigits { get; set; }

@@ -14,7 +14,7 @@ public class PaymentService(
 {
     public async Task<List<PaymentHistoryDto>> GetUserPaymentHistoryAsync(string userId)
     {
-        var payments = await paymentRepository.GetPaymentsByUserIdAndTypeAsync(userId);
+        var payments = await paymentRepository.GetPaymentsByUserIdAndTypeAsync(Guid.Parse(userId));
 
         var historyDtos = payments
             .Select(p => new PaymentHistoryDto
@@ -48,7 +48,7 @@ public class PaymentService(
             CreatedAt = p.CreatedAt,
             PaymentMethod = p.Method,
             PayerEmail = p.PayerEmail,
-            UserId = p.UserId
+            UserId = p.UserId.ToString()
         }).ToList();
 
         var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);

@@ -39,7 +39,7 @@ public class ChargebackService : IChargebackService
             Chargebacks = chargebacks.Select(c => new ChargebackSummaryViewModel
             {
                 Id = c.MercadoPagoChargebackId,
-                Customer = c.User?.Name ?? c.UserId,
+                Customer = c.User?.Name ?? c.UserId?.ToString(),
                 Amount = c.Amount,
                 Date = c.DateCreated != default ? c.DateCreated : c.CreatedAt,
                 Status = string.IsNullOrEmpty(c.Status) ? 0 : 1, // Basic map, adjust as needed

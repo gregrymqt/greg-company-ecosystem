@@ -1,54 +1,53 @@
 using MeuCrudCsharp.Features.Shared.Domain.Interfaces;
 using MeuCrudCsharp.Data;
-using MongoDB.Driver;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace MeuCrudCsharp.Features.Shared.Infrastructure.Persistence;
 
 public class UnitOfWork : IUnitOfWork, IDisposable
 {
-    private readonly IMongoDbContext _context;
-    private IClientSessionHandle? _session;
+    private readonly ApplicationDbContext _context;
+    private IDbContextTransaction? _transaction;
     private bool _isDisposed = false;
 
-    public UnitOfWork(IMongoDbContext context)
+    public UnitOfWork(ApplicationDbContext context)
     {
         _context = context;
     }
 
-    // Expõe a sessão atual para que os Repositories a utilizem nos métodos do Mongo
-    public IClientSessionHandle? Session => _session;
+    public IDbContextTransaction? Transaction => _transaction;
 
     public async Task BeginTransactionAsync()
     {
-        if (_session == null)
+        if (_transaction == null)
         {
-            _session = await _context.StartSessionAsync();
-            _session.StartTransaction();
+            _transaction = await _context.Database.BeginTransactionAsync();
         }
     }
 
     public async Task CommitAsync()
     {
-        if (_session == null) return;
+        if (_transaction == null) return;
 
         try
         {
-            await _session.CommitTransactionAsync();
+            await _context.SaveChangesAsync();
+            await _transaction.CommitAsync();
         }
         finally
         {
-            _session.Dispose();
-            _session = null;
+            _transaction.Dispose();
+            _transaction = null;
         }
     }
 
     public async Task RollbackAsync()
     {
-        if (_session != null)
+        if (_transaction != null)
         {
-            await _session.AbortTransactionAsync();
-            _session.Dispose();
-            _session = null;
+            await _transaction.RollbackAsync();
+            _transaction.Dispose();
+            _transaction = null;
         }
     }
 
@@ -56,7 +55,7 @@ public class UnitOfWork : IUnitOfWork, IDisposable
     {
         if (!_isDisposed)
         {
-            _session?.Dispose();
+            _transaction?.Dispose();
             _isDisposed = true;
         }
         GC.SuppressFinalize(this);

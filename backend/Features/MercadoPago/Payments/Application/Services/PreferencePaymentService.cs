@@ -34,7 +34,7 @@ public class PreferencePaymentService(
     public async Task<string> CreatePreferenceAsync(CreatePreferenceDto model)
     {
         var userId = await userContext.GetCurrentUserId();
-        var user = await userRepository.GetByIdAsync(userId);
+        var user = await userRepository.GetByIdAsync(Guid.Parse(userId));
         
         if (userId == null)
             throw new UnauthorizedAccessException("Usuário não encontrado.");
@@ -63,7 +63,7 @@ public class PreferencePaymentService(
 
         try
         {
-            var initialPayment = new MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities.Payments
+            var initialPayment = new MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities.Payment
             {
                 UserId = user.Id,
                 Status = "pending",

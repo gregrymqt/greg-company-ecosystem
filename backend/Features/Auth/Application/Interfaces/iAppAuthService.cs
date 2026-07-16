@@ -15,7 +15,7 @@ public interface IAppAuthService
 {
     Task<Users> SignInWithGoogleAsync(ClaimsPrincipal googleUserPrincipal, HttpContext httpContext);
 
-    Task<UserSessionDto> GetAuthenticatedUserDataAsync(string userId);
+    Task<UserSessionDto> GetAuthenticatedUserDataAsync(Guid userId);
 
     Task<LoginResponseDto> LoginAsync(LoginRequestDto request);
 

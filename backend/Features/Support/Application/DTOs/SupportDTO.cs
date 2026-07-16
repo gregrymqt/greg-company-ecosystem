@@ -25,8 +25,8 @@ namespace MeuCrudCsharp.Features.Support.Application.DTOs
 
     public class SupportTicketResponseDto
     {
-        public string? Id { get; set; }
-        public string? UserId { get; set; }
+        public Guid Id { get; set; }
+        public Guid UserId { get; set; }
         public string? Title { get; set; }
         public string? Category { get; set; }
         public string? Priority { get; set; }
@@ -39,7 +39,7 @@ namespace MeuCrudCsharp.Features.Support.Application.DTOs
 
     public class SupportResponseDto
     {
-        public string SenderId { get; set; } = string.Empty;
+        public Guid SenderId { get; set; }
         public string SenderRole { get; set; } = string.Empty;
         public string Message { get; set; } = string.Empty;
         public DateTime DateCreated { get; set; }

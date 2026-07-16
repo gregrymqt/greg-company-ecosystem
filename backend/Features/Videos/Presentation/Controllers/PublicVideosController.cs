@@ -30,7 +30,7 @@ namespace MeuCrudCsharp.Features.Videos.Presentation.Controllers
 
                 var dto = new VideoDto
                 {
-                    Id = video.PublicId,
+                    Id = video.Id,
                     Title = video.Title,
                     Description = video.Description,
                     StorageIdentifier = video.StorageIdentifier,

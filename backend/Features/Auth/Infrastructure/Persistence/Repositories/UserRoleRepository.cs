@@ -1,7 +1,6 @@
-using MeuCrudCsharp.Data;
 using MeuCrudCsharp.Features.Auth.Domain.Interfaces;
-using MeuCrudCsharp.Features.Auth.Application.Interfaces;
 using MeuCrudCsharp.Features.Auth.Domain.Entities;
+using MeuCrudCsharp.Data;
 using Microsoft.AspNetCore.Identity;
 
 namespace MeuCrudCsharp.Features.Auth.Infrastructure.Persistence.Repositories
@@ -15,9 +14,9 @@ namespace MeuCrudCsharp.Features.Auth.Infrastructure.Persistence.Repositories
             _userManager = userManager;
         }
 
-        public async Task<List<string>> GetRolesByUserIdAsync(string userId)
+        public async Task<List<string>> GetRolesByUserIdAsync(Guid userId)
         {
-            var user = await _userManager.FindByIdAsync(userId);
+            var user = await _userManager.FindByIdAsync(userId.ToString());
             if (user == null)
             {
                 return new List<string>();

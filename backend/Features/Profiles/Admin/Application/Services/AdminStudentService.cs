@@ -61,7 +61,7 @@ namespace MeuCrudCsharp.Features.Profiles.Admin.Application.Services
                                 u.Subscription?.Status ?? "Sem Assinatura",
                                 u.Subscription?.Plan?.Name ?? "N/A",
                                 u.Subscription?.CreatedAt ?? DateTime.MinValue,
-                                u.Subscription?.Id ?? "Sem Assinatura"
+                                u.Subscription?.Id.ToString() ?? "Sem Assinatura"
                             ))
                             .ToList();
 
@@ -75,7 +75,7 @@ namespace MeuCrudCsharp.Features.Profiles.Admin.Application.Services
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError(ex, "Falha ao buscar os alunos no repositório.");
+                        _logger.LogError(ex, "Falha ao buscar os alunos no repositï¿½rio.");
                         throw new AppServiceException(
                             "An error occurred while querying student data.",
                             ex
@@ -96,8 +96,8 @@ namespace MeuCrudCsharp.Features.Profiles.Admin.Application.Services
 
                 if (user == null)
                 {
-                    _logger.LogWarning("Tentativa de buscar aluno com ID {Guid} não encontrado.", id);
-                    throw new KeyNotFoundException($"Aluno com ID {id} não encontrado.");
+                    _logger.LogWarning("Tentativa de buscar aluno com ID {Guid} nï¿½o encontrado.", id);
+                    throw new KeyNotFoundException($"Aluno com ID {id} nï¿½o encontrado.");
                 }
 
                 var studentDto = new StudentDto(
@@ -107,14 +107,14 @@ namespace MeuCrudCsharp.Features.Profiles.Admin.Application.Services
                     user.Subscription?.Status ?? "Sem Assinatura",
                     user.Subscription?.Plan?.Name ?? "N/A",
                     user.Subscription?.CreatedAt ?? DateTime.MinValue,
-                    user.Subscription?.Id ?? "Sem Assinatura"
+                    user.Subscription?.Id.ToString() ?? "Sem Assinatura"
                 );
 
                 return studentDto;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Falha ao buscar o aluno no repositório.");
+                _logger.LogError(ex, "Falha ao buscar o aluno no repositï¿½rio.");
                 throw new AppServiceException("An error occurred while querying student data.", ex);
             }
         }

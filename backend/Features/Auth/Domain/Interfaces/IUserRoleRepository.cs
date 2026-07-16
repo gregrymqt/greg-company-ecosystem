@@ -4,5 +4,5 @@ namespace MeuCrudCsharp.Features.Auth.Domain.Interfaces;
 
 public interface IUserRoleRepository
 {
-    Task<List<string>> GetRolesByUserIdAsync(string userId);
+    Task<List<string>> GetRolesByUserIdAsync(Guid userId);
 }

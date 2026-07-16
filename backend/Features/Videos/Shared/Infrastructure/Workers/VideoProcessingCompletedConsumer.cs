@@ -70,13 +70,13 @@ public class VideoProcessingCompletedConsumer : RabbitMqConsumerBase
             }
 
             video.LastUpdated = DateTime.UtcNow;
-            _logger.LogInformation("Processamento do video {VideoId} finalizado com sucesso. StreamingUrl gerada: {Url}", video.PublicId, video.StreamingUrl);
+            _logger.LogInformation("Processamento do video {VideoId} finalizado com sucesso. StreamingUrl gerada: {Url}", video.Id, video.StreamingUrl);
         }
         else
         {
             video.Status = VideoStatus.Failed;
             video.LastUpdated = DateTime.UtcNow;
-            _logger.LogWarning("Falha ao processar o video {VideoId}. Erro: {Error}", video.PublicId, payload.Error);
+            _logger.LogWarning("Falha ao processar o video {VideoId}. Erro: {Error}", video.Id, payload.Error);
         }
 
         await videoRepository.UpdateAsync(video);
@@ -87,7 +87,7 @@ public class VideoProcessingCompletedConsumer : RabbitMqConsumerBase
         // Notify via SignalR (StorageIdentifier as Group)
         await hubContext.Clients.Group(video.StorageIdentifier).SendAsync("VideoProcessingStatusUpdated", new 
         { 
-            videoId = video.PublicId, 
+            videoId = video.Id, 
             status = video.Status.ToString(),
             duration = video.Duration.TotalSeconds
         }, cancellationToken);

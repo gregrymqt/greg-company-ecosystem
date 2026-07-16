@@ -1,10 +1,3 @@
-using System;
-using MeuCrudCsharp.Features.MercadoPago.Chargebacks.Domain.Entities;
-using MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities;
-using MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities;
-using MeuCrudCsharp.Features.MercadoPago.Plans.Domain.Entities;
-using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Entities;
-using MeuCrudCsharp.Features.Shared.Domain.Entities;
 using MeuCrudCsharp.Features.Home.Domain.Entities;
 
 namespace MeuCrudCsharp.Features.Home.Domain.Interfaces;
@@ -12,16 +5,14 @@ namespace MeuCrudCsharp.Features.Home.Domain.Interfaces;
 public interface IHomeRepository
 {
     Task<List<HomeHero>> GetAllHeroesAsync();
-    Task<HomeHero?> GetHeroByIdAsync(string id);
+    Task<HomeHero?> GetHeroByIdAsync(Guid id);
     Task AddHeroAsync(HomeHero hero);
     Task UpdateHeroAsync(HomeHero hero);
     Task DeleteHeroAsync(HomeHero hero);
 
     Task<List<HomeServiceEntry>> GetAllServicesAsync();
-    Task<HomeServiceEntry?> GetServiceByIdAsync(string id);
+    Task<HomeServiceEntry?> GetServiceByIdAsync(Guid id);
     Task AddServiceAsync(HomeServiceEntry service);
     Task UpdateServiceAsync(HomeServiceEntry service);
     Task DeleteServiceAsync(HomeServiceEntry service);
 }
-
-

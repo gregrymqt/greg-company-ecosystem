@@ -36,8 +36,8 @@ public class UserAccountService : IUserAccountService
 
     public async Task<AvatarUpdateResponse> UpdateProfilePictureAsync(IFormFile file)
     {
-        var userId = _userContext.GetCurrentUserId().ToString();
-        if (string.IsNullOrEmpty(userId))
+        var userIdStr = _userContext.GetCurrentUserId().ToString();
+        if (string.IsNullOrEmpty(userIdStr) || !Guid.TryParse(userIdStr, out var userId))
             throw new UnauthorizedAccessException("Usuário não identificado.");
 
         var user = await _repository.GetUserByIdAsync(userId);
@@ -54,13 +54,13 @@ public class UserAccountService : IUserAccountService
                 file
             );
             urlFinal = arquivoSalvo.CaminhoRelativo;
-            novoIdArquivo = arquivoSalvo.Id;
+            novoIdArquivo = arquivoSalvo.Id.ToString();
         }
         else
         {
             var arquivoSalvo = await _fileService.SalvarArquivoAsync(file, CATEGORIA_AVATAR);
             urlFinal = arquivoSalvo.CaminhoRelativo;
-            novoIdArquivo = arquivoSalvo.Id;
+            novoIdArquivo = arquivoSalvo.Id.ToString();
         }
 
         user.AvatarFileId = novoIdArquivo;
@@ -79,8 +79,8 @@ public class UserAccountService : IUserAccountService
 
     public async Task<UserProfileDto> GetProfileAsync()
     {
-        var userId = _userContext.GetCurrentUserId().ToString();
-        if (string.IsNullOrEmpty(userId))
+        var userIdStr = _userContext.GetCurrentUserId().ToString();
+        if (string.IsNullOrEmpty(userIdStr) || !Guid.TryParse(userIdStr, out var userId))
             throw new UnauthorizedAccessException("Usuário não identificado.");
 
         var user = await _repository.GetUserByIdAsync(userId);

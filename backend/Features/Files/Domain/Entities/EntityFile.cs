@@ -1,21 +1,15 @@
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
-using MeuCrudCsharp.Data.Configuration.Interfaces;
-using MeuCrudCsharp.Data.Configuration.Attributes;
+using System.ComponentModel.DataAnnotations;
 
 namespace MeuCrudCsharp.Features.Files.Domain.Entities;
 
-public class EntityFile : IMongoDocument
+public class EntityFile
 {
-    public static string CollectionName => "entity_files";
+    [Key]
+    public Guid Id { get; set; } = Guid.NewGuid();
 
-    [BsonId]
-    [BsonRepresentation(BsonType.ObjectId)]
-    public string Id { get; set; } = null!;
-    public required string NomeArquivo { get; set; } // Ex: "guid_relatorio.pdf"
-    public required string CaminhoRelativo { get; set; } // Ex: "uploads/Financeiro/guid_relatorio.pdf"
-    public required string ContentType { get; set; } // Ex: "application/pdf", "image/png"
-    public required string FeatureCategoria { get; set; } // Ex: "Financeiro", "Perfil", "VideosAula"
-    public long TamanhoBytes { get; set; } // Útil para validações
+    public required string NomeArquivo { get; set; }
+    public required string CaminhoRelativo { get; set; }
+    public required string ContentType { get; set; }
+    public required string FeatureCategoria { get; set; }
+    public long TamanhoBytes { get; set; }
 }
-

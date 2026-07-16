@@ -1,29 +1,19 @@
 using MeuCrudCsharp.Features.Profiles.Admin.Domain.Interfaces;
 using MeuCrudCsharp.Data;
-using MeuCrudCsharp.Features.Profiles.Admin.Application.Interfaces;
-using MeuCrudCsharp.Features.MercadoPago.Chargebacks.Domain.Entities;
-using MeuCrudCsharp.Features.MercadoPago.Claims.Domain.Entities;
-using MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities;
-using MeuCrudCsharp.Features.MercadoPago.Plans.Domain.Entities;
-using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Entities;
-using MeuCrudCsharp.Features.Shared.Domain.Entities;
 using MeuCrudCsharp.Features.Auth.Domain.Entities;
-using MongoDB.Driver;
-using MongoDB.Driver.Linq;
+using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Entities;
+using MeuCrudCsharp.Features.MercadoPago.Plans.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace MeuCrudCsharp.Features.Profiles.Admin.Infrastructure.Persistence.Repositories
 {
     public class StudentRepository : IStudentRepository
     {
-        private readonly IMongoCollection<Users> _users;
-        private readonly IMongoCollection<Subscription> _subscriptions;
-        private readonly IMongoCollection<Plan> _plans;
+        private readonly ApplicationDbContext _context;
 
-        public StudentRepository(IMongoDbContext context)
+        public StudentRepository(ApplicationDbContext context)
         {
-            _users = context.GetCollection<Users>("users");
-            _subscriptions = context.GetCollection<Subscription>("subscriptions");
-            _plans = context.GetCollection<Plan>("plans");
+            _context = context;
         }
 
         public async Task<(IEnumerable<Users> Items, int TotalCount)> GetAllWithSubscriptionsAsync(
@@ -31,26 +21,29 @@ namespace MeuCrudCsharp.Features.Profiles.Admin.Infrastructure.Persistence.Repos
             int pageSize
         )
         {
-            var filter = FilterDefinition<Users>.Empty;
-            
-            var totalCount = (int)await _users.CountDocumentsAsync(filter);
+            var query = _context.Users.AsQueryable();
+
+            var totalCount = await query.CountAsync();
 
             if (totalCount == 0)
             {
                 return (new List<Users>(), 0);
             }
 
-            var items = await _users.Find(filter)
-                .SortBy(u => u.Name)
+            var items = await query
+                .OrderBy(u => u.Name)
                 .Skip((page - 1) * pageSize)
-                .Limit(pageSize)
+                .Take(pageSize)
                 .ToListAsync();
 
-            // Resolve Subscriptions and Plans manually
             var userIds = items.Select(u => u.Id).ToList();
-            var subscriptions = await _subscriptions.Find(s => userIds.Contains(s.UserId)).ToListAsync();
+            var subscriptions = await _context.Subscriptions
+                .Where(s => userIds.Contains(s.UserId))
+                .ToListAsync();
             var planIds = subscriptions.Select(s => s.PlanId).Distinct().ToList();
-            var plans = await _plans.Find(p => planIds.Contains(p.Id)).ToListAsync();
+            var plans = await _context.Plans
+                .Where(p => planIds.Contains(p.Id))
+                .ToListAsync();
 
             foreach (var u in items)
             {
@@ -66,14 +59,17 @@ namespace MeuCrudCsharp.Features.Profiles.Admin.Infrastructure.Persistence.Repos
 
         public async Task<Users?> GetByPublicIdWithSubscriptionAsync(Guid publicId)
         {
-            var user = await _users.Find(u => u.PublicId == publicId).SingleOrDefaultAsync();
-            
+            var user = await _context.Users
+                .FirstOrDefaultAsync(u => u.PublicId == publicId);
+
             if (user != null)
             {
-                user.Subscription = await _subscriptions.Find(s => s.UserId == user.Id).FirstOrDefaultAsync();
+                user.Subscription = await _context.Subscriptions
+                    .FirstOrDefaultAsync(s => s.UserId == user.Id);
                 if (user.Subscription != null)
                 {
-                    user.Subscription.Plan = await _plans.Find(p => p.Id == user.Subscription.PlanId).FirstOrDefaultAsync();
+                    user.Subscription.Plan = await _context.Plans
+                        .FirstOrDefaultAsync(p => p.Id == user.Subscription.PlanId);
                 }
             }
 
@@ -81,4 +77,3 @@ namespace MeuCrudCsharp.Features.Profiles.Admin.Infrastructure.Persistence.Repos
         }
     }
 }
-

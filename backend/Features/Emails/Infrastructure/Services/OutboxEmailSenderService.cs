@@ -9,12 +9,12 @@ namespace MeuCrudCsharp.Features.Emails.Infrastructure.Services;
 
 public class OutboxEmailSenderService : IEmailSenderService
 {
-    private readonly IMongoDbContext _context;
+    private readonly ApplicationDbContext _context;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<OutboxEmailSenderService> _logger;
 
     public OutboxEmailSenderService(
-        IMongoDbContext context,
+        ApplicationDbContext context,
         IUnitOfWork unitOfWork,
         ILogger<OutboxEmailSenderService> logger)
     {
@@ -37,15 +37,15 @@ public class OutboxEmailSenderService : IEmailSenderService
             })
         };
 
-        var outboxCollection = _context.GetCollection<OutboxEvent>("OutboxEvents");
+        await _context.OutboxEvents.AddAsync(outboxEvent);
 
-        if (_unitOfWork.Session != null)
+        if (_unitOfWork.Transaction != null)
         {
-            await outboxCollection.InsertOneAsync(_unitOfWork.Session, outboxEvent);
+            await _context.SaveChangesAsync();
         }
         else
         {
-            await outboxCollection.InsertOneAsync(outboxEvent);
+            await _context.SaveChangesAsync();
         }
 
         _logger.LogInformation("Evento de envio de e-mail para {To} gravado no Outbox (Id: {EventId}).", to, outboxEvent.Id);

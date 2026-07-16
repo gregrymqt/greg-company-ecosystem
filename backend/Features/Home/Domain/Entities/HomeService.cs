@@ -1,17 +1,11 @@
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
-using MeuCrudCsharp.Data.Configuration.Interfaces;
-using MeuCrudCsharp.Data.Configuration.Attributes;
+using System.ComponentModel.DataAnnotations;
 
 namespace MeuCrudCsharp.Features.Home.Domain.Entities;
 
-public class HomeServiceEntry : IMongoDocument
+public class HomeServiceEntry
 {
-    public static string CollectionName => "home_services";
-
-    [BsonId]
-    [BsonRepresentation(BsonType.ObjectId)]
-    public string Id { get; set; } = null!;
+    [Key]
+    public Guid Id { get; set; } = Guid.NewGuid();
 
     public string Icon { get; set; } = string.Empty;
 
@@ -27,4 +21,3 @@ public class HomeServiceEntry : IMongoDocument
 
     public int Order { get; set; }
 }
-

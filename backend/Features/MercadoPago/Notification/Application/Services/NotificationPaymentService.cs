@@ -39,29 +39,29 @@ public class NotificationPaymentService(
     public async Task VerifyAndProcessNotificationAsync(string internalPaymentId)
     {
         logger.LogInformation(
-            "Iniciando processamento de notificação para PaymentId: {PaymentId}",
+            "Iniciando processamento de notificaï¿½ï¿½o para PaymentId: {PaymentId}",
             internalPaymentId
         );
 
         try
         {
-            var localPayment = await paymentRepository.GetByIdWithUserAsync(internalPaymentId);
+            var localPayment = await paymentRepository.GetByIdWithUserAsync(Guid.Parse(internalPaymentId));
 
             if (localPayment == null)
                 throw new ResourceNotFoundException(
-                    $"Pagamento com ID {internalPaymentId} não foi encontrado."
+                    $"Pagamento com ID {internalPaymentId} nï¿½o foi encontrado."
                 );
 
             var user = localPayment.User;
             if (user == null)
                 throw new ResourceNotFoundException(
-                    $"Usuário associado ao pagamento {internalPaymentId} não foi encontrado."
+                    $"Usuï¿½rio associado ao pagamento {internalPaymentId} nï¿½o foi encontrado."
                 );
 
             if (localPayment.Status != "pending" && localPayment.Status != "in_process")
             {
                 logger.LogInformation(
-                    "Pagamento {PaymentId} já foi processado (Status: {Status}). Ignorando notificação.",
+                    "Pagamento {PaymentId} jï¿½ foi processado (Status: {Status}). Ignorando notificaï¿½ï¿½o.",
                     internalPaymentId,
                     localPayment.Status
                 );
@@ -71,7 +71,7 @@ public class NotificationPaymentService(
             if (string.IsNullOrEmpty(localPayment.ExternalId))
             {
                 throw new InvalidOperationException(
-                    $"Pagamento {internalPaymentId} não possui ExternalId."
+                    $"Pagamento {internalPaymentId} nï¿½o possui ExternalId."
                 );
             }
 
@@ -80,7 +80,7 @@ public class NotificationPaymentService(
             if (externPayment == null)
             {
                 logger.LogWarning(
-                    "Não foi possível obter detalhes do pagamento externo {ExternalId}",
+                    "Nï¿½o foi possï¿½vel obter detalhes do pagamento externo {ExternalId}",
                     localPayment.ExternalId
                 );
                 throw new Exception(
@@ -104,7 +104,7 @@ public class NotificationPaymentService(
         {
             logger.LogError(
                 ex,
-                "Erro ao processar notificação para PaymentId: {PaymentId}",
+                "Erro ao processar notificaï¿½ï¿½o para PaymentId: {PaymentId}",
                 internalPaymentId
             );
             throw;
@@ -112,7 +112,7 @@ public class NotificationPaymentService(
     }
 
     private async Task ProcessPaymentStatusAsync(
-        MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities.Payments localPayment,
+        MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities.Payment localPayment,
         dynamic externPayment,
         Users user)
     {
@@ -133,7 +133,7 @@ public class NotificationPaymentService(
 
             default:
                 logger.LogWarning(
-                    "Status de pagamento não tratado recebido do Mercado Pago: {Status}",
+                    "Status de pagamento nï¿½o tratado recebido do Mercado Pago: {Status}",
                     (string)externPayment.Status
                 );
                 break;
@@ -141,11 +141,11 @@ public class NotificationPaymentService(
     }
 
     private async Task ProcessApprovedPaymentAsync(
-        MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities.Payments localPayment,
+        MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities.Payment localPayment,
         dynamic externPayment,
         Users user)
     {
-        if (string.IsNullOrEmpty(localPayment.SubscriptionId))
+        if (localPayment.SubscriptionId == Guid.Empty)
         {
             logger.LogInformation(
                 "Pagamento {PaymentId} aprovado. Nenhuma assinatura encontrada, criando uma nova...",
@@ -159,14 +159,14 @@ public class NotificationPaymentService(
             if (metadata == null || metadata.PlanPublicId == Guid.Empty)
             {
                 throw new InvalidOperationException(
-                    $"Metadados (ExternalReference) inválidos ou ausentes no pagamento {externPayment.Id}. Não é possível criar a assinatura."
+                    $"Metadados (ExternalReference) invï¿½lidos ou ausentes no pagamento {externPayment.Id}. Nï¿½o ï¿½ possï¿½vel criar a assinatura."
                 );
             }
 
             if (externPayment.Payer.Email != null)
             {
                 await subscriptionService.ActivateSubscriptionFromSinglePaymentAsync(
-                    user.Id,
+                    user.Id.ToString(),
                     metadata.PlanPublicId,
                     externPayment.Id.ToString(),
                     externPayment.Payer.Email,
@@ -175,7 +175,7 @@ public class NotificationPaymentService(
             }
 
             logger.LogInformation(
-                "Assinatura de pagamento único criada com sucesso para o usuário {UserId}.",
+                "Assinatura de pagamento ï¿½nico criada com sucesso para o usuï¿½rio {UserId}.",
                 user.Id
             );
         }
@@ -187,7 +187,7 @@ public class NotificationPaymentService(
                 localPayment.SubscriptionId
             );
 
-            var subscription = await subscriptionRepository.GetByIdAsync(localPayment.SubscriptionId);
+            var subscription = await subscriptionRepository.GetByIdAsync(localPayment.SubscriptionId.ToString());
             if (subscription != null)
             {
                 subscription.Status = "active";
@@ -199,14 +199,14 @@ public class NotificationPaymentService(
         paymentRepository.Update(localPayment);
     }
 
-    private async Task ProcessRejectedPaymentAsync(MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities.Payments localPayment, dynamic externPayment)
+    private async Task ProcessRejectedPaymentAsync(MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities.Payment localPayment, dynamic externPayment)
     {
         localPayment.Status = externPayment.Status;
         paymentRepository.Update(localPayment);
 
-        if (!string.IsNullOrEmpty(localPayment.SubscriptionId))
+        if (localPayment.SubscriptionId != Guid.Empty)
         {
-            var subscription = await subscriptionRepository.GetByIdAsync(localPayment.SubscriptionId);
+            var subscription = await subscriptionRepository.GetByIdAsync(localPayment.SubscriptionId.ToString());
             if (subscription != null)
             {
                 subscription.Status = externPayment.Status;
@@ -215,14 +215,14 @@ public class NotificationPaymentService(
         }
     }
 
-    private async Task ProcessRefundedPaymentAsync(MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities.Payments localPayment)
+    private async Task ProcessRefundedPaymentAsync(MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities.Payment localPayment)
     {
         localPayment.Status = "refunded";
         paymentRepository.Update(localPayment);
 
-        if (!string.IsNullOrEmpty(localPayment.SubscriptionId))
+        if (localPayment.SubscriptionId != Guid.Empty)
         {
-            var subscription = await subscriptionRepository.GetByIdAsync(localPayment.SubscriptionId);
+            var subscription = await subscriptionRepository.GetByIdAsync(localPayment.SubscriptionId.ToString());
             if (subscription != null)
             {
                 subscription.Status = "refunded";
@@ -231,7 +231,7 @@ public class NotificationPaymentService(
         }
 
         await refundNotification.SendRefundStatusUpdate(
-            localPayment.UserId,
+            localPayment.UserId.ToString(),
             "completed",
             "Seu reembolso foi processado com sucesso!"
         );
@@ -268,7 +268,7 @@ public class NotificationPaymentService(
         try
         {
             var htmlBody = await razorRenderer.RenderViewToStringAsync(viewPath, viewModel);
-            var plainTextBody = $"Olá, {user.Name ?? "Cliente"}! Novidades sobre seu pagamento {paymentId}.";
+            var plainTextBody = $"Olï¿½, {user.Name ?? "Cliente"}! Novidades sobre seu pagamento {paymentId}.";
 
             if (!string.IsNullOrEmpty(user.Email))
             {
@@ -310,7 +310,7 @@ public class NotificationPaymentService(
             "Seu pagamento foi aprovado! ??",
             "~/Pages/EmailTemplates/Confirmation/Email.cshtml",
             viewModel,
-            "Confirmação"
+            "Confirmaï¿½ï¿½o"
         );
     }
 
@@ -326,10 +326,10 @@ public class NotificationPaymentService(
         await SendPaymentEmailNotificationAsync(
             user,
             paymentId,
-            "Atenção: Ocorreu um problema com seu pagamento",
+            "Atenï¿½ï¿½o: Ocorreu um problema com seu pagamento",
             "~/Pages/EmailTemplates/Rejection/Email.cshtml",
             viewModel,
-            "Rejeição"
+            "Rejeiï¿½ï¿½o"
         );
     }
 
@@ -346,7 +346,7 @@ public class NotificationPaymentService(
             "Seu Reembolso foi aprovado! ??",
             "~/Pages/EmailTemplates/Refund/Email.cshtml",
             viewModel,
-            "Confirmação de Reembolso"
+            "Confirmaï¿½ï¿½o de Reembolso"
         );
     }
 }

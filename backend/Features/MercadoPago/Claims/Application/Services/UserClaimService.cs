@@ -23,15 +23,14 @@ public class UserClaimService(
 {
     public async Task<List<ClaimSummaryViewModel>> GetMyClaimsAsync()
     {
-        var userId = userContext.GetCurrentUserId().ToString() 
-            ?? throw new UnauthorizedAccessException("Usuário não autenticado.");
+        var userId = Guid.Parse(await userContext.GetCurrentUserId());
 
         var myClaims = await claimRepository.GetClaimsByUserIdAsync(userId);
 
         return myClaims
             .Select(c => new ClaimSummaryViewModel
             {
-                InternalId = c.Id,
+                InternalId = c.Id.ToString(),
                 MpClaimId = c.MercadoPagoClaimId,
                 Status = c.Status.ToString(),
                 Type = c.Type.ToString(),
@@ -43,8 +42,8 @@ public class UserClaimService(
 
     public async Task<ClaimDetailViewModel> GetMyClaimDetailAsync(string internalId)
     {
-        var userId = userContext.GetCurrentUserId().ToString();
-        var claim = await claimRepository.GetByIdAsync(internalId);
+        var userId = Guid.Parse(await userContext.GetCurrentUserId());
+        var claim = await claimRepository.GetByIdAsync(Guid.Parse(internalId));
 
         if (claim == null || claim.UserId != userId)
             throw new UnauthorizedAccessException("Essa reclamação não é sua.");
@@ -53,7 +52,7 @@ public class UserClaimService(
 
         return new ClaimDetailViewModel
         {
-            InternalId = claim.Id,
+            InternalId = claim.Id.ToString(),
             MpClaimId = claim.MercadoPagoClaimId,
             Status = claim.Status.ToString(),
             Messages = messages
@@ -75,27 +74,27 @@ public class UserClaimService(
         if (string.IsNullOrWhiteSpace(message))
             throw new ArgumentException("Mensagem não pode ser vazia.", nameof(message));
 
-        var userId = userContext.GetCurrentUserId().ToString();
-        var claim = await claimRepository.GetByIdAsync(internalId);
+        var userId = Guid.Parse(await userContext.GetCurrentUserId());
+        var claim = await claimRepository.GetByIdAsync(Guid.Parse(internalId));
 
         if (claim == null || claim.UserId != userId)
             throw new UnauthorizedAccessException("Ação não permitida.");
 
         await mpService.SendMessageAsync(claim.MercadoPagoClaimId, message);
 
-        await hubContext.Clients.User(userId).SendAsync("ReceiveMessage", new { claimId = claim.Id });
+        await hubContext.Clients.User(userId.ToString()).SendAsync("ReceiveMessage", new { claimId = claim.Id });
     }
 
     public async Task RequestMediationAsync(string internalId)
     {
-        var userId = userContext.GetCurrentUserId().ToString();
-        var claim = await claimRepository.GetByIdAsync(internalId);
+        var userId = Guid.Parse(await userContext.GetCurrentUserId());
+        var claim = await claimRepository.GetByIdAsync(Guid.Parse(internalId));
 
         if (claim == null || claim.UserId != userId)
             throw new UnauthorizedAccessException("Ação não permitida.");
 
         await mpService.EscalateToMediationAsync(claim.MercadoPagoClaimId);
 
-        await hubContext.Clients.User(userId).SendAsync("ReceiveMessage", new { claimId = claim.Id });
+        await hubContext.Clients.User(userId.ToString()).SendAsync("ReceiveMessage", new { claimId = claim.Id });
     }
 }

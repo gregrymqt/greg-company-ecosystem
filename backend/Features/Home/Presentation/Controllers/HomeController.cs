@@ -59,7 +59,7 @@ public class HomeController : ApiControllerBase
     [HttpPut("hero/{id}")]
     [Authorize(Roles = "Admin")]
     [AllowLargeFile(2048)]
-    public async Task<IActionResult> UpdateHero(string id, [FromForm] CreateUpdateHeroDto dto)
+    public async Task<IActionResult> UpdateHero(Guid id, [FromForm] CreateUpdateHeroDto dto)
     {
         try
         {
@@ -78,7 +78,7 @@ public class HomeController : ApiControllerBase
 
     [HttpDelete("hero/{id}")]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> DeleteHero(string id)
+    public async Task<IActionResult> DeleteHero(Guid id)
     {
         try
         {
@@ -111,7 +111,7 @@ public class HomeController : ApiControllerBase
 
     [HttpPut("services/{id}")]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> UpdateService(string id, [FromBody] CreateUpdateServiceDto dto)
+    public async Task<IActionResult> UpdateService(Guid id, [FromBody] CreateUpdateServiceDto dto)
     {
         try
         {
@@ -126,7 +126,7 @@ public class HomeController : ApiControllerBase
 
     [HttpDelete("services/{id}")]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> DeleteService(string id)
+    public async Task<IActionResult> DeleteService(Guid id)
     {
         try
         {

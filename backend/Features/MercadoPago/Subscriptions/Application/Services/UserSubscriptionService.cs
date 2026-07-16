@@ -47,14 +47,14 @@ public class UserSubscriptionService : IUserSubscriptionService
             async () =>
             {
                 var mpSubscription = await _mpSubscriptionService.GetSubscriptionByIdAsync(
-                    await GetActiveSubscriptionExternalIdAsync(userId)
+                    await GetActiveSubscriptionExternalIdAsync(Guid.Parse(userId))
                 );
 
                 if (mpSubscription == null)
                     return null;
 
                 var subscription = await _repository.GetByExternalIdAsync(
-                    await GetActiveSubscriptionExternalIdAsync(userId),
+                    await GetActiveSubscriptionExternalIdAsync(Guid.Parse(userId)),
                     includePlan: false,
                     asNoTracking: false
                 ) ?? throw new ResourceNotFoundException(
@@ -84,7 +84,7 @@ public class UserSubscriptionService : IUserSubscriptionService
         }
 
         var subscription = await _repository.GetByExternalIdAsync(
-            await GetActiveSubscriptionExternalIdAsync(userId),
+            await GetActiveSubscriptionExternalIdAsync(Guid.Parse(userId)),
             includePlan: false,
             asNoTracking: false
         ) ?? throw new ResourceNotFoundException(
@@ -144,7 +144,7 @@ public class UserSubscriptionService : IUserSubscriptionService
         }
     }
 
-    private async Task<string> GetActiveSubscriptionExternalIdAsync(string userId)
+    private async Task<string> GetActiveSubscriptionExternalIdAsync(Guid userId)
     {
         var subscription = await _repository.GetActiveSubscriptionByUserIdAsync(userId);
         return subscription?.ExternalId

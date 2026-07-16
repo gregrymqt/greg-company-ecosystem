@@ -63,7 +63,7 @@ namespace MeuCrudCsharp.Features.MercadoPago.Subscriptions.Application.Services
 
             var newSubscription = new Subscription
             {
-                UserId = userId,
+                UserId = Guid.Parse(userId),
                 Status = SubscriptionStatus.Pending.ToMpString(),
                 ExternalId = planExternalId,
                 CardTokenId = savedCardId,
@@ -338,7 +338,7 @@ namespace MeuCrudCsharp.Features.MercadoPago.Subscriptions.Application.Services
 
             var newSubscription = new Subscription
             {
-                UserId = userId,
+                UserId = Guid.Parse(userId),
                 PlanId = localPlan.Id,
                 ExternalId = paymentId,
                 Status = SubscriptionStatus.Authorized.ToMpString(),
@@ -376,7 +376,7 @@ namespace MeuCrudCsharp.Features.MercadoPago.Subscriptions.Application.Services
 
             var dtos = items.Select(s => new AdminSubscriptionListDto(
                 SubscriptionId: s.ExternalId,
-                UserId: s.UserId,
+                UserId: s.UserId.ToString(),
                 PayerEmail: s.PayerEmail,
                 PlanName: s.Plan?.Name ?? "Desconhecido",
                 Status: s.Status,

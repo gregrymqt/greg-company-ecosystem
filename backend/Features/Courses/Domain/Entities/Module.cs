@@ -1,20 +1,21 @@
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
-using MeuCrudCsharp.Features.Videos.Domain.Entities;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MeuCrudCsharp.Features.Courses.Domain.Entities;
 
 public class Module
 {
-    [BsonId]
-    [BsonRepresentation(BsonType.ObjectId)]
-    public string Id { get; set; } = ObjectId.GenerateNewId().ToString();
-
-    public Guid PublicId { get; set; } = Guid.NewGuid();
+    [Key]
+    public Guid Id { get; set; } = Guid.NewGuid();
 
     public string Title { get; set; } = string.Empty;
 
     public int Order { get; set; }
+
+    public Guid? CourseId { get; set; }
+
+    [ForeignKey(nameof(CourseId))]
+    public Course? Course { get; set; }
 
     public List<Lesson> Lessons { get; set; } = new();
 }
