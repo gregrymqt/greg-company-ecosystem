@@ -5,7 +5,6 @@ from fastapi import FastAPI
 import uvicorn
 
 from app.config.settings import settings
-from app.config.database import connect_to_mongo, close_mongo_connection
 from app.config.redis_db import redis_cache
 from app.repositories.product_repository import ProductRepository
 from app.workers.scraper_worker import ScraperWorker
@@ -20,7 +19,6 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(level
 async def lifespan(app: FastAPI):
     # Startup
     logger.info("Iniciando aplicação e conectando aos serviços...")
-    await connect_to_mongo()
     await redis_cache.connect()
     
     repository = ProductRepository()
@@ -39,7 +37,6 @@ async def lifespan(app: FastAPI):
         await worker_task
     except asyncio.CancelledError:
         pass
-    await close_mongo_connection()
     await redis_cache.disconnect()
 
 app = FastAPI(title="Ecommerce Bot API", lifespan=lifespan)

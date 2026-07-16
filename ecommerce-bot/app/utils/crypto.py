@@ -3,6 +3,9 @@ import base64
 import logging
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
+from app.config.database import AsyncSessionLocal
+from app.models.database_models import TenantConfigModel
+
 logger = logging.getLogger(__name__)
 
 def _get_key() -> bytes:
@@ -37,3 +40,32 @@ def decrypt_api_key(cipher_text_b64: str) -> str:
         logger.error(f"Erro ao descriptografar chave: {e}")
         # Retorna a chave original caso a mesma não esteja criptografada (fallback backward-compatibility)
         return cipher_text_b64
+
+
+async def get_tenant_key(tenant_id: str, provider: str) -> str | None:
+    """Lê a chave criptografada (BYOK) do tenant na tabela 'tenant_configs' e a descriptografa."""
+    async with AsyncSessionLocal() as session:
+        config = await session.get(TenantConfigModel, tenant_id)
+        if not config:
+            return None
+        encrypted_keys = config.encrypted_keys or {}
+        encrypted_value = encrypted_keys.get(f"{provider.lower()}_api_key")
+        if not encrypted_value:
+            return None
+        return decrypt_api_key(encrypted_value)
+
+
+async def save_tenant_key(tenant_id: str, provider: str, raw_token: str) -> str:
+    """Criptografa e persiste a chave do tenant na tabela 'tenant_configs' (BYOK)."""
+    from sqlalchemy import select
+    encrypted_value = encrypt_api_key(raw_token)
+    async with AsyncSessionLocal() as session:
+        config = await session.get(TenantConfigModel, tenant_id)
+        if config is None:
+            config = TenantConfigModel(tenant_id=tenant_id, encrypted_keys={})
+            session.add(config)
+        keys = dict(config.encrypted_keys or {})
+        keys[f"{provider.lower()}_api_key"] = encrypted_value
+        config.encrypted_keys = keys
+        await session.commit()
+    return encrypted_value

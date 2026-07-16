@@ -4,9 +4,8 @@ import logging
 from fastapi import HTTPException, status
 import aio_pika
 
-from app.config.database import db
-from app.config.rabbitmq import get_rabbitmq_connection
-from app.utils.crypto import encrypt_api_key
+from app.config.database import AsyncSessionLocal
+from app.utils.crypto import save_tenant_key
 from app.models.messages import ImportRequestMessage
 
 logger = logging.getLogger(__name__)
@@ -15,8 +14,8 @@ class AIScraperService:
     @staticmethod
     async def save_credentials(tenant_id: str, provider: str, raw_token: str):
         try:
-            # Executa a criptografia simétrica com AES-256 GCM
-            encrypted_token = encrypt_api_key(raw_token)
+            # Executa a criptografia simétrica com AES-256 GCM e persiste no Postgres (tabela tenant_configs)
+            await save_tenant_key(tenant_id, provider, raw_token)
         except Exception as e:
             logger.error(f"Falha ao criptografar token para o tenant {tenant_id}: {e}")
             raise HTTPException(
@@ -24,20 +23,6 @@ class AIScraperService:
                 detail="Erro interno ao processar e proteger a credencial de segurança."
             )
 
-        # Persistência isolada no MongoDB atrelada ao tenant_id
-        collection = db.client["ecommerce"]["tenants"]
-        
-        await collection.update_one(
-            {"tenant_id": tenant_id},
-            {
-                "$set": {
-                    f"settings.{provider.lower()}_api_key": encrypted_token,
-                    "updated_at": uuid.uuid4()
-                }
-            },
-            upsert=True
-        )
-        
         logger.info(f"Credencial do provedor '{provider}' salva com sucesso para o Tenant: {tenant_id}")
         return {"status": "success", "message": "Credencial salva e criptografada com sucesso."}
 

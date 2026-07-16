@@ -4,8 +4,9 @@ from fastapi import APIRouter, Depends, HTTPException, Header, status
 from fastapi.responses import JSONResponse
 from typing import Dict, Any
 from app.services.shopify_service import ShopifyService
-from app.config.database import db
-from app.utils.crypto import decrypt_api_key
+from app.config.database import AsyncSessionLocal
+from app.models.database_models import TenantConfigModel
+from app.utils.crypto import decrypt_api_key, get_tenant_key
 from app.exporters.csv_exporter import CsvExportService
 from app.models.shopify_models import ShopifyProductSetInput
 from app.dependencies.auth import get_current_tenant_user
@@ -19,29 +20,30 @@ router = APIRouter(
 async def get_shopify_service(x_tenant_id: str = Header(..., alias="X-Tenant-ID")) -> ShopifyService:
     """
     Dependency Injection que extrai o tenant_id do Header HTTP,
-    recupera os tokens criptografados do Shopify no MongoDB e instancia o serviço.
+    recupera os tokens criptografados do Shopify no PostgreSQL e instancia o serviço.
     """
-    tenant_col = db.client["ecommerce"]["tenants"]
-    tenant = await tenant_col.find_one({"tenant_id": x_tenant_id})
-    
-    if not tenant:
+    async with AsyncSessionLocal() as session:
+        config = await session.get(TenantConfigModel, x_tenant_id)
+
+    if not config:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, 
             detail=f"Tenant '{x_tenant_id}' não encontrado no ecossistema."
         )
-        
+
+    tenant = config.encrypted_keys or {}
     shop_domain = tenant.get("shopify_shop_domain")
     raw_token = tenant.get("shopify_access_token")
-    
+
     if not shop_domain or not raw_token:
         raise HTTPException(
             status_code=status.HTTP_412_PRECONDITION_FAILED,
             detail="Credenciais do Shopify (Domínio ou Access Token) não configuradas para este Tenant."
         )
-        
+
     # 🛡️ Descriptografia AES-256 GCM mantendo a paridade com o fluxo BYOK do ecossistema
     access_token = decrypt_api_key(raw_token)
-    
+
     return ShopifyService(shop_domain=str(shop_domain), access_token=access_token)
 
 @router.post("/products", status_code=status.HTTP_201_CREATED, response_model=Dict[str, Any])

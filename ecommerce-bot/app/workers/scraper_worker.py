@@ -7,7 +7,8 @@ from app.models.messages import ImportRequestMessage
 from app.parsers.json_ld_parser import JsonLdParserService
 from app.parsers.markdown_parser import MarkdownParserService
 from app.services.notification_service import NotificationService
-from app.config.database import db
+from app.config.database import AsyncSessionLocal
+from app.models.database_models import ScrapingMetadataModel
 from urllib.parse import urljoin, urlparse
 from datetime import datetime, timezone, timedelta
 from app.config.settings import settings
@@ -21,7 +22,7 @@ class ScraperWorker:
         self.client = httpx.AsyncClient(timeout=10.0, follow_redirects=True)
         self.repository = repository
         self.json_ld_parser = JsonLdParserService()
-        
+
         # Load API key for MarkdownParserService
         api_key = settings.OPENAI_API_KEY
         self.markdown_parser = MarkdownParserService(api_key=api_key)
@@ -29,38 +30,40 @@ class ScraperWorker:
 
     async def _handle_scraping_failure(self, domain: str, error_type: str, url: str):
         """Registra falha consecutiva e dispara alerta se atingir o limiar (Regra dos 3 Erros)."""
-        collection = db.client["ecommerce"]["scraping_metadata"]
-        
-        doc = await collection.find_one_and_update(
-            {"domain": domain},
-            {"$inc": {"consecutive_failures": 1}},
-            upsert=True,
-            return_document=True
-        )
-        
-        failures = doc.get("consecutive_failures", 1)
-        silenced_until = doc.get("silenced_until")
-        
+        async with AsyncSessionLocal() as session:
+            meta = await session.get(ScrapingMetadataModel, domain)
+            if meta is None:
+                meta = ScrapingMetadataModel(domain=domain, consecutive_failures=1)
+                session.add(meta)
+            else:
+                current = meta.consecutive_failures or 0
+                meta.consecutive_failures = current + 1
+            await session.commit()
+
+            failures = meta.consecutive_failures or 1
+            silenced_until = meta.silenced_until
+
         # Verifica Anti-Spam (cool-down)
         is_silenced = silenced_until and silenced_until.replace(tzinfo=timezone.utc) > datetime.now(timezone.utc)
-        
+
         if failures >= 3 and not is_silenced:
             # Dispara webhook
             await self.notification_service.send_discord_alert(domain, error_type, url)
-            
+
             # Silencia novos alertas para esse domínio por 1 hora
-            await collection.update_one(
-                {"domain": domain},
-                {"$set": {"silenced_until": datetime.now(timezone.utc) + timedelta(hours=1)}}
-            )
+            async with AsyncSessionLocal() as session:
+                meta = await session.get(ScrapingMetadataModel, domain)
+                if meta is not None:
+                    meta.silenced_until = datetime.now(timezone.utc) + timedelta(hours=1)
+                    await session.commit()
 
     async def _handle_scraping_success(self, domain: str):
         """Reseta o contador de falhas após um scraping bem sucedido."""
-        collection = db.client["ecommerce"]["scraping_metadata"]
-        await collection.update_one(
-            {"domain": domain, "consecutive_failures": {"$gt": 0}},
-            {"$set": {"consecutive_failures": 0}}
-        )
+        async with AsyncSessionLocal() as session:
+            meta = await session.get(ScrapingMetadataModel, domain)
+            if meta is not None and (meta.consecutive_failures or 0) > 0:
+                meta.consecutive_failures = 0
+                await session.commit()
 
     async def _process_product_page(self, product_url: str, tenant_id: str):
         """Busca e extrai os dados do produto individual."""

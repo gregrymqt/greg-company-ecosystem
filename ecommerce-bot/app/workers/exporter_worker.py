@@ -4,9 +4,11 @@ from datetime import datetime, timezone
 import logging
 from dotenv import load_dotenv
 
-from app.config.database import db
+from app.config.database import AsyncSessionLocal
+from app.models.database_models import ProductModel
 from app.models.products import Product, ProductStatus
 from app.exporters.csv_exporter import CsvExportService
+from sqlalchemy import select
 
 load_dotenv()
 logger = logging.getLogger(__name__)
@@ -21,28 +23,34 @@ class ExporterWorker:
         self.platform = platform.lower()
 
     async def fetch_processed_products(self):
-        """Busca no MongoDB os produtos que já passaram pela IA e estão com status 'processed'."""
+        """Busca no PostgreSQL os produtos que já passaram pela IA e estão com status 'processed'."""
         try:
-            collection = db.client["ecommerce"]["products"]
-            query = {"status": ProductStatus.PROCESSED.value, "tenant_id": self.tenant_id}
-            raw_products = await collection.find(query).to_list(length=5000)
+            async with AsyncSessionLocal() as session:
+                stmt = select(ProductModel).where(
+                    ProductModel.status == ProductStatus.PROCESSED.value,
+                    ProductModel.tenant_id == self.tenant_id,
+                ).limit(5000)
+                result = await session.execute(stmt)
+                rows = result.scalars().all()
+
             products = []
-            for rp in raw_products:
+            for row in rows:
                 try:
-                    products.append(Product(**rp))
+                    payload = dict(row.raw_payload or {})
+                    products.append(Product(**payload))
                 except Exception as e:
-                    logger.warning(f"Aviso: Não foi possível carregar o produto {rp.get('_id')} no modelo Product. Erro: {e}")
+                    logger.warning(f"Aviso: Não foi possível carregar o produto {row.id} no modelo Product. Erro: {e}")
             return products
         except Exception as e:
-            logger.error(f"Erro ao buscar produtos no MongoDB: {e}")
+            logger.error(f"Erro ao buscar produtos no PostgreSQL: {e}")
             return []
 
     async def export(self):
         """Executa o fluxo completo: Buscar, delegar pro Service, salvar e atualizar Banco."""
         logger.info(f"Iniciando processo de exportação para {self.platform.capitalize()}...")
-        
+
         products = await self.fetch_processed_products()
-        
+
         if not products:
             logger.info("Nenhum produto com status 'processed' encontrado. Nada a exportar.")
             return
@@ -80,39 +88,43 @@ class ExporterWorker:
         try:
             with open(filename, mode='wb') as file:
                 file.write(csv_bytes)
-            
+
             logger.info(f"Sucesso: Arquivo gerado em '{filename}'.")
-            
+
             # Etapa crucial: marcar no banco como exportado para evitar duplicidade
             await self.mark_as_exported([p.sku for p in products])
-            
+
         except Exception as e:
             logger.error(f"Erro crítico ao gerar o arquivo CSV: {e}")
 
     async def mark_as_exported(self, product_skus):
-        """Atualiza os documentos exportados para 'status: Exported' no MongoDB."""
+        """Atualiza os documentos exportados para 'status: Exported' no PostgreSQL."""
         if not product_skus:
             return
 
         try:
-            collection = db.client["ecommerce"]["products"]
-            result = await collection.update_many(
-                {"tenant_id": self.tenant_id, "sku": {"$in": product_skus}},
-                {"$set": {"status": ProductStatus.EXPORTED.value, "updated_at": datetime.now(timezone.utc)}}
-            )
-            logger.info(f"Concluído: {result.modified_count} documentos marcados como 'Exported' no MongoDB.")
+            async with AsyncSessionLocal() as session:
+                stmt = (
+                    select(ProductModel)
+                    .where(
+                        ProductModel.tenant_id == self.tenant_id,
+                        ProductModel.sku.in_(product_skus),
+                    )
+                )
+                result = await session.execute(stmt)
+                rows = result.scalars().all()
+                count = 0
+                for row in rows:
+                    row.status = ProductStatus.EXPORTED.value
+                    count += 1
+                await session.commit()
+            logger.info(f"Concluído: {count} documentos marcados como 'Exported' no PostgreSQL.")
         except Exception as e:
-            logger.error(f"Erro ao atualizar o status no MongoDB: {e}")
+            logger.error(f"Erro ao atualizar o status no PostgreSQL: {e}")
 
 if __name__ == "__main__":
     async def main():
-        from app.config.database import connect_to_mongo, close_mongo_connection
-        await connect_to_mongo()
-        
-        # Teste rápido
         exporter = ExporterWorker(tenant_id="default_tenant", platform="shopify")
         await exporter.export()
-        
-        await close_mongo_connection()
-        
+
     asyncio.run(main())

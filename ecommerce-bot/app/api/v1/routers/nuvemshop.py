@@ -3,7 +3,8 @@ from fastapi.responses import JSONResponse
 from typing import List, Dict, Any, Optional
 from app.services.nuvemshop_service import NuvemshopService
 from app.models.nuvemshop_models import NuvemshopProductRequest
-from app.config.database import db
+from app.config.database import AsyncSessionLocal
+from app.models.database_models import TenantConfigModel
 from app.utils.crypto import decrypt_api_key
 from app.exporters.csv_exporter import CsvExportService
 from app.dependencies.auth import get_current_tenant_user
@@ -17,27 +18,28 @@ router = APIRouter(
 async def get_nuvemshop_service(x_tenant_id: str = Header(..., alias="X-Tenant-ID")) -> NuvemshopService:
     """
     Dependency Injection que extrai o tenant_id do Header HTTP,
-    recupera os tokens da Nuvemshop no MongoDB e instancia o serviço.
+    recupera os tokens da Nuvemshop no PostgreSQL e instancia o serviço.
     """
-    tenant_col = db.client["ecommerce"]["tenants"]
-    tenant = await tenant_col.find_one({"tenant_id": x_tenant_id})
-    
-    if not tenant:
+    async with AsyncSessionLocal() as session:
+        config = await session.get(TenantConfigModel, x_tenant_id)
+
+    if not config:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Tenant '{x_tenant_id}' não encontrado no ecossistema."
         )
-        
+
+    tenant = config.encrypted_keys or {}
     store_id = tenant.get("nuvemshop_store_id")
     raw_token = tenant.get("nuvemshop_access_token")
     app_email = tenant.get("email", "suporte@gregcompany.com")
-    
+
     if not store_id or not raw_token:
         raise HTTPException(
             status_code=status.HTTP_412_PRECONDITION_FAILED,
             detail="Credenciais da Nuvemshop não configuradas ou ausentes para este Tenant."
         )
-    
+
     # 🛡️ Aqui entra a descriptografia AES-256 GCM do seu ecossistema:
     access_token = decrypt_api_key(raw_token)
 

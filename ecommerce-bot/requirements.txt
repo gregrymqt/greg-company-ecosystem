@@ -1,4 +1,6 @@
-motor
+sqlalchemy>=2.0.0
+asyncpg>=0.29.0
+greenlet>=3.0.0  # Necessário para o SQLAlchemy assíncrono
 pydantic
 beautifulsoup4
 httpx

@@ -1,35 +1,31 @@
 import os
-import logging
-from motor.motor_asyncio import AsyncIOMotorClient
+from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
+from sqlalchemy.orm import declarative_base
+from sqlalchemy.pool import NullPool
 
-class Database:
-    client: AsyncIOMotorClient = None
+# Lê a connection string definida na infraestrutura (porta 6543)
+DATABASE_URL = os.getenv("POSTGRES_URI")
 
-db = Database()
+# Se vier com o prefixo 'postgresql://', substitui para o driver assíncrono do 'asyncpg'
+if DATABASE_URL and DATABASE_URL.startswith("postgresql://"):
+    DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
 
-from app.config.settings import settings
+# Usamos NullPool para evitar conexões persistentes ociosas nos workers e API
+engine = create_async_engine(
+    DATABASE_URL,
+    echo=False,
+    poolclass=NullPool
+)
 
-async def connect_to_mongo():
-    mongo_uri = settings.MONGO_URI
-    db.client = AsyncIOMotorClient(mongo_uri)
-    
-    # Criar índices
-    collection = db.client["ecommerce"]["products"]
-    await collection.create_index("status")
-    await collection.create_index([("tenant_id", 1), ("sku", 1)], unique=True)
-    
-    # Criar índice TTL de 1 hora (3600 segundos) para Rate Limiting
-    await db.client["ecommerce"]["demo_rate_limits"].create_index("created_at", expireAfterSeconds=3600)
-    
-    # Criar índice de Busca Semântica na coleção de cache
-    await db.client["ecommerce"]["semantic_cache"].create_index([("description", "text"), ("title", "text")])
-    
-    # Criar índice TTL de 24 horas (86400 segundos) para expurgo da Landing Page
-    await collection.create_index("created_at", expireAfterSeconds=86400, partialFilterExpression={"tenant_id": "demo_tenant"})
-    
-    logging.info("Conectado ao MongoDB e índices verificados!")
+AsyncSessionLocal = async_sessionmaker(
+    bind=engine,
+    class_=AsyncSession,
+    expire_on_commit=False
+)
 
-async def close_mongo_connection():
-    if db.client:
-        db.client.close()
-        logging.info("Conexão com MongoDB fechada.")
+Base = declarative_base()
+
+# Dependência para endpoints FastAPI (se houver)
+async def get_db():
+    async with AsyncSessionLocal() as session:
+        yield session

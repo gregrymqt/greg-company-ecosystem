@@ -2,11 +2,13 @@ import asyncio
 import logging
 from datetime import datetime, timezone, timedelta
 from tenacity import retry, wait_exponential, stop_after_attempt, retry_if_exception_type
-from app.config.database import db
+from app.config.database import AsyncSessionLocal
+from app.models.database_models import ProductModel
 from app.services.llm_service import AllProvidersExhaustedError
 from app.utils.logger import get_logger
-from app.utils.crypto import decrypt_api_key
+from app.utils.crypto import get_tenant_key
 from app.models.products import Product, ProductStatus
+from sqlalchemy import select, update
 
 logger = get_logger("ProcessorWorker")
 
@@ -20,7 +22,7 @@ class ProcessorWorker:
         self.last_cleanup = datetime.now(timezone.utc)
 
     @retry(
-        wait=wait_exponential(multiplier=1, min=4, max=60), 
+        wait=wait_exponential(multiplier=1, min=4, max=60),
         stop=stop_after_attempt(5),
         retry=retry_if_exception_type(AllProvidersExhaustedError),
         before_sleep=_log_retry
@@ -32,78 +34,77 @@ class ProcessorWorker:
     async def run(self):
         logger.info("ProcessorWorker iniciado. Monitorando novos produtos...")
         while True:
-            collection = db.client["ecommerce"]["products"]
-            
-            # Limpeza de produtos órfãos (travados em Processing há mais de 10 min)
-            current_time = datetime.now(timezone.utc)
-            if current_time - self.last_cleanup > timedelta(minutes=5):
-                ten_minutes_ago = current_time - timedelta(minutes=10)
-                await collection.update_many(
-                    {"status": ProductStatus.PROCESSING.value, "updated_at": {"$lt": ten_minutes_ago}},
-                    {"$set": {"status": ProductStatus.RAW.value}}
-                )
-                self.last_cleanup = current_time
+            async with AsyncSessionLocal() as session:
+                # Limpeza de produtos órfãos (travados em Processing há mais de 10 min)
+                current_time = datetime.now(timezone.utc)
+                if current_time - self.last_cleanup > timedelta(minutes=5):
+                    ten_minutes_ago = current_time - timedelta(minutes=10)
+                    cleanup = (
+                        update(ProductModel)
+                        .where(
+                            ProductModel.status == ProductStatus.PROCESSING.value,
+                            ProductModel.updated_at < ten_minutes_ago,
+                        )
+                        .values(status=ProductStatus.RAW.value)
+                    )
+                    await session.execute(cleanup)
+                    await session.commit()
+                    self.last_cleanup = current_time
 
-            # Pega um produto com status Raw e atualiza para Processing atomicamente
-            product = await collection.find_one_and_update(
-                {"status": ProductStatus.RAW.value},
-                {"$set": {"status": ProductStatus.PROCESSING.value, "updated_at": datetime.now(timezone.utc)}},
-                return_document=True
-            )
-            
-            if not product:
-                # Se não houver nada, dorme antes de checar de novo
-                await asyncio.sleep(10)
-                continue
+                # Pega um produto com status Raw e atualiza para Processing atomicamente
+                stmt = (
+                    select(ProductModel)
+                    .where(ProductModel.status == ProductStatus.RAW.value)
+                    .order_by(ProductModel.created_at)
+                    .limit(1)
+                )
+                result = await session.execute(stmt)
+                row = result.scalar_one_or_none()
+
+                if row is None:
+                    await asyncio.sleep(10)
+                    continue
+
+                row.status = ProductStatus.PROCESSING.value
+                row.updated_at = datetime.now(timezone.utc)
+                await session.commit()
+                product_dict = dict(row.raw_payload or {})
 
             try:
-                product_model = Product(**product)
+                product_model = Product(**product_dict)
             except Exception as e:
-                logger.error(f"Erro de validação no DB para o produto {product.get('sku', 'unknown')}: {e}", exc_info=True)
-                await collection.update_one(
-                    {"_id": product["_id"]},
-                    {"$set": {"status": ProductStatus.FAILED.value, "last_error": str(e), "updated_at": datetime.now(timezone.utc)}}
-                )
+                logger.error(f"Erro de validação no DB para o produto {product_dict.get('sku', 'unknown')}: {e}", exc_info=True)
+                await self.repo.set_status(product_dict.get("tenant_id"), product_dict.get("sku"), ProductStatus.FAILED.value)
                 continue
 
             sku = product_model.sku
             log_extra = {"sku": sku}
             try:
                 logger.info(f"Iniciando SKU: {sku}", extra=log_extra)
-                
+
                 # Suporte a BYOK (Bring Your Own Key) para o ProcessorWorker
                 current_llm = self.llm
                 if product_model.tenant_id:
-                    tenant_col = collection.database["tenants"]
-                    tenant_doc = await tenant_col.find_one({"tenant_id": product_model.tenant_id})
-                    if tenant_doc:
-                        raw_key = tenant_doc.get("settings", {}).get("openai_api_key") or tenant_doc.get("openai_api_key")
-                        tenant_openai_key = decrypt_api_key(raw_key) if raw_key else None
-                        if tenant_openai_key:
-                            from app.services.llm_service import LLMService
-                            logger.info(f"Usando chave de API própria (BYOK) para o tenant: {product_model.tenant_id}")
-                            current_llm = LLMService(openai_api_key=tenant_openai_key)
-                            
+                    tenant_openai_key = await get_tenant_key(product_model.tenant_id, "openai")
+                    if tenant_openai_key:
+                        from app.services.llm_service import LLMService
+                        logger.info(f"Usando chave de API própria (BYOK) para o tenant: {product_model.tenant_id}")
+                        current_llm = LLMService(openai_api_key=tenant_openai_key)
+
                 processed_data = await self._process_with_retry(product_model, current_llm)
-                
+
                 # Atualizar o status para PROCESSED
                 processed_data.status = ProductStatus.PROCESSED
                 processed_data.updated_at = datetime.now(timezone.utc)
                 await self.repo.upsert_product(processed_data)
-                
+
             except (ValueError, TypeError) as e:
                 logger.error(f"Erro de validação de dados no produto {sku}: {e}", extra=log_extra, exc_info=True)
-                await collection.update_one(
-                    {"tenant_id": product_model.tenant_id, "sku": sku},
-                    {"$set": {"status": ProductStatus.FAILED.value, "last_error": str(e), "updated_at": datetime.now(timezone.utc)}}
-                )
+                await self.repo.set_status(product_model.tenant_id, sku, ProductStatus.FAILED.value)
             except Exception as e:
                 logger.error(f"Erro final (após retries) ao processar produto {sku}: {e}", extra=log_extra, exc_info=True)
                 # Atualiza para erro para não entrar em loop infinito (Poison Pill)
-                await collection.update_one(
-                    {"tenant_id": product_model.tenant_id, "sku": sku},
-                    {"$set": {"status": ProductStatus.FAILED.value, "last_error": str(e), "updated_at": datetime.now(timezone.utc)}}
-                )
-            
+                await self.repo.set_status(product_model.tenant_id, sku, ProductStatus.FAILED.value)
+
             # Pequena pausa entre itens para não sobrecarregar as APIs
             await asyncio.sleep(1)

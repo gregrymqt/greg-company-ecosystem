@@ -1,4 +1,5 @@
-﻿using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Interfaces;
+// Service for processing refunds via Mercado Pago.
+using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Interfaces;
 using MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Interfaces;
 using MeuCrudCsharp.Data;
 using MeuCrudCsharp.Features.Base;

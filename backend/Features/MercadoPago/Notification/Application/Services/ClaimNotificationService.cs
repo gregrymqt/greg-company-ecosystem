@@ -1,3 +1,4 @@
+// Service for handling Mercado Pago claim notifications.
 using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Interfaces;
 using MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Interfaces;
 using MeuCrudCsharp.Features.MercadoPago.Webhooks.Application.DTOs;

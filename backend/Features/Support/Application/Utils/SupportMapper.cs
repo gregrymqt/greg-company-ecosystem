@@ -1,3 +1,4 @@
+// Mapper class for support tickets and response DTOs.
 using MeuCrudCsharp.Features.Support.Domain.Entities;
 using MeuCrudCsharp.Features.Support.Application.DTOs;
 

@@ -1,7 +1,8 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
-    MONGO_URI: str
+    MONGO_URI: str = ""
+    POSTGRES_URI: str
     RABBITMQ_URL: str
     OPENAI_API_KEY: str
     GEMINI_API_KEY: str
