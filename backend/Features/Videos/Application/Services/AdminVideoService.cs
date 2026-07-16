@@ -110,9 +110,12 @@ public class AdminVideoService : IAdminVideoService
                 StorageIdentifier = storageIdentifier,
                 FileId = fileId,
                 ThumbnailUrl = thumbnailUrl,
-                Status = VideoStatus.Processing,
+                Status = VideoStatus.Pending,
                 UploadDate = DateTime.UtcNow,
+                DateCreated = DateTime.UtcNow,
+                LastUpdated = DateTime.UtcNow,
                 Duration = TimeSpan.Zero,
+                RawVideoUrl = $"greg-videos-raw/{storageIdentifier}"
             };
 
             await _videoRepository.AddAsync(entity);

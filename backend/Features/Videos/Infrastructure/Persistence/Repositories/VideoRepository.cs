@@ -1,4 +1,4 @@
-﻿using MeuCrudCsharp.Features.Videos.Domain.Interfaces;
+using MeuCrudCsharp.Features.Videos.Domain.Interfaces;
 using MeuCrudCsharp.Data;
 using MeuCrudCsharp.Features.Videos.Application.Interfaces;
 using MeuCrudCsharp.Features.Videos.Domain.Entities;
@@ -61,10 +61,17 @@ namespace MeuCrudCsharp.Features.Videos.Infrastructure.Persistence.Repositories
 
         public async Task<(List<Video> Items, int TotalCount)> GetAllPaginatedAsync(
             int page,
-            int pageSize
+            int pageSize,
+            VideoStatus? status = null
         )
         {
             var filter = FilterDefinition<Video>.Empty;
+            
+            if (status.HasValue)
+            {
+                filter = Builders<Video>.Filter.Eq(v => v.Status, status.Value);
+            }
+
             var totalCount = (int)await _videos.CountDocumentsAsync(filter);
 
             var items = await _videos.Find(filter)

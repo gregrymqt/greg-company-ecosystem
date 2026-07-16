@@ -22,10 +22,11 @@ namespace MeuCrudCsharp.Features.Videos.Application.Utils
                 UploadDate = video.UploadDate,
                 Duration = video.Duration,
                 Status = video.Status.ToString(),
+                RawVideoUrl = video.RawVideoUrl,
+                StreamingUrl = video.StreamingUrl,
                 CourseName = video.Course?.Name ?? string.Empty,
                 ThumbnailUrl = video.ThumbnailUrl ?? string.Empty,
             };
         }
     }
 }
-

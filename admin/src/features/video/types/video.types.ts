@@ -9,7 +9,7 @@
 // ENUMS E STATUS
 // =================================================================
 
-export type VideoStatus = 'Processing' | 'Available' | 'Error';
+export type VideoStatus = 'Pending' | 'Processing' | 'Ready' | 'Failed';
 
 // =================================================================
 // DTOs - Baseados em VideoDto.cs
@@ -27,6 +27,8 @@ export interface VideoDto {
   uploadDate: string; // ISO 8601 date string
   duration: string; // TimeSpan como string (ex: "00:12:30")
   status: VideoStatus;
+  rawVideoUrl?: string;
+  streamingUrl?: string;
   courseName?: string;
   thumbnailUrl?: string;
 }
@@ -107,9 +109,4 @@ export interface PlayerVideoDto {
   storageIdentifier: string; // Para construir URL do manifest
 }
 
-/**
- * Helper para construir URL do manifest HLS
- */
-export const getManifestUrl = (storageIdentifier: string): string => {
-  return `/api/videos/${storageIdentifier}/manifest.m3u8`;
-};
+

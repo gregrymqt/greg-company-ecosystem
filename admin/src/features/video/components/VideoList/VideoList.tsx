@@ -22,24 +22,29 @@ export const VideoList: React.FC<VideoListProps> = ({
   onNewClick
 }) => {
   
-  // Função auxiliar para status simples (Agora será utilizada)
   const getStatusBadge = (status: VideoStatus) => {
     switch (status) {
-      case 'Available':
+      case 'Pending':
         return (
-          <span className={`${styles.statusBadge} ${styles.available}`}>
-            Disponível
+          <span className={`${styles.statusBadge} ${styles.pending}`}>
+            Pendente
           </span>
         );
       case 'Processing':
         return (
           <span className={`${styles.statusBadge} ${styles.processing}`}>
-            Processando
+            <i className="fas fa-spinner fa-spin" style={{marginRight: '5px'}}></i> Processando
           </span>
         );
-      case 'Error':
+      case 'Ready':
         return (
-          <span className={`${styles.statusBadge} ${styles.error}`}>Erro</span>
+          <span className={`${styles.statusBadge} ${styles.ready}`}>
+            Pronto
+          </span>
+        );
+      case 'Failed':
+        return (
+          <span className={`${styles.statusBadge} ${styles.failed}`}>Falha</span>
         );
       default:
         return <span>-</span>;

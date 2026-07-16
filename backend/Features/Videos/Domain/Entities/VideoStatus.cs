@@ -2,7 +2,8 @@ namespace MeuCrudCsharp.Features.Videos.Domain.Entities;
 
 public enum VideoStatus
 {
-    Processing, // 0
-    Available, // 1
-    Error, // 2
+    Pending,    // 0
+    Processing, // 1
+    Ready,      // 2
+    Failed,     // 3
 }

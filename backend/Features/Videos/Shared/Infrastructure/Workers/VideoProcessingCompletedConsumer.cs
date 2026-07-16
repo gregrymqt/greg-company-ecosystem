@@ -60,13 +60,22 @@ public class VideoProcessingCompletedConsumer : RabbitMqConsumerBase
 
         if (payload.Success)
         {
-            video.Status = VideoStatus.Available;
+            video.Status = VideoStatus.Ready;
             video.Duration = TimeSpan.FromSeconds(payload.DurationInSeconds);
-            _logger.LogInformation("Processamento do video {VideoId} finalizado com sucesso.", video.PublicId);
+            video.StreamingUrl = payload.ManifestUrl;
+            
+            if (!string.IsNullOrEmpty(payload.RawVideoUrl))
+            {
+                video.RawVideoUrl = payload.RawVideoUrl;
+            }
+
+            video.LastUpdated = DateTime.UtcNow;
+            _logger.LogInformation("Processamento do video {VideoId} finalizado com sucesso. StreamingUrl gerada: {Url}", video.PublicId, video.StreamingUrl);
         }
         else
         {
-            video.Status = VideoStatus.Error;
+            video.Status = VideoStatus.Failed;
+            video.LastUpdated = DateTime.UtcNow;
             _logger.LogWarning("Falha ao processar o video {VideoId}. Erro: {Error}", video.PublicId, payload.Error);
         }
 
@@ -89,6 +98,8 @@ public class VideoProcessingCompletedConsumer : RabbitMqConsumerBase
         string StorageIdentifier,
         double DurationInSeconds,
         bool Success,
-        string Error
+        string Error,
+        string ManifestUrl,
+        string RawVideoUrl
     );
 }

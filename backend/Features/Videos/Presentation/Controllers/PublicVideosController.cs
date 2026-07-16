@@ -3,6 +3,7 @@ using MeuCrudCsharp.Features.Videos.Application.DTOs;
 using MeuCrudCsharp.Features.Videos.Domain.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MeuCrudCsharp.Features.Videos.Domain.Entities;
 
 namespace MeuCrudCsharp.Features.Videos.Presentation.Controllers
 {
@@ -24,8 +25,8 @@ namespace MeuCrudCsharp.Features.Videos.Presentation.Controllers
             {
                 var video = await _videoRepository.GetByPublicIdAsync(publicId);
                 
-                if (video == null)
-                    return NotFound(new { Message = "Vídeo não encontrado." });
+                if (video == null || video.Status != VideoStatus.Ready)
+                    return NotFound(new { Message = "Vídeo não encontrado ou indisponível." });
 
                 var dto = new VideoDto
                 {

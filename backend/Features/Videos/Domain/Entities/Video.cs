@@ -26,10 +26,16 @@ public class Video : IMongoDocument
     public required string StorageIdentifier { get; set; }
 
     public DateTime UploadDate { get; set; }
+    
+    public DateTime DateCreated { get; set; }
+    public DateTime LastUpdated { get; set; }
 
     public TimeSpan Duration { get; set; }
 
     public VideoStatus Status { get; set; }
+    
+    public string? RawVideoUrl { get; set; }
+    public string? StreamingUrl { get; set; }
 
     // --- RELACIONAMENTOS ---
 
@@ -52,7 +58,9 @@ public class Video : IMongoDocument
     public Video()
     {
         UploadDate = DateTime.UtcNow;
-        Status = VideoStatus.Processing;
+        DateCreated = DateTime.UtcNow;
+        LastUpdated = DateTime.UtcNow;
+        Status = VideoStatus.Pending;
     }
 }
 
