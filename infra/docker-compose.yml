@@ -1,6 +1,6 @@
 # ==========================================================
 # GREG COMPANY - INFRASTRUCTURE ORCHESTRATION (V2.2)
-# Stack: .NET Core | React | Go | Python | MongoDB | Redis | RabbitMQ
+# Stack: .NET Core | React | Go | Python | PostgreSQL | Redis | RabbitMQ
 # Security Level: Hardened / Least Privilege
 # ==========================================================
 
@@ -8,21 +8,25 @@ services:
 
   # --- [ INFRASTRUCTURE & DATA LAYER ] ---
 
-  mongodb:
-    image: mongo:7.0
-    container_name: mongodb-store
-    volumes:
-      - mongo-data:/data/db
-    networks:
-      - data-net
-    restart: always
-
   redis:
     image: "redis:7-alpine"
     container_name: redis-cache
     command: redis-server --appendonly yes
     volumes:
       - redis-data:/data
+    networks:
+      - data-net
+    restart: always
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: postgres-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB_NAME:-greg_company}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
     networks:
       - data-net
     restart: always
@@ -72,8 +76,8 @@ services:
       - ../.env
     environment:
       - ASPNETCORE_URLS=http://+:8080
-      - ConnectionStrings__MongoConnection=mongodb://mongodb:27017
-      - MongoDb__DatabaseName=${MONGO_DATABASE_NAME}
+      - ConnectionStrings__PostgresTransaction=${POSTGRES_TRANSACTION_CONNECTION_STRING}
+      - ConnectionStrings__PostgresSession=${POSTGRES_SESSION_CONNECTION_STRING}
       - ConnectionStrings__Redis=redis:6379
       - ConnectionStrings__RabbitMq=amqp://guest:guest@rabbitmq:5672/
       - MercadoPago__AccessToken=${MercadoPago__AccessToken}
@@ -82,9 +86,9 @@ services:
       - Jwt__Key=${Jwt__Key}
       - General__BaseUrl=${GENERAL__BASEURL}
     depends_on:
-      redis:
+      postgres:
         condition: service_started
-      mongodb:
+      redis:
         condition: service_started
       rabbitmq:
         condition: service_started
@@ -121,12 +125,11 @@ services:
     env_file:
       - ../.env
     environment:
-      - MONGO_URI=mongodb://mongodb:27017
-      - MONGO_DB_NAME=${MONGO_DATABASE_NAME}
+      - POSTGRES_URI=${POSTGRES_TRANSACTION_CONNECTION_STRING}
       - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
       - AES_MASTER_KEY=${AES_MASTER_KEY}
     depends_on:
-      mongodb:
+      postgres:
         condition: service_started
       rabbitmq:
         condition: service_started
@@ -170,6 +173,6 @@ networks:
     internal: true # Bloqueia qualquer tráfego que não venha das redes mapeadas acima
 
 volumes:
-  mongo-data:
   redis-data:
   rabbitmq-data:
+  postgres-data:
