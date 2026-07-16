@@ -3,10 +3,20 @@
 export interface PaymentItems {
   id: string;
   amount: number;
+  netReceivedAmount?: number;
   status: string;
-  createdAt: string; // O JSON retorna data como string ISO
+  createdAt: string; 
   description?: string;
   paymentMethod?: string;
+  payerEmail?: string;
+  userId?: string;
+}
+
+export interface AdminPaymentPaginatedResponse {
+  items: PaymentItems[];
+  totalItems: number;
+  totalPages: number;
+  currentPage: number;
 }
 
 export interface RefundStatusData {
@@ -16,6 +26,7 @@ export interface RefundStatusData {
 
 export interface TransactionFilters {
   status?: string;
+  search?: string;
   page?: number;
   pageSize?: number;
 }

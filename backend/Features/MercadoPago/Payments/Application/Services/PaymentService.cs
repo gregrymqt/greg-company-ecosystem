@@ -33,4 +33,32 @@ public class PaymentService(
 
         return historyDtos;
     }
+
+    public async Task<AdminPaymentPaginatedResponse> GetAdminPaymentsPaginatedAsync(int page, int pageSize, string? status, string? search)
+    {
+        var (items, totalCount) = await paymentRepository.GetAdminPaymentsPaginatedAsync(page, pageSize, status, search);
+
+        var dtos = items.Select(p => new AdminPaymentItemDto
+        {
+            Id = p.Id.ToString(),
+            Amount = p.Amount,
+            NetReceivedAmount = p.NetReceivedAmount,
+            Status = p.Status ?? string.Empty,
+            Description = p.Description,
+            CreatedAt = p.CreatedAt,
+            PaymentMethod = p.Method,
+            PayerEmail = p.PayerEmail,
+            UserId = p.UserId
+        }).ToList();
+
+        var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
+
+        return new AdminPaymentPaginatedResponse
+        {
+            Items = dtos,
+            TotalItems = (int)totalCount,
+            TotalPages = totalPages,
+            CurrentPage = page
+        };
+    }
 }

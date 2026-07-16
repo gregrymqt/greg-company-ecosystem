@@ -94,6 +94,32 @@ public class PaymentRepository : IPaymentRepository
         _payments.DeleteOne(p => p.Id == payment.Id);
         return Task.CompletedTask;
     }
+
+    public async Task<(List<MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities.Payments> Items, long TotalCount)> GetAdminPaymentsPaginatedAsync(int page, int pageSize, string? status, string? search)
+    {
+        var builder = Builders<MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities.Payments>.Filter;
+        var filter = builder.Empty;
+
+        if (!string.IsNullOrEmpty(status))
+        {
+            filter &= builder.Eq(p => p.Status, status);
+        }
+
+        if (!string.IsNullOrEmpty(search))
+        {
+            var searchFilter = builder.Regex(p => p.PayerEmail, new MongoDB.Bson.BsonRegularExpression(search, "i"));
+            filter &= searchFilter;
+        }
+
+        var totalCount = await _payments.CountDocumentsAsync(filter);
+        var items = await _payments.Find(filter)
+            .SortByDescending(p => p.CreatedAt)
+            .Skip((page - 1) * pageSize)
+            .Limit(pageSize)
+            .ToListAsync();
+
+        return (items, totalCount);
+    }
 }
 
 

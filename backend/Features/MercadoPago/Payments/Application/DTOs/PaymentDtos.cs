@@ -71,3 +71,24 @@ public class PaymentHistoryDto
     [JsonPropertyName("paymentMethod")]
     public string? PaymentMethod { get; set; }
 }
+
+public class AdminPaymentItemDto
+{
+    public string Id { get; set; } = string.Empty;
+    public decimal Amount { get; set; }
+    public decimal? NetReceivedAmount { get; set; }
+    public string Status { get; set; } = string.Empty;
+    public string? Description { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public string? PaymentMethod { get; set; }
+    public string? PayerEmail { get; set; }
+    public string? UserId { get; set; }
+}
+
+public class AdminPaymentPaginatedResponse
+{
+    public List<AdminPaymentItemDto> Items { get; set; } = new();
+    public int TotalItems { get; set; }
+    public int TotalPages { get; set; }
+    public int CurrentPage { get; set; }
+}

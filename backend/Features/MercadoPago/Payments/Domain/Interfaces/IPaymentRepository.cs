@@ -20,6 +20,6 @@ public interface IPaymentRepository
     Task AddAsync(MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities.Payments payment);
 
     Task Remove(MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities.Payments payment);
+
+    Task<(List<MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities.Payments> Items, long TotalCount)> GetAdminPaymentsPaginatedAsync(int page, int pageSize, string? status, string? search);
 }
-
-

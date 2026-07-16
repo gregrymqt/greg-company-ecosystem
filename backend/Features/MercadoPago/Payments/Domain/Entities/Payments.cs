@@ -29,6 +29,8 @@ namespace MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities
 
         public decimal Amount { get; set; }
 
+        public decimal? NetReceivedAmount { get; set; }
+
         public string Description { get; set; } = null!;
 
         public string SubscriptionId { get; set; } = null!;
@@ -37,5 +39,3 @@ namespace MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities
         public virtual Subscription? Subscription { get; set; }
     }
 }
-
-
