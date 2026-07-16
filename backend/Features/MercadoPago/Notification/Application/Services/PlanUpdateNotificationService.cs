@@ -111,7 +111,7 @@ public class PlanUpdateNotificationService(
         var outboxEvent = new OutboxEvent
         {
             EventType = "email.send.requested",
-            Payload = JsonSerializer.Serialize(new { to = recipientEmail, subject, htmlBody, plainTextBody })
+            Payload = JsonSerializer.Serialize(new { To = recipientEmail, Subject = subject, HtmlBody = htmlBody, PlainTextBody = plainTextBody })
         };
 
         await dbContext.OutboxEvents.AddAsync(outboxEvent);

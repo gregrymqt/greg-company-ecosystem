@@ -121,7 +121,7 @@ public class ChargeBackNotificationService(
         var outboxEvent = new OutboxEvent
         {
             EventType = "email.send.requested",
-            Payload = JsonSerializer.Serialize(new { to = user.Email, subject = $"Notificacao de Contestacao (ID: {chargebackId})", htmlBody, plainTextBody = string.Empty })
+            Payload = JsonSerializer.Serialize(new { To = user.Email, Subject = $"Notificacao de Contestacao (ID: {chargebackId})", HtmlBody = htmlBody, PlainTextBody = string.Empty })
         };
 
         await dbContext.OutboxEvents.AddAsync(outboxEvent);

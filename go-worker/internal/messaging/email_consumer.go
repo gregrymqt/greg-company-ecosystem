@@ -14,10 +14,10 @@ import (
 )
 
 type EmailSendRequest struct {
-	To            string `json:"to"`
-	Subject       string `json:"subject"`
-	HtmlBody      string `json:"htmlBody"`
-	PlainTextBody string `json:"plainTextBody"`
+	To            string `json:"To"`
+	Subject       string `json:"Subject"`
+	HtmlBody      string `json:"HtmlBody"`
+	PlainTextBody string `json:"PlainTextBody"`
 }
 
 type EmailConsumer struct {
