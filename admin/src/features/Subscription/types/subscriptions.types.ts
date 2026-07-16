@@ -38,6 +38,18 @@ export interface UpdateSubscriptionStatusPayload {
   status: 'authorized' | 'paused' | 'cancelled';
 }
 
+// Mapeia AdminSubscriptionListDto do C# (Resultado da listagem paginada)
+export interface AdminSubscriptionList {
+  subscriptionId: string | null;
+  userId: string | null;
+  payerEmail: string | null;
+  planName: string | null;
+  status: string | null;
+  amount: number;
+  dateCreated: string;
+  nextBillingDate: string | null;
+}
+
 // ============================================
 // PUBLIC TYPES (Backend: UserSubscriptionsController)
 // ============================================

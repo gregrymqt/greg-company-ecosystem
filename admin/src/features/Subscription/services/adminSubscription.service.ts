@@ -1,6 +1,7 @@
 import { ApiService } from "@/shared/services/api.service";
 import type {
   AdminSubscriptionDetail,
+  AdminSubscriptionList,
   UpdateSubscriptionValuePayload,
   UpdateSubscriptionStatusPayload,
 } from "../types/subscriptions.types";
@@ -15,6 +16,27 @@ export const adminSubscriptionService = {
   ): Promise<AdminSubscriptionDetail> => {
     const params = new URLSearchParams({ query });
     return await ApiService.get<AdminSubscriptionDetail>(`/admin/subscriptions/search?${params.toString()}`);
+  },
+
+  /**
+   * Lista assinaturas com paginação e filtros.
+   * Rota: GET /api/admin/subscriptions
+   */
+  getSubscriptionsList: async (
+    page: number = 1,
+    pageSize: number = 10,
+    statusFilter?: string,
+    searchTerm?: string
+  ): Promise<{ data: AdminSubscriptionList[], totalCount: number, page: number, pageSize: number }> => {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      pageSize: pageSize.toString(),
+    });
+    
+    if (statusFilter) params.append('statusFilter', statusFilter);
+    if (searchTerm) params.append('searchTerm', searchTerm);
+
+    return await ApiService.get(`/admin/subscriptions?${params.toString()}`);
   },
 
   /**
@@ -52,5 +74,12 @@ export const adminSubscriptionService = {
       `/admin/subscriptions/${id}/status`,
       payload
     );
+  },
+
+  /**
+   * Atalho para cancelar assinatura.
+   */
+  cancelSubscription: async (id: string): Promise<AdminSubscriptionDetail> => {
+    return await adminSubscriptionService.updateStatus(id, 'cancelled');
   },
 };

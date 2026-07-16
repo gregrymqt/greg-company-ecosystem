@@ -31,5 +31,11 @@ public interface ISubscriptionRepository
     Task<Subscription?> GetActiveSubscriptionByCustomerIdAsync(string customerId);
 
     Task<bool> HasActiveSubscriptionByUserIdAsync(string userId);
-}
 
+    Task<(IEnumerable<Subscription> Items, long TotalCount)> GetPaginatedSubscriptionsAsync(
+        int page, 
+        int pageSize, 
+        string? statusFilter = null, 
+        string? searchTerm = null
+    );
+}

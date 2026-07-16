@@ -10,13 +10,27 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Entities
 {
-                         // <-- NOVO: Indexar a data de expiração é ótimo para performance
+    // <-- NOVO: Indexar a data de expiração é ótimo para performance
     public class Subscription : TransactionBase, IMongoDocument
     {
         public static string CollectionName => "subscriptions";
 
         // --- RELACIONAMENTO COM PLAN ---
         public string PlanId { get; set; }
+
+        [BsonIgnore]
+        public string? MercadoPagoPreapprovalId 
+        { 
+            get => ExternalId; 
+            set => ExternalId = value; 
+        }
+
+        [BsonIgnore]
+        public SubscriptionStatus SubscriptionStatus
+        {
+            get => Status != null ? SubscriptionStatusExtensions.FromMpString(Status) : SubscriptionStatus.Unknown;
+            set => Status = value.ToMpString();
+        }
 
         [BsonIgnore]
         public virtual Plan? Plan { get; set; }
@@ -39,6 +53,3 @@ namespace MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Entities
         public string? CardTokenId { get; set; }
     }
 }
-
-
-

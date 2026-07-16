@@ -146,5 +146,40 @@ public class SubscriptionRepository : ISubscriptionRepository
 
         return subscription;
     }
+
+    public async Task<(IEnumerable<Subscription> Items, long TotalCount)> GetPaginatedSubscriptionsAsync(
+        int page, 
+        int pageSize, 
+        string? statusFilter = null, 
+        string? searchTerm = null
+    )
+    {
+        var builder = Builders<Subscription>.Filter;
+        var filter = builder.Empty;
+
+        if (!string.IsNullOrEmpty(statusFilter))
+        {
+            filter &= builder.Eq(s => s.Status, statusFilter);
+        }
+
+        if (!string.IsNullOrEmpty(searchTerm))
+        {
+            var searchFilter = builder.Or(
+                builder.Regex(s => s.PayerEmail, new MongoDB.Bson.BsonRegularExpression(searchTerm, "i")),
+                builder.Regex(s => s.UserId, new MongoDB.Bson.BsonRegularExpression(searchTerm, "i"))
+            );
+            filter &= searchFilter;
+        }
+
+        var totalCount = await _subscriptions.CountDocumentsAsync(filter);
+
+        var items = await _subscriptions.Find(filter)
+            .SortByDescending(s => s.CreatedAt)
+            .Skip((page - 1) * pageSize)
+            .Limit(pageSize)
+            .ToListAsync();
+
+        return (items, totalCount);
+    }
 }
 

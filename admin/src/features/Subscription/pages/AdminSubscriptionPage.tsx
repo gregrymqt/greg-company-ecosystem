@@ -14,10 +14,13 @@ const SIDEBAR_ITEMS: SidebarItem[] = [
 export const AdminSubscriptionPage: React.FC = () => {
   const {
     subscription,
+    subscriptionsList,
     loading,
     searchSubscription,
+    fetchList,
     updateValue,
-    updateStatus
+    updateStatus,
+    cancelSubscription
   } = useAdminSubscription();
 
   const [activeSidebarId, setActiveSidebarId] = useState<string | number>('list');
@@ -25,16 +28,27 @@ export const AdminSubscriptionPage: React.FC = () => {
   const [newAmount, setNewAmount] = useState<number | ''>('');
   const [newStatus, setNewStatus] = useState<'authorized' | 'paused' | 'cancelled' | ''>('');
 
+  React.useEffect(() => {
+    fetchList();
+  }, [fetchList]);
+
   const handleSearch = (query: string) => {
-    setIsManaging(false);
-    searchSubscription(query);
+    fetchList(1, 10, undefined, query);
   };
 
-  const handleManageClick = (item: AdminSubscriptionDetail) => {
-    setNewAmount(item.auto_recurring?.transaction_amount || '');
-    setNewStatus(item.status as 'authorized' | 'paused' | 'cancelled' || '');
-    setIsManaging(true);
+  const handleManageClick = async (subscriptionId: string) => {
+    setIsManaging(false);
+    await searchSubscription(subscriptionId);
   };
+
+  // Quando a busca por detail finalizar (subscription setado no hook), abre o painel.
+  React.useEffect(() => {
+    if (subscription) {
+      setNewAmount(subscription.auto_recurring?.transaction_amount || '');
+      setNewStatus(subscription.status as 'authorized' | 'paused' | 'cancelled' || '');
+      setIsManaging(true);
+    }
+  }, [subscription]);
 
   const handleUpdateValue = async () => {
     if (typeof newAmount === 'number' && newAmount > 0) {
@@ -64,7 +78,7 @@ export const AdminSubscriptionPage: React.FC = () => {
         <div className={styles.contentArea}>
           {activeSidebarId === 'list' && (
             <AdminSubscriptionList
-              subscription={subscription}
+              subscriptions={subscriptionsList}
               loading={loading}
               onSearch={handleSearch}
               onManageClick={handleManageClick}
@@ -108,6 +122,21 @@ export const AdminSubscriptionPage: React.FC = () => {
                 disabled={loading || !newStatus}
               >
                 Atualizar Status
+              </button>
+            </div>
+            
+            <div className={styles.formGroup} style={{ marginTop: 20 }}>
+              <button 
+                onClick={async () => {
+                   if (window.confirm('Tem certeza que deseja cancelar esta assinatura no Mercado Pago?')) {
+                     const success = await cancelSubscription(subscription.id);
+                     if (success) setIsManaging(false);
+                   }
+                }}
+                disabled={loading}
+                style={{ backgroundColor: '#dc3545', color: '#fff' }}
+              >
+                Cancelar Assinatura no MP
               </button>
             </div>
           </div>

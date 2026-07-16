@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 using MeuCrudCsharp.Features.Exceptions;
 using MeuCrudCsharp.Features.MercadoPago.Clients.Application.DTOs;
 using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Application.DTOs;
@@ -41,6 +42,12 @@ namespace MeuCrudCsharp.Features.MercadoPago.Subscriptions.Application.Interface
             string subscriptionId,
             UpdateSubscriptionStatusDto dto
         );
+
+        Task<(IEnumerable<AdminSubscriptionListDto> Items, long TotalCount)> GetPaginatedSubscriptionsAsync(
+            int page, 
+            int pageSize, 
+            string? statusFilter = null, 
+            string? searchTerm = null
+        );
     }
 }
-

@@ -2,17 +2,17 @@ import React, { useState } from "react";
 
 import styles from './AdminSubscriptionList.module.scss';
 import { type TableColumn, Table } from "@/components/Table/Table";
-import type { AdminSubscriptionDetail } from '../../types/subscriptions.types';
+import type { AdminSubscriptionList as AdminSubscriptionListType } from '../../types/subscriptions.types';
 
 interface AdminSubscriptionListProps {
-  subscription: AdminSubscriptionDetail | null;
+  subscriptions: AdminSubscriptionListType[];
   loading: boolean;
   onSearch: (query: string) => void;
-  onManageClick: (subscription: AdminSubscriptionDetail) => void;
+  onManageClick: (subscriptionId: string) => void;
 }
 
 export const AdminSubscriptionList: React.FC<AdminSubscriptionListProps> = ({
-  subscription,
+  subscriptions,
   loading,
   onSearch,
   onManageClick
@@ -50,25 +50,32 @@ export const AdminSubscriptionList: React.FC<AdminSubscriptionListProps> = ({
 
   // --- DEFINIÇÃO DAS COLUNAS DA TABELA ---
 
-  const columns: TableColumn<AdminSubscriptionDetail>[] = [
+  const columns: TableColumn<AdminSubscriptionListType>[] = [
     {
       header: "ID / Email",
       width: "25%",
       render: (item) => (
         <div>
-          <div style={{ fontWeight: "bold", fontSize: "0.9em" }}>{item.id}</div>
+          <div style={{ fontWeight: "bold", fontSize: "0.9em" }}>{item.subscriptionId}</div>
           <div style={{ color: "#666", fontSize: "0.85em" }}>
-            {item.payer_email || "Email não inf."}
+            {item.payerEmail || "Email não inf."}
           </div>
         </div>
       ),
+    },
+    {
+      header: "Plano",
+      width: "15%",
+      render: (item) => (
+        <span style={{ fontWeight: 500 }}>{item.planName}</span>
+      )
     },
     {
       header: "Status",
       width: "15%",
       render: (item) => (
         <span
-          className={`${styles.statusBadge} ${getStatusClass(item.status)}`}
+          className={`${styles.statusBadge} ${getStatusClass(item.status || '')}`}
         >
           {item.status}
         </span>
@@ -77,31 +84,29 @@ export const AdminSubscriptionList: React.FC<AdminSubscriptionListProps> = ({
     {
       header: "Valor",
       width: "15%",
-      render: (item) =>
-        formatCurrency(
-          item.auto_recurring?.transaction_amount,
-          item.auto_recurring?.currency_id || "BRL"
-        ),
+      render: (item) => formatCurrency(item.amount, "BRL"),
     },
     {
       header: "Próx. Pagamento",
       width: "15%",
       render: (item) =>
-        item.next_payment_date ? formatDate(item.next_payment_date) : "N/A",
+        item.nextBillingDate ? formatDate(item.nextBillingDate) : "N/A",
     },
     {
       header: "Criado em",
       width: "15%",
-      render: (item) => formatDate(item.date_created),
+      render: (item) => formatDate(item.dateCreated),
     },
     {
       header: "Ações",
-      width: "15%",
+      width: "10%",
       render: (item) => (
         <div className={styles.actions}>
-          <button onClick={() => onManageClick(item)}>
-            Gerenciar
-          </button>
+          {item.subscriptionId && (
+            <button onClick={() => onManageClick(item.subscriptionId!)}>
+              Gerenciar
+            </button>
+          )}
         </div>
       ),
     },
@@ -116,9 +121,8 @@ export const AdminSubscriptionList: React.FC<AdminSubscriptionListProps> = ({
     }
   };
 
-  // Transformação: A Table espera um array, mas a busca retorna 1 item ou null.
-  // Criamos um array contendo o item (se existir) para passar para a Table.
-  const tableData = subscription ? [subscription] : [];
+  // Array direto das props
+  const tableData = subscriptions || [];
 
   return (
     <div className={styles.container}>
@@ -146,12 +150,12 @@ export const AdminSubscriptionList: React.FC<AdminSubscriptionListProps> = ({
       </form>
 
       {/* Tabela Genérica */}
-      <Table<AdminSubscriptionDetail>
+      <Table<AdminSubscriptionListType>
         data={tableData}
         columns={columns}
         isLoading={loading}
-        keyExtractor={(item) => item.id}
-        emptyMessage="Nenhuma assinatura encontrada. Use a busca acima."
+        keyExtractor={(item) => item.subscriptionId || Math.random().toString()}
+        emptyMessage="Nenhuma assinatura encontrada."
       />
     </div>
   );

@@ -1,11 +1,13 @@
 import { useState, useCallback } from 'react';
 import { adminSubscriptionService } from '../services/adminSubscription.service';
 import { ApiError } from '@/shared/services/api.service';
-import type { AdminSubscriptionDetail } from '../types/subscriptions.types';
+import type { AdminSubscriptionDetail, AdminSubscriptionList } from '../types/subscriptions.types';
 import { AlertService } from '@/shared/services/alert.service';
 
 export const useAdminSubscription = () => {
   const [subscription, setSubscription] = useState<AdminSubscriptionDetail | null>(null);
+  const [subscriptionsList, setSubscriptionsList] = useState<AdminSubscriptionList[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(false);
   // Função para buscar a assinatura (pelo ID ou Query)
   const searchSubscription = useCallback(async (query: string) => {
@@ -21,6 +23,20 @@ export const useAdminSubscription = () => {
       // Tenta pegar a mensagem do backend ou usa uma genérica
       const msg = err instanceof ApiError ? err.message : 'Erro ao buscar assinatura.';
       AlertService.error('Erro na Busca', msg);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const fetchList = useCallback(async (page = 1, pageSize = 10, statusFilter?: string, searchTerm?: string) => {
+    setLoading(true);
+    try {
+      const result = await adminSubscriptionService.getSubscriptionsList(page, pageSize, statusFilter, searchTerm);
+      setSubscriptionsList(result.data);
+      setTotalCount(result.totalCount);
+    } catch (err) {
+      const msg = err instanceof ApiError ? err.message : 'Erro ao listar assinaturas.';
+      AlertService.error('Erro na Listagem', msg);
     } finally {
       setLoading(false);
     }
@@ -74,11 +90,35 @@ export const useAdminSubscription = () => {
     }
   }, [subscription]);
 
+  const cancelSubscription = useCallback(async (id: string): Promise<boolean> => {
+    setLoading(true);
+    try {
+      await adminSubscriptionService.cancelSubscription(id);
+      await AlertService.success('Sucesso!', 'Assinatura cancelada com sucesso.');
+      // Atualiza a lista atual se existir
+      setSubscriptionsList(prev => prev.map(sub => sub.subscriptionId === id ? { ...sub, status: 'cancelled' } : sub));
+      if (subscription?.id === id) {
+          setSubscription({ ...subscription, status: 'cancelled' });
+      }
+      return true;
+    } catch (err) {
+      const msg = err instanceof ApiError ? err.message : 'Erro ao cancelar assinatura.';
+      AlertService.error('Erro', msg);
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }, [subscription]);
+
   return {
     subscription,
+    subscriptionsList,
+    totalCount,
     loading,
     searchSubscription,
+    fetchList,
     updateValue,
-    updateStatus
+    updateStatus,
+    cancelSubscription
   };
 };

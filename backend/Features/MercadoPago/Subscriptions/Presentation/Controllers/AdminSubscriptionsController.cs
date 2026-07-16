@@ -17,6 +17,21 @@ namespace MeuCrudCsharp.Features.MercadoPago.Subscriptions.Presentation.Controll
             _subscriptionService = subscriptionService;
         }
 
+        [HttpGet]
+        [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetList([FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string? statusFilter = null, [FromQuery] string? searchTerm = null)
+        {
+            try
+            {
+                var (items, totalCount) = await _subscriptionService.GetPaginatedSubscriptionsAsync(page, pageSize, statusFilter, searchTerm);
+                return Ok(new { data = items, totalCount, page, pageSize });
+            }
+            catch (Exception ex)
+            {
+                return HandleException(ex, "Erro ao buscar assinaturas.");
+            }
+        }
+
         [HttpGet("search")]
         [ProducesResponseType(typeof(SubscriptionResponseDto), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(object), StatusCodes.Status502BadGateway)]

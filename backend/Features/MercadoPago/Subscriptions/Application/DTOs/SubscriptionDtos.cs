@@ -75,3 +75,14 @@ public record SubscriptionDetailsDto(
     [property: JsonPropertyName("lastFourCardDigits")] string? LastFourCardDigits,
     [property: JsonPropertyName("nextBillingDate")] DateTime? NextBillingDate
 );
+
+public record AdminSubscriptionListDto(
+    [property: JsonPropertyName("subscriptionId")] string? SubscriptionId,
+    [property: JsonPropertyName("userId")] string? UserId,
+    [property: JsonPropertyName("payerEmail")] string? PayerEmail,
+    [property: JsonPropertyName("planName")] string? PlanName,
+    [property: JsonPropertyName("status")] string? Status,
+    [property: JsonPropertyName("amount")] decimal Amount,
+    [property: JsonPropertyName("dateCreated")] DateTime DateCreated,
+    [property: JsonPropertyName("nextBillingDate")] DateTime? NextBillingDate
+);
