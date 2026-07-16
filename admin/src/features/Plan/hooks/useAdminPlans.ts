@@ -24,7 +24,7 @@ export const useAdminPlans = () => {
     const fetchAdminPlans = useCallback(async (page: number = 1, pageSize: number = 10) => {
         setLoading(true);
         try {
-            const data = await AdminPlansService.getAdminPlans(page, pageSize);
+            const data = await AdminPlansService.getPlansList(page, pageSize);
             setPlans(data.items);
             setPagination(data);
         } catch (error) {
@@ -53,7 +53,7 @@ export const useAdminPlans = () => {
     const createPlan = async (planData: CreatePlanRequest): Promise<boolean> => {
         setLoading(true);
         try {
-            await AdminPlansService.create(planData);
+            await AdminPlansService.createPlan(planData);
             await AlertService.success('Sucesso!', 'Plano criado com sucesso.');
             return true;
         } catch (error) {
@@ -104,6 +104,22 @@ export const useAdminPlans = () => {
         }
     };
 
+    // Toggle Status
+    const togglePlanStatus = async (id: string, isActive: boolean): Promise<boolean> => {
+        setLoading(true);
+        try {
+            await AdminPlansService.togglePlanStatus(id, isActive);
+            await AlertService.success('Sucesso', 'Status alterado com sucesso.');
+            setPlans((prev) => prev.map((p) => p.id === id ? { ...p, status: isActive ? 'active' : 'inactive' } : p));
+            return true;
+        } catch (error) {
+            AlertService.error('Erro ao alterar status', error instanceof ApiError ? error.message : 'Falha na comunicacao.');
+            return false;
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return {
         loading,
         plans,
@@ -113,6 +129,7 @@ export const useAdminPlans = () => {
         createPlan,
         updatePlan,
         deletePlan,
+        togglePlanStatus,
         pagination: {
             currentPage: pagination?.currentPage ?? 1,
             totalPages: pagination?.totalPages ?? 0,

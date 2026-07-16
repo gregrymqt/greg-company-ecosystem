@@ -32,7 +32,8 @@ namespace MeuCrudCsharp.Features.MercadoPago.Plans.Application.Mappers
                 dbPlan.FrequencyInterval,
                 dbPlan.TransactionAmount,
                 dbPlan.FrequencyType.ToString(),
-                dbPlan.Category
+                dbPlan.Category,
+                dbPlan.IncludedCourseIds ?? new List<string>()
             );
         }
 
@@ -77,7 +78,8 @@ namespace MeuCrudCsharp.Features.MercadoPago.Plans.Application.Mappers
                 apiPlan.AutoRecurring.Frequency,
                 apiPlan.AutoRecurring.TransactionAmount,
                 frequencyTypeEnum.ToString(),
-                localPlan.Category
+                localPlan.Category,
+                localPlan.IncludedCourseIds ?? new List<string>()
             );
         }
 
@@ -89,7 +91,8 @@ namespace MeuCrudCsharp.Features.MercadoPago.Plans.Application.Mappers
                 dbPlan.TransactionAmount,
                 dbPlan.FrequencyInterval,
                 dbPlan.FrequencyType.ToString().ToLower(),
-                dbPlan.Description
+                dbPlan.Description,
+                dbPlan.IncludedCourseIds ?? new List<string>()
             );
         }
     }

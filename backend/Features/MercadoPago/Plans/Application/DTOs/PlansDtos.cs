@@ -20,7 +20,9 @@ public record CreatePlanDto(
         AutoRecurringDto? AutoRecurring,
     [property: JsonPropertyName("description")]
     [Required(ErrorMessage = "The description is required.")]
-        string? Description
+        string? Description,
+    [property: JsonPropertyName("included_course_ids")]
+        List<string>? IncludedCourseIds
 );
 
 public record PlanDto(
@@ -35,7 +37,8 @@ public record PlanDto(
     int Frequency,
     decimal Amount,
     string FrequencyType,
-    string Category
+    string Category,
+    List<string> IncludedCourseIds
 );
 
 public record PlanEditDto(
@@ -44,7 +47,8 @@ public record PlanEditDto(
     decimal TransactionAmount,
     int Frequency,
     string FrequencyType,
-    string? Description
+    string? Description,
+    List<string> IncludedCourseIds
 );
 
 public record PlanResponseDto(

@@ -20,7 +20,7 @@ export const AdminPlansService = {
    * C# Controller: AdminPlansController.GetPlans
    * Retorna a lista administrativa dos planos com paginação
    */
-  getAdminPlans: async (page = 1, pageSize = 10): Promise<PagedResult<PlanAdminSummary>> => {
+  getPlansList: async (page = 1, pageSize = 10): Promise<PagedResult<PlanAdminSummary>> => {
     const params = new URLSearchParams({
       page: page.toString(),
       pageSize: pageSize.toString(),
@@ -40,7 +40,7 @@ export const AdminPlansService = {
    * C# Controller: AdminPlansController.CreatePlan
    * Cria um novo plano no Mercado Pago e sincroniza no banco local
    */
-  create: async (data: CreatePlanRequest): Promise<PlanAdminSummary> => {
+  createPlan: async (data: CreatePlanRequest): Promise<PlanAdminSummary> => {
     return await ApiService.post<PlanAdminSummary>(`${ADMIN_ENDPOINT}`, data);
   },
 
@@ -58,5 +58,13 @@ export const AdminPlansService = {
    */
   delete: async (id: string): Promise<void> => {
     return await ApiService.delete(`${ADMIN_ENDPOINT}/${id}`);
+  },
+
+  /**
+   * Ativa/desativa o plano
+   */
+  togglePlanStatus: async (id: string, isActive: boolean): Promise<unknown> => {
+    // Caso o backend suporte PATCH, caso contrrio recai no update ou delete lgico
+    return await ApiService.patch(`${ADMIN_ENDPOINT}/${id}/toggle-status`, { isActive });
   }
 };

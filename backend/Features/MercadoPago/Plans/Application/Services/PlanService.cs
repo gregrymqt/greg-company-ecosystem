@@ -75,7 +75,7 @@ namespace MeuCrudCsharp.Features.MercadoPago.Plans.Application.Services
             )
             {
                 throw new ArgumentException(
-                    $"Valor de frequ�ncia inv�lido: '{createDto.AutoRecurring.FrequencyType}'."
+                    $"Valor de frequncia invlido: '{createDto.AutoRecurring.FrequencyType}'."
                 );
             }
 
@@ -88,62 +88,54 @@ namespace MeuCrudCsharp.Features.MercadoPago.Plans.Application.Services
                 FrequencyInterval = createDto.AutoRecurring.Frequency,
                 FrequencyType = frequencyTypeEnum,
                 IsActive = true,
+                IncludedCourseIds = createDto.IncludedCourseIds ?? new List<string>()
             };
 
-            await _planRepository.AddAsync(newPlan);
+            var mercadoPagoPayload = new
+            {
+                reason = createDto.Reason,
+                auto_recurring = createDto.AutoRecurring,
+                back_url = _generalSettings.BaseUrl,
+                external_reference = newPlan.PublicId.ToString(),
+            };
 
+            PlanResponseDto mpPlanResponse;
             try
             {
-                var mercadoPagoPayload = new
-                {
-                    reason = createDto.Reason,
-                    auto_recurring = createDto.AutoRecurring,
-                    back_url = _generalSettings.BaseUrl,
-                    external_reference = newPlan.PublicId.ToString(),
-                };
-
-                var mpPlanResponse = await _mercadoPagoPlanService.CreatePlanAsync(
-                    mercadoPagoPayload
-                );
-
-                newPlan.ExternalPlanId = mpPlanResponse.Id;
-
-                await _unitOfWork.CommitAsync();
-
-                await _cacheService.RemoveAsync(CacheKeys.ActiveDbPlans);
-                await _cacheService.RemoveAsync(CacheKeys.ActiveApiPlans);
-
-                _logger.LogInformation(
-                    "Plano '{PlanName}' criado com sucesso. ID: {PlanId}, ExternalId: {ExternalId}",
-                    newPlan.Name,
-                    newPlan.Id,
-                    newPlan.ExternalPlanId
-                );
-
-                return PlanMapper.MapDbPlanToDto(newPlan);
+                mpPlanResponse = await _mercadoPagoPlanService.CreatePlanAsync(mercadoPagoPayload);
             }
             catch (ExternalApiException ex)
             {
                 _logger.LogError(
                     ex,
-                    "Erro na API externa ao criar plano '{PlanName}'. Rollback autom�tico.",
+                    "Erro na API externa ao criar plano '{PlanName}'.",
                     createDto.Reason
                 );
-
-                _logger.LogInformation(
-                    "Rollback autom�tico conclu�do. Plano '{PlanName}' N�O foi persistido.",
-                    createDto.Reason
-                );
-
                 throw;
             }
+
+            newPlan.ExternalPlanId = mpPlanResponse.Id;
+            await _planRepository.AddAsync(newPlan);
+            await _unitOfWork.CommitAsync();
+
+            await _cacheService.RemoveAsync(CacheKeys.ActiveDbPlans);
+            await _cacheService.RemoveAsync(CacheKeys.ActiveApiPlans);
+
+            _logger.LogInformation(
+                "Plano '{PlanName}' criado com sucesso. ID: {PlanId}, ExternalId: {ExternalId}",
+                newPlan.Name,
+                newPlan.Id,
+                newPlan.ExternalPlanId
+            );
+
+            return PlanMapper.MapDbPlanToDto(newPlan);
         }
 
         public async Task<PlanDto> UpdatePlanAsync(Guid publicId, UpdatePlanDto updateDto)
         {
             var localPlan =
                 await _planRepository.GetByPublicIdAsync(publicId, asNoTracking: false)
-                ?? throw new ResourceNotFoundException($"Plano com ID {publicId} n�o encontrado.");
+                ?? throw new ResourceNotFoundException($"Plano com ID {publicId} no encontrado.");
 
             var originalName = localPlan.Name;
             var originalTransactionAmount = localPlan.TransactionAmount;
@@ -182,7 +174,7 @@ namespace MeuCrudCsharp.Features.MercadoPago.Plans.Application.Services
             {
                 _logger.LogError(
                     ex,
-                    "Erro na API externa ao atualizar plano '{PlanName}'. Rollback autom�tico.",
+                    "Erro na API externa ao atualizar plano '{PlanName}'. Rollback automtico.",
                     localPlan.Name
                 );
 
@@ -192,7 +184,7 @@ namespace MeuCrudCsharp.Features.MercadoPago.Plans.Application.Services
                 localPlan.FrequencyType = originalFrequencyType;
                 localPlan.Description = originalDescription;
                 _logger.LogInformation(
-                    "Rollback conclu�do. Altera��es locais no plano '{PlanName}' foram desfeitas.",
+                    "Rollback concludo. Alteraes locais no plano '{PlanName}' foram desfeitas.",
                     localPlan.Name
                 );
 
@@ -204,12 +196,12 @@ namespace MeuCrudCsharp.Features.MercadoPago.Plans.Application.Services
         {
             var localPlan =
                 await _planRepository.GetByPublicIdAsync(publicId, asNoTracking: false)
-                ?? throw new ResourceNotFoundException($"Plano com ID {publicId} n�o encontrado.");
+                ?? throw new ResourceNotFoundException($"Plano com ID {publicId} no encontrado.");
 
             if (!localPlan.IsActive)
             {
                 _logger.LogWarning(
-                    "Tentativa de desativar o plano {PlanId} que j� est� inativo.",
+                    "Tentativa de desativar o plano {PlanId} que j est inativo.",
                     localPlan.ExternalPlanId
                 );
                 return;
@@ -235,14 +227,14 @@ namespace MeuCrudCsharp.Features.MercadoPago.Plans.Application.Services
             {
                 _logger.LogError(
                     ex,
-                    "Erro na API externa ao desativar plano '{PlanName}'. Rollback autom�tico.",
+                    "Erro na API externa ao desativar plano '{PlanName}'. Rollback automtico.",
                     localPlan.Name
                 );
 
                 localPlan.IsActive = true;
 
                 _logger.LogInformation(
-                    "Rollback conclu�do. Plano '{PlanName}' permanece ativo localmente.",
+                    "Rollback concludo. Plano '{PlanName}' permanece ativo localmente.",
                     localPlan.Name
                 );
 
@@ -259,7 +251,7 @@ namespace MeuCrudCsharp.Features.MercadoPago.Plans.Application.Services
             var criteria = "asc";
 
             _logger.LogInformation(
-                "Buscando p�gina {Page} de planos da API do Mercado Pago.",
+                "Buscando pgina {Page} de planos da API do Mercado Pago.",
                 page
             );
             var activePlansFromApi = await _mercadoPagoPlanService.SearchActivePlansAsync(
@@ -292,7 +284,7 @@ namespace MeuCrudCsharp.Features.MercadoPago.Plans.Application.Services
                 else
                 {
                     _logger.LogWarning(
-                        "Plano '{ExternalId}' existe no MP mas n�o localmente.",
+                        "Plano '{ExternalId}' existe no MP mas no localmente.",
                         apiPlan.Id
                     );
                 }
@@ -326,23 +318,29 @@ namespace MeuCrudCsharp.Features.MercadoPago.Plans.Application.Services
 
             try
             {
-                var pagedResult = await _planRepository.GetActivePlansAsync(page, pageSize);
+                var cacheKey = $"{CacheKeys.ActiveDbPlans}_{page}_{pageSize}";
+                return await _cacheService.GetOrCreateAsync(
+                    cacheKey,
+                    async () =>
+                    {
+                        var pagedResult = await _planRepository.GetActivePlansAsync(page, pageSize);
+                        var planDtos = pagedResult.Items.Select(PlanMapper.MapDbPlanToDto).ToList();
 
-                var planDtos = pagedResult.Items.Select(PlanMapper.MapDbPlanToDto).ToList();
-
-                return new PagedResultDto<PlanDto>(
-                    planDtos,
-                    pagedResult.CurrentPage,
-                    pagedResult.PageSize,
-                    pagedResult.TotalCount
-                );
+                        return new PagedResultDto<PlanDto>(
+                            planDtos,
+                            pagedResult.CurrentPage,
+                            pagedResult.PageSize,
+                            pagedResult.TotalCount
+                        );
+                    },
+                    TimeSpan.FromMinutes(15)
+                ) ?? new PagedResultDto<PlanDto>([], page, pageSize, 0);
             }
             catch (Exception dbEx)
             {
-                _logger.LogError(dbEx, "Falha ao buscar planos paginados do reposit�rio.");
-                throw new AppServiceException("N�o foi poss�vel carregar os planos.", dbEx);
+                _logger.LogError(dbEx, "Falha ao buscar planos paginados do repositrio ou cache.");
+                throw new AppServiceException("No foi possvel carregar os planos.", dbEx);
             }
         }
     }
 }
-

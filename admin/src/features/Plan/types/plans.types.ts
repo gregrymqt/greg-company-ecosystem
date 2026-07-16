@@ -25,6 +25,7 @@ export interface PlanPublic {
   isRecommended: boolean;
   isActive: boolean;
   frequency: number; // 1 = mensal, 12 = anual, etc.
+  includedCourseIds: string[];
 }
 
 // --- ADMIN TYPES ---
@@ -38,6 +39,7 @@ export interface PlanAdminDetail {
   frequency: number;
   frequencyType: string;
   description: string;
+  includedCourseIds: string[];
 }
 
 // Baseado no C# PlanResponseDto
@@ -67,10 +69,12 @@ export interface CreatePlanRequest {
   reason: string;               // Nome do plano
   description: string;          // Descrição interna
   auto_recurring: AutoRecurringRequest;
+  included_course_ids: string[];
 }
 
 // Baseado no C# UpdatePlanDto
 export interface UpdatePlanRequest {
   reason?: string;
   auto_recurring?: AutoRecurringRequest;
+  included_course_ids?: string[];
 }

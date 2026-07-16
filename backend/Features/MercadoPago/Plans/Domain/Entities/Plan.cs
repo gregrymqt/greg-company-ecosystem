@@ -70,5 +70,11 @@ namespace MeuCrudCsharp.Features.MercadoPago.Plans.Domain.Entities
         public PlanFrequencyType FrequencyType { get; set; }
 
         public bool IsActive { get; set; } = false;
+
+        public List<string> IncludedCourseIds { get; set; } = new();
+        
+        public DateTime DateCreated { get; set; } = DateTime.UtcNow;
+        
+        public DateTime DateUpdated { get; set; } = DateTime.UtcNow;
     }
 }
