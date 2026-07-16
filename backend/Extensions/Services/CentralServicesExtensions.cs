@@ -20,7 +20,7 @@ public static class CentralServicesExtensions
             .AddSignalRServices()
             .AddInfrastructureComponents()
             .AddIdentityPersistence()
-            .AddMongoPersistence()
+            .AddPostgresPersistence(builder.Configuration)
             .AddDistributedServices()
             .AddMercadoPagoIntegration()
             .AddRabbitMqIntegration()
