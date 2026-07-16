@@ -17,3 +17,4 @@ fastapi
 uvicorn
 html2text
 aio_pika
+redis>=5.0.0

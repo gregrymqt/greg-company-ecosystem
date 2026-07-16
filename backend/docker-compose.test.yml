@@ -7,19 +7,22 @@ services:
     environment:
       - USE_REDIS=true
       - ConnectionStrings__Redis=redis-test:6379
-      - ConnectionStrings__DefaultConnection=Server=mssql-test;Database=TestDb;User Id=sa;Password=TestPassword123!;TrustServerCertificate=True;
+      - ConnectionStrings__PostgresTransaction=Host=postgres-test;Port=5432;Database=greg_company_test;Username=postgres;Password=postgres;
+      - ConnectionStrings__PostgresSession=Host=postgres-test;Port=5432;Database=greg_company_test;Username=postgres;Password=postgres;
     depends_on:
-      mongodb-test:
+      postgres-test:
         condition: service_healthy
       redis-test:
         condition: service_started
 
-  mongodb-test:
-    image: mongo:latest
-    ports:
-      - "27018:27018"
+  postgres-test:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: greg_company_test
     healthcheck:
-      test: ["CMD", "mongo", "--eval", "db.adminCommand('ping')"]
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
       timeout: 5s
       retries: 5

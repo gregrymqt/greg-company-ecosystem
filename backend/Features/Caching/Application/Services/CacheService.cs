@@ -45,11 +45,11 @@ public class CacheService(IDistributedCache cache, ILogger<CacheService> logger)
             await cache.RemoveAsync(key);
             logger.LogInformation("Chave de cache {CacheKey} removida com sucesso.", key);
         }
-        catch (RedisConnectionException ex)
+        catch (Exception ex)
         {
-            logger.LogError(
+            logger.LogWarning(
                 ex,
-                "Não foi possível conectar ao Redis para remover a chave {CacheKey}.",
+                "Falha ao remover a chave de cache {CacheKey}. O Redis pode estar indisponível.",
                 key
             );
         }
@@ -83,15 +83,26 @@ public class CacheService(IDistributedCache cache, ILogger<CacheService> logger)
         try
         {
             var cachedValue = await cache.GetStringAsync(key);
-            return string.IsNullOrEmpty(cachedValue)
-                ? default
-                : JsonSerializer.Deserialize<T>(cachedValue);
+            if (string.IsNullOrEmpty(cachedValue))
+                return default;
+
+            return JsonSerializer.Deserialize<T>(cachedValue);
+        }
+        catch (JsonException ex)
+        {
+            logger.LogWarning(
+                ex,
+                "Desserialização falhou para a chave {CacheKey} (possível dado residual ou schema antigo). Limpando a chave.",
+                key
+            );
+            await RemoveAsync(key);
+            return default;
         }
         catch (Exception ex)
         {
-            logger.LogError(
+            logger.LogWarning(
                 ex,
-                "Falha ao ler ou desserializar o cache para a chave {CacheKey}.",
+                "Falha ao ler o cache para a chave {CacheKey}. Redis pode estar indisponível.",
                 key
             );
             return default;
@@ -134,7 +145,7 @@ public class CacheService(IDistributedCache cache, ILogger<CacheService> logger)
         }
         catch (Exception ex)
         {
-            logger.LogError(
+            logger.LogWarning(
                 ex,
                 "Não foi possível conectar ao Redis ou serializar para definir a chave {CacheKey}.",
                 key

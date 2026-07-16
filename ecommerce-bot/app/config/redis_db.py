@@ -10,44 +10,68 @@ logger = logging.getLogger(__name__)
 class RedisCache:
     def __init__(self):
         self.redis_client: Optional[redis.Redis] = None
+        self._pool: Optional[redis.ConnectionPool] = None
 
     async def connect(self):
+        if not settings.REDIS_URL:
+            logger.warning("REDIS_URL não configurada. Redis desabilitado.")
+            return
         logger.info(f"Connecting to Redis at {settings.REDIS_URL}")
-        self.redis_client = redis.from_url(settings.REDIS_URL, decode_responses=True)
-        await self.redis_client.ping()
-        logger.info("Connected to Redis successfully.")
+        self._pool = redis.ConnectionPool.from_url(
+            settings.REDIS_URL,
+            decode_responses=True,
+            max_connections=20,
+        )
+        self.redis_client = redis.Redis(connection_pool=self._pool)
+        try:
+            await self.redis_client.ping()
+            logger.info("Connected to Redis successfully.")
+        except redis.ConnectionError:
+            logger.warning(
+                "Não foi possível conectar ao Redis em %s. "
+                "O Redis ficará indisponível até reconexão.",
+                settings.REDIS_URL,
+            )
+            self.redis_client = None
 
     async def disconnect(self):
         if self.redis_client:
             logger.info("Disconnecting from Redis...")
-            await self.redis_client.close()
+            await self.redis_client.aclose()
+            self.redis_client = None
+        if self._pool:
+            await self._pool.disconnect()
+            self._pool = None
 
     async def get(self, key: str) -> Optional[Any]:
         if not self.redis_client:
             return None
-        value = await self.redis_client.get(key)
-        if value:
-            try:
-                return json.loads(value)
-            except json.JSONDecodeError:
-                return value
+        try:
+            value = await self.redis_client.get(key)
+            if value:
+                try:
+                    return json.loads(value)
+                except json.JSONDecodeError:
+                    return value
+        except redis.ConnectionError:
+            logger.warning("Redis indisponível ao ler chave %s.", key)
         return None
 
     async def set(self, key: str, value: Any, expire_seconds: int = 3600):
         if not self.redis_client:
             return
-        
-        if isinstance(value, (dict, list)):
-            value = json.dumps(value)
-            
-        await self.redis_client.set(key, value, ex=expire_seconds)
+        try:
+            if isinstance(value, (dict, list)):
+                value = json.dumps(value)
+            await self.redis_client.set(key, value, ex=expire_seconds)
+        except redis.ConnectionError:
+            logger.warning("Redis indisponível ao gravar chave %s.", key)
 
     async def get_or_create(self, key: str, factory: Callable, expire_seconds: int = 3600) -> Any:
         value = await self.get(key)
         if value is not None:
             return value
 
-        # Create new value
         if asyncio.iscoroutinefunction(factory):
             new_value = await factory()
         else:

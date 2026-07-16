@@ -127,9 +127,12 @@ services:
     environment:
       - POSTGRES_URI=${POSTGRES_TRANSACTION_CONNECTION_STRING}
       - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
+      - REDIS_URL=redis://redis:6379
       - AES_MASTER_KEY=${AES_MASTER_KEY}
     depends_on:
       postgres:
+        condition: service_started
+      redis:
         condition: service_started
       rabbitmq:
         condition: service_started
