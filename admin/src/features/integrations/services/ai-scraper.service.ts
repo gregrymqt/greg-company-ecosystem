@@ -6,8 +6,7 @@ export const AiScraperService = {
     return await ApiService.post<void, AICredentialsPayload>("/v1/ai/credentials", payload);
   },
   
-  startExtraction: async (url: string): Promise<void> => {
-    const payload: WebScraperPayload = { url };
+  startExtraction: async (payload: WebScraperPayload): Promise<void> => {
     return await ApiService.post<void, WebScraperPayload>("/v1/scraper/extract", payload);
   }
 };

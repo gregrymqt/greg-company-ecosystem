@@ -1,5 +1,5 @@
 using MeuCrudCsharp.Features.Support.Application.DTOs;
-using MeuCrudCsharp.Features.Videos.Application.DTOs;
+using MeuCrudCsharp.Features.Shared.Application.DTOs;
 
 namespace MeuCrudCsharp.Features.Support.Application.Interfaces
 {

@@ -1,7 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using MeuCrudCsharp.Features.Files.Domain.Entities;
-using MeuCrudCsharp.Features.Courses.Domain.Entities;
 
 namespace MeuCrudCsharp.Features.Videos.Domain.Entities;
 
@@ -29,9 +28,6 @@ public class Video
     public string? StreamingUrl { get; set; }
 
     public Guid? CourseId { get; set; }
-
-    [ForeignKey(nameof(CourseId))]
-    public virtual Course? Course { get; set; }
 
     public Guid? FileId { get; set; }
 

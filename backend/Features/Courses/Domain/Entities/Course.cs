@@ -1,6 +1,5 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using MeuCrudCsharp.Features.Videos.Domain.Entities;
 
 namespace MeuCrudCsharp.Features.Courses.Domain.Entities;
 
@@ -24,6 +23,8 @@ public class Course
     public bool IsPublished { get; set; } = false;
 
     public string? ThumbnailUrl { get; set; }
+
+    public double TotalDurationMinutes { get; set; } = 0;
 
     public List<Module> Modules { get; set; } = new();
 }

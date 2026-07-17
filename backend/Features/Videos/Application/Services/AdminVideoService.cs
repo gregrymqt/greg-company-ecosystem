@@ -2,6 +2,7 @@ using MeuCrudCsharp.Features.Videos.Domain.Interfaces;
 using MeuCrudCsharp.Features.Caching.Application.Interfaces;
 using MeuCrudCsharp.Features.Exceptions;
 using MeuCrudCsharp.Features.Files.Application.Interfaces;
+using MeuCrudCsharp.Features.Shared.Application.DTOs;
 using MeuCrudCsharp.Features.Shared.Domain.Interfaces;
 using MeuCrudCsharp.Features.Videos.Application.DTOs;
 using MeuCrudCsharp.Features.Videos.Application.Interfaces;

@@ -19,4 +19,6 @@ public class Lesson
 
     public Guid VideoPublicId { get; set; }
     public string VideoTitle { get; set; } = string.Empty;
+
+    public bool IsVideoAvailable { get; set; } = false;
 }

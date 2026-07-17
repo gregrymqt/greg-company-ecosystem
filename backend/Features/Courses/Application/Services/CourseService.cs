@@ -4,10 +4,10 @@ using MeuCrudCsharp.Features.Courses.Application.Interfaces;
 using MeuCrudCsharp.Features.Courses.Domain.Interfaces;
 using MeuCrudCsharp.Features.Courses.Application.Mappers;
 using MeuCrudCsharp.Features.Exceptions;
+using MeuCrudCsharp.Features.Shared.Application.DTOs;
 using MeuCrudCsharp.Features.Shared.Domain.Interfaces;
 using MeuCrudCsharp.Features.Shared.Domain.Entities;
 using MeuCrudCsharp.Features.Courses.Domain.Entities;
-using MeuCrudCsharp.Features.Videos.Application.DTOs;
 using MeuCrudCsharp.Data;
 using System.Text.Json;
 

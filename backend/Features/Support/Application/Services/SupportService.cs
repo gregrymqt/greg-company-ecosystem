@@ -4,7 +4,7 @@ using MeuCrudCsharp.Features.Exceptions;
 using MeuCrudCsharp.Features.Support.Application.DTOs;
 using MeuCrudCsharp.Features.Support.Application.Interfaces;
 using MeuCrudCsharp.Features.Support.Application.Utils;
-using MeuCrudCsharp.Features.Videos.Application.DTOs;
+using MeuCrudCsharp.Features.Shared.Application.DTOs;
 using MeuCrudCsharp.Data;
 using MeuCrudCsharp.Features.Shared.Domain.Entities;
 using MeuCrudCsharp.Features.Shared.Domain.Interfaces;

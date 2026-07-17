@@ -18,7 +18,7 @@ namespace MeuCrudCsharp.Features.Videos.Application.Utils
                 Status = video.Status.ToString(),
                 RawVideoUrl = video.RawVideoUrl,
                 StreamingUrl = video.StreamingUrl,
-                CourseName = video.Course?.Name ?? string.Empty,
+                CourseId = video.CourseId,
                 ThumbnailUrl = video.ThumbnailUrl ?? string.Empty,
             };
         }

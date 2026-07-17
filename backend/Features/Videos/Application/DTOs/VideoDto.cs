@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using MeuCrudCsharp.Features.Files.Application.DTOs;
+using MeuCrudCsharp.Features.Shared.Application.DTOs;
 
 namespace MeuCrudCsharp.Features.Videos.Application.DTOs
 {
@@ -16,7 +17,6 @@ namespace MeuCrudCsharp.Features.Videos.Application.DTOs
         public string? RawVideoUrl { get; set; }
         public string? StreamingUrl { get; set; }
         public Guid? CourseId { get; set; }
-        public string? CourseName { get; set; }
         public string? ThumbnailUrl { get; set; }
     }
 
@@ -31,8 +31,6 @@ namespace MeuCrudCsharp.Features.Videos.Application.DTOs
         public IFormFile? ThumbnailFile { get; set; }
     }
 
-    public record PaginatedResultDto<T>(List<T> Items, int TotalCount, int Page, int PageSize);
-
     public class CreateVideoDto : BaseUploadDto
     {
         [Required]
@@ -45,5 +43,3 @@ namespace MeuCrudCsharp.Features.Videos.Application.DTOs
         public IFormFile? ThumbnailFile { get; set; }
     }
 }
-
-

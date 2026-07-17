@@ -1,10 +1,13 @@
 using System.Text.Json;
 using MeuCrudCsharp.Features.Base.Workers;
 using MeuCrudCsharp.Features.Caching.Application.Interfaces;
+using MeuCrudCsharp.Features.Courses.Domain.Entities;
 using MeuCrudCsharp.Features.Shared.Infrastructure.Hubs;
 using MeuCrudCsharp.Features.Videos.Domain.Entities;
 using MeuCrudCsharp.Features.Videos.Domain.Interfaces;
+using MeuCrudCsharp.Data;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 using RabbitMQ.Client;
 
 namespace MeuCrudCsharp.Features.Videos.Shared.Infrastructure.Workers;
@@ -50,6 +53,7 @@ public class VideoProcessingCompletedConsumer : RabbitMqConsumerBase
         var videoRepository = scope.ServiceProvider.GetRequiredService<IVideoRepository>();
         var cacheService = scope.ServiceProvider.GetRequiredService<ICacheService>();
         var hubContext = scope.ServiceProvider.GetRequiredService<IHubContext<NotificationHub>>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         var video = await videoRepository.GetByPublicIdAsync(Guid.Parse(payload.VideoId));
         if (video == null)
@@ -71,6 +75,8 @@ public class VideoProcessingCompletedConsumer : RabbitMqConsumerBase
 
             video.LastUpdated = DateTime.UtcNow;
             _logger.LogInformation("Processamento do video {VideoId} finalizado com sucesso. StreamingUrl gerada: {Url}", video.Id, video.StreamingUrl);
+
+            await PropagateVideoReadyToCourseDomain(dbContext, video, payload.DurationInSeconds, cancellationToken);
         }
         else
         {
@@ -81,16 +87,57 @@ public class VideoProcessingCompletedConsumer : RabbitMqConsumerBase
 
         await videoRepository.UpdateAsync(video);
 
-        // Invalidate cache
         await cacheService.InvalidateCacheByKeyAsync("videos_cache_version");
 
-        // Notify via SignalR (StorageIdentifier as Group)
+        if (video.CourseId.HasValue)
+        {
+            await cacheService.InvalidateCacheByKeyAsync("courses_cache_version");
+        }
+
         await hubContext.Clients.Group(video.StorageIdentifier).SendAsync("VideoProcessingStatusUpdated", new 
         { 
             videoId = video.Id, 
             status = video.Status.ToString(),
             duration = video.Duration.TotalSeconds
         }, cancellationToken);
+    }
+
+    private async Task PropagateVideoReadyToCourseDomain(
+        ApplicationDbContext dbContext,
+        Video video,
+        double durationInSeconds,
+        CancellationToken cancellationToken)
+    {
+        if (!video.CourseId.HasValue)
+        {
+            _logger.LogDebug("Video {VideoId} nao possui CourseId. Propagacao para Course domain ignorada.", video.Id);
+            return;
+        }
+
+        var lesson = await dbContext.Lessons
+            .FirstOrDefaultAsync(l => l.VideoPublicId == video.Id, cancellationToken);
+
+        if (lesson != null && !lesson.IsVideoAvailable)
+        {
+            lesson.IsVideoAvailable = true;
+            _logger.LogInformation(
+                "Lesson {LessonId} marcada como disponivel (video {VideoId} pronto).",
+                lesson.Id, video.Id);
+        }
+
+        var course = await dbContext.Courses
+            .FirstOrDefaultAsync(c => c.Id == video.CourseId.Value, cancellationToken);
+
+        if (course != null)
+        {
+            var addedMinutes = durationInSeconds / 60.0;
+            course.TotalDurationMinutes += addedMinutes;
+            _logger.LogInformation(
+                "Course {CourseId} atualizado: +{Minutes:F1} min (total: {Total:F1} min).",
+                course.Id, addedMinutes, course.TotalDurationMinutes);
+        }
+
+        await dbContext.SaveChangesAsync(cancellationToken);
     }
 
     public record VideoProcessingCompletedEvent(
