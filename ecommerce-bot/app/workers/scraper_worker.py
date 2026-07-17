@@ -15,6 +15,7 @@ from app.config.settings import settings
 from app.config.rabbitmq import get_rabbitmq_connection, configure_rabbitmq_topology
 import aio_pika
 import json
+from app.utils.progress import publish_demo_progress
 
 
 class ScraperWorker:
@@ -176,14 +177,29 @@ class ScraperWorker:
                                 msg_model = ImportRequestMessage.model_validate(raw_data)
                                 url_to_scrape = msg_model.target_url
                                 tenant_id = msg_model.tenant_id
-                                
                                 if url_to_scrape:
+                                    if queue_name == "ecommerce_demo":
+                                        await publish_demo_progress(url_to_scrape, "scraping", 30)
+
                                     product = await self._process_product_page(url_to_scrape, tenant_id)
                                     if product:
+                                        if queue_name == "ecommerce_demo":
+                                            original_data = {
+                                                "title": product.title,
+                                                "description": product.description,
+                                                "price": str(product.price) if product.price else None,
+                                                "imageUrl": product.images[0] if product.images else None
+                                            }
+                                            await publish_demo_progress(url_to_scrape, "generating", 70, original=original_data)
                                         await self.repository.upsert_product(product)
+                                    else:
+                                        if queue_name == "ecommerce_demo":
+                                            await publish_demo_progress(url_to_scrape, "failed", 100, error="Falha ao extrair dados do produto.")
                                         
                             except Exception as process_err:
                                 logging.error(f"Erro ao processar mensagem do RabbitMQ: {process_err}")
+                                if queue_name == "ecommerce_demo" and url_to_scrape:
+                                    await publish_demo_progress(url_to_scrape, "failed", 100, error=str(process_err))
                                 # O message.process(requeue=False) já lida com o reject automaticamente no final do bloco se falhar,
                                 # enviando a mensagem para o ecommerce_dlx com routing key failed graças à nossa topologia.
                                 raise

@@ -85,8 +85,7 @@ const getHeaders = (isFormData = false): HeadersInit => {
     headers["X-CSRF-TOKEN"] = csrfToken;
   }
 
-  // Isolamento de Tenant (Code Review Fix)
-  const tenantId = StorageService.getItem<string>(STORAGE_KEYS.TENANT_ID) || StorageService.getItem<UserSession>(STORAGE_KEYS.USER_SESSION)?.tenantId;
+  const tenantId = StorageService.getItem<string>(STORAGE_KEYS.TENANT_ID) || StorageService.getItem<UserSession>(STORAGE_KEYS.USER_SESSION)?.tenant_id;
   if (tenantId) {
     headers["X-Tenant-ID"] = tenantId;
   }
@@ -177,6 +176,7 @@ export const ApiService = {
     };
 
     const response = await fetch(`${BASE_URL}${endpoint}`, {
+      ...options,
       method: "GET",
       headers: headers as HeadersInit,
     });
@@ -194,6 +194,7 @@ export const ApiService = {
     };
 
     const response = await fetch(`${BASE_URL}${endpoint}`, {
+      ...options,
       method: "POST",
       headers: headers as HeadersInit,
       body: JSON.stringify(body),
@@ -212,6 +213,7 @@ export const ApiService = {
     };
 
     const response = await fetch(`${BASE_URL}${endpoint}`, {
+      ...options,
       method: "PUT",
       headers: headers as HeadersInit,
       body: JSON.stringify(body),
@@ -226,6 +228,7 @@ export const ApiService = {
     };
 
     const response = await fetch(`${BASE_URL}${endpoint}`, {
+      ...options,
       method: "DELETE",
       headers: headers as HeadersInit,
     });
@@ -243,6 +246,7 @@ export const ApiService = {
       ...((options?.headers as Record<string, string>) || {}),
     };
     const response = await fetch(`${BASE_URL}${endpoint}`, {
+      ...options,
       method: "PATCH",
       headers: headers as HeadersInit,
       body: JSON.stringify(body),

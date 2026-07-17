@@ -73,11 +73,24 @@ export const useIntegrations = (activeProvider: IntegrationProvider) => {
       setIsLoading(true);
       setFallbackInfo(null); // Reseta o estado do fallback antes de tentar
       
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 45000);
+      
+      const getProductSku = (data: any): string => {
+        if (data.variants && data.variants[0]) {
+          return data.variants[0].sku || '';
+        }
+        return '';
+      };
+      const sku = getProductSku(productData);
+
       try {
         const response =
           activeProvider === "nuvemshop"
-            ? await NuvemshopService.createProduct(productData as NuvemshopProductRequest)
-            : await ShopifyService.syncProduct(productData as ShopifyProductSetInput);
+            ? await NuvemshopService.createProduct(productData as NuvemshopProductRequest, { signal: controller.signal })
+            : await ShopifyService.syncProduct(productData as ShopifyProductSetInput, { signal: controller.signal });
+
+        clearTimeout(timeoutId);
 
         // Tratamento do Fallback de CSV (HTTP 202) mapeado no seu backend Python
         if (response?.status === "fallback_csv") {
@@ -86,14 +99,30 @@ export const useIntegrations = (activeProvider: IntegrationProvider) => {
             downloadUrl: response.download_url,
           });
           notifyWarning("Sincronização direta falhou. CSV de contingência gerado.");
+          if (sku) {
+            setProducts(prev => prev.map(p => p.sku === sku ? { ...p, status: 'Failed', last_error: response.message } : p));
+          }
           return response;
         }
 
         notifySuccess("Produto sincronizado com sucesso na loja!");
+        if (sku) {
+          setProducts(prev => prev.map(p => p.sku === sku ? { ...p, status: 'Exported' } : p));
+        }
         return response;
       } catch (error: unknown) {
-        const err = error as Error;
-        notifyError(err.message || "Erro ao sincronizar o produto.");
+        clearTimeout(timeoutId);
+        const err = error as any;
+        let errorMessage = err.message || "Erro ao sincronizar o produto.";
+        
+        if (err.name === 'AbortError') {
+          errorMessage = "A sincronização expirou (tempo limite de 45s excedido).";
+        }
+        
+        notifyError(errorMessage);
+        if (sku) {
+          setProducts(prev => prev.map(p => p.sku === sku ? { ...p, status: 'Failed', last_error: errorMessage } : p));
+        }
         throw error;
       } finally {
         setIsLoading(false);

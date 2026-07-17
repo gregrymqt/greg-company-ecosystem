@@ -9,6 +9,7 @@ from app.utils.logger import get_logger
 from app.utils.crypto import get_tenant_key
 from app.models.products import Product, ProductStatus
 from sqlalchemy import select, update
+from app.utils.progress import publish_demo_progress
 
 logger = get_logger("ProcessorWorker")
 
@@ -98,13 +99,48 @@ class ProcessorWorker:
                 processed_data.updated_at = datetime.now(timezone.utc)
                 await self.repo.upsert_product(processed_data)
 
+                if product_model.tenant_id == "demo_tenant":
+                    original_data = {
+                        "title": product_dict.get("title", ""),
+                        "description": product_dict.get("description", ""),
+                        "price": str(product_dict.get("price")) if product_dict.get("price") is not None else None,
+                        "imageUrl": product_dict.get("images")[0] if product_dict.get("images") else None
+                    }
+                    seo_tags = processed_data.attributes.get("seo_tags", "") if processed_data.attributes else ""
+                    enhanced_data = {
+                        "seoTitle": processed_data.title,
+                        "copywriting": processed_data.description,
+                        "tags": seo_tags.split(",") if seo_tags else []
+                    }
+                    await publish_demo_progress(
+                        url=product_model.metadata.source_url if product_model.metadata else "",
+                        status="completed",
+                        progress=100,
+                        original=original_data,
+                        enhanced=enhanced_data
+                    )
+
             except (ValueError, TypeError) as e:
                 logger.error(f"Erro de validação de dados no produto {sku}: {e}", extra=log_extra, exc_info=True)
                 await self.repo.set_status(product_model.tenant_id, sku, ProductStatus.FAILED.value)
+                if product_model.tenant_id == "demo_tenant":
+                    await publish_demo_progress(
+                        url=product_model.metadata.source_url if product_model.metadata else "",
+                        status="failed",
+                        progress=100,
+                        error=f"Erro de validação: {str(e)}"
+                    )
             except Exception as e:
                 logger.error(f"Erro final (após retries) ao processar produto {sku}: {e}", extra=log_extra, exc_info=True)
                 # Atualiza para erro para não entrar em loop infinito (Poison Pill)
                 await self.repo.set_status(product_model.tenant_id, sku, ProductStatus.FAILED.value)
+                if product_model.tenant_id == "demo_tenant":
+                    await publish_demo_progress(
+                        url=product_model.metadata.source_url if product_model.metadata else "",
+                        status="failed",
+                        progress=100,
+                        error=f"Erro no processamento: {str(e)}"
+                    )
 
             # Pequena pausa entre itens para não sobrecarregar as APIs
             await asyncio.sleep(1)

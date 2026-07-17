@@ -1,6 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useIntegrations, type IntegrationProvider } from '../hooks/useIntegrations';
 import { AIScraperPanel } from '../components/AIScraperPanel/AIScraperPanel';
+import { SyncProductTable } from '../components/SyncProductTable/SyncProductTable';
+import { useAuth } from '@/features/auth/hooks/useAuth';
+import { StorageService, STORAGE_KEYS } from '@/shared/services/storage.service';
+import type { Product } from '../types/shared.types';
 import styles from './IntegrationDashboard.module.scss';
 
 export const IntegrationDashboard: React.FC = () => {
@@ -9,7 +13,85 @@ export const IntegrationDashboard: React.FC = () => {
 
   // Hook da lógica de negócios, repassando um provedor de loja apenas quando não for a aba de IA
   const storeProvider = activeTab === 'ai' ? 'shopify' : activeTab;
-  const { fallbackInfo, clearFallback, isLoading } = useIntegrations(storeProvider);
+  const { 
+    products, 
+    pageInfo, 
+    fetchProducts, 
+    isLoading, 
+    fallbackInfo, 
+    clearFallback, 
+    syncProduct, 
+    updateProduct, 
+    deleteProduct 
+  } = useIntegrations(storeProvider);
+
+  const { user } = useAuth();
+  const tenantId = StorageService.getItem<string>(STORAGE_KEYS.TENANT_ID) || 
+                   user?.tenant_id || 
+                   (user as any)?.tenantId || 
+                   user?.tenants?.[0] || 
+                   '';
+
+  // Carrega produtos ao alternar de aba
+  useEffect(() => {
+    if (activeTab !== 'ai') {
+      fetchProducts(10);
+    }
+  }, [activeTab, fetchProducts]);
+
+  // Helpers para mapear os dados internos do produto para os payloads de integração
+  const mapProductToNuvemshop = (product: Product, tId: string) => ({
+    tenant_id: tId,
+    handle: { pt: product.sku },
+    name: { pt: product.title || '' },
+    description: { pt: product.description || '' },
+    published: true,
+    free_shipping: false,
+    requires_shipping: true,
+    categories: [],
+    variants: [
+      {
+        price: product.price,
+        sku: product.sku,
+        stock: 999
+      }
+    ],
+    images: product.images ? product.images.map((img: string) => ({ src: img })) : []
+  });
+
+  const mapProductToShopify = (product: Product, tId: string) => ({
+    tenant_id: tId,
+    title: product.title || '',
+    descriptionHtml: product.description || '',
+    vendor: 'Default Vendor',
+    status: 'DRAFT' as const,
+    variants: [
+      {
+        price: String(product.price || 0),
+        sku: product.sku,
+        optionValues: []
+      }
+    ],
+    files: product.images ? product.images.map((img: string) => ({ originalSource: img, contentType: 'IMAGE' as const })) : []
+  });
+
+  const handleSync = async (product: Product) => {
+    if (activeTab === 'shopify') {
+      const payload = mapProductToShopify(product, tenantId);
+      await syncProduct(payload);
+    } else if (activeTab === 'nuvemshop') {
+      const payload = mapProductToNuvemshop(product, tenantId);
+      await syncProduct(payload);
+    }
+  };
+
+  const handleUpdate = async (productId: string | number, data: unknown) => {
+    await updateProduct(productId, data as any);
+  };
+
+  const handleDelete = async (productId: string | number) => {
+    await deleteProduct(productId);
+  };
 
   return (
     <div className={styles.container}>
@@ -73,10 +155,18 @@ export const IntegrationDashboard: React.FC = () => {
             </div>
           )}
 
-          {/* Espaço reservado para a futura Tabela de Produtos */}
+          {/* Tabela de Produtos integrada */}
           <div className={styles.tableArea}>
-            {/* <ProductTable provider={activeTab} /> */}
-            <p>A tabela de produtos para {activeTab === 'shopify' ? 'Shopify' : 'Nuvemshop'} será renderizada aqui.</p>
+            <SyncProductTable 
+              data={products}
+              isLoading={isLoading}
+              provider={activeTab}
+              onSync={handleSync}
+              onUpdate={handleUpdate}
+              onDelete={handleDelete}
+              hasNextPage={pageInfo.hasNextPage}
+              onNextPage={() => fetchProducts(10, pageInfo.endCursor || undefined)}
+            />
           </div>
         </>
       )}

@@ -11,11 +11,16 @@ export const useFreeSample = () => {
 
   // Referência persistente para o controlador de aborto do fetch do SSE
   const abortControllerRef = useRef<AbortController | null>(null);
+  const timeoutRef = useRef<any>(null);
 
   /**
    * Força a interrupção da conexão HTTP com o SSE no backend Python
    */
   const disconnectStream = useCallback(() => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
       abortControllerRef.current = null;
@@ -62,6 +67,31 @@ export const useFreeSample = () => {
       const controller = new AbortController();
       abortControllerRef.current = controller;
 
+      // Inicia timer de 45 segundos
+      timeoutRef.current = setTimeout(() => {
+        setProducts((prevProducts) => {
+          const hasUnfinished = prevProducts.some(
+            (p) => p.status !== 'completed' && p.status !== 'failed'
+          );
+
+          if (hasUnfinished) {
+            disconnectStream();
+            setIsProcessing(false);
+            return prevProducts.map((item) =>
+              item.status !== 'completed' && item.status !== 'failed'
+                ? {
+                    ...item,
+                    status: 'failed' as const,
+                    error: 'Instabilidade na fila detectada. Estamos processando o seu produto em segundo plano, você pode continuar navegando.',
+                    progress: 100
+                  }
+                : item
+            );
+          }
+          return prevProducts;
+        });
+      }, 45000);
+
       // 3. Abre o canal e intercepta os chunks de dados em tempo real
       await FreeSampleService.streamProgress(
         (payload: SseStreamPayload) => {
@@ -88,12 +118,18 @@ export const useFreeSample = () => {
 
             if (allFinished) {
               setIsProcessing(false);
+              if (timeoutRef.current) {
+                clearTimeout(timeoutRef.current);
+              }
             }
 
             return updatedProducts;
           });
         },
         (streamError) => {
+          if (timeoutRef.current) {
+            clearTimeout(timeoutRef.current);
+          }
           console.error("Falha na resiliência do stream:", streamError);
           setGlobalError("A conexão com o servidor de atualização falhou.");
           setIsProcessing(false);
@@ -107,6 +143,9 @@ export const useFreeSample = () => {
       setIsProcessing(false);
 
     } catch (error) {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
       setIsProcessing(false);
 
       // Captura tipada herdando as mensagens tratadas no seu ApiService global

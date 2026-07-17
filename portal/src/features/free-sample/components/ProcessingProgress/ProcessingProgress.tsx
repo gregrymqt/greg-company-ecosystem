@@ -1,5 +1,7 @@
+import React, { useState } from 'react';
 import styles from './ProcessingProgress.module.scss';
 import type { DemoProductItem, ProcessStatus } from '../../types/free-sample.types';
+import { AlertService } from '../../../../shared/services/alert.service';
 
 interface ProcessingProgressProps {
   /** Array de produtos/URLs sendo processados pelo hook useFreeSample */
@@ -21,7 +23,11 @@ const getStatusMetadata = (status: ProcessStatus, error?: string) => {
     case 'completed':
       return { text: 'Página de vendas otimizada com sucesso! 🔥', class: styles.completed };
     case 'failed':
-      return { text: error || 'Bloqueio de segurança do fornecedor detectado.', class: styles.failed };
+      const isTimeout = error?.includes('Instabilidade na fila');
+      const text = isTimeout 
+        ? error 
+        : 'Não conseguimos acessar esse produto automaticamente devido a bloqueios do site. Tente colar o texto do produto manualmente.';
+      return { text, class: styles.failed };
     default:
       return { text: 'Aguardando inicialização...', class: styles.idle };
   }
@@ -40,7 +46,22 @@ const formatUrlDisplay = (url: string): string => {
 };
 
 export function ProcessingProgress({ products }: ProcessingProgressProps) {
+  const [manualTexts, setManualTexts] = useState<Record<string, string>>({});
+
   if (products.length === 0) return null;
+
+  const handleManualSubmit = async (url: string) => {
+    const text = manualTexts[url] || '';
+    if (!text.trim()) {
+      AlertService.notify('Atenção', 'Por favor, insira o texto do produto.', 'warning');
+      return;
+    }
+
+    await AlertService.error(
+      'Recurso Premium',
+      'A otimização manual de textos copiados está disponível apenas para assinantes da Greg Company. Crie sua conta ou assine um plano para obter acesso completo.'
+    );
+  };
 
   return (
     <div className={styles.wrapper}>
@@ -51,6 +72,7 @@ export function ProcessingProgress({ products }: ProcessingProgressProps) {
           const meta = getStatusMetadata(product.status, product.error);
           const isDone = product.status === 'completed';
           const isFailed = product.status === 'failed';
+          const isTimeout = product.error?.includes('Instabilidade na fila');
 
           return (
             <div key={index} className={`${styles.card} ${meta.class}`}>
@@ -69,6 +91,24 @@ export function ProcessingProgress({ products }: ProcessingProgressProps) {
               <div className={styles.statusMessage}>
                 {meta.text}
               </div>
+
+              {isFailed && !isTimeout && (
+                <div className={styles.manualInputBlock}>
+                  <textarea
+                    className={styles.manualTextArea}
+                    placeholder="Cole aqui o título, descrição ou textos do produto que deseja otimizar..."
+                    value={manualTexts[product.url] || ''}
+                    onChange={(e) => setManualTexts(prev => ({ ...prev, [product.url]: e.target.value }))}
+                  />
+                  <button 
+                    type="button"
+                    className={styles.manualSubmitBtn}
+                    onClick={() => handleManualSubmit(product.url)}
+                  >
+                    <i className="fas fa-magic" /> Otimizar Texto Manualmente
+                  </button>
+                </div>
+              )}
 
               <div className={styles.progressTrack}>
                 <div 

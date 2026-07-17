@@ -137,3 +137,62 @@
     background-color: #f9f9f9;
   }
 }
+
+.failedActions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.errorLog {
+  font-size: 0.8rem;
+  color: #dc3545;
+  background-color: #fdf3f4;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #f5c2c7;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  max-width: fit-content;
+}
+
+.actionButtons {
+  display: flex;
+  gap: 8px;
+}
+
+.rowRetryBtn, .rowManualBtn {
+  background: none;
+  border: 1px solid;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s ease;
+}
+
+.rowRetryBtn {
+  border-color: var(--primary-color, #007bff);
+  color: var(--primary-color, #007bff);
+
+  &:hover {
+    background-color: var(--primary-color, #007bff);
+    color: #ffffff;
+  }
+}
+
+.rowManualBtn {
+  border-color: #28a745;
+  color: #28a745;
+
+  &:hover {
+    background-color: #28a745;
+    color: #ffffff;
+  }
+}

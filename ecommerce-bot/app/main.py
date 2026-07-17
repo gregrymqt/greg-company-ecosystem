@@ -8,6 +8,8 @@ from app.config.settings import settings
 from app.config.redis_db import redis_cache
 from app.repositories.product_repository import ProductRepository
 from app.workers.scraper_worker import ScraperWorker
+from app.workers.processor_worker import ProcessorWorker
+from app.services.llm_service import LLMService
 from app.api.v1.api import router as v1_router
 
 logger = logging.getLogger(__name__)
@@ -23,20 +25,24 @@ async def lifespan(app: FastAPI):
     
     repository = ProductRepository()
     scraper_worker = ScraperWorker(repository)
+    llm_service = LLMService()
+    processor_worker = ProcessorWorker(repository, llm_service)
     
-    # Inicia a task em background para o worker não bloquear o servidor HTTP
-    worker_task = asyncio.create_task(scraper_worker.start_consuming("ecommerce_prod"))
-    app.state.worker_task = worker_task
+    # Inicia as tasks em background para os workers não bloquearem o servidor HTTP
+    prod_worker_task = asyncio.create_task(scraper_worker.start_consuming("ecommerce_prod"))
+    demo_worker_task = asyncio.create_task(scraper_worker.start_consuming("ecommerce_demo"))
+    processor_task = asyncio.create_task(processor_worker.run())
+    
+    app.state.worker_tasks = [prod_worker_task, demo_worker_task, processor_task]
 
     yield
     
     # Shutdown
     logger.info("Encerrando aplicação e fechando conexões...")
-    worker_task.cancel()
-    try:
-        await worker_task
-    except asyncio.CancelledError:
-        pass
+    for task in app.state.worker_tasks:
+        task.cancel()
+    
+    await asyncio.gather(*app.state.worker_tasks, return_exceptions=True)
     await redis_cache.disconnect()
 
 app = FastAPI(title="Ecommerce Bot API", lifespan=lifespan)

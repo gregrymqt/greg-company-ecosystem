@@ -60,6 +60,35 @@ export const SyncProductTable: React.FC<SyncProductTableProps> = ({
         <div className={styles.productInfo}>
           <span className={styles.sku}>{item.sku}</span>
           <span className={styles.title}>{item.title || 'Sem título'}</span>
+          
+          {item.status === 'Failed' && (
+            <div className={styles.failedActions}>
+              {item.last_error && (
+                <div className={styles.errorLog}>
+                  <i className="fas fa-exclamation-circle" /> {item.last_error}
+                </div>
+              )}
+              <div className={styles.actionButtons}>
+                <button 
+                  type="button" 
+                  className={styles.rowRetryBtn} 
+                  onClick={() => onSync(item)}
+                >
+                  <i className="fas fa-redo-alt" /> Retentar
+                </button>
+                <button 
+                  type="button" 
+                  className={styles.rowManualBtn} 
+                  onClick={() => {
+                    const id = item._id || item.sku;
+                    if (id) onUpdate(id, item);
+                  }}
+                >
+                  <i className="fas fa-pen" /> Mapear Manualmente
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       ),
     },
@@ -95,6 +124,28 @@ export const SyncProductTable: React.FC<SyncProductTableProps> = ({
           >
             <i className="fas fa-sync"></i> Sincronizar
           </button>
+          
+          {item.status === 'Failed' && (
+            <>
+              <button 
+                type="button" 
+                className={styles.menuItem} 
+                onClick={() => onSync(item)}
+              >
+                <i className="fas fa-redo"></i> Retentar Sincronizar
+              </button>
+              <button 
+                type="button" 
+                className={styles.menuItem} 
+                onClick={() => {
+                  const id = item._id || item.sku;
+                  if (id) onUpdate(id, item);
+                }}
+              >
+                <i className="fas fa-edit"></i> Mapear Manualmente
+              </button>
+            </>
+          )}
         </ActionMenu>
       ),
     }
