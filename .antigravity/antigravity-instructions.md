@@ -24,7 +24,7 @@ This is a **monorepo multi-service business suite** following a decoupled micro-
 Services and repositories are **auto-registered via Scrutor** by namespace scanning. When adding new features, create `Services/` and `Repositories/` folders strictly following the standard namespace pattern so they will be automatically discovered.
 
 ### Database & Background Jobs
-- **Primary DB:** MongoDB. C# backend uses the native `MongoDB.Driver`. Python uses asynchronous `motor`. It serves as the single source of truth.
+- **Primary DB:** PostgreSQL (Supabase Cloud). C# backend uses Entity Framework Core with the `Npgsql` provider. Python uses SQLAlchemy with the asynchronous `asyncpg` driver. It serves as the single source of truth.
 - **Cache:** Redis for performance (`USE_REDIS` env var toggles it).
 - **Messaging:** RabbitMQ is used as the AMQP broker.
 - **Storage:** Supabase Storage is used for files.
@@ -37,10 +37,12 @@ The `go-worker` directory contains logic for asynchronously processing videos an
 ### Ecommerce Bot (Python)
 The `ecommerce-bot` directory houses web scraping and LLM processing services. 
 **Crucial Architectural Details for AI Agents:**
-- Uses `motor` for MongoDB access and Pydantic for validation.
+- Uses `SQLAlchemy` with `asyncpg` for PostgreSQL access and Pydantic for validation.
 - Enforces strict Multi-tenant isolation relying on `(tenant_id, sku)` composite keys.
 - Utilizes RabbitMQ queues `ecommerce_prod` (Priority) and `ecommerce_demo` (TTL and Max-Length restrictions) via an exclusive Dead Letter Exchange (DLX).
-- Implements BYOK (Bring Your Own Key) Security: OpenAI/Gemini API keys are **strictly encrypted in MongoDB using AES-256 GCM**. If modifying the `ProcessorWorker` or `LLMService`, always respect the decryption layer `decrypt_api_key` located in `app/utils/crypto.py`. Do NOT write plaintext keys to the database.
+- Implements a Real-Time SSE stream endpoint `/v1/demo/stream` and uses Redis Pub/Sub (`demo_progress` channel) to announce scraping & LLM copywriting stages.
+- `main.py` integrates a background worker lifespan to run both `ScraperWorker` (handling `ecommerce_prod` and `ecommerce_demo` queues) and `ProcessorWorker` tasks.
+- Implements BYOK (Bring Your Own Key) Security: OpenAI/Gemini API keys are **strictly encrypted in PostgreSQL using AES-256 GCM**. If modifying the `ProcessorWorker` or `LLMService`, always respect the decryption layer `decrypt_api_key` located in `app/utils/crypto.py`. Do NOT write plaintext keys to the database.
 Make sure `venv` is excluded from source control.
 
 ## Frontends (React + TypeScript + Vite)
@@ -49,6 +51,11 @@ Make sure `venv` is excluded from source control.
 The application UI is split into two completely independent React projects:
 1. **`portal/`**: For end-users.
 2. **`admin/`**: For administrators.
+
+### Resilience, Timeouts & UI Feedback States
+- **Timeouts:** React frontends (Portal & Admin) implement a 45-second execution bound on scraper/sync requests via `AbortController` cancellation at the HTTP API client level (`ApiService` wrapper spreads `options` to support `options.signal`).
+- **Portal Fallbacks:** The free-sample loading grid visually captures scraping failures or queue timeouts. In case of access blocks, it displays a friendly warning: *"Não conseguimos acessar esse produto automaticamente..."* and renders a localized `textarea` for manual copy-pasting, triggering a premium signup upsell.
+- **Admin Dashboard Table:** Mounts `SyncProductTable` linked to backend providers (Shopify & Nuvemshop). Displays real-time failure logs under the product card and provides contextual actions: **Retentar** (re-sync) and **Mapear Manualmente** (edit modal).
 
 ### Project Structure (Inside portal/ or admin/)
 ```

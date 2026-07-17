@@ -10,20 +10,20 @@ Ecossistema completo para gestão de cursos online com sistema integrado de paga
 - 🔔 Suporte e sistema de reclamações
 - 💰 Gestão de carteira digital e transações
 - ✉️ Integração com SendGrid para envio de e-mails via RabbitMQ (Transactional Outbox)
-- 🤖 Automação, Web Scraping e Enriquecimento de IA com Bot em Python
+- 🤖 Automação, Web Scraping e Enriquecimento de IA com Bot em Python (incluindo real-time SSE progress updates e resiliência a timeouts)
 
 ## 🚀 Tecnologias e Integrações
 
 *   **Backend (API & BI):** ASP.NET 8 (C#) para APIs RESTful e processamento de métricas e lógica de BI. O projeto principal chama-se `MeuCrudCsharp`.
 *   **Microserviços (Workers):** Golang (`go-worker`) para processamento assíncrono (transcodificação de vídeos e envio de e-mails).
 *   **Frontends (Micro-frontends):** React com TypeScript e Vite. Dividido em dois projetos isolados: `portal` (vitrine) e `admin` (gestão).
-*   **Banco de Dados:** MongoDB nativo (`MongoDB.Driver`) como banco de dados principal e *Single Source of Truth* para toda a plataforma.
+*   **Banco de Dados:** PostgreSQL hospedado na nuvem Supabase (C# usa Entity Framework Core com `Npgsql`, Python usa SQLAlchemy com `asyncpg`) como banco de dados principal e *Single Source of Truth* para toda a plataforma.
 *   **Cache:** Redis para caching de alta performance.
 *   **Mensageria e Eventos:** RabbitMQ para mensageria assíncrona e Transactional Outbox Pattern para processamento confiável de eventos (ex: Webhooks e Emails).
 *   **Gateway Proxy:** Nginx como API Gateway, servindo como única porta de entrada (Porta 80) para todo o ecossistema.
 *   **Pagamentos:** Integração completa com MercadoPago (Checkout Pro, Webhooks, PIX e Assinaturas).
 *   **Armazenamento de Arquivos:** Integração com Supabase Storage.
-*   **Automação de IA:** Bot implementado em Python (`ecommerce-bot`) responsável por Web Scraping, busca semântica em Cache e enriquecimento LLM com segurança BYOK (AES-256).
+*   **Automação de IA:** Bot implementado em Python (`ecommerce-bot`) responsável por Web Scraping, busca semântica em Cache e enriquecimento LLM com segurança BYOK (AES-256) persistidos em PostgreSQL.
 *   **Containerização:** Docker e Docker Compose para ambiente local, e Kubernetes (manifestos em `infra/manifests/`) para orquestração em nuvem.
 
 ## 🏗️ Arquitetura
@@ -31,11 +31,11 @@ Ecossistema completo para gestão de cursos online com sistema integrado de paga
 O ecossistema adota uma arquitetura de **Monorepo**, separado em serviços independentes:
 
 1. **Proxy Gateway (Nginx):** Roteador central que recebe todas as requisições na porta 80 e direciona para o portal, admin ou backend.
-2. **Backend (C#):** Clean Architecture com Vertical Slices - cada feature (Auth, Courses, MercadoPago, Analytics, etc.) possui sua própria estrutura completa. Auto-registro de dependências via Scrutor. Utiliza o Transactional Outbox Pattern.
+2. **Backend (C#):** Clean Architecture com Vertical Slices - cada feature (Auth, Courses, MercadoPago, Analytics, etc.) possui sua própria estrutura completa. Auto-registro de dependências via Scrutor. Utiliza o Transactional Outbox Pattern e persistência SQL via PostgreSQL (Supabase).
 3. **Go Worker (Golang):** Microserviço dedicado à transcodificação de vídeos e envio de e-mails, consumindo mensagens do RabbitMQ (`marketplace.exchange`).
-4. **Ecommerce Bot (Python):** Worker de Automação de E-commerce operando Web Scraping assíncrono, processamento de NLP/LLM com isolamento Multi-tenant e criptografia de chaves (AES-256 GCM). O bot se expõe parcialmente via API para recebimento de streams SSE.
-5. **Portal Frontend (React):** Aplicação voltada para o usuário final. Contém a vitrine de cursos, player de vídeos e área do aluno.
-6. **Admin Frontend (React):** Painel de backoffice para gestão da plataforma.
+4. **Ecommerce Bot (Python):** Worker de Automação de E-commerce operando Web Scraping assíncrono, processamento de NLP/LLM com isolamento Multi-tenant e criptografia de chaves (AES-256 GCM) salvas em PostgreSQL. O bot publica o progresso de extração e enriquecimento no Redis Pub/Sub e expõe um endpoint SSE (`/v1/demo/stream`) para streams em tempo real.
+5. **Portal Frontend (React):** Aplicação voltada para o usuário final. Contém a vitrine de cursos, player de vídeos, área do aluno e o painel de simulação ("free-sample") resiliente a timeouts de 45s e falhas de scraping com fallback manual.
+6. **Admin Frontend (React):** Painel de backoffice para gestão da plataforma, apresentando tabelas integradas de produtos e sincronização direta com logs e ações locais de retentativa e mapeamento manual.
 
 ### Padrão Vertical Slice
 Cada feature (ex: `Course`, `Payment`, `Mcp`) é tratada de forma autônoma. O Backend possui tudo o que a feature precisa para funcionar, e os Frontends implementam apenas as views correspondentes.
@@ -141,7 +141,9 @@ Configure no arquivo `.env` na raiz do projeto:
 
 ```env
 # Banco de Dados
-MONGO_CONNECTION_STRING=mongodb://mongodb-store:27017/GregCompanyMongo
+ConnectionStrings__PostgresTransaction=Host=supabase-db;Port=5432;Database=greg_company;Username=postgres;Password=your_password;
+ConnectionStrings__PostgresSession=Host=supabase-db;Port=5432;Database=greg_company;Username=postgres;Password=your_password;
+POSTGRES_URI=postgresql://postgres:your_password@supabase-db:5432/greg_company
 ConnectionStrings__Redis=redis-cache:6379
 ConnectionStrings__RabbitMq=amqp://guest:guest@rabbitmq:5672/
 USE_REDIS=true
