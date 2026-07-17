@@ -60,8 +60,9 @@ export const useFreeSample = () => {
     setProducts(initialState);
 
     try {
-      // 1. Envia o lote para o endpoint FastAPI
-      await FreeSampleService.triggerDemo(cleanUrls);
+      // 1. Envia o lote para o endpoint FastAPI e captura o ticket de sessão
+      const response = await FreeSampleService.triggerDemo(cleanUrls);
+      const currentTicketId = response.ticket_id;
 
       // 2. Prepara o token de cancelamento para o stream
       const controller = new AbortController();
@@ -92,8 +93,9 @@ export const useFreeSample = () => {
         });
       }, 45000);
 
-      // 3. Abre o canal e intercepta os chunks de dados em tempo real
+      // 3. Abre o canal e intercepta os chunks de dados em tempo real passando o ticket
       await FreeSampleService.streamProgress(
+        currentTicketId,
         (payload: SseStreamPayload) => {
           // 🔥 OTIMIZAÇÃO: Tratamento atômico em uma única passagem de render
           setProducts((prevProducts) => {

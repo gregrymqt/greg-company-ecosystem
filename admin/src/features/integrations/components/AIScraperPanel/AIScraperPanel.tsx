@@ -4,7 +4,7 @@ import { useAiScraper } from '../../hooks/useAiScraper';
 import styles from './AIScraperPanel.module.scss';
 
 export const AIScraperPanel: React.FC = () => {
-  const { isSavingKey, isStartingScraper, saveCredentials, startScraping } = useAiScraper();
+  const { isSavingKey, isStartingScraper, saveCredentials, startScraping, lastTaskId } = useAiScraper();
 
   return (
     <div className={styles.container}>
@@ -38,6 +38,12 @@ export const AIScraperPanel: React.FC = () => {
             <Form.Submit isLoading={isStartingScraper}>Iniciar Extração com IA</Form.Submit>
           </Form.Actions>
         </Form>
+        {lastTaskId && (
+          <div style={{ marginTop: '1rem', fontSize: '0.85rem', color: 'var(--text-muted, #666)' }}>
+            <i className="fas fa-info-circle" style={{ marginRight: '0.5rem', color: 'var(--primary-color, #007bff)' }}></i>
+            Tarefa enfileirada com ID de rastreamento: <code style={{ background: '#f4f4f4', padding: '2px 6px', borderRadius: '4px' }}>{lastTaskId}</code>
+          </div>
+        )}
       </section>
     </div>
   );

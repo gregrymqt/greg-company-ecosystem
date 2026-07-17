@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import styles from './ProcessingProgress.module.scss';
 import type { DemoProductItem, ProcessStatus } from '../../types/free-sample.types';
 import { AlertService } from '../../../../shared/services/alert.service';

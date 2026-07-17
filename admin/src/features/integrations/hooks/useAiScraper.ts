@@ -7,6 +7,7 @@ import { StorageService, STORAGE_KEYS } from '@/shared/services/storage.service'
 export const useAiScraper = () => {
   const [isSavingKey, setIsSavingKey] = useState(false);
   const [isStartingScraper, setIsStartingScraper] = useState(false);
+  const [lastTaskId, setLastTaskId] = useState<string | null>(null);
   const { user } = useAuth();
 
   const tenantId = StorageService.getItem<string>(STORAGE_KEYS.TENANT_ID) || 
@@ -33,11 +34,14 @@ export const useAiScraper = () => {
 
   const startScraping = async (data: Record<string, unknown>) => {
     setIsStartingScraper(true);
+    setLastTaskId(null);
     try {
-      await AiScraperService.startExtraction({
+      const response = await AiScraperService.startExtraction({
         url: String(data.url),
         tenant_id: tenantId
       });
+      setLastTaskId(response.task_id);
+      console.log('Scraping task started with ID:', response.task_id);
       AlertService.notify('Sucesso', 'A extração foi iniciada em background', 'success');
     } catch (error) {
       AlertService.notify('Erro', 'Falha ao iniciar a extração.', 'error');
@@ -50,6 +54,7 @@ export const useAiScraper = () => {
     isSavingKey,
     isStartingScraper,
     saveCredentials,
-    startScraping
+    startScraping,
+    lastTaskId
   };
 };

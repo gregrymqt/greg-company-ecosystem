@@ -57,3 +57,9 @@ export interface SseStreamPayload {
   enhanced?: EnhancedProductData;
   error?: string;
 }
+
+export interface DemoTriggerResponse {
+  status: string;
+  ticket_id: string;
+  message?: string;
+}

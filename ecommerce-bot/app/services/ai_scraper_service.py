@@ -4,9 +4,10 @@ import logging
 from fastapi import HTTPException, status
 import aio_pika
 
-from app.config.database import AsyncSessionLocal
 from app.utils.crypto import save_tenant_key
 from app.models.messages import ImportRequestMessage
+from app.config.rabbitmq import get_rabbitmq_connection
+
 
 logger = logging.getLogger(__name__)
 
@@ -61,7 +62,11 @@ class AIScraperService:
                 )
                 
             logger.info(f"Solicitação de scraping enviada ao RabbitMQ para o Tenant {tenant_id}. URL: {target_url}")
-            return {"status": "accepted", "message": "Extração iniciada com sucesso em background."}
+            return {
+                "status": "accepted",
+                "task_id": generated_product_id,
+                "message": "Extração iniciada com sucesso em background."
+            }
             
         except Exception as e:
             logger.error(f"Erro ao publicar mensagem de scraping no RabbitMQ para o tenant {tenant_id}: {e}")
