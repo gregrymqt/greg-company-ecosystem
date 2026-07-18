@@ -126,7 +126,7 @@ services:
       - ../.env
     environment:
       - POSTGRES_URI=${POSTGRES_TRANSACTION_CONNECTION_STRING}
-      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
+      - RABBITMQ_URL=amqp://${RabbitMQ__UserName}:${RabbitMQ__Password}@rabbitmq:5672/
       - REDIS_URL=redis://redis:6379
       - AES_MASTER_KEY=${AES_MASTER_KEY}
       - Groq_API_KEY=${Groq_API_KEY}

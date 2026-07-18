@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Amazon.Runtime;
 using Amazon;
 
-namespace MeuCrudCsharp.Features.Files.Infrastructure.Services;
+namespace MeuCrudCsharp.Features.Files.Application.Services;
 
 public class SupabaseStorageService : ISupabaseStorageService
 {

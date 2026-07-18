@@ -3,6 +3,7 @@
 Ecossistema completo para gestão de cursos online com sistema integrado de pagamentos, assinaturas e inteligência de negócios. Plataforma Full-stack desenvolvida por Lucas Vicente De Souza, estudante de Desenvolvimento de Software Multiplataforma na FATEC.
 
 **Features Principais:**
+
 - 🎓 Gestão completa de cursos e vídeos (com transcodificação delegada a microserviço Go)
 - 💳 Sistema de pagamentos com MercadoPago (PIX, Cartão, Assinaturas)
 - 👥 Autenticação e perfis de usuário (incluindo Google Login)
@@ -14,17 +15,17 @@ Ecossistema completo para gestão de cursos online com sistema integrado de paga
 
 ## 🚀 Tecnologias e Integrações
 
-*   **Backend (API & BI):** ASP.NET 8 (C#) para APIs RESTful e processamento de métricas e lógica de BI. O projeto principal chama-se `MeuCrudCsharp`.
-*   **Microserviços (Workers):** Golang (`go-worker`) para processamento assíncrono (transcodificação de vídeos e envio de e-mails).
-*   **Frontends (Micro-frontends):** React com TypeScript e Vite. Dividido em dois projetos isolados: `portal` (vitrine) e `admin` (gestão).
-*   **Banco de Dados:** PostgreSQL hospedado na nuvem Supabase (C# usa Entity Framework Core com `Npgsql`, Python usa SQLAlchemy com `asyncpg`) como banco de dados principal e *Single Source of Truth* para toda a plataforma.
-*   **Cache:** Redis para caching de alta performance.
-*   **Mensageria e Eventos:** RabbitMQ para mensageria assíncrona e Transactional Outbox Pattern para processamento confiável de eventos (ex: Webhooks e Emails).
-*   **Gateway Proxy:** Nginx como API Gateway, servindo como única porta de entrada (Porta 80) para todo o ecossistema.
-*   **Pagamentos:** Integração completa com MercadoPago (Checkout Pro, Webhooks, PIX e Assinaturas).
-*   **Armazenamento de Arquivos:** Integração com Supabase Storage.
-*   **Automação de IA:** Bot implementado em Python (`ecommerce-bot`) responsável por Web Scraping, busca semântica em Cache e enriquecimento LLM com segurança BYOK (AES-256) persistidos em PostgreSQL.
-*   **Containerização:** Docker e Docker Compose para ambiente local, e Kubernetes (manifestos em `infra/manifests/`) para orquestração em nuvem.
+- **Backend (API & BI):** ASP.NET 8 (C#) para APIs RESTful e processamento de métricas e lógica de BI. O projeto principal chama-se `MeuCrudCsharp`.
+- **Microserviços (Workers):** Golang (`go-worker`) para processamento assíncrono (transcodificação de vídeos e envio de e-mails).
+- **Frontends (Micro-frontends):** React com TypeScript e Vite. Dividido em dois projetos isolados: `portal` (vitrine) e `admin` (gestão).
+- **Banco de Dados:** PostgreSQL hospedado na nuvem Supabase (C# usa Entity Framework Core com `Npgsql`, Python usa SQLAlchemy com `asyncpg`) como banco de dados principal e *Single Source of Truth* para toda a plataforma.
+- **Cache:** Redis para caching de alta performance.
+- **Mensageria e Eventos:** RabbitMQ para mensageria assíncrona e Transactional Outbox Pattern para processamento confiável de eventos (ex: Webhooks e Emails).
+- **Gateway Proxy:** Nginx como API Gateway, servindo como única porta de entrada (Porta 80) para todo o ecossistema.
+- **Pagamentos:** Integração completa com MercadoPago (Checkout Pro, Webhooks, PIX e Assinaturas).
+- **Armazenamento de Arquivos:** Integração com Supabase Storage.
+- **Automação de IA:** Bot implementado em Python (`ecommerce-bot`) responsável por Web Scraping, busca semântica em Cache e enriquecimento LLM com segurança BYOK (AES-256) persistidos em PostgreSQL.
+- **Containerização:** Docker e Docker Compose para ambiente local, e Kubernetes (manifestos em `infra/manifests/`) para orquestração em nuvem.
 
 ## 🏗️ Arquitetura
 
@@ -38,6 +39,7 @@ O ecossistema adota uma arquitetura de **Monorepo**, separado em serviços indep
 6. **Admin Frontend (React):** Painel de backoffice para gestão da plataforma, apresentando tabelas integradas de produtos e sincronização direta com logs e ações locais de retentativa e mapeamento manual.
 
 ### Padrão Vertical Slice
+
 Cada feature (ex: `Course`, `Payment`, `Mcp`) é tratada de forma autônoma. O Backend possui tudo o que a feature precisa para funcionar, e os Frontends implementam apenas as views correspondentes.
 
 ---
@@ -45,13 +47,15 @@ Cada feature (ex: `Course`, `Payment`, `Mcp`) é tratada de forma autônoma. O B
 ## 🛠️ Como Executar
 
 ### Pré-requisitos
-*   [.NET 8 SDK](https://dotnet.microsoft.com/download)
-*   [Node.js v20.x](https://nodejs.org/) (com npm ou yarn)
-*   [Docker Desktop](https://www.docker.com/products/docker-desktop/) ou Docker Engine/Compose
-*   [Go 1.21+](https://go.dev/) (Para desenvolvimento do go-worker)
-*   [Python 3.10+](https://www.python.org/) (Para desenvolvimento do ecommerce-bot)
+
+* [.NET 8 SDK](https://dotnet.microsoft.com/download)
+- [Node.js v20.x](https://nodejs.org/) (com npm ou yarn)
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) ou Docker Engine/Compose
+- [Go 1.21+](https://go.dev/) (Para desenvolvimento do go-worker)
+- [Python 3.10+](https://www.python.org/) (Para desenvolvimento do ecommerce-bot)
 
 ### 1. Configuração do Ambiente
+
 Clone o repositório e crie o arquivo de variáveis de ambiente na raiz.
 
 ```bash
@@ -63,6 +67,7 @@ cp .env.example .env
 ```
 
 ### 2. Suba a Infraestrutura (Completa)
+
 Os arquivos centrais de orquestração estão no diretório `infra/`. Para subir toda a stack (Bancos, Mensageria, APIs, Go Worker e Frontends com Nginx):
 
 ```bash
@@ -73,17 +78,22 @@ docker compose up -d --build
 A aplicação ficará disponível via `http://localhost` (Porta 80 provida pelo Nginx).
 
 ### 3. Executar o Backend Localmente (Sem Docker Compose completo)
+
 Para rodar apenas o backend localmente no modo desenvolvimento:
+
 ```bash
 cd backend
 dotnet run
 ```
+
 A documentação Swagger estará em `/swagger`.
 
 ### 4. Executar os Frontends Localmente (Sem Docker)
+
 Em terminais separados:
 
 **Portal (Usuários):**
+
 ```bash
 cd portal
 npm install
@@ -91,6 +101,7 @@ npm run dev
 ```
 
 **Admin (Gestores):**
+
 ```bash
 cd admin
 npm install
@@ -182,6 +193,7 @@ SUPABASE_S3_URL=sua_url_supabase
 ## 🔄 CI/CD (Integração e Entrega Contínuas)
 
 O projeto utiliza **GitHub Actions** para automatizar deploys. Os pipelines foram desacoplados:
+
 - `.github/workflows/ci-cd-backend.yml`
 - `.github/workflows/ci-cd-portal.yml`
 - `.github/workflows/ci-cd-admin.yml`
@@ -189,10 +201,12 @@ O projeto utiliza **GitHub Actions** para automatizar deploys. Os pipelines fora
 ---
 
 ## 📝 Licença
+
 Este projeto foi desenvolvido como trabalho acadêmico na FATEC - Faculdade de Tecnologia de São Paulo.
 
 ---
 
 ## 👨‍💻 Autor
+
 **Lucas Vicente De Souza**  
 Estudante de Desenvolvimento de Software Multiplataforma - FATEC
