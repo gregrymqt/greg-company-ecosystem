@@ -4,11 +4,10 @@ metadata:
   name: redis-service
   namespace: greg-company
 spec:
-  type: NodePort
+  type: ClusterIP
   ports:
     - port: 6379
       targetPort: 6379
-      nodePort: 30379
   selector:
     app: redis-cache
 ---
@@ -30,9 +29,22 @@ spec:
       containers:
         - name: redis
           image: redis:7-alpine # Imagem leve e previsível
-          command: ["redis-server", "--appendonly", "yes"]
+          command: ["redis-server", "--requirepass", "$(REDIS_PASSWORD)"]
           ports:
             - containerPort: 6379
+          env:
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: greg-api-secrets
+                  key: REDIS_PASSWORD
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+            limits:
+              cpu: "200m"
+              memory: "256Mi"
           volumeMounts:
             - name: redis-persistent-storage
               mountPath: /data

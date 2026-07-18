@@ -2,34 +2,19 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: greg-configmap
-  namespace: greg-network
+  namespace: greg-company
 data:
-  # Dados Globais
-  Google__ClientId: "317826651619-a80lvh3utf0shuk1hut00inholqskp9a.apps.googleusercontent.com"
-  POSTGRES_USER: "postgres.bvoxyxmettvzaejhftrq"
-  POSTGRES_DB_NAME: "postgres"
-  
-  # No K8s, você aponta para os nomes dos "Services" internos do cluster
+  ENVIRONMENT: "production"
+  GENERAL__BASEURL: "https://api.gregcompany.com"
+  USE_KUBERNETES_LOGS: "true"
+  SCRAPER_BASE_URL: "https://exemplo-loja.com.br"
+  Google__ClientId: "SEU_CLIENT_ID_AQUI"
+  POSTGRES_DB_NAME: "greg_company"
   ConnectionStrings__Redis: "redis-service:6379"
   USE_REDIS: "TRUE"
   REDIS_URL: "redis://redis-service:6379"
-  REDIS_HOST: "redis-service"
-  REDIS_PORT: "6379"
-  
-  RabbitMQ__HostName: "rabbitmq-cluster-service"
-  RabbitMQ__Port: "5672"
-  RabbitMQ__UserName: "greg_admin"
-  
-  MercadoPago__PublicKey: "TEST-2a6b79f0-a11f-4b21-8715-42714906ae51"
+  MercadoPago__PublicKey: "QVBQX1VTUi1hMjg1NjE0NC0yY2RlLTRjMGEtYjc2NC1kYWNhNWFiYjdjNjI="
   SendGrid__FromEmail: "lucasvicentedesouza021@gmail.com"
   SendGrid__FromName: "Greg Company"
-  
-  USE_KUBERNETES_LOGS: "true"
-  GENERAL__BASEURL: "https://api.gregcompany.com"
-  
-  # Configuração S3 Cloud
   Access_key_ID: "1326cce953a33dd945a859ff9d1a6d82"
   EndPoint_S3: "https://bvoxyxmettvzaejhftrq.storage.supabase.co/storage/v1/s3"
-  
-  VITE_GENERAL__BASEURL: "https://api.gregcompany.com"
-  VITE_WS_URL: "wss://api.gregcompany.com"

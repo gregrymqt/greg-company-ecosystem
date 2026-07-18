@@ -125,7 +125,7 @@ services:
     env_file:
       - ../.env
     environment:
-      - POSTGRES_URI=${POSTGRES_TRANSACTION_CONNECTION_STRING}
+      - POSTGRES_URI=${POSTGRES_URI_PYTHON}
       - RABBITMQ_URL=amqp://${RabbitMQ__UserName}:${RabbitMQ__Password}@rabbitmq:5672/
       - REDIS_URL=redis://redis:6379
       - AES_MASTER_KEY=${AES_MASTER_KEY}
