@@ -129,6 +129,8 @@ services:
       - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
       - REDIS_URL=redis://redis:6379
       - AES_MASTER_KEY=${AES_MASTER_KEY}
+      - Groq_API_KEY=${Groq_API_KEY}
+      - Deepseek_Api_Key=${Deepseek_Api_Key}
     depends_on:
       postgres:
         condition: service_started

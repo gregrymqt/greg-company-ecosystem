@@ -1,7 +1,7 @@
 import asyncio
 import time
 from dotenv import load_dotenv
-from app.providers.llm_provider import OpenAIProvider, GeminiProvider
+from app.providers.llm_provider import DeepSeekProvider, GroqProvider
 from app.utils.logger import get_logger
 
 logger = get_logger("LLMService")
@@ -13,18 +13,21 @@ class AllProvidersExhaustedError(Exception):
     pass
 
 class LLMService:
-    def __init__(self, openai_api_key: str = None):
+    def __init__(self, deepseek_api_key: str = None, groq_api_key: str = None, is_demo: bool = False, **kwargs):
         # Initialize the list of providers in the order we want to use them
         self.providers = []
         try:
-            self.providers.append(OpenAIProvider(api_key=openai_api_key))
+            self.providers.append(DeepSeekProvider(api_key=deepseek_api_key))
         except Exception as e:
-            logger.warning(f"OpenAIProvider não configurado: {e}")
+            logger.warning(f"DeepSeekProvider não configurado: {e}")
             
         try:
-            self.providers.append(GeminiProvider())
+            self.providers.append(GroqProvider(api_key=groq_api_key))
         except Exception as e:
-            logger.warning(f"GeminiProvider não configurado: {e}")
+            logger.warning(f"GroqProvider não configurado: {e}")
+
+        if is_demo:
+            self.providers.sort(key=lambda p: 0 if p.name == "Groq" else 1)
 
     async def enrich_product(self, product: Product) -> Product:
         prompt = f"""

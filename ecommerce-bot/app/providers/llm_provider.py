@@ -2,7 +2,6 @@ import abc
 import asyncio
 import logging
 import openai
-from google import genai
 from app.models.llm_responses import EnrichedProductResponse
 from app.utils.logger import get_logger
 from app.config.settings import settings
@@ -20,49 +19,52 @@ class LLMProvider(abc.ABC):
         pass
 
 
-class OpenAIProvider(LLMProvider):
+class DeepSeekProvider(LLMProvider):
     def __init__(self, api_key: str = None):
-        key = api_key or settings.OPENAI_API_KEY
-        self.client = openai.AsyncOpenAI(api_key=key)
-        
+        key = api_key or settings.DEEPSEEK_API_KEY
+        if not key:
+            raise ValueError("DEEPSEEK_API_KEY is not configured.")
+        self.client = openai.AsyncOpenAI(api_key=key, base_url="https://api.deepseek.com")
+
     @property
     def name(self) -> str:
-        return "OpenAI"
+        return "DeepSeek"
 
     async def enrich(self, prompt: str) -> EnrichedProductResponse:
-        response = await self.client.beta.chat.completions.parse(
-            model="gpt-4o-mini",
+        response = await self.client.chat.completions.create(
+            model="deepseek-chat",
             messages=[{"role": "user", "content": prompt}],
-            response_format=EnrichedProductResponse,
+            response_format={"type": "json_object"},
         )
-        return response.choices[0].message.parsed
+        content = response.choices[0].message.content
+        try:
+            return EnrichedProductResponse.model_validate_json(content)
+        except Exception as e:
+            logger.error(f"Erro ao validar schema do DeepSeek: {e} | Resposta: {content}", exc_info=True)
+            raise
 
 
-class GeminiProvider(LLMProvider):
-    def __init__(self):
-        api_key = settings.GEMINI_API_KEY
-        if not api_key:
-            raise ValueError("GEMINI_API_KEY is not configured.")
-        self.client = genai.Client(api_key=api_key)
-        
+class GroqProvider(LLMProvider):
+    def __init__(self, api_key: str = None):
+        key = api_key or settings.GROQ_API_KEY
+        if not key:
+            raise ValueError("GROQ_API_KEY is not configured.")
+        self.client = openai.AsyncOpenAI(api_key=key, base_url="https://api.groq.com/openai/v1")
+
     @property
     def name(self) -> str:
-        return "Gemini"
+        return "Groq"
 
     async def enrich(self, prompt: str) -> EnrichedProductResponse:
-        # Use google-genai structured output with Pydantic schema
-        response = await self.client.aio.models.generate_content(
-            model='gemini-2.5-flash',
-            contents=prompt,
-            config=genai.types.GenerateContentConfig(
-                response_mime_type="application/json",
-                response_schema=EnrichedProductResponse,
-            ),
+        response = await self.client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[{"role": "user", "content": prompt}],
+            response_format={"type": "json_object"},
         )
-        # Parse the JSON response manually since google-genai with response_schema returns string JSON
-        # For simplicity and correctness with the Pydantic model:
+        content = response.choices[0].message.content
         try:
-            return EnrichedProductResponse.model_validate_json(response.text)
+            return EnrichedProductResponse.model_validate_json(content)
         except Exception as e:
-            logger.error(f"Erro ao validar schema do Gemini: {e} | Resposta: {response.text}", exc_info=True)
+            logger.error(f"Erro ao validar schema do Groq: {e} | Resposta: {content}", exc_info=True)
             raise
+

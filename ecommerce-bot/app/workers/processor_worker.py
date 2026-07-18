@@ -85,12 +85,24 @@ class ProcessorWorker:
 
                 # Suporte a BYOK (Bring Your Own Key) para o ProcessorWorker
                 current_llm = self.llm
+                is_demo = product_model.tenant_id == "demo_tenant"
                 if product_model.tenant_id:
-                    tenant_openai_key = await get_tenant_key(product_model.tenant_id, "openai")
-                    if tenant_openai_key:
+                    tenant_deepseek_key = await get_tenant_key(product_model.tenant_id, "deepseek")
+                    tenant_groq_key = await get_tenant_key(product_model.tenant_id, "groq")
+                    if tenant_deepseek_key or tenant_groq_key:
                         from app.services.llm_service import LLMService
                         logger.info(f"Usando chave de API própria (BYOK) para o tenant: {product_model.tenant_id}")
-                        current_llm = LLMService(openai_api_key=tenant_openai_key)
+                        current_llm = LLMService(
+                            deepseek_api_key=tenant_deepseek_key,
+                            groq_api_key=tenant_groq_key,
+                            is_demo=is_demo
+                        )
+                    elif is_demo:
+                        from app.services.llm_service import LLMService
+                        current_llm = LLMService(is_demo=True)
+                elif is_demo:
+                    from app.services.llm_service import LLMService
+                    current_llm = LLMService(is_demo=True)
 
                 processed_data = await self._process_with_retry(product_model, current_llm)
 

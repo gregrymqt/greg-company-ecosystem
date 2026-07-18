@@ -1,6 +1,7 @@
 import asyncio
 from typing import Optional, Dict, Any
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ValidationError
+import json
 import html2text
 from bs4 import BeautifulSoup
 
@@ -29,15 +30,15 @@ class MarkdownParserService:
     da OpenAI para extrair os dados do produto em formato JSON estruturado.
     """
 
-    def __init__(self, api_key: str, model: str = "gpt-4o-mini"):
+    def __init__(self, api_key: str, model: str = "deepseek-chat"):
         """
         Inicializa o serviço de parsing via LLM.
 
         Args:
             api_key: Chave de API da OpenAI.
-            model: Modelo leve a ser utilizado (padrão: gpt-4o-mini).
+            model: Modelo leve a ser utilizado (padrão: deepseek-chat).
         """
-        self.client = AsyncOpenAI(api_key=api_key)
+        self.client = AsyncOpenAI(api_key=api_key, base_url="https://api.deepseek.com")
         self.model = model
         
         # Configuração do html2text (Passo 2)
@@ -99,29 +100,31 @@ class MarkdownParserService:
         )
 
         try:
-            # Passo 4: Garantia de Output com Structured Outputs da OpenAI
-            completion = await self.client.beta.chat.completions.parse(
+            # Passo 4: Garantia de Output com JSON Mode do DeepSeek
+            completion = await self.client.chat.completions.create(
                 model=self.model,
                 messages=[
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": f"Extraia os dados de produto do seguinte texto Markdown:\n\n{markdown_text}"}
                 ],
-                response_format=ProductExtractionSchema,
+                response_format={"type": "json_object"},
                 temperature=0.0  # Temperatura zero para máxima determinismo e precisão
             )
 
-            product_data = completion.choices[0].message.parsed
+            content = completion.choices[0].message.content
+            product_data = ProductExtractionSchema.model_validate_json(content)
             
             if product_data:
                 return product_data.model_dump()
             
-            # Caso raríssimo de a lib não popular o parsed model
             return self._empty_response()
 
         except openai.APIError as e:
-            raise LLMParserException(f"Erro na API da OpenAI: {str(e)}") from e
+            raise LLMParserException(f"Erro na API do DeepSeek: {str(e)}") from e
         except openai.RateLimitError as e:
-            raise LLMParserException(f"Limite de cota/rate limit excedido na OpenAI: {str(e)}") from e
+            raise LLMParserException(f"Limite de cota/rate limit excedido no DeepSeek: {str(e)}") from e
+        except (ValidationError, json.JSONDecodeError) as e:
+            raise LLMParserException(f"Erro ao converter JSON do DeepSeek para ProductExtractionSchema: {str(e)}") from e
         except Exception as e:
             raise LLMParserException(f"Falha inesperada ao processar extração via LLM: {str(e)}") from e
 

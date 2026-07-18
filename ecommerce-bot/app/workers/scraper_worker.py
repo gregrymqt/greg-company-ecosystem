@@ -25,7 +25,7 @@ class ScraperWorker:
         self.json_ld_parser = JsonLdParserService()
 
         # Load API key for MarkdownParserService
-        api_key = settings.OPENAI_API_KEY
+        api_key = settings.DEEPSEEK_API_KEY
         self.markdown_parser = MarkdownParserService(api_key=api_key)
         self.notification_service = NotificationService()
 
