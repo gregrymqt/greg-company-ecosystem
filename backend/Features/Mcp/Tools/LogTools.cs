@@ -40,6 +40,18 @@ public class LogTools
     [Description("Lê as últimas linhas do arquivo de log físico do Serilog (backend) para depurar exceções.")]
     public async Task<CallToolResult> ReadLogsAsync(LogLinesArgs args) // 💡 Ajustado para o DTO
     {
+        if (_useKubernetes)
+        {
+            return new CallToolResult
+            {
+                IsError = true,
+                Content = [new TextContentBlock 
+                { 
+                    Text = "A gravação de logs em disco local está desativada por diretrizes Stateless do Kubernetes (USE_KUBERNETES_LOGS=true). Por favor, consulte os logs diretamente no cluster utilizando a CLI nativa do console (ex: 'kubectl logs')." 
+                }]
+            };
+        }
+
         var logPath = "log/log-.txt";
 
         if (!File.Exists(logPath))

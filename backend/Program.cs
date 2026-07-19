@@ -3,19 +3,26 @@ using MeuCrudCsharp.Extensions.Services;
 using MeuCrudCsharp.Extensions.App;
 using Serilog;
 
-Log.Logger = new LoggerConfiguration()
+var useK8sLogs = Environment.GetEnvironmentVariable("USE_KUBERNETES_LOGS") == "true";
+
+var loggerConfig = new LoggerConfiguration()
     .MinimumLevel.Debug()
     .MinimumLevel.Override("Microsoft", Serilog.Events.LogEventLevel.Warning)
     .Enrich.FromLogContext()
-    .WriteTo.Console()
-    .WriteTo.File(
+    .WriteTo.Console();
+
+if (!useK8sLogs)
+{
+    loggerConfig.WriteTo.File(
         "log/log-.txt",
         rollingInterval: RollingInterval.Day,
         shared: true,
         flushToDiskInterval: TimeSpan.FromSeconds(1),
         outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}"
-    )
-    .CreateLogger();
+    );
+}
+
+Log.Logger = loggerConfig.CreateLogger();
 
 try
 {

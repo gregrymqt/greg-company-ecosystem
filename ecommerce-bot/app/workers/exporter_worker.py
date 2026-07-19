@@ -86,8 +86,11 @@ class ExporterWorker:
         filename = f"export_{self.platform}_{timestamp}.csv"
 
         try:
-            with open(filename, mode='wb') as file:
-                file.write(csv_bytes)
+            def _save_file():
+                with open(filename, mode='wb') as file:
+                    file.write(csv_bytes)
+
+            await asyncio.to_thread(_save_file)
 
             logger.info(f"Sucesso: Arquivo gerado em '{filename}'.")
 
