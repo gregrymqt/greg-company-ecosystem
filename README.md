@@ -151,21 +151,31 @@ greg-company-ecosystem/
 Configure no arquivo `.env` na raiz do projeto:
 
 ```env
-# Banco de Dados
-ConnectionStrings__PostgresTransaction=Host=supabase-db;Port=5432;Database=greg_company;Username=postgres;Password=your_password;
-ConnectionStrings__PostgresSession=Host=supabase-db;Port=5432;Database=greg_company;Username=postgres;Password=your_password;
-POSTGRES_URI=postgresql://postgres:your_password@supabase-db:5432/greg_company
-ConnectionStrings__Redis=redis-cache:6379
-ConnectionStrings__RabbitMq=amqp://guest:guest@rabbitmq:5672/
-USE_REDIS=true
+# Banco de Dados (PostgreSQL, Redis, RabbitMQ)
+POSTGRES_TRANSACTION_CONNECTION_STRING="Host=postgres;Port=5432;Database=greg_company;Username=postgres;Password=postgres;Max Pool Size=40;Pooling=true;"
+POSTGRES_SESSION_CONNECTION_STRING="Host=postgres;Port=5432;Database=greg_company;Username=postgres;Password=postgres;Pooling=true;"
+POSTGRES_URI_PYTHON="postgresql://postgres:postgres@postgres:5432/greg_company"
+POSTGRES_PASSWORD=postgres
+POSTGRES_DB_NAME=greg_company
+ConnectionStrings__Redis=redis:6379
+USE_REDIS=TRUE
+REDIS_URL=redis://redis:6379
+REDIS_HOST=redis
+REDIS_PORT=6379
+REDIS_PASSWORD=
+RabbitMQ__HostName=rabbitmq
+RabbitMQ__Port=5672
+RabbitMQ__UserName=guest
+RabbitMQ__Password=guest
 
 # MercadoPago
 MercadoPago__AccessToken=your_access_token
 MercadoPago__PublicKey=your_public_key
 MercadoPago__WebhookSecret=your_webhook_secret
 
-# JWT
+# JWT & Segurança BYOK
 Jwt__Key=your_secret_key
+AES_MASTER_KEY=chave_mestre_base64_aes256_32bytes
 
 # Google Auth
 Google__ClientId=your_client_id
@@ -176,16 +186,18 @@ SendGrid__ApiKey=your_sendgrid_key
 SendGrid__FromEmail=your_email@domain.com
 SendGrid__FromName=Greg Company
 
-# Base URL para Gateway
-VITE_GENERAL_BASEURL=http://localhost
+# Provedores de IA (ecommerce-bot)
+Groq_API_KEY=gsk_sua_chave_groq_aqui
+Deepseek_Api_Key=sk-sua_chave_deepseek_aqui
 
-# Integrações de Inteligência Artificial e Segurança BYOK
-OPENAI_API_KEY=sua_chave_openai
-Gemini_Api_Key=sua_chave_gemini
-AES_MASTER_KEY=chave_mestre_base64_aes256_32bytes
+# Armazenamento Cloud (Supabase S3)
+Access_key_ID=your_access_key
+Secret_Access_key=your_secret_key
+EndPoint_S3=https://sua-url-storage.supabase.co/storage/v1/s3
 
-# Armazenamento (Storage)
-SUPABASE_S3_URL=sua_url_supabase
+# Variáveis do Frontend (Vercel / Local)
+VITE_GENERAL__BASEURL=http://localhost
+VITE_WS_URL=ws://localhost:8000/v1/demo/stream
 ```
 
 ---

@@ -17,6 +17,7 @@ COPY . .
 # Injeção da URL da API como argumento de build para o Vite
 ARG GENERAL_BASEURL
 ENV VITE_GENERAL_BASEURL=$GENERAL_BASEURL
+ENV VITE_GENERAL__BASEURL=$GENERAL_BASEURL
 
 # Compila e gera os ativos estáticos otimizados na pasta /app/dist
 RUN npm run build

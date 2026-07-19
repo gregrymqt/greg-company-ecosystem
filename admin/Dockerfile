@@ -17,6 +17,7 @@ COPY . .
 # Injeção das variáveis de ambiente necessárias para o build do Vite
 ARG GENERAL_BASEURL
 ENV VITE_GENERAL_BASEURL=$GENERAL_BASEURL
+ENV VITE_GENERAL__BASEURL=$GENERAL_BASEURL
 
 # Compila e gera os arquivos estáticos otimizados na pasta /app/dist
 RUN npm run build

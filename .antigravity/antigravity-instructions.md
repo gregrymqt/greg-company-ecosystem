@@ -42,7 +42,7 @@ The `ecommerce-bot` directory houses web scraping and LLM processing services.
 - Utilizes RabbitMQ queues `ecommerce_prod` (Priority) and `ecommerce_demo` (TTL and Max-Length restrictions) via an exclusive Dead Letter Exchange (DLX).
 - Implements a Real-Time SSE stream endpoint `/v1/demo/stream` and uses Redis Pub/Sub (`demo_progress` channel) to announce scraping & LLM copywriting stages.
 - `main.py` integrates a background worker lifespan to run both `ScraperWorker` (handling `ecommerce_prod` and `ecommerce_demo` queues) and `ProcessorWorker` tasks.
-- Implements BYOK (Bring Your Own Key) Security: OpenAI/Gemini API keys are **strictly encrypted in PostgreSQL using AES-256 GCM**. If modifying the `ProcessorWorker` or `LLMService`, always respect the decryption layer `decrypt_api_key` located in `app/utils/crypto.py`. Do NOT write plaintext keys to the database.
+- Implements BYOK (Bring Your Own Key) Security: Groq/Deepseek API keys are **strictly encrypted in PostgreSQL using AES-256 GCM**. If modifying the `ProcessorWorker` or `LLMService`, always respect the decryption layer `decrypt_api_key` located in `app/utils/crypto.py`. Do NOT write plaintext keys to the database.
 Make sure `venv` is excluded from source control.
 
 ## Frontends (React + TypeScript + Vite)
@@ -71,7 +71,7 @@ src/
 ## Docker Orchestration
 
 ### Infrastructure Layout
-- **Global Stack (Docker):** Production orchestration lives in `infra/docker-compose.yml`. This creates the `greg-network` and spins up MongoDB, Redis, RabbitMQ, the Backend, both Frontends, the Go Worker, and the Nginx `proxy-gateway`.
+- **Global Stack (Docker):** Production orchestration lives in `infra/docker-compose.yml`. This creates the `greg-network` and spins up PostgreSQL, Redis, RabbitMQ, the Backend, both Frontends, the Go Worker, and the Nginx `proxy-gateway`.
 - **Global Stack (Kubernetes):** Kubernetes manifests are located in `infra/manifests/` (e.g., `apps-infra.yaml`, `greg-secrets.yaml`). 
   *CRITICAL FOR AI AGENTS: When creating or renaming environment variables (e.g., `VITE_` prefixes, `.NET` double underscores `__`), you MUST ensure strict 1:1 parity between `.env`, `docker-compose.yml`, and `greg-secrets.yaml` to prevent Environment Drift.*
 - **Nginx Config:** Located at `infra/nginx.conf`. 

@@ -47,6 +47,6 @@ jobs:
         run: |
           REPO=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
           IMAGE_NAME=ghcr.io/$REPO/admin
-          docker build -t $IMAGE_NAME:latest -t $IMAGE_NAME:${{ github.sha }} ./admin
+          docker build -t $IMAGE_NAME:latest -t $IMAGE_NAME:${{ github.sha }} --build-arg GENERAL_BASEURL="https://api.gregcompany.com" ./admin
           docker push $IMAGE_NAME:latest
           docker push $IMAGE_NAME:${{ github.sha }}
