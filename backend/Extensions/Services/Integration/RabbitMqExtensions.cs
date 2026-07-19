@@ -20,7 +20,9 @@ public static class RabbitMqExtensions
             var factory = new ConnectionFactory
             {
                 HostName = hostname,
-                Port = port
+                Port = port,
+                AutomaticRecoveryEnabled = true,
+                TopologyRecoveryEnabled = true
             };
 
             // Setup further configuration like Username, Password here if needed

@@ -61,6 +61,9 @@ func (c *EmailConsumer) StartConsuming(exchange, queueName, routingKey string) e
 	slog.Info("Waiting for email messages...", "queue", q.Name)
 
 	go func() {
+		maxWorkers := 20 // Limite seguro para evitar estouro de memória
+		sem := make(chan struct{}, maxWorkers)
+
 		for d := range msgs {
 			var req EmailSendRequest
 			if err := json.Unmarshal(d.Body, &req); err != nil {
@@ -71,7 +74,9 @@ func (c *EmailConsumer) StartConsuming(exchange, queueName, routingKey string) e
 
 			slog.Info("Received email send request", "to", req.To, "subject", req.Subject)
 
+			sem <- struct{}{}
 			go func(d amqp.Delivery, req EmailSendRequest) {
+				defer func() { <-sem }()
 				client := sendgrid.NewSendClient(c.cfg.SendGridApiKey)
 
 				from := mail.NewEmail(c.cfg.SendGridFromName, c.cfg.SendGridFromEmail)

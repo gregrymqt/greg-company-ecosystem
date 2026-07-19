@@ -1,3 +1,4 @@
+using System;
 using MeuCrudCsharp.Extensions.Services.Integration; // Novo
 using MeuCrudCsharp.Extensions.Services.Mcp;
 using MeuCrudCsharp.Extensions.Services.Persistence;
@@ -34,7 +35,12 @@ public static class CentralServicesExtensions
         builder.Services.AddHostedService<OutboxProcessorWorker>();
         builder.Services.AddHostedService<VideoProcessingCompletedConsumer>();
         builder.Services.AddHostedService<ProductImportCompletedConsumer>();
-        builder.Services.AddHealthChecks();
+        builder.Services.AddHealthChecks()
+            .AddNpgSql(
+                connectionString: builder.Configuration.GetConnectionString("PostgresTransaction") ?? builder.Configuration["ConnectionStrings:PostgresTransaction"] ?? "",
+                name: "supabase_postgresql",
+                timeout: TimeSpan.FromSeconds(3)
+            );
 
         return builder;
     }

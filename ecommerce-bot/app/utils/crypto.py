@@ -32,14 +32,15 @@ def decrypt_api_key(cipher_text_b64: str) -> str:
         key = _get_key()
         aesgcm = AESGCM(key)
         data = base64.b64decode(cipher_text_b64)
+        if len(data) < 12:
+            raise ValueError("Tamanho dos dados insuficientes para extração do IV (mínimo de 12 bytes).")
         nonce = data[:12]
         cipher_text = data[12:]
         plain_text = aesgcm.decrypt(nonce, cipher_text, None)
         return plain_text.decode('utf-8')
     except Exception as e:
         logger.error(f"Erro ao descriptografar chave: {e}")
-        # Retorna a chave original caso a mesma não esteja criptografada (fallback backward-compatibility)
-        return cipher_text_b64
+        raise ValueError("Falha crítica de segurança: Tag de autenticação inválida ou dados corrompidos.") from e
 
 
 async def get_tenant_key(tenant_id: str, provider: str) -> str | None:

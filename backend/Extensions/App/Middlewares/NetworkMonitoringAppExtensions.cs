@@ -1,3 +1,6 @@
+using Microsoft.Extensions.DependencyInjection;
+using System.Net.Http.Json;
+
 namespace MeuCrudCsharp.Extensions.App.Middlewares;
 
 public static class NetworkMonitoringAppExtensions
@@ -19,7 +22,8 @@ public static class NetworkMonitoringAppExtensions
 
                 try
                 {
-                    using var client = new HttpClient();
+                    var httpClientFactory = context.RequestServices.GetRequiredService<IHttpClientFactory>();
+                    using var client = httpClientFactory.CreateClient();
                     await client.PostAsJsonAsync("http://localhost:8888/log", logData);
                 }
                 catch
