@@ -77,12 +77,9 @@ public class MercadoPagoChargebackIntegrationService(
         // or configure it here manually if needed. I will rely on the base class' SendMercadoPagoRequestAsync if possible,
         // but since SendMercadoPagoRequestAsync usually serializes JSON, I have to do it manually.
         
-        var client = httpClientFactory.CreateClient("MercadoPago");
-        // We assume the token is already set in the named client by MercadoPagoServiceBase or DI setup.
-        
         try
         {
-            var response = await client.SendAsync(request);
+            var response = await HttpClient.SendAsync(request);
             response.EnsureSuccessStatusCode();
         }
         catch (Exception ex)

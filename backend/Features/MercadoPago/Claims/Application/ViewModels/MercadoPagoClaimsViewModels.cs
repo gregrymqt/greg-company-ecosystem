@@ -20,9 +20,9 @@ public class MercadoPagoClaimsViewModels
 
     public class ClaimSummaryViewModel
     {
-        public string InternalId { get; set; }
+        public string InternalId { get; set; } = string.Empty;
 
-        public string MpClaimId { get; set; }
+        public string MpClaimId { get; set; } = string.Empty;
 
         public string CustomerName { get; set; } = string.Empty;
         public string CustomerEmail { get; set; } = string.Empty;
@@ -39,8 +39,8 @@ public class MercadoPagoClaimsViewModels
 
     public class ClaimDetailViewModel
     {
-        public string InternalId { get; set; }
-        public string MpClaimId { get; set; }
+        public string InternalId { get; set; } = string.Empty;
+        public string MpClaimId { get; set; } = string.Empty;
 
         public string? Status { get; set; }
         public string? Stage { get; set; }
@@ -70,7 +70,7 @@ public class MercadoPagoClaimsViewModels
     public class ReplyClaimViewModel
     {
         [Required]
-        public string InternalId { get; set; }
+        public string InternalId { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "A mensagem nÃ£o pode ser vazia.")]
         [MinLength(5, ErrorMessage = "Escreva uma resposta mais detalhada.")]
