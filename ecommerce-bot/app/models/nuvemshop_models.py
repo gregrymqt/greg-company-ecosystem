@@ -67,7 +67,7 @@ class NuvemshopProductRequest(BaseModel):
     images: List[NuvemshopImageRequest] = []
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
     @classmethod
     def from_internal_data(cls, data: Dict):

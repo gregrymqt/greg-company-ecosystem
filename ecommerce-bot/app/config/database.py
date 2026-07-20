@@ -1,10 +1,10 @@
-import os
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 from sqlalchemy.orm import declarative_base
 from sqlalchemy.pool import NullPool
+from app.config.settings import settings
 
-# Lê a connection string definida na infraestrutura (porta 6543)
-DATABASE_URL = os.getenv("POSTGRES_URI")
+# Lê a connection string das configurações centralizadas
+DATABASE_URL = settings.POSTGRES_URI
 
 # Se vier com o prefixo 'postgresql://', substitui para o driver assíncrono do 'asyncpg'
 if DATABASE_URL and DATABASE_URL.startswith("postgresql://"):
