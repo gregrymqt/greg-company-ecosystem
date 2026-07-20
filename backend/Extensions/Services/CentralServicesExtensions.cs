@@ -23,7 +23,7 @@ public static class CentralServicesExtensions
             .AddSignalRServices()
             .AddInfrastructureComponents()
             .AddIdentityPersistence()
-            .AddPostgresPersistence(builder.Configuration)
+            .AddPostgresPersistence()
             .AddDistributedServices()
             .AddMercadoPagoIntegration()
             .AddRabbitMqIntegration()
@@ -31,13 +31,13 @@ public static class CentralServicesExtensions
             .AddCookiePolicies()
             .AddAuthConfiguration();
 
-        builder.Services.AddMcpContextServer(builder.Configuration);
+        builder.Services.AddMcpContextServer();
         builder.Services.AddHostedService<OutboxProcessorWorker>();
         builder.Services.AddHostedService<VideoProcessingCompletedConsumer>();
         builder.Services.AddHostedService<ProductImportCompletedConsumer>();
         builder.Services.AddHealthChecks()
             .AddNpgSql(
-                connectionString: builder.Configuration.GetConnectionString("PostgresTransaction") ?? builder.Configuration["ConnectionStrings:PostgresTransaction"] ?? "",
+                connectionStringFactory: sp => sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<PostgresSettings>>().Value.TransactionConnectionString!,
                 name: "supabase_postgresql",
                 timeout: TimeSpan.FromSeconds(3)
             );

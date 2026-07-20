@@ -10,12 +10,15 @@ public static class WebSecurityServicesExtensions
     {
         builder.Services.AddCors(options =>
         {
-            // Certifique-se de importar o namespace do GeneralSettings
             var generalSettings = builder
-                .Configuration.GetSection("General")
-                .Get<GeneralSettings>();
+                .Configuration.GetSection(GeneralSettings.SectionName)
+                .Get<GeneralSettings>() ?? new GeneralSettings();
 
-            if (generalSettings is null || string.IsNullOrEmpty(generalSettings.BaseUrl))
+            generalSettings.BaseUrl ??= builder.Configuration["GENERAL__BASEURL"]
+                ?? builder.Configuration["General:BaseUrl"]
+                ?? "http://localhost:5045";
+
+            if (string.IsNullOrEmpty(generalSettings.BaseUrl))
             {
                 throw new InvalidOperationException(
                     "Configurações do General não encontradas ou o BaseUrl está vazio."

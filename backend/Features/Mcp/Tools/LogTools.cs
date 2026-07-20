@@ -4,7 +4,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using ModelContextProtocol;
 using ModelContextProtocol.Protocol;
 using ModelContextProtocol.Server;
@@ -28,9 +28,9 @@ public class LogTools
 {
     private readonly bool _useKubernetes;
 
-    public LogTools(IConfiguration configuration)
+    public LogTools(IOptions<GeneralSettings> generalSettings)
     {
-        _useKubernetes = configuration.GetValue<bool>("USE_KUBERNETES_LOGS");
+        _useKubernetes = generalSettings.Value.UseKubernetesLogs;
     }
 
     // ====================================================================

@@ -12,8 +12,7 @@ namespace MeuCrudCsharp.Extensions.Services.Mcp;
 public static class McpFeatureExtensions
 {
     public static IServiceCollection AddMcpContextServer(
-        this IServiceCollection services,
-        IConfiguration configuration
+        this IServiceCollection services
     )
     {
         services

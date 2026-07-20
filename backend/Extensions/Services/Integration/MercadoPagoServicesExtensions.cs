@@ -9,12 +9,14 @@ public static class MercadoPagoServicesExtensions
         this WebApplicationBuilder builder
     )
     {
-        // Certifique-se de importar o namespace do MercadoPagoSettings (ex: MeuCrudCsharp.AppSettings)
         var mercadoPagoSettings = builder
-            .Configuration.GetSection("MercadoPago")
-            .Get<MercadoPagoSettings>();
+            .Configuration.GetSection(MercadoPagoSettings.SectionName)
+            .Get<MercadoPagoSettings>() ?? new MercadoPagoSettings();
 
-        if (mercadoPagoSettings is null || string.IsNullOrEmpty(mercadoPagoSettings.AccessToken))
+        mercadoPagoSettings.AccessToken ??= builder.Configuration["MercadoPago__AccessToken"]
+            ?? builder.Configuration["MercadoPago:AccessToken"];
+
+        if (string.IsNullOrEmpty(mercadoPagoSettings.AccessToken))
         {
             throw new InvalidOperationException(
                 "Configurações do Mercado Pago não encontradas ou o AccessToken está vazio."

@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace MeuCrudCsharp.Features.Auth.Presentation.Controllers
 {
@@ -19,7 +20,7 @@ namespace MeuCrudCsharp.Features.Auth.Presentation.Controllers
         IAppAuthService authService,
         IJwtService jwtService,
         ILogger<AuthController> logger,
-        IConfiguration configuration,
+        IOptions<GeneralSettings> generalSettingsOptions,
         ICacheService cacheService
     ) : ApiControllerBase
     {
@@ -41,7 +42,7 @@ namespace MeuCrudCsharp.Features.Auth.Presentation.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> GoogleCallback(string? remoteError = null)
         {
-            var frontendUrl = configuration["General:BaseUrl"] ?? "http://localhost:5173";
+            var frontendUrl = generalSettingsOptions.Value.BaseUrl ?? "http://localhost:5173";
             var frontendCallbackUrl = $"{frontendUrl}/google-callback";
 
             if (remoteError != null)

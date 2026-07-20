@@ -46,11 +46,12 @@ public static class AuthServicesExtensions
         IConfiguration configuration
     )
     {
-        var googleSettings = configuration.GetSection("Google").Get<GoogleSettings>();
+        var googleSettings = configuration.GetSection(GoogleSettings.SectionName).Get<GoogleSettings>() ?? new GoogleSettings();
+        googleSettings.ClientId ??= configuration["Google__ClientId"] ?? configuration["Google:ClientId"];
+        googleSettings.ClientSecret ??= configuration["Google__ClientSecret"] ?? configuration["Google:ClientSecret"];
 
         if (
-            googleSettings is null
-            || string.IsNullOrEmpty(googleSettings.ClientId)
+            string.IsNullOrEmpty(googleSettings.ClientId)
             || string.IsNullOrEmpty(googleSettings.ClientSecret)
         )
         {
@@ -72,9 +73,10 @@ public static class AuthServicesExtensions
         IConfiguration configuration
     )
     {
-        var jwtSettings = configuration.GetSection("Jwt").Get<JwtSettings>();
+        var jwtSettings = configuration.GetSection(JwtSettings.SectionName).Get<JwtSettings>() ?? new JwtSettings();
+        jwtSettings.Key ??= configuration["Jwt__Key"] ?? configuration["Jwt:Key"];
 
-        if (jwtSettings?.Key is null)
+        if (string.IsNullOrEmpty(jwtSettings.Key))
             throw new InvalidOperationException(
                 "Chave de assinatura do JWT não encontrada no arquivo de configuração."
             );

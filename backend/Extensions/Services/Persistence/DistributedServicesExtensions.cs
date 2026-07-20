@@ -1,5 +1,6 @@
 using Hangfire;
 using Hangfire.Redis.StackExchange;
+using Microsoft.Extensions.Options;
 using StackExchange.Redis;
 
 namespace MeuCrudCsharp.Extensions.Services.Persistence;
@@ -8,18 +9,17 @@ public static class DistributedServicesExtensions
 {
     public static WebApplicationBuilder AddDistributedServices(this WebApplicationBuilder builder)
     {
-        var useRedis = builder.Configuration.GetValue<bool>("USE_REDIS");
-        var redisConnectionString = builder.Configuration.GetConnectionString("Redis");
+        var redisSettings = builder.Services.BuildServiceProvider().GetRequiredService<IOptions<RedisSettings>>().Value;
 
-        if (useRedis)
+        if (redisSettings.UseRedis)
         {
-            if (string.IsNullOrEmpty(redisConnectionString))
+            if (string.IsNullOrEmpty(redisSettings.ConnectionString))
             {
                 throw new InvalidOperationException(
                     "A variável USE_REDIS é true mas a connection string está vazia."
                 );
             }
-            builder.AddRedisPersistence(redisConnectionString);
+            builder.AddRedisPersistence(redisSettings);
         }
         else
         {
@@ -31,17 +31,14 @@ public static class DistributedServicesExtensions
 
     private static void AddRedisPersistence(
         this WebApplicationBuilder builder,
-        string redisConnectionString
+        RedisSettings redisSettings
     )
     {
-        var options = ConfigurationOptions.Parse(redisConnectionString);
+        var options = ConfigurationOptions.Parse(redisSettings.ConnectionString!);
 
-        var redisPassword = builder.Configuration["REDIS_PASSWORD"]
-            ?? Environment.GetEnvironmentVariable("REDIS_PASSWORD");
-
-        if (!string.IsNullOrWhiteSpace(redisPassword) && string.IsNullOrEmpty(options.Password))
+        if (!string.IsNullOrWhiteSpace(redisSettings.Password) && string.IsNullOrEmpty(options.Password))
         {
-            options.Password = redisPassword;
+            options.Password = redisSettings.Password;
         }
 
         var multiplexer = ConnectionMultiplexer.Connect(options);

@@ -1,14 +1,15 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using MeuCrudCsharp.Data;
 
 namespace MeuCrudCsharp.Extensions.Services.Persistence;
 
 public static class PostgresServicesExtensions
 {
-    public static WebApplicationBuilder AddPostgresPersistence(this WebApplicationBuilder builder, IConfiguration configuration)
+    public static WebApplicationBuilder AddPostgresPersistence(this WebApplicationBuilder builder)
     {
-        // Lê a connection string do Transaction Pooler configurada no .env
-        var connectionString = configuration.GetConnectionString("PostgresTransaction");
+        var postgresSettings = builder.Services.BuildServiceProvider().GetRequiredService<IOptions<PostgresSettings>>().Value;
+        var connectionString = postgresSettings.TransactionConnectionString;
 
         builder.Services.AddDbContext<ApplicationDbContext>(options =>
             options.UseNpgsql(connectionString, npgsqlOptions =>

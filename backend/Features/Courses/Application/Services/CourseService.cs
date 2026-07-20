@@ -10,6 +10,7 @@ using MeuCrudCsharp.Features.Shared.Domain.Entities;
 using MeuCrudCsharp.Features.Courses.Domain.Entities;
 using MeuCrudCsharp.Data;
 using System.Text.Json;
+using Microsoft.Extensions.Options;
 
 namespace MeuCrudCsharp.Features.Courses.Application.Services
 {
@@ -19,7 +20,7 @@ namespace MeuCrudCsharp.Features.Courses.Application.Services
         ICacheService cacheService,
         IUnitOfWork unitOfWork,
         ApplicationDbContext dbContext,
-        Microsoft.Extensions.Configuration.IConfiguration configuration
+        IOptions<GeneralSettings> generalSettings
     ) : ICourseService
     {
         private const string CoursesCacheVersionKey = "courses_cache_version";
@@ -117,7 +118,7 @@ namespace MeuCrudCsharp.Features.Courses.Application.Services
             }
 
             await cacheService.InvalidateCacheByKeyAsync(CoursesCacheVersionKey);
-            if (configuration["USE_REDIS"] == "true")
+            if (generalSettings.Value.UseRedis)
             {
                 await cacheService.InvalidateCacheByKeyAsync("catalog:courses:public");
             }
@@ -155,7 +156,7 @@ namespace MeuCrudCsharp.Features.Courses.Application.Services
             await unitOfWork.CommitAsync();
 
             await cacheService.InvalidateCacheByKeyAsync(CoursesCacheVersionKey);
-            if (configuration["USE_REDIS"] == "true")
+            if (generalSettings.Value.UseRedis)
             {
                 await cacheService.InvalidateCacheByKeyAsync("catalog:courses:public");
             }
@@ -180,7 +181,7 @@ namespace MeuCrudCsharp.Features.Courses.Application.Services
             await unitOfWork.CommitAsync();
 
             await cacheService.InvalidateCacheByKeyAsync(CoursesCacheVersionKey);
-            if (configuration["USE_REDIS"] == "true")
+            if (generalSettings.Value.UseRedis)
             {
                 await cacheService.InvalidateCacheByKeyAsync("catalog:courses:public");
             }

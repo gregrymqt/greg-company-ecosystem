@@ -3,6 +3,8 @@ public class GeneralSettings
     public const string SectionName = "GENERAL";
     public string? BaseUrl { get; set; }
     public string? FrontendUrl { get; set; }
+    public bool UseKubernetesLogs { get; set; }
+    public bool UseRedis { get; set; }
 }
 
 public class MercadoPagoSettings
@@ -36,11 +38,11 @@ public class GoogleSettings
     public string? ClientSecret { get; set; }
 }
 
-
 public class RabbitMqSettings
 {
     public const string SectionName = "RabbitMq";
     public string? HostName { get; set; }
+    public int Port { get; set; } = 5672;
     public string? UserName { get; set; }
     public string? Password { get; set; }
     public string? VirtualHost { get; set; }
@@ -52,4 +54,19 @@ public class SupabaseSettings
     public string? AccessKeyID { get; set; }
     public string? SecretAccessKey { get; set; }
     public string? EndPointS3 { get; set; }
+}
+
+public class RedisSettings
+{
+    public const string SectionName = "Redis";
+    public bool UseRedis { get; set; }
+    public string? ConnectionString { get; set; }
+    public string? Password { get; set; }
+}
+
+public class PostgresSettings
+{
+    public const string SectionName = "Postgres";
+    public string? TransactionConnectionString { get; set; }
+    public string? SessionConnectionString { get; set; }
 }
