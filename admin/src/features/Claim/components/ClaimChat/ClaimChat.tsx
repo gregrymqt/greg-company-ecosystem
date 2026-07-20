@@ -4,7 +4,7 @@ import { Form } from "@/components/Form";
 import { useClaimChatLogic } from '../../hooks/useClaimChatLogic';
 
 interface Props {
-  claimId: number;
+  claimId: string;
 }
 
 import type { ReplyFormData } from '../../types/claim.dtos';

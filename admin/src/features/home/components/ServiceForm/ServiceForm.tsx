@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from './HomeForms.module.scss';
+import styles from '../HeroForm/HomeForms.module.scss';
 import { Form } from '@/components/Form';
 import type { ServiceDto, ServiceFormValues } from '@/features/home/types/home.types';
 

@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 
-import styles from './styles/PlansPage.module.scss';
+import styles from './PlansPage.module.scss';
 import { PlanForm, PlanList } from '@/features/plan';
 import type { SidebarItem } from '@/components/SideBar/types/sidebar.types';
 import type { PlanAdminDetail } from '@/features/plan';

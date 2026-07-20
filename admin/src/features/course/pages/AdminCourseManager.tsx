@@ -6,7 +6,7 @@ import type { CourseDto } from '@/features/course/types/course.types';
 // Sub-components, Estilos e Types
 import { CourseList } from '@/features/course/components/CourseList/CourseList';
 import { CourseForm } from '@/features/course/components/CourseForm/CourseForm';
-import styles from './styles/AdminCourseManager.module.scss';
+import styles from './AdminCourseManager.module.scss';
 import type { CourseFormData, AdminTab } from '@/features/course/types/admin-course.types';
 
 // Hook refatorado

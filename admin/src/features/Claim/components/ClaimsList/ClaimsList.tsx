@@ -2,9 +2,8 @@
 
 import React from 'react';
 import { ClaimStatusBadge } from '../ClaimStatusBadge/ClaimStatusBadge';
-import { type ClaimSummary } from '../../types/claims.types';
+import { type ClaimSummary, type ClaimStatus } from '../../types/claims.types';
 import styles from './ClaimsList.module.scss';
-import type { ClaimStatus } from '@/types/models';
 import { type TableColumn, Table } from '@/components/Table/Table';
 
 interface ClaimsListProps {

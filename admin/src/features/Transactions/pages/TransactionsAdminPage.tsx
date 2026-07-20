@@ -1,6 +1,6 @@
 import React from 'react';
 import { FailedPaymentsList } from '../components/FailedPaymentsList/FailedPaymentsList';
-import styles from '../styles/TransactionsAdminPage.module.scss';
+import styles from './TransactionsAdminPage.module.scss';
 
 export const TransactionsAdminPage: React.FC = () => {
     return (

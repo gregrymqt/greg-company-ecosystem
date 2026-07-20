@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import styles from "./styles/AdminHomePage.module.scss"; // Vamos criar/reutilizar este estilo
+import styles from "./AdminHomePage.module.scss"; // Vamos criar/reutilizar este estilo
 
 import { Sidebar } from "@/components/SideBar";
 import type { SidebarItem } from "@/components/SideBar/types/sidebar.types";

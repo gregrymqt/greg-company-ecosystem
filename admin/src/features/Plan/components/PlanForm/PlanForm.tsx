@@ -54,7 +54,8 @@ export const PlanForm: React.FC<PlanFormProps> = ({ initialData, onSuccess, onCa
                 frequency_type: data.frequencyType,
                 transaction_amount: Number(data.transactionAmount),
                 currency_id: 'BRL' // Fixo BRL conforme contexto
-            }
+            },
+            included_course_ids: []
         };
 
         let success = false;

@@ -63,13 +63,14 @@ export const SupportTicketList: React.FC = () => {
 
   // Renderiza badge de status
   const renderStatusBadge = (status: SupportTicketStatus) => {
-    const statusMap = {
-      Open: { label: 'Aberto', className: styles.open },
-      InProgress: { label: 'Em Andamento', className: styles.inProgress },
-      Closed: { label: 'Fechado', className: styles.closed }
+    const statusMap: Record<SupportTicketStatus, { label: string; className: string }> = {
+      open: { label: 'Aberto', className: styles.open },
+      in_progress: { label: 'Em Andamento', className: styles.inProgress },
+      resolved: { label: 'Resolvido', className: styles.success },
+      closed: { label: 'Fechado', className: styles.closed }
     };
 
-    const { label, className } = statusMap[status];
+    const { label, className } = statusMap[status] || { label: status, className: '' };
     return <span className={`${styles.badge} ${className}`}>{label}</span>;
   };
 
@@ -86,18 +87,12 @@ export const SupportTicketList: React.FC = () => {
     },
     {
       header: 'Assunto',
-      accessor: 'context',
+      accessor: 'title',
       width: '180px'
     },
     {
-      header: 'Descrição',
-      render: (item) => (
-        <span title={item.explanation}>
-          {item.explanation.length > 60
-            ? `${item.explanation.substring(0, 60)}...`
-            : item.explanation}
-        </span>
-      )
+      header: 'Categoria',
+      render: (item) => <span>{item.category}</span>
     },
     {
       header: 'Status',
@@ -119,28 +114,28 @@ export const SupportTicketList: React.FC = () => {
             <i className="fas fa-eye"></i> Visualizar Detalhes
           </button>
 
-          {item.status === 'Open' && (
+          {item.status === 'open' && (
             <button
               className={`${styles.actionItem} ${styles.warning}`}
-              onClick={() => updateStatus(item.id, 'InProgress')}
+              onClick={() => updateStatus(item.id, 'in_progress')}
             >
               <i className="fas fa-play-circle"></i> Iniciar Atendimento
             </button>
           )}
 
-          {item.status === 'InProgress' && (
+          {item.status === 'in_progress' && (
             <button
               className={`${styles.actionItem} ${styles.success}`}
-              onClick={() => updateStatus(item.id, 'Closed')}
+              onClick={() => updateStatus(item.id, 'closed')}
             >
               <i className="fas fa-check-circle"></i> Finalizar
             </button>
           )}
 
-          {item.status === 'Closed' && (
+          {item.status === 'closed' && (
             <button
               className={styles.actionItem}
-              onClick={() => updateStatus(item.id, 'InProgress')}
+              onClick={() => updateStatus(item.id, 'in_progress')}
             >
               <i className="fas fa-undo"></i> Reabrir
             </button>
@@ -148,7 +143,7 @@ export const SupportTicketList: React.FC = () => {
         </ActionMenu>
       )
     }
-  ], [updateStatus]);
+  ], [fetchTicketById, updateStatus]);
 
   return (
     <div className={styles.container}>
@@ -174,9 +169,10 @@ export const SupportTicketList: React.FC = () => {
             onChange={(e) => updateFilters({ status: (e.target.value as SupportTicketStatus) || undefined })}
           >
             <option value="">Todos os Status</option>
-            <option value="Open">Aberto</option>
-            <option value="InProgress">Em Andamento</option>
-            <option value="Closed">Fechado</option>
+            <option value="open">Aberto</option>
+            <option value="in_progress">Em Andamento</option>
+            <option value="resolved">Resolvido</option>
+            <option value="closed">Fechado</option>
           </select>
           <button
             className={styles.refreshBtn}
@@ -211,13 +207,10 @@ export const SupportTicketList: React.FC = () => {
             <h3>Detalhes do Ticket</h3>
             <p><strong>ID:</strong> {currentTicket.id}</p>
             <p><strong>ID do Usuário:</strong> {currentTicket.userId}</p>
-            <p><strong>Contexto:</strong> {currentTicket.context}</p>
+            <p><strong>Título:</strong> {currentTicket.title}</p>
+            <p><strong>Categoria:</strong> {currentTicket.category}</p>
+            <p><strong>Prioridade:</strong> {currentTicket.priority}</p>
             <p><strong>Data de Criação:</strong> {new Date(currentTicket.createdAt).toLocaleString('pt-BR')}</p>
-            
-            <div className={styles.explanationBox}>
-              <strong>Explicação:</strong>
-              <p>{currentTicket.explanation}</p>
-            </div>
             
             <button className={styles.closeBtn} onClick={() => setIsModalOpen(false)}>
               Fechar

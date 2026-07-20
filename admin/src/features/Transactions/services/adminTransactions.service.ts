@@ -1,5 +1,5 @@
 import { ApiService } from "@/shared/services/api.service";
-import type { PaymentItems, TransactionFilters, AdminPaymentPaginatedResponse } from '../types/transactions.types';
+import type { TransactionFilters, AdminPaymentPaginatedResponse } from '../types/transactions.types';
 
 /**
  * AdminTransactionsService - Área Administrativa

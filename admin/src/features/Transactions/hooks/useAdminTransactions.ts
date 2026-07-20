@@ -40,7 +40,7 @@ export const useAdminTransactions = () => {
       });
 
       if (!abortControllerRef.current?.signal.aborted) {
-        setTransactions(data);
+        setTransactions(data?.items || []);
         if (type) {
           setCurrentFilter(type);
         }

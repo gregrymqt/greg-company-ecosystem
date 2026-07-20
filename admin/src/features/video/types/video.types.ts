@@ -109,4 +109,12 @@ export interface PlayerVideoDto {
   storageIdentifier: string; // Para construir URL do manifest
 }
 
+/**
+ * Função utilitária para gerar a URL do manifesto de streaming a partir do identificador de armazenamento
+ */
+export const getManifestUrl = (storageIdentifier: string): string => {
+  if (!storageIdentifier) return '';
+  return `/api/videos/${storageIdentifier}/manifest.m3u8`;
+};
+
 

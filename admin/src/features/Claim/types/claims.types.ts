@@ -2,6 +2,15 @@
 
 import { type FieldValues } from "react-hook-form";
 
+export const ClaimStatus = {
+  Novo: 'Novo',
+  EmAnalise: 'EmAnalise',
+  ResolvidoGanhamos: 'ResolvidoGanhamos',
+  ResolvidoPerdemos: 'ResolvidoPerdemos',
+} as const;
+
+export type ClaimStatus = typeof ClaimStatus[keyof typeof ClaimStatus];
+
 
 // --- ENTIDADES VISUAIS (VIEW MODELS) ---
 

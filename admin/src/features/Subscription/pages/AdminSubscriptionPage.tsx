@@ -3,9 +3,8 @@ import { Sidebar } from '@/components/SideBar';
 import type { SidebarItem } from '@/components/SideBar/types/sidebar.types';
 import { useAdminSubscription } from '../hooks/useAdminSubscription';
 import { AdminSubscriptionList } from '../components/AdminSubscriptionList/AdminSubscriptionList';
-import type { AdminSubscriptionDetail } from '../types/subscriptions.types';
 
-import styles from './styles/AdminSubscriptionPage.module.scss';
+import styles from './AdminSubscriptionPage.module.scss';
 
 const SIDEBAR_ITEMS: SidebarItem[] = [
   { id: 'list', label: 'Assinaturas', icon: 'fas fa-file-invoice-dollar' }

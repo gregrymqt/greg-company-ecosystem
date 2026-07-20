@@ -1,6 +1,6 @@
 import React from 'react';
 import styles from './ClaimStatusBadge.module.scss';
-import  { ClaimStatus } from '@/types/models';
+import { ClaimStatus } from '../../types/claims.types';
 
 interface Props {
   status: ClaimStatus;

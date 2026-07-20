@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { type TableColumn, Table } from '@/components/Table/Table';
 import { useChargebackDetails } from '../../hooks/useChargebackDetails';
 import { useChargebacks } from '../../hooks/useChargebacks';
-import type { ChargebackSummary } from '../../types/chargeback.types';
+import { getChargebackStatusLabel, type ChargebackSummary } from '../../types/chargeback.types';
 import { ChargebackDetailModal } from '../ChargebackDetailModal/ChargebackDetailModal';
 import { ChargebackFilter } from '../ChargebackFilter/ChargebackFilter';
 import type { FilterFormData } from '../../types/chargeback.dtos';
@@ -53,9 +53,9 @@ export const ChargebackList = () => {
     { 
       header: 'Status', 
       render: (item) => {
-        // Exemplo simples de classe baseada no texto do status
-        const statusClass = item.status.toLowerCase().includes('novo') ? 'novo' : 'aguardando';
-        return <span className={`${styles.statusBadge} ${styles[statusClass] || ''}`}>{item.status}</span>;
+        const label = getChargebackStatusLabel(item.status);
+        const statusClass = label.toLowerCase().includes('novo') ? 'novo' : 'aguardando';
+        return <span className={`${styles.statusBadge} ${styles[statusClass] || ''}`}>{label}</span>;
       },
       width: '20%'
     },

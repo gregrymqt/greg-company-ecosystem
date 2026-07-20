@@ -69,7 +69,7 @@ export interface CreatePlanRequest {
   reason: string;               // Nome do plano
   description: string;          // Descrição interna
   auto_recurring: AutoRecurringRequest;
-  included_course_ids: string[];
+  included_course_ids?: string[];
 }
 
 // Baseado no C# UpdatePlanDto

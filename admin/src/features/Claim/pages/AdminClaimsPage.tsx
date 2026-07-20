@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import styles from "./styles/ClaimsLayout.module.scss";
+import styles from "./ClaimsLayout.module.scss";
 import { ClaimChat, ClaimsList } from "@/features/claim";
 import { AdminClaimService } from "@/features/claim";
 import { Modal } from "@/components/Modal/Modal";
@@ -22,7 +22,7 @@ export const AdminClaimsPage: React.FC = () => {
   const [totalPages, setTotalPages] = useState(1);
 
   // Estado para controlar qual disputa está aberta no Modal
-  const [selectedClaimId, setSelectedClaimId] = useState<number | null>(null);
+  const [selectedClaimId, setSelectedClaimId] = useState<string | null>(null);
 
   const loadClaims = useCallback(async () => {
     setIsLoading(true);

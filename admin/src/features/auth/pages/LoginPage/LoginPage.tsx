@@ -1,4 +1,3 @@
-import { authService } from '@/features/auth/services/auth.service';
 import { LoginForm } from '@/features/auth/components/LoginForm/LoginForm';
 import styles from './LoginPage.module.scss';
 import logoAdmin from '@/assets/logo-admin.png';
