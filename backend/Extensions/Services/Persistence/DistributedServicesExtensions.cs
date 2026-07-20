@@ -1,5 +1,6 @@
 using Hangfire;
 using Hangfire.Redis.StackExchange;
+using StackExchange.Redis;
 
 namespace MeuCrudCsharp.Extensions.Services.Persistence;
 
@@ -33,15 +34,28 @@ public static class DistributedServicesExtensions
         string redisConnectionString
     )
     {
-        builder.Services.AddStackExchangeRedisCache(options =>
+        var options = ConfigurationOptions.Parse(redisConnectionString);
+
+        var redisPassword = builder.Configuration["REDIS_PASSWORD"]
+            ?? Environment.GetEnvironmentVariable("REDIS_PASSWORD");
+
+        if (!string.IsNullOrWhiteSpace(redisPassword) && string.IsNullOrEmpty(options.Password))
         {
-            options.Configuration = redisConnectionString;
-            options.InstanceName = "MeuApp_";
+            options.Password = redisPassword;
+        }
+
+        var multiplexer = ConnectionMultiplexer.Connect(options);
+        builder.Services.AddSingleton<IConnectionMultiplexer>(multiplexer);
+
+        builder.Services.AddStackExchangeRedisCache(cacheOptions =>
+        {
+            cacheOptions.ConfigurationOptions = options;
+            cacheOptions.InstanceName = "MeuApp_";
         });
 
-        builder.Services.AddHangfire(config => config.UseRedisStorage(redisConnectionString));
+        builder.Services.AddHangfire(config => config.UseRedisStorage(multiplexer));
         builder.Services.AddHangfireServer();
-        Console.WriteLine("--> Usando Redis para Cache Distribuído e Hangfire.");
+        Console.WriteLine("--> Usando Redis para Cache Distribuído e Hangfire (Conexão Singleton Autenticada).");
     }
 
     private static void AddInMemoryPersistence(this WebApplicationBuilder builder)

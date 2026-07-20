@@ -11,7 +11,7 @@ services:
   redis:
     image: "redis:7-alpine"
     container_name: redis-cache
-    command: redis-server --appendonly yes
+    command: redis-server --requirepass "${REDIS_PASSWORD:-redis_dev_password}" --appendonly yes
     volumes:
       - redis-data:/data
     networks:
@@ -78,7 +78,8 @@ services:
       - ASPNETCORE_URLS=http://+:8080
       - ConnectionStrings__PostgresTransaction=${POSTGRES_TRANSACTION_CONNECTION_STRING}
       - ConnectionStrings__PostgresSession=${POSTGRES_SESSION_CONNECTION_STRING}
-      - ConnectionStrings__Redis=redis:6379
+      - ConnectionStrings__Redis=redis:6379,password=${REDIS_PASSWORD:-redis_dev_password}
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-redis_dev_password}
       - ConnectionStrings__RabbitMq=amqp://guest:guest@rabbitmq:5672/
       - MercadoPago__AccessToken=${MercadoPago__AccessToken}
       - MercadoPago__WebhookSecret=${MercadoPago__WebhookSecret}
@@ -127,7 +128,8 @@ services:
     environment:
       - POSTGRES_URI=${POSTGRES_URI_PYTHON}
       - RABBITMQ_URL=amqp://${RabbitMQ__UserName}:${RabbitMQ__Password}@rabbitmq:5672/
-      - REDIS_URL=redis://redis:6379
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-redis_dev_password}@redis:6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-redis_dev_password}
       - AES_MASTER_KEY=${AES_MASTER_KEY}
       - Groq_API_KEY=${Groq_API_KEY}
       - Deepseek_Api_Key=${Deepseek_Api_Key}

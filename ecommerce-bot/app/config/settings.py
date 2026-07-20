@@ -20,6 +20,10 @@ class Settings(BaseSettings):
         validation_alias=AliasChoices("JWT__KEY", "JWT__Key", "Jwt__Key")
     )
     REDIS_URL: str = "redis://localhost:6379"
+    REDIS_PASSWORD: str | None = Field(
+        default=None,
+        validation_alias=AliasChoices("REDIS_PASSWORD", "REDIS__PASSWORD")
+    )
     DEEPSEEK_API_KEY: str | None = None
     GROQ_API_KEY: str | None = None
 

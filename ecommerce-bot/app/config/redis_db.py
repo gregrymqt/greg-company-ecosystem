@@ -1,5 +1,6 @@
 import json
 import asyncio
+import os
 from typing import Any, Optional, Callable
 import redis.asyncio as redis
 from app.config.settings import settings
@@ -16,21 +17,33 @@ class RedisCache:
         if not settings.REDIS_URL:
             logger.warning("REDIS_URL não configurada. Redis desabilitado.")
             return
-        logger.info(f"Connecting to Redis at {settings.REDIS_URL}")
-        self._pool = redis.ConnectionPool.from_url(
-            settings.REDIS_URL,
-            decode_responses=True,
-            max_connections=20,
-        )
-        self.redis_client = redis.Redis(connection_pool=self._pool)
+
+        redis_url = settings.REDIS_URL
+        redis_password = settings.REDIS_PASSWORD or os.getenv("REDIS_PASSWORD")
+
+        logger.info(f"Connecting to Redis at {redis_url}")
+
+        kwargs = {
+            "decode_responses": True,
+            "max_connections": 20,
+        }
+        if redis_password and "@" not in redis_url:
+            kwargs["password"] = redis_password
+
         try:
+            self._pool = redis.ConnectionPool.from_url(redis_url, **kwargs)
+            self.redis_client = redis.Redis(connection_pool=self._pool)
             await self.redis_client.ping()
             logger.info("Connected to Redis successfully.")
-        except redis.ConnectionError:
+        except (redis.AuthenticationError, redis.exceptions.AuthenticationError) as e:
+            logger.error("Erro de autenticação no Redis: Credenciais incorretas ou senha requerida. Detalhes: %s", e)
+            self.redis_client = None
+        except redis.ConnectionError as e:
             logger.warning(
                 "Não foi possível conectar ao Redis em %s. "
-                "O Redis ficará indisponível até reconexão.",
-                settings.REDIS_URL,
+                "O Redis ficará indisponível até reconexão. Detalhes: %s",
+                redis_url,
+                e,
             )
             self.redis_client = None
 

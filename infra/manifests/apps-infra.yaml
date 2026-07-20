@@ -60,13 +60,16 @@ spec:
                 secretKeyRef:
                   name: greg-api-secrets
                   key: POSTGRES_SESSION_CONNECTION_STRING
-            - name: ConnectionStrings__Redis
-              value: "redis-service:6379"
             - name: ConnectionStrings__RabbitMq
               valueFrom:
                 secretKeyRef:
                   name: greg-api-secrets
                   key: RABBITMQ_URL
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: greg-api-secrets
+                  key: REDIS_PASSWORD
           envFrom:
             - secretRef:
                 name: greg-api-secrets
@@ -154,8 +157,11 @@ spec:
                 secretKeyRef:
                   name: greg-api-secrets
                   key: RABBITMQ_URL
-            - name: REDIS_URL
-              value: "redis://redis-service:6379"
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: greg-api-secrets
+                  key: REDIS_PASSWORD
             - name: Groq_API_KEY
               valueFrom:
                 secretKeyRef:
@@ -171,6 +177,11 @@ spec:
                 secretKeyRef:
                   name: greg-api-secrets
                   key: AES_MASTER_KEY
+          envFrom:
+            - secretRef:
+                name: greg-api-secrets
+            - configMapRef:
+                name: greg-configmap
           volumeMounts:
             - name: supabase-cert-volume
               mountPath: /app/certs
