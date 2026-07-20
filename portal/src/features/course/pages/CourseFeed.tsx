@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import styles from './styles/CourseFeed.module.scss';
+import styles from './CourseFeed.module.scss';
 import { CourseRow } from '../components/CourseRow/CourseRow';
 import { CourseSkeleton } from '../components/CourseSkeleton/CourseSkeleton';
 import { usePublicCourses } from '../hooks/usePublicCourses';

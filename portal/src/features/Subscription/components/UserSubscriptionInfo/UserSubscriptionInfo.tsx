@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from '../styles/UserSubscriptionInfo.module.scss';
+import styles from './UserSubscriptionInfo.module.scss';
 import { Card } from '@/components/Card/Card';
 import type { SubscriptionDetailsDto } from '../../types/subscriptions.types';
 
@@ -38,7 +38,7 @@ export const UserSubscriptionInfo: React.FC<UserSubscriptionInfoProps> = ({ data
 
                     <div className={styles.dataItem}>
                         <label>Status</label>
-                        <span className={`${styles.badge} ${styles[data.status === 'active' ? 'authorized' : (data.status || '')]}`}>
+                        <span className={`${styles.badge} ${styles[data.status === 'authorized' ? 'authorized' : (data.status || '')]}`}>
                             {translateStatus(data.status)}
                         </span>
                     </div>

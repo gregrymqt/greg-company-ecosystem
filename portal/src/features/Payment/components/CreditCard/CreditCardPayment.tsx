@@ -1,6 +1,6 @@
 // src/features/Payment/Public/components/CreditCard/CreditCardPayment.tsx
 import React from 'react';
-import styles from '../../styles/CreditCardPayment.module.scss';
+import styles from './CreditCardPayment.module.scss';
 import { MercadoPagoBrick } from '.';
 import { useCreditCardPayment } from '../../hooks/useCreditCardPayment';
 import type { CreditCardMode } from '../../types';

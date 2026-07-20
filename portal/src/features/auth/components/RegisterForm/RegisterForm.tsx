@@ -1,6 +1,6 @@
 import { Form } from '@/components/Form/Form';
 import { useRegisterForm } from '../../hooks/useRegisterForm';
-import styles from '../styles/RegisterForm.module.scss';
+import styles from './RegisterForm.module.scss';
 
 export const RegisterForm = () => {
   const { formMethods, onSubmit, handleGoogleLogin } = useRegisterForm();

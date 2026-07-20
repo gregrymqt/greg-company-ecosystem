@@ -1,7 +1,7 @@
 // src/features/Payment/Public/components/Pix/PixPayment.tsx
 import React from 'react';
 
-import styles from '../../styles/PixPayment.module.scss';
+import styles from './PixPayment.module.scss';
 import { usePixPayment } from '../../hooks/usePixPayment';
 import { PixForm, PixQRCode } from '.';
 

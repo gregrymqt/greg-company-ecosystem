@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from "react";
-import styles from '../styles/ClaimChat.module.scss';
+import styles from './ClaimChat.module.scss';
 import { Form } from "@/components/Form";
 import { useClaimChatLogic } from '../../hooks/useClaimChatLogic';
 

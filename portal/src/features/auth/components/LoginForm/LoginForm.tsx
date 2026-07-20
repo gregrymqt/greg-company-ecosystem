@@ -1,6 +1,6 @@
 import { Form } from '@/components/Form/Form';
 import { useLoginForm } from '../../hooks/useLoginForm';
-import styles from '../styles/LoginForm.module.scss';
+import styles from './LoginForm.module.scss';
 
 export const LoginForm = () => {
   const { formMethods, onSubmit, handleGoogleLogin } = useLoginForm();

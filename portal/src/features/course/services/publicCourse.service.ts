@@ -14,15 +14,6 @@ import { STORAGE_KEYS, StorageService } from '@/shared/services/storage.service'
 
 const BASE_ENDPOINT = '/public/courses';
 
-// Helper para formatar duração de vídeos
-const formatDuration = (totalSeconds: number): string => {
-  if (!totalSeconds) return '';
-  const minutes = Math.floor(totalSeconds / 60);
-  const hours = Math.floor(minutes / 60);
-  if (hours > 0) return `${hours}h ${minutes % 60}m`;
-  return `${minutes}m`;
-};
-
 export const publicCourseService = {
   /**
    * Busca cursos paginados e transforma para UI

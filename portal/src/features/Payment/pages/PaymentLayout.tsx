@@ -105,7 +105,7 @@ export const PaymentLayout: React.FC = () => {
           <PixPayment
             amount={planData.amount}
             planId={planData.publicId}
-            planName={planData.name}
+            planName={planData.name || ''}
             userParams={userParams}
             onPaymentSuccess={handleSuccess}
           />
@@ -131,7 +131,7 @@ export const PaymentLayout: React.FC = () => {
         return (
           <CreditCardPayment
             planId={planData.publicId}
-            planName={planData.name}
+            planName={planData.name || ''}
             frequency={planData.frequency}
             amount={planData.amount}
             mode={planData.frequency === 1 ? "payment" : "subscription"}

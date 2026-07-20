@@ -76,12 +76,12 @@ export const PlanFeed = ({ category }: PlanFeedProps) => {
                 </div>
               )}
 
-              <Card.Body title={plan.name}>
+              <Card.Body title={plan.name || ''}>
                 <div className={styles.priceWrapper}>
                   <span className={styles.currency}>R$</span>
                   {/* Tratamento para exibir apenas o valor numérico grande */}
                   <span className={styles.value}>
-                    {plan.priceDisplay.replace('R$', '').trim()}
+                    {(plan.priceDisplay || '').replace('R$', '').trim()}
                   </span>
                 </div>
                 <p className={styles.billingInfo}>{plan.billingInfo}</p>

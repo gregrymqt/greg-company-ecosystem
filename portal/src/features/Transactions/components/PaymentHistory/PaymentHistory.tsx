@@ -57,7 +57,7 @@ export const PaymentHistory: React.FC = () => {
                     <ActionMenu>
                         {canRefund && (
                             <button
-                                onClick={() => requestRefund(item.id)}
+                                onClick={() => requestRefund(String(item.id))}
                                 className={styles.actionBtn}
                                 title="Solicitar Reembolso"
                                 disabled={isProcessing}

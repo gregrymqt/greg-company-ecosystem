@@ -5,7 +5,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { userAccountService } from '../services/user-account.service';
-import type { UserProfileDto } from '../types';
+import type { UserProfileDto } from '../types/profile.types';
 import { AlertService } from '@/shared/services/alert.service';
 
 export const useProfileData = () => {
