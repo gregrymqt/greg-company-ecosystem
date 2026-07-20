@@ -234,8 +234,8 @@ spec:
                   key: RABBITMQ_URL
             - name: SUPABASE_S3_URL
               valueFrom:
-                secretKeyRef:
-                  name: greg-api-secrets
+                configMapKeyRef:
+                  name: greg-configmap
                   key: EndPoint_S3
           envFrom:
             - secretRef:
