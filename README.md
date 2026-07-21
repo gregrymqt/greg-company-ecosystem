@@ -24,7 +24,6 @@ Ecossistema completo para gestão de cursos online com sistema integrado de paga
 - **Gateway Proxy:** Nginx como API Gateway, servindo como única porta de entrada (Porta 80) para todo o ecossistema.
 - **Pagamentos:** Integração completa com MercadoPago (Checkout Pro, Webhooks, PIX e Assinaturas).
 - **Armazenamento de Arquivos:** Integração com Supabase Storage.
-- **Automação de IA:** Bot implementado em Python (`ecommerce-bot`) responsável por Web Scraping, busca semântica em Cache e enriquecimento LLM com segurança BYOK (AES-256) persistidos em PostgreSQL.
 - **Containerização:** Docker e Docker Compose para ambiente local, e Kubernetes (manifestos em `infra/manifests/`) para orquestração em nuvem.
 
 ## 🏗️ Arquitetura
@@ -125,9 +124,6 @@ greg-company-ecosystem/
 ├── go-worker/                 # Golang Microservice para transcodificação de vídeos
 │   └── ...
 │
-├── ecommerce-bot/             # Automação em Python
-│   └── ...
-│
 ├── portal/                    # React Micro-frontend (Usuários)
 │   ├── src/features/          # Features exclusivas da visão do cliente
 │   └── Dockerfile
@@ -186,10 +182,6 @@ SendGrid__ApiKey=your_sendgrid_key
 SendGrid__FromEmail=your_email@domain.com
 SendGrid__FromName=Greg Company
 
-# Provedores de IA (ecommerce-bot)
-Groq_API_KEY=gsk_sua_chave_groq_aqui
-Deepseek_Api_Key=sk-sua_chave_deepseek_aqui
-
 # Armazenamento Cloud (Supabase S3)
 Access_key_ID=your_access_key
 Secret_Access_key=your_secret_key
@@ -197,7 +189,6 @@ EndPoint_S3=https://sua-url-storage.supabase.co/storage/v1/s3
 
 # Variáveis do Frontend (Vercel / Local)
 VITE_GENERAL__BASEURL=http://localhost
-VITE_WS_URL=ws://localhost:8000/v1/demo/stream
 ```
 
 ---

@@ -50,7 +50,7 @@ export const useAuth = () => {
         // 2. Busca dados otimizados (Agora vem rápido e leve)
         const userDto = await authService.getMe();
 
-        const allowedRoles = ['Admin', 'Manager', 'CourseAdmin', 'EcommerceAdmin'];
+        const allowedRoles = ['Admin', 'Manager', 'CourseAdmin'];
         const hasAccess = userDto.roles?.some(r => allowedRoles.includes(r)) || userDto.isCourseAdmin;
 
         if (!hasAccess) {

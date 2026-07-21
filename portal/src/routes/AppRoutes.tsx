@@ -14,7 +14,6 @@ import { CreateSupportPage } from "@/features/support/pages/CreateSupportPage";
 import { AboutPage } from "@/features/about/pages/AboutPage";
 import { MainLayout } from "@/components/layout/components/MainLayout";
 import { PlanPage } from "@/features/Plan/pages/PlanPage";
-import { FreeSamplePage } from "@/features/free-sample/pages/FreeSamplePage";
 import { PaymentLayout } from "@/features/Payment/pages/PaymentLayout";
 import { GoogleCallbackPage } from "@/features/auth/pages/GoogleCallbackPage/GoogleCallbackPage";
 import { LoginPage } from "@/features/auth/pages/LoginPage/LoginPage";
@@ -30,7 +29,6 @@ export const AppRoutes = () => {
 
       {/* === ROTAS PROTEGIDAS FULL SCREEN (Sem Layout) === */}
       <Route element={<ProtectedRoute />}>
-        <Route path="/amostra-gratis" element={<FreeSamplePage />} />
         <Route path="/payment/checkout/:planId" element={<PaymentLayout />} />
       </Route>
 

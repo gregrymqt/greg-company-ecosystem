@@ -28,13 +28,6 @@ export const ProtectedRoute = ({ allowedRoles }: ProtectedRouteProps) => {
       }
     }
 
-    // Verificação extra de segurança para EcommerceAdmin via presença de Tenants
-    if (!hasPermission && allowedRoles.includes(AppRoles.EcommerceAdmin)) {
-      if (user?.tenants && user.tenants.length > 0) {
-        hasPermission = true;
-      }
-    }
-    
     if (!hasPermission) {
       return <Navigate to="/acesso-negado" replace />;
     }

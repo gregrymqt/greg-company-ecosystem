@@ -1,6 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { GraduationCap, Bot, Sparkles } from 'lucide-react';
+import { GraduationCap, Bot } from 'lucide-react';
 import { Card } from '@/components/Card/Card';
 import styles from './PlanSelection.module.scss';
 
@@ -9,7 +8,6 @@ interface PlanSelectionProps {
 }
 
 export const PlanSelection: React.FC<PlanSelectionProps> = ({ onSelect }) => {
-  const navigate = useNavigate();
 
   return (
     <div className={styles.container}>
@@ -61,13 +59,6 @@ export const PlanSelection: React.FC<PlanSelectionProps> = ({ onSelect }) => {
               onClick={() => onSelect('ecommerce')}
             >
               Ver Planos de Automação
-            </button>
-            <button 
-              className={`${styles.button} ${styles.secondaryBtn}`}
-              onClick={() => navigate('/free-sample')}
-            >
-              <Sparkles size={16} />
-              Testar demonstração gratuita
             </button>
           </div>
         </Card>

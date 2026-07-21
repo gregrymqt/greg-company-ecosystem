@@ -8,7 +8,6 @@ data:
   GENERAL__BASEURL: "https://api.gregcompany.com"
   VITE_GENERAL__BASEURL: "https://gregcompany.com"
   USE_KUBERNETES_LOGS: "true"
-  SCRAPER_BASE_URL: "https://exemplo-loja.com.br"
   CDN_BASE_URL: "https://api.gregcompany.com"
   Email_Admin: "lucasvicentedesouza021@gmail.com"
   Google__ClientId: "317826651619-a80lvh3utf0shuk1hut00inholqskp9a.apps.googleusercontent.com"

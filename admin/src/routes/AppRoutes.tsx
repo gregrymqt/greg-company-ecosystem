@@ -23,7 +23,7 @@ export const AppRoutes = () => {
       <Route element={<MainLayout />}>
 
         {/* Nível 1: Acesso Comum do Painel (Todos os papéis administrativos) */}
-        <Route element={<ProtectedRoute allowedRoles={[AppRoles.Admin, AppRoles.CourseAdmin, AppRoles.EcommerceAdmin, AppRoles.Manager]} />}>
+        <Route element={<ProtectedRoute allowedRoles={[AppRoles.Admin, AppRoles.CourseAdmin, AppRoles.Manager]} />}>
           <Route path="/" element={<AdminProfile />} />
           <Route path="/home" element={<AdminHomePage />} />
           <Route path="/suporte" element={<SupportAdminPage />} />
@@ -36,9 +36,9 @@ export const AppRoutes = () => {
           <Route path="/planos" element={<PlansAdmin />} />
         </Route>
 
-        {/* Nível 3: E-commerce, Reclamações e Financeiro */}
-        {/* Acesso liberado apenas para EcommerceAdmin e Admin (programadores) */}
-        <Route element={<ProtectedRoute allowedRoles={[AppRoles.Admin, AppRoles.EcommerceAdmin]} />}>
+        {/* Nível 3: Reclamações e Financeiro */}
+        {/* Acesso liberado apenas para Admin e Manager */}
+        <Route element={<ProtectedRoute allowedRoles={[AppRoles.Admin, AppRoles.Manager]} />}>
           <Route path="/reclamacoes" element={<AdminClaimsPage />} />
           <Route path="/contestacoes" element={<ChargebackManager />} />
         </Route>

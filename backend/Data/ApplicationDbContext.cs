@@ -6,7 +6,6 @@ using MeuCrudCsharp.Features.Videos.Domain.Entities;
 using MeuCrudCsharp.Features.Home.Domain.Entities;
 using MeuCrudCsharp.Features.Files.Domain.Entities;
 using MeuCrudCsharp.Features.Support.Domain.Entities;
-using MeuCrudCsharp.Features.Products.Domain.Entities;
 using MeuCrudCsharp.Features.MercadoPago.Payments.Domain.Entities;
 using MeuCrudCsharp.Features.MercadoPago.Subscriptions.Domain.Entities;
 using MeuCrudCsharp.Features.MercadoPago.Plans.Domain.Entities;
@@ -31,7 +30,6 @@ public class ApplicationDbContext : IdentityDbContext<Users, Roles, Guid>
     public DbSet<HomeServiceEntry> HomeServices => Set<HomeServiceEntry>();
     public DbSet<EntityFile> EntityFiles => Set<EntityFile>();
     public DbSet<SupportTicket> SupportTickets => Set<SupportTicket>();
-    public DbSet<Product> Products => Set<Product>();
     public DbSet<Payment> Payments => Set<Payment>();
     public DbSet<Subscription> Subscriptions => Set<Subscription>();
     public DbSet<Plan> Plans => Set<Plan>();

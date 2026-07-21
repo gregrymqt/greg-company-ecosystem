@@ -15,8 +15,7 @@ public static class RolesInitializationExtensions
             AppRoles.Admin,
             AppRoles.User,
             AppRoles.Manager,
-            AppRoles.CourseAdmin,
-            AppRoles.EcommerceAdmin
+            AppRoles.CourseAdmin
         };
 
         foreach (var role in roles)

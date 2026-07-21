@@ -6,7 +6,6 @@ using MeuCrudCsharp.Extensions.Services.Presentation;
 using MeuCrudCsharp.Extensions.Services.Web; // Novo
 using MeuCrudCsharp.Features.Shared.Infrastructure.Workers;
 using MeuCrudCsharp.Features.Videos.Shared.Infrastructure.Workers;
-using MeuCrudCsharp.Features.Products.Shared.Infrastructure.Workers;
 
 namespace MeuCrudCsharp.Extensions.Services;
 
@@ -34,7 +33,6 @@ public static class CentralServicesExtensions
         builder.Services.AddMcpContextServer();
         builder.Services.AddHostedService<OutboxProcessorWorker>();
         builder.Services.AddHostedService<VideoProcessingCompletedConsumer>();
-        builder.Services.AddHostedService<ProductImportCompletedConsumer>();
         builder.Services.AddHealthChecks()
             .AddNpgSql(
                 connectionStringFactory: sp => sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<PostgresSettings>>().Value.TransactionConnectionString!,

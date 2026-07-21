@@ -24,7 +24,6 @@ export const AppRoles = {
   Admin: "Admin",
   User: "User",
   Manager: "Manager",
-  CourseAdmin: "CourseAdmin",
-  EcommerceAdmin: "EcommerceAdmin" // Administra ecommerce
+  CourseAdmin: "CourseAdmin"
 } as const;
 export type AppRoles = typeof AppRoles[keyof typeof AppRoles];

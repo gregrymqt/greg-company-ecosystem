@@ -178,7 +178,6 @@ namespace MeuCrudCsharp.Features.Auth.Application.Services
                 AppRoles.Admin, 
                 AppRoles.Manager, 
                 AppRoles.CourseAdmin, 
-                AppRoles.EcommerceAdmin,
                 AppRoles.User 
             };
 

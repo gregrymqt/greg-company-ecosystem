@@ -37,7 +37,7 @@ export const useLoginForm = () => {
     try {
       const response = await authService.loginWithEmail(data);
       
-      const allowedRoles = ['Admin', 'Manager', 'CourseAdmin', 'EcommerceAdmin'];
+      const allowedRoles = ['Admin', 'Manager', 'CourseAdmin'];
       const hasAccess = response.user.roles?.some(r => allowedRoles.includes(r)) || response.user.isCourseAdmin;
 
       if (!hasAccess) {
