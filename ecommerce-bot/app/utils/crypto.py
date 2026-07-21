@@ -9,7 +9,8 @@ from app.models.database_models import TenantConfigModel
 logger = logging.getLogger(__name__)
 
 def _get_key() -> bytes:
-    key_b64 = os.environ.get("AES_MASTER_KEY")
+    from app.config.settings import settings
+    key_b64 = settings.AES_MASTER_KEY or os.environ.get("AES_MASTER_KEY")
     if not key_b64:
         raise ValueError("AES_MASTER_KEY não configurada no ambiente.")
     return base64.b64decode(key_b64)

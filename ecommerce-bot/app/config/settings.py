@@ -24,8 +24,14 @@ class Settings(BaseSettings):
         default=None,
         validation_alias=AliasChoices("REDIS_PASSWORD", "REDIS__PASSWORD")
     )
-    DEEPSEEK_API_KEY: str | None = None
-    GROQ_API_KEY: str | None = None
+    DEEPSEEK_API_KEY: str | None = Field(
+        default=None,
+        validation_alias=AliasChoices("DEEPSEEK_API_KEY", "Deepseek_Api_Key", "DEEPSEEK_KEY")
+    )
+    GROQ_API_KEY: str | None = Field(
+        default=None,
+        validation_alias=AliasChoices("GROQ_API_KEY", "Groq_API_KEY", "GROQ_KEY")
+    )
 
     model_config = SettingsConfigDict(
         env_file=('../.env', '.env'),

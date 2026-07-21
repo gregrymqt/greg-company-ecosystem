@@ -41,6 +41,7 @@ public class GoogleSettings
 public class RabbitMqSettings
 {
     public const string SectionName = "RabbitMq";
+    public string? ConnectionString { get; set; }
     public string? HostName { get; set; }
     public int Port { get; set; } = 5672;
     public string? UserName { get; set; }

@@ -74,6 +74,12 @@ public static class AppSettingsServicesExtensions
         {
             builder.Configuration.GetSection(RabbitMqSettings.SectionName).Bind(options);
 
+            options.ConnectionString ??= builder.Configuration.GetConnectionString("RabbitMq")
+                ?? builder.Configuration["ConnectionStrings__RabbitMq"]
+                ?? builder.Configuration["ConnectionStrings:RabbitMq"]
+                ?? builder.Configuration["RABBITMQ_URL"]
+                ?? Environment.GetEnvironmentVariable("RABBITMQ_URL");
+
             options.HostName ??= builder.Configuration["RabbitMQ__HostName"] ?? builder.Configuration["RabbitMQ:HostName"] ?? "localhost";
             var portStr = builder.Configuration["RabbitMQ__Port"] ?? builder.Configuration["RabbitMQ:Port"];
             if (int.TryParse(portStr, out var port))
